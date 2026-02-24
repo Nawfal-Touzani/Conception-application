@@ -4,6 +4,12 @@ api test:
     - cd api
     - mvn clean test
 
+  artifacts:
+    paths:
+      - api/target/reports/
+      - api/target/site/
+      - api/target/surefire-reports/
+
 frontend test:
   image: node:20
   script:
@@ -11,3 +17,7 @@ frontend test:
     - npm install
     - npm run lint
     - npm run coverage
+
+  artifacts:
+    paths:
+      - frontend/coverage/
