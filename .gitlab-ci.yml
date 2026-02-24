@@ -3,3 +3,11 @@ api test:
   script:
     - cd api
     - mvn clean test
+
+frontend test:
+  image: node:20
+  script:
+    - cd frontend
+    - npm install
+    - npm run lint
+    - npm run coverage
