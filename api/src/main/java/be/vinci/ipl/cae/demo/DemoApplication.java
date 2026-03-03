@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SuppressWarnings("PMD.UseUtilityClass")
 @SpringBootApplication
-public class DemoApplication {
+public class  DemoApplication {
 
   /**
    * Main method of the application.
