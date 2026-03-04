@@ -42,7 +42,7 @@ public class MembershipRequest {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long idRequest;
+  private Long id;
 
   @Column(nullable = false)
   private LocalDateTime requestDate = LocalDateTime.now();
@@ -68,7 +68,7 @@ public class MembershipRequest {
   /**
    *MembershipRequest constructor.
    */
-  public MembershipRequest(LocalDateTime requestDate, State state,
+  public MembershipRequest( State state,
       String refusalReason,
       LocalDateTime processingDate) {
 
