@@ -38,7 +38,7 @@ public class Notification {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long idNotification;
+  private Long id;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
