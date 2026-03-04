@@ -10,7 +10,8 @@ import java.time.LocalDate;
  */
 @Entity
 @Table(name = "unavailabilities")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 public class Unavailability {
 

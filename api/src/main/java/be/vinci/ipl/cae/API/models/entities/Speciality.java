@@ -14,6 +14,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 public class Speciality {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,7 +25,7 @@ public class Speciality {
     /**
      * While the application frequently needs to fetch a member's chosen speciality,
      * there is currently no use case requiring the retrieval of all members using a specific speciality.
-     * Unidirectional Relationship architecture chosen.
+     * Unidirectional relationship architecture is then my choice.
      */
 
     public Speciality(String name) {
