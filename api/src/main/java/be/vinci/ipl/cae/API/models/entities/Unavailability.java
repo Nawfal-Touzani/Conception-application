@@ -1,19 +1,12 @@
 package be.vinci.ipl.cae.API.models.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.*;
 import java.time.LocalDate;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Represents a member's period of unavailability.
+ * This table allows keeping a full history of past and future unavailabilities.
  */
 @Entity
 @Table(name = "unavailabilities")
@@ -32,9 +25,13 @@ public class Unavailability {
   private LocalDate endDate;
 
   // FK
-  @ManyToOne(optional = false)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "member_id", nullable = false)
   private Member member;
 
-
+  public Unavailability(LocalDate startDate, LocalDate endDate, Member member) {
+    this.startDate = startDate;
+    this.endDate = endDate;
+    this.member = member;
+  }
 }
