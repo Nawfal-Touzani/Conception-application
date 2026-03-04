@@ -44,7 +44,7 @@ public class Notification {
   @Column(nullable = false)
   private Type type;
 
-  @Column(nullable = false,length = 200)
+  @Column(nullable = false, length = 200)
   private String message;
 
   @Column(nullable = false)

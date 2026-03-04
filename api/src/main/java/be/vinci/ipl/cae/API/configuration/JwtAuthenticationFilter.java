@@ -1,5 +1,6 @@
 package be.vinci.ipl.cae.API.configuration;
 
+import be.vinci.ipl.cae.API.models.entities.User;
 import be.vinci.ipl.cae.API.services.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
