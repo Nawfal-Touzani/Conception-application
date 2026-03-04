@@ -1,8 +1,8 @@
-package be.vinci.ipl.cae.demo.controllers;
+package be.vinci.ipl.cae.API.controllers;
 
-import be.vinci.ipl.cae.demo.models.dtos.NewDrink;
-import be.vinci.ipl.cae.demo.models.entities.Drink;
-import be.vinci.ipl.cae.demo.services.DrinkService;
+import be.vinci.ipl.cae.API.models.dtos.NewDrink;
+import be.vinci.ipl.cae.API.models.entities.Drink;
+import be.vinci.ipl.cae.API.services.DrinkService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;

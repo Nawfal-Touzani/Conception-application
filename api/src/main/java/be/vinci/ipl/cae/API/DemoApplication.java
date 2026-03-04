@@ -1,4 +1,4 @@
-package be.vinci.ipl.cae.demo;
+package be.vinci.ipl.cae.API;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

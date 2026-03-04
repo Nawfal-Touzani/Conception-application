@@ -1,8 +1,8 @@
-package be.vinci.ipl.cae.demo.controllers;
+package be.vinci.ipl.cae.API.controllers;
 
-import be.vinci.ipl.cae.demo.models.dtos.AuthenticatedUser;
-import be.vinci.ipl.cae.demo.models.dtos.Credentials;
-import be.vinci.ipl.cae.demo.services.UserService;
+import be.vinci.ipl.cae.API.models.dtos.AuthenticatedUser;
+import be.vinci.ipl.cae.API.models.dtos.Credentials;
+import be.vinci.ipl.cae.API.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

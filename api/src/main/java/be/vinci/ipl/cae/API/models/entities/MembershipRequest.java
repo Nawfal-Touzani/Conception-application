@@ -1,4 +1,4 @@
-package be.vinci.ipl.cae.demo.models.entities;
+package be.vinci.ipl.cae.API.models.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -18,16 +18,21 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
-@Table(name="membership_requests")
+@Table(name = "membership_requests")
 
 public class MembershipRequest {
 
-  public MembershipRequest() {}
 
-  public enum State{
-    PENDING,ACCEPTED,REFUSED
+  public enum State {
+    PENDING, ACCEPTED, REFUSED
   }
 
   @Id
@@ -35,74 +40,36 @@ public class MembershipRequest {
   private Long idRequest;
 
   @Column(nullable = false)
-  private LocalDateTime requestDate;
+  private LocalDateTime requestDate = LocalDateTime.now();
 
-  @Column(nullable = false)
   @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
   private State state;
 
 
   private String refusalReason;
 
-  @Column(nullable = false)
+
   private LocalDateTime processingDate;
-
-  public MembershipRequest( LocalDateTime requestDate, State state,
-      String refusalReason,
-      LocalDateTime processingDate) {
-
-    this.requestDate = requestDate;
-    this.state = state;
-    this.refusalReason = refusalReason;
-    this.processingDate = processingDate;
-  }
-
-
-  public LocalDateTime getRequestDate() {
-    return requestDate;
-  }
-
-  public void setRequestDate(LocalDateTime requestDate) {
-    this.requestDate = requestDate;
-  }
-
-  public State getState() {
-    return state;
-  }
-
-  public void setState(State state) {
-    this.state = state;
-  }
-
-  public String getRefusalReason() {
-    return refusalReason;
-  }
-
-  public void setRefusalReason(String refusalReason) {
-    this.refusalReason = refusalReason;
-  }
-
-  public LocalDateTime getProcessingDate() {
-    return processingDate;
-  }
-
-  public void setProcessingDate(LocalDateTime processingDate) {
-    this.processingDate = processingDate;
-  }
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "id_member", nullable = false)
   @JsonBackReference("member-requests")
   private Member member;
 
- @OneToMany(mappedBy = "membershipRequest",cascade = CascadeType.ALL,orphanRemoval = true)
+  @OneToMany(mappedBy = "membershipRequest", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonManagedReference("request-notifications")
-  private List<Notification> notifications =new ArrayList<>();
+  private List<Notification> notifications = new ArrayList<>();
 
-  public List<Notification> getNotifications() {
-    return notifications;
+
+  public MembershipRequest(LocalDateTime requestDate, State state,
+      String refusalReason,
+      LocalDateTime processingDate) {
+
+    this.state = state;
+    this.refusalReason = refusalReason;
+    this.processingDate = processingDate;
   }
 
 
-  //manque equipe
 }

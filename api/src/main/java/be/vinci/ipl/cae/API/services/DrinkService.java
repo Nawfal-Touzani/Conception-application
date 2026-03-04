@@ -1,8 +1,8 @@
-package be.vinci.ipl.cae.demo.services;
+package be.vinci.ipl.cae.API.services;
 
-import be.vinci.ipl.cae.demo.models.dtos.NewDrink;
-import be.vinci.ipl.cae.demo.models.entities.Drink;
-import be.vinci.ipl.cae.demo.repositories.DrinkRepository;
+import be.vinci.ipl.cae.API.models.dtos.NewDrink;
+import be.vinci.ipl.cae.API.models.entities.Drink;
+import be.vinci.ipl.cae.API.repositories.DrinkRepository;
 import org.springframework.stereotype.Service;
 
 /**

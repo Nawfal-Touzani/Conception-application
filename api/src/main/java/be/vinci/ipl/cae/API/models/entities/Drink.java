@@ -1,4 +1,4 @@
-package be.vinci.ipl.cae.demo.models.entities;
+package be.vinci.ipl.cae.API.models.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

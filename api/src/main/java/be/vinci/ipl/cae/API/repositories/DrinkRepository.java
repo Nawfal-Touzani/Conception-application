@@ -1,6 +1,6 @@
-package be.vinci.ipl.cae.demo.repositories;
+package be.vinci.ipl.cae.API.repositories;
 
-import be.vinci.ipl.cae.demo.models.entities.Drink;
+import be.vinci.ipl.cae.API.models.entities.Drink;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

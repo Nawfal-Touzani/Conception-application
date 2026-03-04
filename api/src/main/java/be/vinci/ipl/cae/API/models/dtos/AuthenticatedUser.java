@@ -1,4 +1,4 @@
-package be.vinci.ipl.cae.demo.models.dtos;
+package be.vinci.ipl.cae.API.models.dtos;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,4 +1,4 @@
-package be.vinci.ipl.cae.demo.models.entities;
+package be.vinci.ipl.cae.API.models.entities;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;

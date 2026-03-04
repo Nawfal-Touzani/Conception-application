@@ -1,8 +1,6 @@
-package be.vinci.ipl.cae.demo.services;
+package be.vinci.ipl.cae.API.services;
 
-import be.vinci.ipl.cae.demo.models.dtos.AuthenticatedUser;
-import be.vinci.ipl.cae.demo.models.entities.User;
-import be.vinci.ipl.cae.demo.repositories.UserRepository;
+import be.vinci.ipl.cae.API.models.dtos.AuthenticatedUser;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import java.util.Date;

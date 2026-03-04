@@ -1,4 +1,4 @@
-package be.vinci.ipl.cae.demo.configuration;
+package be.vinci.ipl.cae.API.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

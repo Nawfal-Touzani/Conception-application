@@ -1,8 +1,6 @@
-package be.vinci.ipl.cae.demo.services;
+package be.vinci.ipl.cae.API.services;
 
-import be.vinci.ipl.cae.demo.models.dtos.NewPizza;
-import be.vinci.ipl.cae.demo.models.entities.Pizza;
-import be.vinci.ipl.cae.demo.repositories.PizzaRepository;
+import be.vinci.ipl.cae.API.models.dtos.NewPizza;
 import org.springframework.stereotype.Service;
 
 /**
