@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 package be.vinci.ipl.cae.API.repositories;
 
 import be.vinci.ipl.cae.API.models.entities.Notification;
@@ -10,3 +11,25 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface NotificationRepository extends CrudRepository<Notification, Long> {
 }
+=======
+package be.vinci.ipl.cae.API.repositories;
+
+import be.vinci.ipl.cae.API.models.entities.Notification;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+
+/**
+ * Notification repository.
+ */
+@Repository
+public interface NotificationRepository extends CrudRepository<Notification, Long> {
+
+  /**
+   * Finds a given member.
+   *
+   * @param idMember the id member
+   * @return the member
+   */
+  Iterable<Notification> findByMemberIdMember(long idMember);
+}
+>>>>>>> develop

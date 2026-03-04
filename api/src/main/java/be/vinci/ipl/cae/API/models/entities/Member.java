@@ -1,66 +1,73 @@
 package be.vinci.ipl.cae.API.models.entities;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lombok.*;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.*;
 
-import java.time.LocalDateTime;
-
+/**
+ * Represents a user/player in the Vinci Arena platform.
+ */
 @Entity
 @Table(name = "members")
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
+
 public class Member {
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idMember;
+  @Column(nullable = false, unique = true)
+  private String email;
 
-    @Column(nullable = false, unique = true)
-    private String email;
+  @Column(nullable = false)
+  private String password;
 
-    @Column(nullable = false)
-    private String password;
+  @Column(nullable = false)
+  private String tag;
 
-    @Column(nullable = false, length = 50)
-    private String tag;
+  @Column(nullable = false)
+  private boolean isAdmin = false;
 
-    private Boolean isAvailable;
+  @Column(nullable = false, updatable = false)
+  private LocalDateTime profileCreationDateTime = LocalDateTime.now();
 
-    private boolean isAdmin = false;
+  // FK
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "image_id", nullable = false)
+  private Image image;
 
-    private LocalDateTime profileCreationDate;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "speciality_id", nullable = false)
+  private Speciality speciality;
 
-    // FK
+  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonManagedReference("member-unavailabilities")
+  private List<Unavailability> unavailabilities = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "image_id", nullable = false)
-    private Images image;
+  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonManagedReference("member-notifications")
+  private List<Notification> notifications = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "speciality_id", nullable = false)
-    private Specialities speciality;
+  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonManagedReference("member-requests")
+  private List<MembershipRequest> membershipRequests = new ArrayList<>();
 
-
-    @OneToMany(mappedBy = "member",cascade = CascadeType.ALL,orphanRemoval = true)
-    @JsonManagedReference("member-notifications")
-    private List<Notification> notifications = new ArrayList<>();
-
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("member-requests")
-    private List<MembershipRequest> membershipRequests = new ArrayList<>();
-
-    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("member-teamComposition")
-    private TeamComposition teamComposition;
-
-
-
-
-
+  // Constructor
+  public Member(String email, String password, String tag, boolean isAdmin, LocalDateTime profileCreationDateTime, Image image, Speciality speciality, List<Unavailability> unavailabilities, List<Notification> notifications, List<MembershipRequest> membershipRequests) {
+    this.email = email;
+    this.password = password;
+    this.tag = tag;
+    this.isAdmin = isAdmin;
+    this.profileCreationDateTime = profileCreationDateTime;
+    this.image = image;
+    this.speciality = speciality;
+    this.unavailabilities = unavailabilities;
+    this.notifications = notifications;
+    this.membershipRequests = membershipRequests;
+  }
 }

@@ -38,13 +38,13 @@ public class Notification {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long idNotification;
+  private Long id;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private Type type;
 
-  @Column(nullable = false,length = 200)
+  @Column(nullable = false, length = 200)
   private String message;
 
   @Column(nullable = false)
