@@ -1,10 +1,8 @@
-package be.vinci.ipl.cae.demo.services;
+package be.vinci.ipl.cae.API.services;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-import be.vinci.ipl.cae.demo.models.entities.Pizza;
-import be.vinci.ipl.cae.demo.repositories.PizzaRepository;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
