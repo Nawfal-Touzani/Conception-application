@@ -17,10 +17,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Notification entity
- */
 
+/**
+ * Notification entity.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,6 +29,9 @@ import lombok.Setter;
 
 public class Notification {
 
+  /**
+   * Type enumeration.
+   */
   public enum Type {
     TOURNAMENT, MATCH, RESULT, MEMBERSHIP_REQUEST, RESULT_CONFIRMATION
   }
@@ -41,8 +44,7 @@ public class Notification {
   @Column(nullable = false)
   private Type type;
 
-  @Column(nullable = false)
-
+  @Column(nullable = false,length = 200)
   private String message;
 
   @Column(nullable = false)
@@ -50,7 +52,6 @@ public class Notification {
 
   @Column(nullable = false)
   private boolean read = false;
-
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "id_member", nullable = false)
@@ -62,13 +63,14 @@ public class Notification {
   @JsonBackReference("request-notifications")
   private MembershipRequest membershipRequest;
 
-
+  /**
+   *Notification constructor.
+   */
   public Notification(Type type, String message, LocalDateTime sendDate) {
-
     this.type = type;
     this.message = message;
     this.sendDate = sendDate;
-  }
 
+  }
 
 }

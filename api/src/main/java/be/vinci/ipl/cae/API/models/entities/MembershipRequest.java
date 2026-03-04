@@ -22,6 +22,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * MembershipRequest entity.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -30,7 +33,9 @@ import lombok.Setter;
 
 public class MembershipRequest {
 
-
+  /**
+   * State enumeration.
+   */
   public enum State {
     PENDING, ACCEPTED, REFUSED
   }
@@ -46,9 +51,8 @@ public class MembershipRequest {
   @Column(nullable = false)
   private State state;
 
-
+  @Column(length = 200)
   private String refusalReason;
-
 
   private LocalDateTime processingDate;
 
@@ -61,7 +65,9 @@ public class MembershipRequest {
   @JsonManagedReference("request-notifications")
   private List<Notification> notifications = new ArrayList<>();
 
-
+  /**
+   *MembershipRequest constructor.
+   */
   public MembershipRequest(LocalDateTime requestDate, State state,
       String refusalReason,
       LocalDateTime processingDate) {
@@ -70,6 +76,5 @@ public class MembershipRequest {
     this.refusalReason = refusalReason;
     this.processingDate = processingDate;
   }
-
 
 }
