@@ -9,4 +9,12 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface NotificationRepository extends CrudRepository<Notification, Long> {
+
+  /**
+   * Finds a given member.
+   *
+   * @param idMember the id member
+   * @return the member
+   */
+  Iterable<Notification> findByMemberIdMember(long idMember);
 }
