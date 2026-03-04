@@ -27,7 +27,7 @@ public class Image {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long idImage;
+  private Long id;
 
   @Column(nullable = false)
   private String imageUrl;
@@ -35,8 +35,7 @@ public class Image {
   /**
    * Images constructor.
    */
-  public Image(Long idImage, String imageUrl) {
-    this.idImage = idImage;
+  public Image( String imageUrl) {
     this.imageUrl = imageUrl;
   }
 
