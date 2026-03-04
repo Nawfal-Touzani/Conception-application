@@ -10,7 +10,7 @@ import java.util.Optional;
  * Repository for Member entity, providing basic CRUD operations.
  */
 @Repository
-public interface MembersRepository extends CrudRepository<Member, Long> {
+public interface MemberRepository extends CrudRepository<Member, Long> {
 
     /**
      * Checks whether a member with the given email already exists.
