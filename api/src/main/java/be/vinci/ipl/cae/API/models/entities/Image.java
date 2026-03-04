@@ -23,7 +23,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 
-public class Images {
+public class Image {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +35,7 @@ public class Images {
   /**
    * Images constructor.
    */
-  public Images(Long idImage, String imageUrl) {
+  public Image(Long idImage, String imageUrl) {
     this.idImage = idImage;
     this.imageUrl = imageUrl;
   }
