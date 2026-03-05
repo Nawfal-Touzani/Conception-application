@@ -1,7 +1,7 @@
 package be.vinci.ipl.cae.api.configuration;
 
-import be.vinci.ipl.cae.api.models.entities.User;
-import be.vinci.ipl.cae.api.services.UserService;
+import be.vinci.ipl.cae.api.models.entities.Member;
+import be.vinci.ipl.cae.api.services.AuthService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,48 +17,43 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-/**
- * JwtAuthenticationFilter to handle user authentication.
- */
 @Configuration
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-  private final UserService userService;
+  private final AuthService authService;
 
-  /**
-   * Constructor for JwtAuthenticationFilter.
-   *
-   * @param userService the injected UserService.
-   */
-  public JwtAuthenticationFilter(UserService userService) {
-    this.userService = userService;
+  public JwtAuthenticationFilter(AuthService authService) {
+    this.authService = authService;
   }
 
-  /**
-   * Filter to handle user authentication.
-   *
-   * @param request     the request.
-   * @param response    the response.
-   * @param filterChain the filter chain.
-   * @throws ServletException the servlet exception.
-   * @throws IOException      the IO exception.
-   */
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-      FilterChain filterChain) throws ServletException, IOException {
+                                  FilterChain filterChain) throws ServletException, IOException {
+
     String token = request.getHeader("Authorization");
+
+    // Additional security: remove the "Bearer" prefix if the frontend sends it.
+    if (token != null && token.startsWith("Bearer ")) {
+      token = token.substring(7);
+    }
+
     if (token != null) {
-      String username = userService.verifyJwtToken(token);
-      if (username != null) {
-        User user = userService.readOneFromUsername(username);
-        if (user != null) {
+      String email = authService.verifyJwtToken(token); // On vérifie l'email
+      if (email != null) {
+        Member member = authService.readOneFromEmail(email);
+        if (member != null) {
           List<GrantedAuthority> authorities = new ArrayList<>();
-          if ("admin".equals(username)) {
+
+          // The correct role is assigned based on the `isAdmin` attribute of your entity.
+          if (member.isAdmin()) {
             authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+          } else {
+            authorities.add(new SimpleGrantedAuthority("ROLE_MEMBER"));
           }
+
           UsernamePasswordAuthenticationToken authentication =
-              new UsernamePasswordAuthenticationToken(
-                  user, null, authorities);
+                  new UsernamePasswordAuthenticationToken(member, null, authorities);
+
           authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
           SecurityContextHolder.getContext().setAuthentication(authentication);
         }
