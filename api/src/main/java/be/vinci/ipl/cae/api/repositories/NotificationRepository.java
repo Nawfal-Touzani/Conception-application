@@ -1,6 +1,7 @@
 package be.vinci.ipl.cae.api.repositories;
 
 import be.vinci.ipl.cae.api.models.entities.Notification;
+import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,4 +18,5 @@ public interface NotificationRepository extends CrudRepository<Notification, Lon
    * @return the member
    */
   Iterable<Notification> findByMemberId(long id);
+
 }

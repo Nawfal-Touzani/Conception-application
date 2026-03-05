@@ -38,3 +38,9 @@ Content-Type: application/json
   "message": "Test membre inconnu",
   "sendDate": "2026-03-05T12:30:00"
 }
+
+### Mark a notification as read
+PATCH {{baseUrl}}/members/1/notifications/1
+
+### Try to mark a non-existent member (should return 404)
+PATCH {{baseUrl}}/members/1/notifications/2
