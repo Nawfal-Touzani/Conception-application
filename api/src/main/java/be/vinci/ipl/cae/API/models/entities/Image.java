@@ -1,45 +1,33 @@
 package be.vinci.ipl.cae.API.models.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 
 /**
- * Image entity.
+ * Represents a profile image that can be chosen by a member.
+ * Several members can share the same default profile image.
  */
 @Entity
 @Table(name = "images")
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-
 public class Image {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false)
-  private String imageUrl;
+  @Column(nullable = false, unique = true)
+  private String url;
 
   /**
-   * Images constructor.
+   * While the application frequently needs to fetch a member's chosen avatar,
+   * there is currently no use case requiring the retrieval of all members using a specific profile image.
+   * Unidirectional relationship architecture is then my choice.
    */
-  public Image( String imageUrl) {
-    this.imageUrl = imageUrl;
-  }
 
-  // FK
-  @OneToMany(mappedBy = "image")
-  private List<Member> members;
+  public Image(String url) {
+    this.url = url;
+  }
 }
