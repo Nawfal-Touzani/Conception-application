@@ -1,35 +1,22 @@
 package be.vinci.ipl.cae.api.models.entities;
 
+import jakarta.persistence.*;
+import lombok.*;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /**
  * Represents a user/player in the Vinci Arena platform.
  */
 @Entity
-@Table(name = "member")
+@Table(name = "members")
 @Getter
 @Setter
 @NoArgsConstructor
 
 public class Member {
-
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -73,24 +60,20 @@ public class Member {
   /**
    * Instantiates a new Member.
    *
-   * @param email                   the email
-   * @param password                the password
-   * @param tag                     the tag
-   * @param isAdmin                 the is admin
-   * @param profileCreationDateTime the profile creation date time
-   * @param image                   the image
-   * @param speciality              the speciality
+   * @param email      the email
+   * @param password   the password
+   * @param tag        the tag
+   * @param isAdmin    the is admin
+   * @param image      the image
+   * @param speciality the speciality
    */
-  // Constructor
-  public Member(String email, String password, String tag, boolean isAdmin, LocalDateTime
-      profileCreationDateTime, Image image, Speciality speciality) {
+  public Member(String email, String password, String tag, boolean isAdmin, Image image,
+      Speciality speciality) {
     this.email = email;
     this.password = password;
     this.tag = tag;
     this.isAdmin = isAdmin;
-    this.profileCreationDateTime = profileCreationDateTime;
     this.image = image;
     this.speciality = speciality;
-
   }
 }
