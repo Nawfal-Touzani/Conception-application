@@ -1,82 +1,80 @@
 package be.vinci.ipl.cae.api.controllers;
 
 import be.vinci.ipl.cae.api.models.dtos.AuthenticatedMember;
-import be.vinci.ipl.cae.api.models.dtos.Credentials;
-import be.vinci.ipl.cae.api.services.UserService;
+import be.vinci.ipl.cae.api.models.dtos.LoginCredentials;
+import be.vinci.ipl.cae.api.models.dtos.RegisterCredentials;
+import be.vinci.ipl.cae.api.models.entities.Member;
+import be.vinci.ipl.cae.api.services.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * AuthController to handle user authentication.
+ * REST controller for managing authentication.
+ * Handles user registration, login and automatic re-authentication.
  */
 @RestController
 @RequestMapping("/auths")
 public class AuthController {
 
-  private final UserService userService;
+  private final AuthService authService;
 
   /**
-   * Constructor for AuthController.
+   * Constructs an AuthController with the given AuthService.
    *
-   * @param userService the injected UserService.
+   * @param authService the service used to handle authentication logic
    */
-  public AuthController(UserService userService) {
-    this.userService = userService;
-  }
-
-  private boolean isInvalidCredentials(Credentials credentials) {
-    return credentials == null
-        || credentials.getUsername() == null
-        || credentials.getUsername().isBlank()
-        || credentials.getPassword() == null
-        || credentials.getPassword().isBlank();
+  public AuthController(AuthService authService) {
+    this.authService = authService;
   }
 
   /**
-   * Register a new user.
+   * Registers a new user.
    *
-   * @param credentials the user credentials from the request body.
-   * @return the authenticated user.
+   * @param registerCredentials the credentials of the user to register
+   * @throws ResponseStatusException 409 if a user with the same email already exists
    */
   @PostMapping("/register")
-  public AuthenticatedMember register(@RequestBody Credentials credentials) {
-    if (isInvalidCredentials(credentials)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+  @ResponseStatus(HttpStatus.CREATED)
+  public void register(@Valid @RequestBody RegisterCredentials registerCredentials) {
+    try {
+      authService.register(registerCredentials);
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
     }
-
-    AuthenticatedMember user = userService.register(credentials.getUsername(),
-        credentials.getPassword());
-
-    if (user == null) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT);
-    }
-    return user;
   }
 
   /**
-   * Login a user.
+   * Logs in a user and returns an authenticated member with a JWT token.
    *
-   * @param credentials the user credentials from the request body
-   * @return the authenticated user.
+   * @param loginCredentials the credentials of the user to log in
+   * @return the authenticated member with a JWT token
+   * @throws ResponseStatusException 401 if the credentials are invalid
    */
   @PostMapping("/login")
-  public AuthenticatedMember login(@RequestBody Credentials credentials) {
-    if (isInvalidCredentials(credentials)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-    }
-
-    AuthenticatedMember user = userService.login(credentials.getUsername(),
-        credentials.getPassword());
-
-    if (user == null) {
+  public AuthenticatedMember login(@Valid @RequestBody LoginCredentials loginCredentials) {
+    AuthenticatedMember authMember = authService.login(loginCredentials);
+    if (authMember == null) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
     }
-
-    return user;
+    return authMember;
   }
 
+  /**
+   * Automatic authentification if in a session case scenario. New 24h token + infos sent.
+   */
+  @GetMapping("/me")
+  @PreAuthorize("isAuthenticated()")
+  public AuthenticatedMember autoLogin(Authentication authentication) {
+    Member currentMember = (Member) authentication.getPrincipal();
+    return authService.createJwtToken(currentMember);
+  }
 }
