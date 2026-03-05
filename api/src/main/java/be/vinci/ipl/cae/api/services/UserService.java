@@ -1,6 +1,6 @@
 package be.vinci.ipl.cae.api.services;
 
-import be.vinci.ipl.cae.api.models.dtos.AuthenticatedUser;
+import be.vinci.ipl.cae.api.models.dtos.AuthenticatedMember;
 import be.vinci.ipl.cae.api.models.entities.User;
 import be.vinci.ipl.cae.api.repositories.UserRepository;
 import com.auth0.jwt.JWT;
@@ -39,7 +39,7 @@ public class UserService {
    * @param username the username to included in the claim
    * @return the JWT token
    */
-  public AuthenticatedUser createJwtToken(String username) {
+  public AuthenticatedMember createJwtToken(String username) {
     String token = JWT.create()
         .withIssuer("auth0")
         .withClaim("username", username)
@@ -47,11 +47,11 @@ public class UserService {
         .withExpiresAt(new Date(System.currentTimeMillis() + lifetimeJwt))
         .sign(algorithm);
 
-    AuthenticatedUser authenticatedUser = new AuthenticatedUser();
-    authenticatedUser.setUsername(username);
-    authenticatedUser.setToken(token);
+    AuthenticatedMember authenticatedMember = new AuthenticatedMember();
+    authenticatedMember.setUsername(username);
+    authenticatedMember.setToken(token);
 
-    return authenticatedUser;
+    return authenticatedMember;
   }
 
   /**
@@ -75,7 +75,7 @@ public class UserService {
    * @param password the password
    * @return the authenticated user if the login is successful, null otherwise
    */
-  public AuthenticatedUser login(String username, String password) {
+  public AuthenticatedMember login(String username, String password) {
     User user = userRepository.findByUsername(username);
     if (user == null) {
       return null;
@@ -97,7 +97,7 @@ public class UserService {
    * @param password the password
    * @return the authenticated user if the registration is successful, null otherwise
    */
-  public AuthenticatedUser register(String username, String password) {
+  public AuthenticatedMember register(String username, String password) {
     User user = userRepository.findByUsername(username);
     if (user != null) {
       return null;
