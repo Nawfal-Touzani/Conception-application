@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -33,12 +34,19 @@ public class NotificationController {
   }
 
   /**
-   * Gets all notifications of a member.
+   * Gets all notifications of a member(optional filter by read status).
    */
   @GetMapping("/{id}/notifications")
-  public Iterable<Notification> getNotificationsOfMember(@PathVariable long id) {
+  public Iterable<Notification> getNotificationsOfMember(@PathVariable long id,
+      @RequestParam(required = false) Boolean read) {
 
-    Iterable<Notification> notifications = notificationService.getAllNotificationByMember(id);
+    Iterable<Notification> notifications;
+
+    if (read == null) {
+      notifications = notificationService.getAllNotificationByMember(id);
+    } else {
+      notifications = notificationService.getNotificationsByReadStatus(id, read);
+    }
 
     if (notifications == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -78,7 +86,6 @@ public class NotificationController {
     if (result == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
-
 
     return result;
   }
