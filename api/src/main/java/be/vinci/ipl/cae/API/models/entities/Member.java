@@ -58,7 +58,7 @@ public class Member {
   private List<MembershipRequest> membershipRequests = new ArrayList<>();
 
   // Constructor
-  public Member(String email, String password, String tag, boolean isAdmin, LocalDateTime profileCreationDateTime, Image image, Speciality speciality, List<Unavailability> unavailabilities, List<Notification> notifications, List<MembershipRequest> membershipRequests) {
+  public Member(String email, String password, String tag, boolean isAdmin, LocalDateTime profileCreationDateTime, Image image, Speciality speciality) {
     this.email = email;
     this.password = password;
     this.tag = tag;
@@ -66,8 +66,6 @@ public class Member {
     this.profileCreationDateTime = profileCreationDateTime;
     this.image = image;
     this.speciality = speciality;
-    this.unavailabilities = unavailabilities;
-    this.notifications = notifications;
-    this.membershipRequests = membershipRequests;
+
   }
 }
