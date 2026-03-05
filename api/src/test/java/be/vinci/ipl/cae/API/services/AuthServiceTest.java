@@ -1,7 +1,6 @@
 package be.vinci.ipl.cae.API.services;
 
 import be.vinci.ipl.cae.API.models.dtos.AuthenticatedMember;
-import be.vinci.ipl.cae.API.models.dtos.MemberRegisterRequestDTO;
 import be.vinci.ipl.cae.API.models.entities.Image;
 import be.vinci.ipl.cae.API.models.entities.Member;
 import be.vinci.ipl.cae.API.models.entities.Speciality;
@@ -41,14 +40,14 @@ class AuthServiceTest {
     @InjectMocks
     private AuthService authService;
 
-    private MemberRegisterRequestDTO registerDTO;
+    private be.vinci.ipl.cae.API.models.dtos.MemberRegisterRequestDto registerDTO;
     private Member dummyMember;
     private Image dummyImage;
     private Speciality dummySpeciality;
 
     @BeforeEach
     void setUp() {
-        registerDTO = new MemberRegisterRequestDTO();
+        registerDTO = new be.vinci.ipl.cae.API.models.dtos.MemberRegisterRequestDto();
         registerDTO.setEmail("test@vinci.be");
         registerDTO.setPassword("password123");
         registerDTO.setTag("Gamer123");
