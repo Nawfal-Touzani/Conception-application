@@ -1,47 +1,40 @@
-@baseUrl = http://localhost:3000
+@baseUrl = http://localhost:5433
 
-### Try to login an unknow user
+### 1. Try to login an unknown user
 POST {{baseUrl}}/auths/login
 Content-Type: application/json
 
 {
-  "username": "unknown",
+  "email": "unknown@vinci.be",
   "password": "admin"
 }
 
-### Create the default admin
+### 2. Register a new member
 POST {{baseUrl}}/auths/register
 Content-Type: application/json
 
 {
-  "username": "admin",
-  "password": "admin"
+  "email": "joueur1@vinci.be",
+  "password": "password123",
+  "tag": "Ninja#001",
+  "imageId": 1,
+  "specialityId": 1
 }
 
-### Login the default admin
+### 3. Login the new member
 POST {{baseUrl}}/auths/login
 Content-Type: application/json
 
 {
-  "username": "admin",
-  "password": "admin"
+  "email": "joueur1@vinci.be",
+  "password": "password123"
 }
 
+> {% client.global.set("token", response.body.token) %}
 
-### Create the manager user
-POST {{baseUrl}}/auths/register
-Content-Type: application/json
+### 4. Auto-Login
+GET {{baseUrl}}/auths/me
+Authorization: Bearer {{token}}
 
-{
-  "username": "manager",
-  "password": "manager"
-}
-
-### Login the manager user
-POST {{baseUrl}}/auths/login
-Content-Type: application/json
-
-{
-  "username": "manager",
-  "password": "manager"
-}
+### 5. Try to access a secure route without token
+GET {{baseUrl}}/auths/me
