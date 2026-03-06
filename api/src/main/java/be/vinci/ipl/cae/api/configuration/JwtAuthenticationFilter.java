@@ -27,38 +27,55 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   }
 
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+  protected void doFilterInternal(HttpServletRequest request,
+                                  HttpServletResponse response,
                                   FilterChain filterChain) throws ServletException, IOException {
 
     String token = request.getHeader("Authorization");
 
+    // No token, let it through. It will be auto blocked later if needed.
+    if (token == null) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
     // Additional security: remove the "Bearer" prefix if the frontend sends it.
-    if (token != null && token.startsWith("Bearer ")) {
+    if (token.startsWith("Bearer ")) {
       token = token.substring(7);
     }
 
-    if (token != null) {
-      String email = authService.verifyJwtToken(token); // On vérifie l'email
-      if (email != null) {
-        Member member = authService.readOneFromEmail(email);
-        if (member != null) {
-          List<GrantedAuthority> authorities = new ArrayList<>();
-
-          // The correct role is assigned based on the `isAdmin` attribute of your entity.
-          if (member.isAdmin()) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-          } else {
-            authorities.add(new SimpleGrantedAuthority("ROLE_MEMBER"));
-          }
-
-          UsernamePasswordAuthenticationToken authentication =
-                  new UsernamePasswordAuthenticationToken(member, null, authorities);
-
-          authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-          SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
-      }
+    // Token verification
+    String email = authService.verifyJwtToken(token);
+    if (email == null) { // invalid token or expired
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired JWT");
+      return; // 401 & stop filtering
     }
+
+    // User catch
+    Member member = authService.readOneFromEmail(email);
+    if (member == null) {
+      // user doesn't exist anymore
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User not found");
+      return;
+    }
+
+    // Valid token, the request can continue
+    // The authentication object contains the user's identity and roles, and is stored in the SecurityContext to be accessible throughout the application
+
+    // Role
+    List<GrantedAuthority> authorities = new ArrayList<>();
+    authorities.add(new SimpleGrantedAuthority("ROLE_MEMBER")); // EVERYONE has this basic role
+    if (member.isAdmin()) {
+      authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN")); // The admins ALSO have this role
+    }
+
+    // Identity injection into the SecurityContext
+    UsernamePasswordAuthenticationToken authentication =
+            new UsernamePasswordAuthenticationToken(member, null, authorities);
+    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    // We let the request continue to the controller
     filterChain.doFilter(request, response);
   }
 }
