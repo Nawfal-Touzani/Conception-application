@@ -1,4 +1,4 @@
-@baseUrl = http://localhost:5433
+@baseUrl = http://localhost:8080
 
 ### 1. Try to login an unknown user
 POST {{baseUrl}}/auths/login
@@ -14,9 +14,9 @@ POST {{baseUrl}}/auths/register
 Content-Type: application/json
 
 {
-  "email": "joueur1@vinci.be",
-  "password": "password123",
-  "tag": "Ninja#001",
+  "email": "player1@vinci.be",
+  "password": "player1",
+  "tag": "Player",
   "imageId": 1,
   "specialityId": 1
 }
@@ -27,7 +27,7 @@ Content-Type: application/json
 
 {
   "email": "joueur1@vinci.be",
-  "password": "password123"
+  "password": "player1"
 }
 
 > {% client.global.set("token", response.body.token) %}
