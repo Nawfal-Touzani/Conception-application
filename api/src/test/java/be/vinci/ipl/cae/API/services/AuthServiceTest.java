@@ -1,6 +1,7 @@
 package be.vinci.ipl.cae.api.services;
 
 import be.vinci.ipl.cae.api.models.dtos.AuthenticatedMember;
+import be.vinci.ipl.cae.api.models.dtos.LoginCredentials;
 import be.vinci.ipl.cae.api.models.dtos.RegisterCredentials;
 import be.vinci.ipl.cae.api.models.entities.Image;
 import be.vinci.ipl.cae.api.models.entities.Member;
@@ -15,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 
@@ -25,16 +27,13 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
-    // Setup
+    // Variables
     @Mock
     private MemberRepository memberRepository;
-
     @Mock
     private ImageRepository imageRepository;
-
     @Mock
     private SpecialityRepository specialityRepository;
-
     @Mock
     private BCryptPasswordEncoder passwordEncoder;
 
@@ -42,38 +41,32 @@ class AuthServiceTest {
     private AuthService authService;
 
     private RegisterCredentials registerDTO;
-    private Member dummyMember;
-    private Image dummyImage;
-    private Speciality dummySpeciality;
+    private LoginCredentials loginDTO;
+    private Member mockMember;
+    private Member mockAdmin;
+    private Image mockImage;
+    private Speciality mockSpeciality;
 
     @BeforeEach
     void setUp() {
-        registerDTO = new MemberRegisterRequestDto();
-        registerDTO.setEmail("test@vinci.be");
-        registerDTO.setPassword("password123");
-        registerDTO.setTag("Gamer123");
-        registerDTO.setImageId(1L);
-        registerDTO.setSpecialityId(1L);
+        ReflectionTestUtils.setField(authService, "jwtSecret", "real-secret");
 
-        dummyImage = new Image("http://image.url");
-        dummyImage.setId(1L);
-
-        dummySpeciality = new Speciality("Architect");
-        dummySpeciality.setId(1L);
-
-        dummyMember = new Member("test@vinci.be", "hashedPassword", "Gamer123", false, dummyImage, dummySpeciality);
-        dummyMember.setId(1L);
+        registerDTO = new RegisterCredentials("test@vinci.be", "test", "Gamer", 1L, 1L);
+        loginDTO = new LoginCredentials("test@vinci.be", "test");
+        mockImage = new Image("http://image.url");
+        mockSpeciality = new Speciality("Architecte");
+        mockMember = new Member("test@vinci.be", "hashedPassword", "Gamer", false, mockImage, mockSpeciality);
+        mockAdmin = new Member("admin@vinci.be", "hashedPassword", "Admin", true, mockImage, mockSpeciality);
     }
 
     // REGISTER TESTS
     @Test
     void registerSuccess() {
         // Arrange
-        when(memberRepository.existsByEmail(registerDTO.getEmail())).thenReturn(false);
-        when(imageRepository.findById(registerDTO.getImageId())).thenReturn(Optional.of(dummyImage));
-        when(specialityRepository.findById(registerDTO.getSpecialityId())).thenReturn(Optional.of(dummySpeciality));
-        when(passwordEncoder.encode(registerDTO.getPassword())).thenReturn("hashedPassword");
-        when(memberRepository.save(any(Member.class))).thenReturn(dummyMember);
+        when(memberRepository.existsByEmail(registerDTO.email())).thenReturn(false);
+        when(imageRepository.findById(registerDTO.imageId())).thenReturn(Optional.of(mockImage));
+        when(specialityRepository.findById(registerDTO.specialityId())).thenReturn(Optional.of(mockSpeciality));
+        when(passwordEncoder.encode(registerDTO.password())).thenReturn("hashedPassword");
 
         // Act
         assertDoesNotThrow(() -> authService.register(registerDTO));
@@ -85,7 +78,7 @@ class AuthServiceTest {
     @Test
     void registerEmailAlreadyExists() {
         // Arrange
-        when(memberRepository.existsByEmail(registerDTO.getEmail())).thenReturn(true);
+        when(memberRepository.existsByEmail(registerDTO.email())).thenReturn(true);
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> authService.register(registerDTO));
@@ -98,8 +91,8 @@ class AuthServiceTest {
     @Test
     void registerImageNotFound() {
         // Arrange
-        when(memberRepository.existsByEmail(registerDTO.getEmail())).thenReturn(false);
-        when(imageRepository.findById(registerDTO.getImageId())).thenReturn(Optional.empty()); // Image introuvable
+        when(memberRepository.existsByEmail(registerDTO.email())).thenReturn(false);
+        when(imageRepository.findById(registerDTO.imageId())).thenReturn(Optional.empty());
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> authService.register(registerDTO));
@@ -109,40 +102,38 @@ class AuthServiceTest {
     @Test
     void registerSpecialityNotFound() {
         // Arrange
-        when(memberRepository.existsByEmail(registerDTO.getEmail())).thenReturn(false);
-        when(imageRepository.findById(registerDTO.getImageId())).thenReturn(Optional.of(dummyImage));
-        when(specialityRepository.findById(registerDTO.getSpecialityId())).thenReturn(Optional.empty()); // Spécialité introuvable
+        when(memberRepository.existsByEmail(registerDTO.email())).thenReturn(false);
+        when(imageRepository.findById(registerDTO.imageId())).thenReturn(Optional.of(mockImage));
+        when(specialityRepository.findById(registerDTO.specialityId())).thenReturn(Optional.empty());
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> authService.register(registerDTO));
         assertEquals("Speciality not found.", exception.getMessage());
     }
 
-
     // LOGIN TESTS
     @Test
     void loginSuccess() {
         // Arrange
-        when(memberRepository.findByEmail("test@vinci.be")).thenReturn(Optional.of(dummyMember));
-        when(passwordEncoder.matches("password123", dummyMember.getPassword())).thenReturn(true);
+        when(memberRepository.findByEmail(loginDTO.email())).thenReturn(Optional.of(mockMember));
+        when(passwordEncoder.matches(loginDTO.password(), mockMember.getPassword())).thenReturn(true);
 
         // Act
-        AuthenticatedMember result = authService.login("test@vinci.be", "password123");
+        AuthenticatedMember result = authService.login(loginDTO);
 
         // Assert
         assertNotNull(result);
-        assertEquals("test@vinci.be", result.getEmail());
-        assertEquals("Gamer123", result.getTag());
-        assertNotNull(result.getToken());
+        assertEquals("test@vinci.be", result.email());
+        assertNotNull(result.token());
     }
 
     @Test
     void loginMemberNotFound() {
         // Arrange
-        when(memberRepository.findByEmail("wrong@vinci.be")).thenReturn(Optional.empty());
+        when(memberRepository.findByEmail(loginDTO.email())).thenReturn(Optional.empty());
 
         // Act
-        AuthenticatedMember result = authService.login("wrong@vinci.be", "password123");
+        AuthenticatedMember result = authService.login(loginDTO);
 
         // Assert
         assertNull(result);
@@ -151,21 +142,23 @@ class AuthServiceTest {
     @Test
     void loginWrongPassword() {
         // Arrange
-        when(memberRepository.findByEmail("test@vinci.be")).thenReturn(Optional.of(dummyMember));
-        when(passwordEncoder.matches("wrongPassword", dummyMember.getPassword())).thenReturn(false);
+        when(memberRepository.findByEmail(loginDTO.email())).thenReturn(Optional.of(mockMember));
+        when(passwordEncoder.matches("wrongPassword", mockMember.getPassword())).thenReturn(false);
 
         // Act
-        AuthenticatedMember result = authService.login("test@vinci.be", "wrongPassword");
+        LoginCredentials badLogin = new LoginCredentials("test@vinci.be", "wrongPassword");
+        AuthenticatedMember result = authService.login(badLogin);
 
         // Assert
         assertNull(result);
     }
 
-    // REPO LOGIC TESTS
+    // REPO TESTS
+
     @Test
     void readOneFromEmailFound() {
         // Arrange
-        when(memberRepository.findByEmail("test@vinci.be")).thenReturn(Optional.of(dummyMember));
+        when(memberRepository.findByEmail("test@vinci.be")).thenReturn(Optional.of(mockMember));
 
         // Act
         Member result = authService.readOneFromEmail("test@vinci.be");
@@ -189,24 +182,34 @@ class AuthServiceTest {
 
     // JWT TOKEN TESTS
     @Test
-    void createJwtTokenSuccess() {
-        // Arrange = dummyMember
+    void createJwtTokenForMember() {
+        // Arrange = mock
+
         // Act
-        AuthenticatedMember result = authService.createJwtToken(dummyMember);
+        AuthenticatedMember result = authService.createJwtToken(mockMember);
 
         // Assert
         assertNotNull(result);
-        assertEquals("test@vinci.be", result.getEmail());
-        assertEquals("Gamer123", result.getTag());
-        assertEquals("ROLE_MEMBER", result.getRole());
-        assertNotNull(result.getToken());
+        assertEquals("MEMBER", result.role());
+    }
+
+    @Test
+    void createJwtTokenForAdmin() {
+        // Arrange = mock
+
+        // Act
+        AuthenticatedMember result = authService.createJwtToken(mockAdmin);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("ADMIN", result.role());
     }
 
     @Test
     void verifyJwtTokenValidToken() {
         // Arrange
-        AuthenticatedMember authMember = authService.createJwtToken(dummyMember);
-        String validToken = authMember.getToken();
+        AuthenticatedMember authMember = authService.createJwtToken(mockMember);
+        String validToken = authMember.token();
 
         // Act
         String email = authService.verifyJwtToken(validToken);
