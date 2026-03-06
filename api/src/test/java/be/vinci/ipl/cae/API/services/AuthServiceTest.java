@@ -1,7 +1,6 @@
 package be.vinci.ipl.cae.api.services;
 
 import be.vinci.ipl.cae.api.models.dtos.AuthenticatedMember;
-import be.vinci.ipl.cae.api.models.dtos.MemberRegisterRequestDto;
 import be.vinci.ipl.cae.api.models.entities.Image;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Speciality;
