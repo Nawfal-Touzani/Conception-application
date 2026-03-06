@@ -49,13 +49,13 @@ public class Member {
   @JsonManagedReference("member-unavailabilities")
   private List<Unavailability> unavailabilities = new ArrayList<>();
 
-  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-  @JsonManagedReference("member-notifications")
-  private List<Notification> notifications = new ArrayList<>();
 
-  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-  @JsonManagedReference("member-requests")
-  private List<MembershipRequest> membershipRequests = new ArrayList<>();
+
+
+
+
+
+
 
   /**
    * Instantiates a new Member.

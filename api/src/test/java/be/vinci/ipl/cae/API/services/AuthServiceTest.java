@@ -1,12 +1,13 @@
-package be.vinci.ipl.cae.API.services;
+package be.vinci.ipl.cae.api.services;
 
-import be.vinci.ipl.cae.API.models.dtos.AuthenticatedMember;
-import be.vinci.ipl.cae.API.models.entities.Image;
-import be.vinci.ipl.cae.API.models.entities.Member;
-import be.vinci.ipl.cae.API.models.entities.Speciality;
-import be.vinci.ipl.cae.API.repositories.ImageRepository;
-import be.vinci.ipl.cae.API.repositories.MemberRepository;
-import be.vinci.ipl.cae.API.repositories.SpecialityRepository;
+import be.vinci.ipl.cae.api.models.dtos.AuthenticatedMember;
+import be.vinci.ipl.cae.api.models.dtos.MemberRegisterRequestDto;
+import be.vinci.ipl.cae.api.models.entities.Image;
+import be.vinci.ipl.cae.api.models.entities.Member;
+import be.vinci.ipl.cae.api.models.entities.Speciality;
+import be.vinci.ipl.cae.api.repositories.ImageRepository;
+import be.vinci.ipl.cae.api.repositories.MemberRepository;
+import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,14 +41,14 @@ class AuthServiceTest {
     @InjectMocks
     private AuthService authService;
 
-    private be.vinci.ipl.cae.API.models.dtos.MemberRegisterRequestDto registerDTO;
+    private MemberRegisterRequestDto registerDTO;
     private Member dummyMember;
     private Image dummyImage;
     private Speciality dummySpeciality;
 
     @BeforeEach
     void setUp() {
-        registerDTO = new be.vinci.ipl.cae.API.models.dtos.MemberRegisterRequestDto();
+        registerDTO = new MemberRegisterRequestDto();
         registerDTO.setEmail("test@vinci.be");
         registerDTO.setPassword("password123");
         registerDTO.setTag("Gamer123");
