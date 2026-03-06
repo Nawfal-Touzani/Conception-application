@@ -1,76 +1,142 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns="http://maven.apache.org/POM/4.0.0"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <artifactId>cae-exercices-demo</artifactId>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.3.4</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>be.vinci.ipl.cae.group12</groupId>
+  <artifactId>vinci-arena-api</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>Groupe 12 VA API</name>
+  <description>Backend API for Vinci Arena eSport site</description>
+
+  <properties>
+    <java.version>21</java.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.auth0</groupId>
+      <artifactId>java-jwt</artifactId>
+      <version>4.5.0</version>
+    </dependency>
+    <dependency>
+      <groupId>me.paulschwarz</groupId>
+      <artifactId>spring-dotenv</artifactId>
+      <version>5.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
   <build>
     <plugins>
       <plugin>
+        <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
           <excludes>
             <exclude>
-              <artifactId>lombok</artifactId>
               <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
             </exclude>
           </excludes>
         </configuration>
-        <groupId>org.springframework.boot</groupId>
       </plugin>
 
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
         <configuration>
-          <annotationProcessorPaths>
-            <path>
-              <artifactId>lombok</artifactId>
-              <groupId>org.projectlombok</groupId>
-              <version>1.18.34</version>
-            </path>
-          </annotationProcessorPaths>
+          <source>21</source>
+          <target>21</target>
           <compilerArgs>
             <arg>-parameters</arg>
           </compilerArgs>
-          <source>21</source>
-          <target>21</target>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>1.18.34</version>
+            </path>
+          </annotationProcessorPaths>
         </configuration>
-        <groupId>org.apache.maven.plugins</groupId>
-        <version>3.8.1</version>
       </plugin>
 
-
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>3.6.0</version>
         <configuration>
           <configLocation>google_checks.xml</configLocation>
           <consoleOutput>true</consoleOutput>
           <failsOnError>true</failsOnError>
           <maxAllowedViolations>10</maxAllowedViolations>
           <violationSeverity>warning</violationSeverity>
-
         </configuration>
         <dependencies>
           <dependency>
-            <artifactId>checkstyle</artifactId>
             <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
             <version>10.20.0</version>
           </dependency>
         </dependencies>
         <executions>
           <execution>
+            <phase>test</phase>
             <goals>
               <goal>check</goal>
               <goal>checkstyle</goal>
             </goals>
-            <phase>test</phase>
           </execution>
         </executions>
-        <groupId>org.apache.maven.plugins</groupId>
-        <version>3.6.0</version>
       </plugin>
 
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>
+        <version>3.26.0</version>
         <configuration>
           <failOnViolation>true</failOnViolation>
           <minimumTokens>40</minimumTokens>
@@ -81,172 +147,83 @@
         </configuration>
         <executions>
           <execution>
-            <configuration>
-              <maxAllowedViolations>0</maxAllowedViolations>
-            </configuration>
-            <goals>
-              <goal>check</goal>
-            </goals>
             <id>pmd-check</id>
             <phase>test</phase>
-          </execution>
-          <execution>
+            <goals><goal>check</goal></goals>
             <configuration>
               <maxAllowedViolations>0</maxAllowedViolations>
             </configuration>
-            <goals>
-              <goal>cpd-check</goal>
-            </goals>
+          </execution>
+          <execution>
             <id>pmd-cpd-check</id>
             <phase>test</phase>
+            <goals><goal>cpd-check</goal></goals>
+            <configuration>
+              <maxAllowedViolations>0</maxAllowedViolations>
+            </configuration>
           </execution>
         </executions>
-
-        <groupId>org.apache.maven.plugins</groupId>
-        <version>3.26.0</version>
       </plugin>
 
       <plugin>
+        <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.12</version>
         <executions>
           <execution>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
+            <goals><goal>prepare-agent</goal></goals>
           </execution>
           <execution>
-            <goals>
-              <goal>report</goal>
-            </goals>
             <id>report</id>
             <phase>test</phase>
+            <goals><goal>report</goal></goals>
           </execution>
         </executions>
-        <groupId>org.jacoco</groupId>
-        <version>0.8.12</version>
       </plugin>
-
-
     </plugins>
   </build>
-  <dependencies>
-    <dependency>
-      <artifactId>h2</artifactId>
-      <groupId>com.h2database</groupId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <artifactId>spring-boot-starter-data-jpa</artifactId>
-      <groupId>org.springframework.boot</groupId>
-    </dependency>
-    <dependency>
-      <artifactId>spring-boot-starter-web</artifactId>
-      <groupId>org.springframework.boot</groupId>
-    </dependency>
-    <dependency>
-      <artifactId>spring-boot-starter-validation</artifactId>
-      <groupId>org.springframework.boot</groupId>
-    </dependency>
-    <dependency>
-      <artifactId>postgresql</artifactId>
-      <groupId>org.postgresql</groupId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <artifactId>lombok</artifactId>
-      <groupId>org.projectlombok</groupId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <groupId>org.springframework.boot</groupId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <artifactId>java-jwt</artifactId>
-      <groupId>com.auth0</groupId>
-      <version>4.4.0</version>
-    </dependency>
-    <dependency>
-      <artifactId>spring-boot-starter-security</artifactId>
-      <groupId>org.springframework.boot</groupId>
-    </dependency>
-    <dependency>
-      <artifactId>spring-security-test</artifactId>
-      <groupId>org.springframework.security</groupId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <artifactId>junit-jupiter</artifactId>
-      <groupId>org.mockito</groupId>
-      <version>2.20.0</version>
-    </dependency>
-  </dependencies>
-  <description>auths</description>
-  <groupId>be.vinci.ipl.cae.demos</groupId>
-  <modelVersion>4.0.0</modelVersion>
-  <name>auths</name>
-  <parent>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <groupId>org.springframework.boot</groupId>
-    <relativePath/>
-    <version>3.3.4</version> <!-- lookup parent from repository -->
-  </parent>
+
   <profiles>
     <profile>
+      <id>no-build-failure</id>
       <build>
         <plugins>
-
           <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-checkstyle-plugin</artifactId>
+            <version>3.6.0</version>
             <configuration>
               <consoleOutput>true</consoleOutput>
               <failOnViolation>false</failOnViolation>
               <failsOnError>false</failsOnError>
             </configuration>
-            <groupId>org.apache.maven.plugins</groupId>
-            <version>3.6.0</version>
           </plugin>
-
           <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-pmd-plugin</artifactId>
+            <version>3.26.0</version>
             <executions>
               <execution>
-                <configuration>
-                  <failOnViolation>false</failOnViolation>
-                </configuration>
-                <goals>
-                  <goal>check</goal>
-                </goals>
                 <id>pmd-check</id>
                 <phase>test</phase>
-              </execution>
-              <execution>
+                <goals><goal>check</goal></goals>
                 <configuration>
                   <failOnViolation>false</failOnViolation>
                 </configuration>
-                <goals>
-                  <goal>cpd-check</goal>
-                </goals>
+              </execution>
+              <execution>
                 <id>pmd-cpd-check</id>
                 <phase>test</phase>
+                <goals><goal>cpd-check</goal></goals>
+                <configuration>
+                  <failOnViolation>false</failOnViolation>
+                </configuration>
               </execution>
             </executions>
-            <groupId>org.apache.maven.plugins</groupId>
-
-            <version>3.26.0</version>
           </plugin>
-
         </plugins>
       </build>
-      <id>no-build-failure</id>
     </profile>
   </profiles>
-
-  <properties>
-    <java.version>21</java.version>
-  </properties>
-
-  <version>0.0.1-SNAPSHOT</version>
 
 </project>
