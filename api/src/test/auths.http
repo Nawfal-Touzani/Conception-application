@@ -1,40 +1,65 @@
-@baseUrl = http://localhost:8080
+@baseUrl = http://localhost:3000
 
-### 1. Try to login an unknown user
-POST {{baseUrl}}/auths/login
-Content-Type: application/json
+### TESTS SCENARIO
+### THE OBJECTIVE IS TO TEST THE API SECURITY
 
-{
-  "email": "unknown@vinci.be",
-  "password": "admin"
-}
+### 0. Tokens
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibmV3QHZpbmNpLmJlIiwiaWF0IjoxNzcyODM2NDMwLCJleHAiOjE3NzI5MjI4MzB9.hOFxWtso3qoUXrOGWXWM8smSKO8_Va7fd2jIQFT_FvA
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoiYWRtaW5AdmluY2kuYmUiLCJpYXQiOjE3NzI4MzY1MTksImV4cCI6MTc3MjkyMjkxOX0.53GrDr1AKBy-omLIy4ZDJJm0yTmGyhWyOa657VT2EVc
 
-### 2. Register a new member
+### REGISTER & LOGIN (ok)
+### 1. Valid new member registration (201)
 POST {{baseUrl}}/auths/register
 Content-Type: application/json
 
 {
-  "email": "player1@vinci.be",
-  "password": "player1",
-  "tag": "Player",
+  "email": "new@vinci.be",
+  "password": "new",
+  "tag": "New",
   "imageId": 1,
   "specialityId": 1
 }
 
-### 3. Login the new member
+### 2. Login new member (200 + Token)
 POST {{baseUrl}}/auths/login
 Content-Type: application/json
 
 {
-  "email": "joueur1@vinci.be",
-  "password": "player1"
+  "email": "new@vinci.be",
+  "password": "new"
 }
 
-> {% client.global.set("token", response.body.token) %}
+### 3. Login admin (CommandLineRunner)
+POST {{baseUrl}}/auths/login
+Content-Type: application/json
 
-### 4. Auto-Login
-GET {{baseUrl}}/auths/me
-Authorization: Bearer {{token}}
+{
+  "email": "admin@vinci.be",
+  "password": "admin"
+}
 
-### 5. Try to access a secure route without token
+### TOKENS (ko)
+### 1. Protected route without token
 GET {{baseUrl}}/auths/me
+
+### 2. Protected route with fake token
+GET {{baseUrl}}/auths/me
+Authorization: Bearer fake.token
+
+### ROLES: (isAuthenticated vs hasRole) (ok)
+### 1. Logged member acces to /me (200 + new token)
+GET {{baseUrl}}/auths/me
+Authorization: Bearer {{userToken}}
+
+### 2. Logged admin acces to /me (200 + new token)
+GET {{baseUrl}}/auths/me
+Authorization: Bearer {{adminToken}}
+
+### ADMIN ONLY (ko)
+### 1. Member try to do an admin only action (403)
+#DELETE/GET/UPDATE/CREATE {{baseUrl}}/xxx/xxx
+Authorization: Bearer {{userToken}}
+
+### 2. Admin try to do an admin only action (200)
+#DELETE/GET/UPDATE/CREATE {{baseUrl}}/xxx/xxx
+Authorization: Bearer {{adminToken}}
