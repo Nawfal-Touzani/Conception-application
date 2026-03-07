@@ -16,5 +16,6 @@ public interface ImageRepository extends CrudRepository<Image, Long> {
      *
      * @return the list of all images
      */
+    @Override
     List<Image> findAll();
 }

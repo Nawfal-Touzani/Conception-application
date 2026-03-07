@@ -16,5 +16,6 @@ public interface SpecialityRepository extends CrudRepository<Speciality, Long> {
      *
      * @return the list of all specialities
      */
+    @Override
     List<Speciality> findAll();
 }
