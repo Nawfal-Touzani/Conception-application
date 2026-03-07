@@ -12,13 +12,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-<<<<<<< HEAD:api/src/main/java/be/vinci/ipl/cae/API/models/entities/Member.java
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-=======
->>>>>>> develop:api/src/main/java/be/vinci/ipl/cae/api/models/entities/Member.java
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
