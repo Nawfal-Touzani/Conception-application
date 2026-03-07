@@ -2,7 +2,10 @@ import { AuthenticatedMember, MaybeAuthenticatedMember } from '../types';
 
 const storeKey = 'authenticatedMember';
 
-export const storeAuthenticatedMember = (member: AuthenticatedMember, rememberMe: boolean) => {
+export const storeAuthenticatedMember = (
+  member: AuthenticatedMember,
+  rememberMe: boolean,
+) => {
   const memberJson = JSON.stringify(member);
   if (rememberMe) {
     localStorage.setItem(storeKey, memberJson);
@@ -12,7 +15,8 @@ export const storeAuthenticatedMember = (member: AuthenticatedMember, rememberMe
 };
 
 export const getAuthenticatedMember = (): MaybeAuthenticatedMember => {
-  const memberJson = localStorage.getItem(storeKey) || sessionStorage.getItem(storeKey);
+  const memberJson =
+    localStorage.getItem(storeKey) || sessionStorage.getItem(storeKey);
   if (!memberJson) return undefined;
   return JSON.parse(memberJson);
 };
