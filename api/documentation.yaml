@@ -67,7 +67,7 @@ paths:
           description: Ordre de tri, par titre ascendant (+title) ou descendant (-title)
           schema:
             type: string
-            enum: [+title, -title]
+            enum: [ +title, -title ]
             example: +title
       responses:
         '200':
@@ -132,7 +132,7 @@ paths:
       description: Suppression d'une pizza
       security:
         - bearerAuth:
-          - admin
+            - admin
       responses:
         '200':
           description: Pizza supprimée
@@ -151,7 +151,7 @@ paths:
       description: Modification d'une pizza
       security:
         - bearerAuth:
-          - admin
+            - admin
       requestBody:
         required: true
         description: Nouveaux détails de la pizza
@@ -202,7 +202,7 @@ paths:
       description: Création d'une nouvelle boisson
       security:
         - bearerAuth:
-          - admin
+            - admin
       requestBody:
         required: true
         content:
@@ -251,7 +251,7 @@ paths:
       description: Suppression d'une boisson
       security:
         - bearerAuth:
-          - admin
+            - admin
       responses:
         '200':
           description: Boisson supprimée
@@ -270,7 +270,7 @@ paths:
       description: Modification d'une boisson
       security:
         - bearerAuth:
-          - admin
+            - admin
       requestBody:
         required: true
         description: Nouveaux détails de la boisson

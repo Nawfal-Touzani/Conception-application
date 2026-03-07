@@ -81,17 +81,16 @@ public class Member {
    * @param image                   the image
    * @param speciality              the speciality
    */
-    // Constructor
+  // Constructor
   public Member(String email, String password, String tag, boolean isAdmin, LocalDateTime
-    profileCreationDateTime, Image image, Speciality speciality){
-      this.email = email;
-      this.password = password;
-      this.tag = tag;
-      this.isAdmin = isAdmin;
-      this.profileCreationDateTime = profileCreationDateTime;
-      this.image = image;
-      this.speciality = speciality;
+      profileCreationDateTime, Image image, Speciality speciality) {
+    this.email = email;
+    this.password = password;
+    this.tag = tag;
+    this.isAdmin = isAdmin;
+    this.profileCreationDateTime = profileCreationDateTime;
+    this.image = image;
+    this.speciality = speciality;
 
-    }
-
+  }
 }
