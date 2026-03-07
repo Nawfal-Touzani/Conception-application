@@ -1,54 +1,37 @@
-interface Pizza {
-  id: number;
-  title: string;
-  content: string;
+interface AuthContextType {
+  authenticatedMember: MaybeAuthenticatedMember;
+  registerMember: (newMember: MemberRegisterRequest) => Promise<void>;
+  loginMember: (credentials: Credentials, rememberMe: boolean) => Promise<void>;
+  clearMember: () => void;
 }
 
-type NewPizza = Omit<Pizza, 'id'>;
-
-interface Drink {
-  title: string;
-  image: string;
-  volume: string;
-  price: string;
-}
-
-interface PizzeriaContext {
-  pizzas: Pizza[];
-  setPizzas: (pizzas: Pizza[]) => void;
-  actionToBePerformed: boolean;
-  setActionToBePerformed: (actionToBePerformed: boolean) => void;
-  clearActionToBePerformed: () => void;
-  drinks: Drink[];
-  addPizza: (newPizza: NewPizza) => Promise<void>;
-}
-
-interface UserContextType {
-  authenticatedUser: MaybeAuthenticatedUser;
-  registerUser: (newUser: User) => Promise<void>;
-  loginUser: (user: User) => Promise<void>;
-  clearUser: () => void;
-}
-
-interface User {
-  username: string;
+interface Credentials {
+  email: string;
   password: string;
 }
 
-interface AuthenticatedUser {
-  username: string;
+interface MemberRegisterRequest {
+  email: string;
+  password: string;
+  tag: string;
+  imageId: number;
+  specialityId: number;
+}
+
+interface AuthenticatedMember {
+  id: number;
+  email: string;
+  tag: string;
+  role: string;
   token: string;
 }
 
-type MaybeAuthenticatedUser = AuthenticatedUser | undefined;
+type MaybeAuthenticatedMember = AuthenticatedMember | undefined;
 
 export type {
-  Pizza,
-  NewPizza,
-  Drink,
-  PizzeriaContext,
-  User,
-  AuthenticatedUser,
-  MaybeAuthenticatedUser,
-  UserContextType,
+  Credentials,
+  MemberRegisterRequest,
+  AuthenticatedMember,
+  MaybeAuthenticatedMember,
+  AuthContextType,
 };

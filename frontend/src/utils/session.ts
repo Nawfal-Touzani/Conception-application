@@ -1,19 +1,32 @@
-import { AuthenticatedUser, MaybeAuthenticatedUser } from '../types';
+import { AuthenticatedMember, MaybeAuthenticatedMember } from '../types';
 
-const storeAuthenticatedUser = (authenticatedUser: AuthenticatedUser) => {
-  localStorage.setItem('authenticatedUser', JSON.stringify(authenticatedUser));
+const storeKey = 'authenticatedMember';
+
+export const storeAuthenticatedMember = (
+  member: AuthenticatedMember,
+  rememberMe: boolean,
+) => {
+  const memberJson = JSON.stringify(member);
+  if (rememberMe) {
+    localStorage.setItem(storeKey, memberJson);
+  } else {
+    sessionStorage.setItem(storeKey, memberJson);
+  }
 };
 
-const getAuthenticatedUser = (): MaybeAuthenticatedUser => {
-  const authenticatedUser = localStorage.getItem('authenticatedUser');
-
-  if (!authenticatedUser) return undefined;
-
-  return JSON.parse(authenticatedUser);
+export const getAuthenticatedMember = (): MaybeAuthenticatedMember => {
+  const memberJson =
+    localStorage.getItem(storeKey) || sessionStorage.getItem(storeKey);
+  if (!memberJson) return undefined;
+  return JSON.parse(memberJson);
 };
 
-const clearAuthenticatedUser = () => {
-  localStorage.removeItem('authenticatedUser');
+export const clearAuthenticatedMember = () => {
+  localStorage.removeItem(storeKey);
+  sessionStorage.removeItem(storeKey);
 };
 
-export { storeAuthenticatedUser, getAuthenticatedUser, clearAuthenticatedUser };
+export const getToken = (): string | undefined => {
+  const member = getAuthenticatedMember();
+  return member?.token;
+};
