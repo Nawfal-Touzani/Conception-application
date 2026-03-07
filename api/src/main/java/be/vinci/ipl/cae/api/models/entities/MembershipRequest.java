@@ -52,6 +52,11 @@ public class MembershipRequest {
   @JsonManagedReference("request-notifications")
   private List<Notification> notifications = new ArrayList<>();
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "id_equipe", nullable = false)
+  @JsonBackReference("team-requests")
+  private Team team;
+
   /**
    * MembershipRequest constructor.
    *
@@ -69,17 +74,8 @@ public class MembershipRequest {
    * State enumeration.
    */
   public enum State {
-    /**
-     * Pending state.
-     */
     PENDING,
-    /**
-     * Accepted state.
-     */
     ACCEPTED,
-    /**
-     * Refused state.
-     */
     REFUSED
   }
 
