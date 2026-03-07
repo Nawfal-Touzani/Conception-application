@@ -17,11 +17,22 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * JWT authentication filter that intercepts incoming HTTP requests
+ * to validate the JWT token provided in the Authorization header.
+ * If the token is valid, the authenticated user is injected into
+ * the Spring Security context to be accessible throughout the application.
+ */
 @Configuration
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final AuthService authService;
 
+  /**
+   * Constructs a JwtAuthenticationFilter with the given AuthService.
+   *
+   * @param authService the service used to verify JWT tokens and retrieve users
+   */
   public JwtAuthenticationFilter(AuthService authService) {
     this.authService = authService;
   }
@@ -59,8 +70,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       return;
     }
 
-    // Valid token, the request can continue
-    // The authentication object contains the user's identity and roles, and is stored in the SecurityContext to be accessible throughout the application
+    // Valid token, the request can continue.
+    // The authentication object contains the user's identity and roles,
+    // and is stored in the SecurityContext to be accessible throughout the application.
 
     // Role
     List<GrantedAuthority> authorities = new ArrayList<>();
