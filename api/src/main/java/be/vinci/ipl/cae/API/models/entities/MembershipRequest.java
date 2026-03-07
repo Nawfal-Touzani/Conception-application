@@ -1,4 +1,4 @@
-package be.vinci.ipl.cae.API.models.entities;
+package be.vinci.ipl.cae.api.models.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -15,12 +15,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * MembershipRequest entity.
@@ -66,11 +67,11 @@ public class MembershipRequest {
   private List<Notification> notifications = new ArrayList<>();
 
   /**
-   *MembershipRequest constructor.
+   * MembershipRequest constructor.
    */
-  public MembershipRequest( State state,
-      String refusalReason,
-      LocalDateTime processingDate) {
+  public MembershipRequest(State state,
+                           String refusalReason,
+                           LocalDateTime processingDate) {
 
     this.state = state;
     this.refusalReason = refusalReason;

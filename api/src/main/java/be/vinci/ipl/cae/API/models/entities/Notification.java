@@ -1,4 +1,4 @@
-package be.vinci.ipl.cae.API.models.entities;
+package be.vinci.ipl.cae.api.models.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
@@ -12,10 +12,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 
 /**
@@ -66,7 +67,7 @@ public class Notification {
   private MembershipRequest membershipRequest;
 
   /**
-   *Notification constructor.
+   * Notification constructor.
    */
   public Notification(Type type, String message, LocalDateTime sendDate) {
     this.type = type;
