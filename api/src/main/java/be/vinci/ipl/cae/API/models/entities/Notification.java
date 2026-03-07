@@ -53,6 +53,8 @@ public class Notification {
   @Column(nullable = false)
   private boolean read = false;
 
+  //fk
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "id_member", nullable = false)
   @JsonBackReference("member-notifications")
