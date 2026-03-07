@@ -18,8 +18,9 @@ public class DemoApplication {
    * @param args the arguments
    */
   public static void main(String[] args) {
-    AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-    DotenvPropertySource.addToEnvironment(context.getEnvironment());
+    try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext()) {
+      DotenvPropertySource.addToEnvironment(context.getEnvironment());
+    }
     SpringApplication.run(DemoApplication.class, args);
   }
 }
