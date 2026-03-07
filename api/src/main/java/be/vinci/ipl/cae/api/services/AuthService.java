@@ -17,25 +17,35 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Service handling authentication operations including member registration,
+ * login, and JWT token management.
+ * JWT tokens are signed using HMAC256 with a secret injected via environment
+ * variable and have a lifetime of 24 hours.
+ */
 @Service
 public class AuthService {
 
-  // Secret injection by .env
-  @Value("${JWT_SECRET}")
-  private String jwtSecret;
-
   // 24h lifetime
   private static final long JWT_LIFETIME = 24 * 60 * 60 * 1000;
-
   private final BCryptPasswordEncoder passwordEncoder;
   private final MemberRepository memberRepository;
   private final ImageRepository imageRepository;
   private final SpecialityRepository specialityRepository;
+  // Secret injection by .env
+  @Value("${JWT_SECRET}")
+  private String jwtSecret;
 
-  public AuthService(BCryptPasswordEncoder passwordEncoder,
-      MemberRepository memberRepository,
-      ImageRepository imageRepository,
-      SpecialityRepository specialityRepository) {
+  /**
+   * Constructor of the required dependencies.
+   *
+   * @param passwordEncoder        encoder used to hash and verify passwords
+   * @param memberRepository       repository for member persistence and lookup
+   * @param imageRepository        repository used to validate the profile image on registration
+   * @param specialityRepository   repository used to validate the speciality on registration
+   */
+  public AuthService(BCryptPasswordEncoder passwordEncoder, MemberRepository memberRepository,
+      ImageRepository imageRepository, SpecialityRepository specialityRepository) {
     this.passwordEncoder = passwordEncoder;
     this.memberRepository = memberRepository;
     this.imageRepository = imageRepository;
@@ -43,11 +53,8 @@ public class AuthService {
   }
 
   /**
-   * Register a new member.
-   * No automatic authentification.
-   * No token, we only save the member.
+   * Register a new member. No automatic authentification. No token, we only save the member.
    */
-  @Transactional
   public void register(RegisterCredentials registerCredentials) {
     // Verifications
     if (memberRepository.existsByEmail(registerCredentials.email())) {
@@ -65,7 +72,7 @@ public class AuthService {
     newMember.setEmail(registerCredentials.email());
     newMember.setPassword(passwordEncoder.encode(registerCredentials.password()));
     newMember.setTag(registerCredentials.tag());
-    newMember.setAdmin(false); // Utilisateur classique par défaut
+    newMember.setAdmin(false); // By default
     newMember.setImage(image);
     newMember.setSpeciality(speciality);
 
@@ -77,7 +84,8 @@ public class AuthService {
    */
   public AuthenticatedMember login(LoginCredentials loginCredentials) {
     Member member = memberRepository.findByEmail(loginCredentials.email()).orElse(null);
-    if (member == null || !passwordEncoder.matches(loginCredentials.password(), member.getPassword())) {
+    if (member == null || !passwordEncoder.matches(loginCredentials.password(),
+        member.getPassword())) {
       return null; // unknown user or bad password
     }
 
@@ -88,19 +96,15 @@ public class AuthService {
    * Create a JWT token and populate the AuthenticatedMember DTO.
    */
   public AuthenticatedMember createJwtToken(Member member) {
-    // Création de l'algorithme avec le secret injecté
     Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
 
-    String token = JWT.create()
-        .withIssuer("auth0")
-        .withClaim("email", member.getEmail())
-        .withIssuedAt(new Date())
-        .withExpiresAt(new Date(System.currentTimeMillis() + JWT_LIFETIME))
+    String token = JWT.create().withIssuer("auth0").withClaim("email", member.getEmail())
+        .withIssuedAt(new Date()).withExpiresAt(new Date(System.currentTimeMillis() + JWT_LIFETIME))
         .sign(algorithm);
 
     // For the front (JSON)
     String role;
-    if(member.isAdmin()){
+    if (member.isAdmin()) {
       role = "ADMIN";
     } else {
       role = "MEMBER";
@@ -114,7 +118,6 @@ public class AuthService {
    */
   public String verifyJwtToken(String token) {
     try {
-      // Création de l'algorithme avec le secret injecté
       Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
       return JWT.require(algorithm).build().verify(token).getClaim("email").asString();
     } catch (Exception e) {

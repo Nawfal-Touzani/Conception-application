@@ -11,11 +11,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ImageRepository extends CrudRepository<Image, Long> {
 
-    /**
-     * Finds all images.
-     *
-     * @return the list of all images
-     */
-    @Override
-    List<Image> findAll();
+  /**
+   * Finds all images.
+   *
+   * @return the list of all images
+   */
+  @Override
+  List<Image> findAll();
 }

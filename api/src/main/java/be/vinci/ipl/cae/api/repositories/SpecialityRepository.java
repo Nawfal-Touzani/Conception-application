@@ -11,11 +11,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SpecialityRepository extends CrudRepository<Speciality, Long> {
 
-    /**
-     * Finds all specialities.
-     *
-     * @return the list of all specialities
-     */
-    @Override
-    List<Speciality> findAll();
+  /**
+   * Finds all specialities.
+   *
+   * @return the list of all specialities
+   */
+  @Override
+  List<Speciality> findAll();
 }
