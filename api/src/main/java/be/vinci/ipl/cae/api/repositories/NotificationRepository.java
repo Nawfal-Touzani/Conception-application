@@ -16,6 +16,5 @@ public interface NotificationRepository extends CrudRepository<Notification, Lon
    * @param id the id member
    * @return the member
    */
-  Iterable<Notification> findByMemberId(long idMember);
   Iterable<Notification> findByMemberId(long id);
 }

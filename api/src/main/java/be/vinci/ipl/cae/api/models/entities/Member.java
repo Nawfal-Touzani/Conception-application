@@ -23,7 +23,7 @@ import lombok.Setter;
  * Represents a user/player in the Vinci Arena platform.
  */
 @Entity
-@Table(name = "members")
+@Table(name = "member")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -80,23 +80,18 @@ public class Member {
    * @param profileCreationDateTime the profile creation date time
    * @param image                   the image
    * @param speciality              the speciality
-   * @param unavailabilities        the unavailabilities
-   * @param notifications           the notifications
-   * @param membershipRequests      the membership requests
    */
-  public Member(String email, String password, String tag, boolean isAdmin,
-      LocalDateTime profileCreationDateTime, Image image, Speciality speciality,
-      List<Unavailability> unavailabilities, List<Notification> notifications,
-      List<MembershipRequest> membershipRequests) {
-  // Constructor
-  public Member(String email, String password, String tag, boolean isAdmin, LocalDateTime profileCreationDateTime, Image image, Speciality speciality) {
-    this.email = email;
-    this.password = password;
-    this.tag = tag;
-    this.isAdmin = isAdmin;
-    this.profileCreationDateTime = profileCreationDateTime;
-    this.image = image;
-    this.speciality = speciality;
+    // Constructor
+  public Member(String email, String password, String tag, boolean isAdmin, LocalDateTime
+    profileCreationDateTime, Image image, Speciality speciality){
+      this.email = email;
+      this.password = password;
+      this.tag = tag;
+      this.isAdmin = isAdmin;
+      this.profileCreationDateTime = profileCreationDateTime;
+      this.image = image;
+      this.speciality = speciality;
 
-  }
+    }
+
 }
