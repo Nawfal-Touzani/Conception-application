@@ -6,12 +6,12 @@ import be.vinci.ipl.cae.api.models.entities.Speciality;
 import be.vinci.ipl.cae.api.repositories.ImageRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
+import java.util.List;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.util.List;
 
 /**
  * Configuration class for the BCryptPasswordEncoder.
@@ -29,6 +29,17 @@ public class BcryptConfiguration {
     return new BCryptPasswordEncoder();
   }
 
+  /**
+   * Bean for initializing default users in the database.
+   * Creates a default admin and a default user if they do not already exist,
+   * along with a default image and a default speciality if none are present.
+   *
+   * @param memberRepository     the repository for managing members
+   * @param imageRepository      the repository for managing images
+   * @param specialityRepository the repository for managing specialities
+   * @param passwordEncoder      the BCryptPasswordEncoder for encoding passwords
+   * @return a CommandLineRunner that initializes the default users
+   */
   @Bean
   public CommandLineRunner initUsers(MemberRepository memberRepository,
                                      ImageRepository imageRepository,

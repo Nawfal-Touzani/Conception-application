@@ -131,9 +131,17 @@
               <goal>check</goal>
               <goal>checkstyle</goal>
             </goals>
+        <executions>
+          <execution>
+            <phase>test</phase>
+            <goals>
+              <goal>check</goal>
+              <goal>checkstyle</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
+
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
