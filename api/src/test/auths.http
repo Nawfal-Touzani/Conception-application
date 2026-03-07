@@ -5,8 +5,8 @@ POST {{baseUrl}}/auths/login
 Content-Type: application/json
 
 {
-  "username":"unknown",
-  "password":"admin"
+  "username": "unknown",
+  "password": "admin"
 }
 
 ### Create the default admin
@@ -14,8 +14,8 @@ POST {{baseUrl}}/auths/register
 Content-Type: application/json
 
 {
-  "username":"admin",
-  "password":"admin"
+  "username": "admin",
+  "password": "admin"
 }
 
 ### Login the default admin
@@ -23,8 +23,8 @@ POST {{baseUrl}}/auths/login
 Content-Type: application/json
 
 {
-  "username":"admin",
-  "password":"admin"
+  "username": "admin",
+  "password": "admin"
 }
 
 
@@ -33,8 +33,8 @@ POST {{baseUrl}}/auths/register
 Content-Type: application/json
 
 {
-  "username":"manager",
-  "password":"manager"
+  "username": "manager",
+  "password": "manager"
 }
 
 ### Login the manager user
@@ -42,6 +42,6 @@ POST {{baseUrl}}/auths/login
 Content-Type: application/json
 
 {
-  "username":"manager",
-  "password":"manager"
+  "username": "manager",
+  "password": "manager"
 }
