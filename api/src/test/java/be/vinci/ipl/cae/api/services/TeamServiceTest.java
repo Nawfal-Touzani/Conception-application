@@ -1,4 +1,4 @@
-package be.vinci.ipl.cae.API.services;
+package be.vinci.ipl.cae.api.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

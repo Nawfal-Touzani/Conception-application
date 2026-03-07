@@ -1,85 +1,86 @@
 import { useState, SyntheticEvent, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, TextField, useTheme } from '@mui/material';
-import { UserContextType } from '../../types';
-import { UserContext } from '../../contexts/UserContext';
-import './index.css';
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Checkbox,
+  FormControlLabel,
+} from '@mui/material';
+import { AuthContextType } from '../../types';
+import { AuthContext } from '../../contexts/AuthContext';
 
 const LoginPage = () => {
-  const { loginUser }: UserContextType = useContext(UserContext);
+  const { loginMember }: AuthContextType = useContext(AuthContext);
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const theme = useTheme();
+  const [rememberMe, setRememberMe] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
+    setErrorMsg('');
     try {
-      await loginUser({ username, password });
+      await loginMember({ email, password }, rememberMe);
       navigate('/');
     } catch (err) {
       console.error('LoginPage::error: ', err);
+      setErrorMsg('Identifiants incorrects.');
     }
-  };
-
-  const handleUsernameInputChange = (e: SyntheticEvent) => {
-    const input = e.target as HTMLInputElement;
-    setUsername(input.value);
-  };
-
-  const handlePasswordChange = (e: SyntheticEvent) => {
-    const input = e.target as HTMLInputElement;
-    setPassword(input.value);
   };
 
   return (
     <Box
-      sx={{
-        margin: 2,
-        padding: 3,
-        backgroundColor: 'secondary.light',
-        borderRadius: 4,
-        boxShadow: 2,
-      }}
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{ maxWidth: 400, mx: 'auto', mt: 4, p: 3, boxShadow: 2 }}
     >
-      <h1>Connectez un utilisateur</h1>
-      <form onSubmit={handleSubmit}>
-        <Box sx={{ marginBottom: 2 }}>
-          <TextField
-            fullWidth
-            id="username"
-            name="username"
-            label="Username"
-            variant="outlined"
-            value={username}
-            onChange={handleUsernameInputChange}
-            required
-            color="primary"
-            sx={{
-              input: { color: theme.palette.secondary.contrastText },
-            }}
+      <Typography variant="h4" mb={2}>
+        Se connecter
+      </Typography>
+
+      {errorMsg && (
+        <Typography color="error" mb={2}>
+          {errorMsg}
+        </Typography>
+      )}
+
+      <TextField
+        label="Email"
+        id="email"
+        type="email"
+        fullWidth
+        margin="normal"
+        onChange={(e) => setEmail(e.target.value)}
+        value={email}
+        required
+      />
+      <TextField
+        label="Password"
+        id="password"
+        type="password"
+        fullWidth
+        margin="normal"
+        onChange={(e) => setPassword(e.target.value)}
+        value={password}
+        required
+      />
+
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
           />
-        </Box>
-        <Box sx={{ marginBottom: 2 }}>
-          <TextField
-            fullWidth
-            id="password"
-            name="password"
-            label="Password"
-            variant="outlined"
-            value={password}
-            onChange={handlePasswordChange}
-            required
-            color="primary"
-            sx={{
-              input: { color: theme.palette.secondary.contrastText },
-            }}
-          />
-        </Box>
-        <Button type="submit" variant="contained" color="primary">
-          S'authentifier
-        </Button>
-      </form>
+        }
+        label="Se souvenir de moi"
+      />
+
+      <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>
+        S'authentifier
+      </Button>
     </Box>
   );
 };
