@@ -66,6 +66,16 @@ public class Notification {
   @JsonBackReference("request-notifications")
   private MembershipRequest membershipRequest;
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "id_tournament")
+  @JsonBackReference("tournament-notifications")
+  private Tournament tournament;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "id_match")
+  @JsonBackReference("match-notifications")
+  private Match match;
+
   /**
    * Notification constructor.
    */
