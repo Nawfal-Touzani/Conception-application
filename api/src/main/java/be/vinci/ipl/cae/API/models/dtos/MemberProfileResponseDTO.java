@@ -1,4 +1,4 @@
-package be.vinci.ipl.cae.API.models.dtos;
+package be.vinci.ipl.cae.api.models.dtos;
 
 import java.time.LocalDate;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package be.vinci.ipl.cae.API.services;
+package be.vinci.ipl.cae.api.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -7,14 +7,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import be.vinci.ipl.cae.API.models.dtos.MemberProfileResponseDTO;
-import be.vinci.ipl.cae.API.models.dtos.UpdateMemberProfileDTO;
-import be.vinci.ipl.cae.API.models.entities.Image;
-import be.vinci.ipl.cae.API.models.entities.Member;
-import be.vinci.ipl.cae.API.models.entities.Speciality;
-import be.vinci.ipl.cae.API.repositories.ImageRepository;
-import be.vinci.ipl.cae.API.repositories.MemberRepository;
-import be.vinci.ipl.cae.API.repositories.SpecialityRepository;
+import be.vinci.ipl.cae.api.models.dtos.MemberProfileResponseDTO;
+import be.vinci.ipl.cae.api.models.dtos.UpdateMemberProfileDTO;
+import be.vinci.ipl.cae.api.models.entities.Image;
+import be.vinci.ipl.cae.api.models.entities.Member;
+import be.vinci.ipl.cae.api.models.entities.Speciality;
+import be.vinci.ipl.cae.api.repositories.ImageRepository;
+import be.vinci.ipl.cae.api.repositories.MemberRepository;
+import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;

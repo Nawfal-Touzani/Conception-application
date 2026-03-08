@@ -1,11 +1,11 @@
-package be.vinci.ipl.cae.API.services;
+package be.vinci.ipl.cae.api.services;
 
-import be.vinci.ipl.cae.API.models.dtos.MemberProfileResponseDTO;
-import be.vinci.ipl.cae.API.models.dtos.UpdateMemberProfileDTO;
-import be.vinci.ipl.cae.API.models.entities.Member;
-import be.vinci.ipl.cae.API.repositories.ImageRepository;
-import be.vinci.ipl.cae.API.repositories.MemberRepository;
-import be.vinci.ipl.cae.API.repositories.SpecialityRepository;
+import be.vinci.ipl.cae.api.models.dtos.MemberProfileResponseDTO;
+import be.vinci.ipl.cae.api.models.dtos.UpdateMemberProfileDTO;
+import be.vinci.ipl.cae.api.models.entities.Member;
+import be.vinci.ipl.cae.api.repositories.ImageRepository;
+import be.vinci.ipl.cae.api.repositories.MemberRepository;
+import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
 import org.springframework.stereotype.Service;
 
 /**

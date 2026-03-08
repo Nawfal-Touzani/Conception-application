@@ -1,8 +1,8 @@
-package be.vinci.ipl.cae.API.controllers;
+package be.vinci.ipl.cae.api.controllers;
 
-import be.vinci.ipl.cae.API.models.dtos.MemberProfileResponseDTO;
-import be.vinci.ipl.cae.API.models.dtos.UpdateMemberProfileDTO;
-import be.vinci.ipl.cae.API.services.MemberService;
+import be.vinci.ipl.cae.api.models.dtos.MemberProfileResponseDTO;
+import be.vinci.ipl.cae.api.models.dtos.UpdateMemberProfileDTO;
+import be.vinci.ipl.cae.api.services.MemberService;
 import jakarta.validation.Valid;
 import org.springframework.boot.autoconfigure.neo4j.Neo4jProperties.Authentication;
 import org.springframework.http.HttpStatus;
