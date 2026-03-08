@@ -1,7 +1,6 @@
 package be.vinci.ipl.cae.api.controllers;
 
 import be.vinci.ipl.cae.api.models.dtos.NotificationDto;
-import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.services.NotificationService;
 import jakarta.validation.Valid;

@@ -114,7 +114,7 @@ Dans le cadre du site de la pizzeria, nous savons que l'API met à disposition c
 
 | URI                  | Méthode HTTP | Opération                                                                                                                   |
 | -------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| **`auths/login`**    | **POST**     | Vérifier les credentials d'une ressource de type "users" et renvoyer le username et un token JWT si les credentials sont OK |
+| **`auths/login`**    | **POST**     | Vérifier les registerCredentials d'une ressource de type "users" et renvoyer le username et un token JWT si les registerCredentials sont OK |
 | **`auths/register`** | **POST**     | Créer une ressource de type "users" et renvoyer le username et un token JWT                                                 |
 
 <br/>
@@ -138,11 +138,11 @@ Ainsi, nous nous rendons compte qu'il est important de définir une variable d'�
 
 Notons que nous souhaitons appliquer le même format à tous les formulaires de chacune des pages. Dès lors, le plus direct est de renommer `AddPizzaPage.css` en `index.css`. Nous allons utiliser `index.css` tant dans `AddPizzaPage` que `RegisterPage` (et plus tard `LoginPage`).
 
-Ainsi, nous allons définir le fetch du register au sein de `App` en y ajoutant la nouvelle fonction `registerUser`, en mettant à jour le contexte, et en créant une nouvelle variable d'état `authenticatedUser` (associé à un nouveau type `AuthenticatedUser` et qui pourra aussi être associé à un type `MaybeAuthenticatedUser`) :
+Ainsi, nous allons définir le fetch du register au sein de `App` en y ajoutant la nouvelle fonction `registerUser`, en mettant à jour le contexte, et en créant une nouvelle variable d'état `authenticatedMember` (associé à un nouveau type `AuthenticatedUser` et qui pourra aussi être associé à un type `MaybeAuthenticatedUser`) :
 
 ```tsx
 // code existant
-const [authenticatedUser, setAuthenticatedUser] =
+const [authenticatedMember, setAuthenticatedUser] =
   useState<MaybeAuthenticatedUser>(undefined);
 // ...
 const registerUser = async (newUser: NewUser) => {
@@ -324,13 +324,13 @@ Il faut aussi mettre à jour la `Navbar` :
 
 ```tsx
 interface NavBarProps {
-  authenticatedUser: MaybeAuthenticatedUser;
+  authenticatedMember: MaybeAuthenticatedUser;
 }
 
-const NavBar = ({ authenticatedUser }: NavBarProps) => {
+const NavBar = ({ authenticatedMember }: NavBarProps) => {
   const navigate = useNavigate();
 
-  if (authenticatedUser) {
+  if (authenticatedMember) {
     return (
       <nav>
         <button onClick={() => navigate('/')}>Home</button>
@@ -353,9 +353,9 @@ const NavBar = ({ authenticatedUser }: NavBarProps) => {
 };
 ```
 
-Ici nous avons ajouté un paramètre qui contiendra, l'éventuel `authenticatedUser` si l'utilisateur vient de créer son compte (ou s'il s'est loggué, mais nous verrons ça plus tard).
+Ici nous avons ajouté un paramètre qui contiendra, l'éventuel `authenticatedMember` si l'utilisateur vient de créer son compte (ou s'il s'est loggué, mais nous verrons ça plus tard).
 
-Nous mettons donc à jour le `return` de `App` afin de passer cette variable `authenticatedUser` à la `Navbar` :
+Nous mettons donc à jour le `return` de `App` afin de passer cette variable `authenticatedMember` à la `Navbar` :
 
 ```tsx
 return (
@@ -366,7 +366,7 @@ return (
       handleHeaderClick={handleHeaderClick}
     />
     <main>
-      <NavBar authenticatedUser={authenticatedUser} />
+      <NavBar authenticatedMember={authenticatedMember} />
       <Outlet context={fullPizzaContext} />
     </main>
     <Footer />
@@ -400,10 +400,10 @@ const loginUser = async (user: User) => {
         `fetch error : ${response.status} : ${response.statusText}`,
       );
 
-    const authenticatedUser: AuthenticatedUser = await response.json();
-    console.log('authenticatedUser: ', authenticatedUser);
+    const authenticatedMember: AuthenticatedUser = await response.json();
+    console.log('authenticatedMember: ', authenticatedMember);
 
-    setAuthenticatedUser(authenticatedUser);
+    setAuthenticatedUser(authenticatedMember);
   } catch (err) {
     console.error('loginUser::error: ', err);
     throw err;
@@ -539,10 +539,10 @@ const router = createBrowserRouter([
 Il faut aussi mettre à jour la `Navbar` :
 
 ```tsx
-const NavBar = ({ authenticatedUser }: NavBarProps) => {
+const NavBar = ({ authenticatedMember }: NavBarProps) => {
   const navigate = useNavigate();
 
-  if (authenticatedUser) {
+  if (authenticatedMember) {
     return (
       <nav>
         <button onClick={() => navigate('/')}>Home</button>
@@ -571,7 +571,7 @@ Veuillez exécuter le frontend et vous assurer que pour l'utilisateur préalable
 
 Maintenant, bien que l'utilisateur soit connecté et donc authentifié, si nous faisons un refresh de la page, nous perdons les données de session.
 
-Nous allons donc voir comment sauvegarder `authenticatedUser` dans le `localStorage`.
+Nous allons donc voir comment sauvegarder `authenticatedMember` dans le `localStorage`.
 
 💭 Mais quel est le format d'un `AuthenticatedUser` ?  
 Celui-ci est fixé par notre API et nous l'avons déjà défini dans `types.ts`... Voici un exemple de sa forme :
@@ -592,16 +592,16 @@ Veuillez créer un nouveau script `/src/utils/session.ts` et y ajouter ce code-c
 ```ts
 import { AuthenticatedUser, MaybeAuthenticatedUser } from '../types';
 
-const storeAuthenticatedUser = (authenticatedUser: AuthenticatedUser) => {
-  localStorage.setItem('authenticatedUser', JSON.stringify(authenticatedUser));
+const storeAuthenticatedUser = (authenticatedMember: AuthenticatedUser) => {
+  localStorage.setItem('authenticatedMember', JSON.stringify(authenticatedMember));
 };
 
 const getAuthenticatedUser = (): MaybeAuthenticatedUser => {
-  const authenticatedUser = localStorage.getItem('authenticatedUser');
+  const authenticatedMember = localStorage.getItem('authenticatedMember');
 
-  if (!authenticatedUser) return undefined;
+  if (!authenticatedMember) return undefined;
 
-  return JSON.parse(authenticatedUser);
+  return JSON.parse(authenticatedMember);
 };
 
 export { storeAuthenticatedUser, getAuthenticatedUser };
@@ -656,11 +656,11 @@ const loginUser = async (user: User) => {
         `fetch error : ${response.status} : ${response.statusText}`,
       );
 
-    const authenticatedUser: AuthenticatedUser = await response.json();
-    console.log('authenticatedUser: ', authenticatedUser);
+    const authenticatedMember: AuthenticatedUser = await response.json();
+    console.log('authenticatedMember: ', authenticatedMember);
 
-    setAuthenticatedUser(authenticatedUser);
-    storeAuthenticatedUser(authenticatedUser);
+    setAuthenticatedUser(authenticatedMember);
+    storeAuthenticatedUser(authenticatedMember);
   } catch (err) {
     console.error('loginUser::error: ', err);
     throw err;
@@ -674,9 +674,9 @@ En fait, cela doit se faire au chargement de la page. Et nous souhaitons, si nou
 ```tsx
 useEffect(() => {
   fetchPizzas();
-  const authenticatedUser = getAuthenticatedUser();
-  if (authenticatedUser) {
-    setAuthenticatedUser(authenticatedUser);
+  const authenticatedMember = getAuthenticatedUser();
+  if (authenticatedMember) {
+    setAuthenticatedUser(authenticatedMember);
   }
 }, []);
 ```
@@ -689,7 +689,7 @@ N'hésitez pas à aller voir le `localStorage` de votre browser. Pour Chrome, da
 
 Il est à noter que pour avoir une application complète, il va aussi falloir penser à faire effacer les données de session.
 
-Nous allons ajouter un élément à la `Navbar` qui se nomme `Se déconnecter`. Lorsqu'on cliquera sur cet élément, nous devons mettre à jour la variable d'état `authenticatedUser` qui se trouve dans `App` et nous devons effacer les données de session du `localStorage`. Comme l'état est géré dans le composant "parent" de la `Navbar`, nous allons créer une fonction dans `App` qui permette d'agir sur cet état.
+Nous allons ajouter un élément à la `Navbar` qui se nomme `Se déconnecter`. Lorsqu'on cliquera sur cet élément, nous devons mettre à jour la variable d'état `authenticatedMember` qui se trouve dans `App` et nous devons effacer les données de session du `localStorage`. Comme l'état est géré dans le composant "parent" de la `Navbar`, nous allons créer une fonction dans `App` qui permette d'agir sur cet état.
 
 Veuillez donc mettre à jour `App` en lui ajoutant cette fonction `clearUser` et en passant cette fonction à la `Navbar` :
 
@@ -708,7 +708,7 @@ return (
       handleHeaderClick={handleHeaderClick}
     />
     <main>
-      <NavBar authenticatedUser={authenticatedUser} clearUser={clearUser} />
+      <NavBar authenticatedMember={authenticatedMember} clearUser={clearUser} />
       <Outlet context={fullPizzaContext} />
     </main>
     <Footer />
@@ -720,14 +720,14 @@ Voici le code de la `Navbar` mis à jour pour ajouter l'élement de déconnexion
 
 ```tsx
 interface NavBarProps {
-  authenticatedUser: MaybeAuthenticatedUser;
+  authenticatedMember: MaybeAuthenticatedUser;
   clearUser: () => void;
 }
 
-const NavBar = ({ authenticatedUser, clearUser }: NavBarProps) => {
+const NavBar = ({ authenticatedMember, clearUser }: NavBarProps) => {
   const navigate = useNavigate();
 
-  if (authenticatedUser) {
+  if (authenticatedMember) {
     return (
       <nav>
         <button onClick={() => navigate('/')}>Home</button>
@@ -765,7 +765,7 @@ Nous allons donc mettre à jour la fonction permettant de créer une pizza qui e
 ```tsx numbered highlighting="1"
  const addPizza = async (newPizza: NewPizza) => {
     try {
-      if(!authenticatedUser)  {
+      if(!authenticatedMember)  {
         throw new Error("You must be authenticated to add a pizza");
       }
       const options = {
@@ -773,7 +773,7 @@ Nous allons donc mettre à jour la fonction permettant de créer une pizza qui e
         body: JSON.stringify(newPizza),
         headers: {
           "Content-Type": "application/json",
-          Authorization: authenticatedUser.token,
+          Authorization: authenticatedMember.token,
         },
       };
       // Suite du code

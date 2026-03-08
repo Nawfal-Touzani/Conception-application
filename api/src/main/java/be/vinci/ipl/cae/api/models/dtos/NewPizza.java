@@ -4,12 +4,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * AuthenticatedUser DTO.
+ * NewPizza DTO.
  */
 @Data
 @NoArgsConstructor
-public class AuthenticatedUser {
+public class NewPizza {
 
-  private String username;
-  private String token;
+  private String title;
+  private String content;
 }
