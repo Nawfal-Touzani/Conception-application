@@ -15,13 +15,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * MembershipRequest entity.
@@ -70,8 +69,8 @@ public class MembershipRequest {
    * MembershipRequest constructor.
    */
   public MembershipRequest(State state,
-                           String refusalReason,
-                           LocalDateTime processingDate) {
+      String refusalReason,
+      LocalDateTime processingDate) {
 
     this.state = state;
     this.refusalReason = refusalReason;
