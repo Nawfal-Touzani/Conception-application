@@ -1,7 +1,7 @@
 package be.vinci.ipl.cae.api.services;
 
-import be.vinci.ipl.cae.api.models.dtos.MemberProfileResponseDTO;
-import be.vinci.ipl.cae.api.models.dtos.UpdateMemberProfileDTO;
+import be.vinci.ipl.cae.api.models.dtos.MemberProfileResponseDto;
+import be.vinci.ipl.cae.api.models.dtos.UpdateMemberProfileDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.repositories.ImageRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
@@ -34,14 +34,14 @@ public class MemberService {
    * @param email the member's email
    * @return the profile DTO or null if not found
    */
-  public MemberProfileResponseDTO getProfile(String email) {
+  public MemberProfileResponseDto getProfile(String email) {
     Member member = memberRepository.findByEmail(email).orElse(null);
 
     if (member == null) {
       return null;
     }
 
-    MemberProfileResponseDTO dto = new MemberProfileResponseDTO();
+    MemberProfileResponseDto dto = new MemberProfileResponseDto();
     dto.setEmail(member.getEmail());
     dto.setTag(member.getTag());
     dto.setSpeciality(member.getSpeciality().getName());
@@ -60,7 +60,7 @@ public class MemberService {
    * @param payload the data to update
    * @return the updated profile DTO or null if member not found
    */
-  public MemberProfileResponseDTO updateProfile(String email, UpdateMemberProfileDTO payload) {
+  public MemberProfileResponseDto updateProfile(String email, UpdateMemberProfileDto payload) {
     Member member = memberRepository.findByEmail(email).orElse(null);
 
     if (member == null) {
