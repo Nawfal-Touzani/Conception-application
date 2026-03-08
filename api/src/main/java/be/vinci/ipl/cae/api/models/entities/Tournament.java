@@ -89,13 +89,13 @@ public class Tournament {
    * @param organizer            organizer member
    */
   public Tournament(Status status,
-      String name,
-      String description,
-      LocalDateTime startDate,
-      LocalDateTime endDate,
-      LocalDateTime registrationDeadline,
-      Integer maxParticipants,
-      Member organizer) {
+                    String name,
+                    String description,
+                    LocalDateTime startDate,
+                    LocalDateTime endDate,
+                    LocalDateTime registrationDeadline,
+                    Integer maxParticipants,
+                    Member organizer) {
 
     this.status = status;
     this.name = name;
