@@ -6,6 +6,7 @@ import be.vinci.ipl.cae.api.services.NotificationService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,6 +60,24 @@ public class NotificationController {
     if (result == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
+
+    return result;
+  }
+
+  /**
+   * Mark a notification as read.
+   */
+  @PatchMapping("/{idMember}/notifications/{idNotification}")
+  @ResponseStatus(HttpStatus.OK)
+  public Notification markNotificationAsRead(@PathVariable long idMember,
+      @PathVariable long idNotification) {
+
+    Notification result = notificationService.markNotificationRead(idNotification);
+
+    if (result == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
 
     return result;
   }

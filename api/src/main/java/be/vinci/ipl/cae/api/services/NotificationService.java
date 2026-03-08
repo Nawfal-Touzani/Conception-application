@@ -4,6 +4,7 @@ import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.NotificationRepository;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 /**
@@ -46,6 +47,22 @@ public class NotificationService {
     }
     notification.setMember(member);
 
+    return notificationRepository.save(notification);
+  }
+
+  /**
+   *Mark the notification to read.
+   */
+  public Notification markNotificationRead(long id) {
+    Optional<Notification> notificationOpt = notificationRepository.findById(id);
+
+    if (notificationOpt.isEmpty()) {
+      return null;
+    }
+
+    Notification notification = notificationOpt.get();
+
+    notification.setRead(true);
     return notificationRepository.save(notification);
   }
 
