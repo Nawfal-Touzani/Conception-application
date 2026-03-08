@@ -1,5 +1,6 @@
 @baseUrl = http://localhost:3000
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibmV3QHZpbmNpLmJlIiwiaWF0IjoxNzcyOTk5MzYzLCJleHAiOjE3NzMwODU3NjN9.ta7zjJMn7ysFZa-xJAcp1qroPNXZch7mnj1N1JwaU9o
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibmV3QHZpbmNpLmJlIiwiaWF0IjoxNzcyOTk5OTI5LCJleHAiOjE3NzMwODYzMjl9.A0q4C9ZIrFBU7qlU9sXUxHOu2UcOaI4_8YVP3xtI1FM
+
 ### Get my profile
 GET {{baseUrl}}/members/me
 Authorization: Bearer {{token}}

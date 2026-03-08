@@ -97,7 +97,7 @@ public class MemberService {
       return false;
     }
 
-    if (!dto.getOldPassword().equals(dto.getNewPassword())) {
+    if (dto.getOldPassword().equals(dto.getNewPassword())) {
       return false;
     }
 
