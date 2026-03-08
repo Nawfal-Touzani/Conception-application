@@ -1,0 +1,40 @@
+@baseUrl = http://localhost:3000
+
+### Set token after login (copie depuis la réponse du login dans auth.http)
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3NzI3MzY0NTMsImV4cCI6MTc3MjgyMjg1M30.M2wa5OyETf9cml5j4ZdgXTI0Hv-i2TfaeHfxX1S5Jmg
+
+### Create a team (valid, should return 201)
+POST {{baseUrl}}/teams
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "MonEquipe"
+}
+
+### Try to create a team with empty name (should return 400)
+POST {{baseUrl}}/teams
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": ""
+}
+
+### Try to create a team with same name (should return 409)
+POST {{baseUrl}}/teams
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "MonEquipe"
+}
+
+### Try to create second team with same member (should return 409)
+POST {{baseUrl}}/teams
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "AutreEquipe"
+}

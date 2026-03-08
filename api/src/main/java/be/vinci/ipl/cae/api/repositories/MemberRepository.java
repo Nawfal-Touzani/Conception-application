@@ -1,10 +1,9 @@
 package be.vinci.ipl.cae.api.repositories;
 
 import be.vinci.ipl.cae.api.models.entities.Member;
+import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
 
 /**
  * Repository for Member entity, providing basic CRUD operations.
@@ -12,19 +11,19 @@ import java.util.Optional;
 @Repository
 public interface MemberRepository extends CrudRepository<Member, Long> {
 
-    /**
-     * Checks whether a member with the given email already exists.
-     *
-     * @param email the email to check
-     * @return true if a member with this email exists, false otherwise
-     */
-    boolean existsByEmail(String email);
+  /**
+   * Checks whether a member with the given email already exists.
+   *
+   * @param email the email to check
+   * @return true if a member with this email exists, false otherwise
+   */
+  boolean existsByEmail(String email);
 
-    /**
-     * Retrieves a member by their email address.
-     *
-     * @param email the email to search for
-     * @return an Optional containing the member if found, or empty if not
-     */
-    Optional<Member> findByEmail(String email);
+  /**
+   * Retrieves a member by their email address.
+   *
+   * @param email the email to search for
+   * @return an Optional containing the member if found, or empty if not
+   */
+  Optional<Member> findByEmail(String email);
 }

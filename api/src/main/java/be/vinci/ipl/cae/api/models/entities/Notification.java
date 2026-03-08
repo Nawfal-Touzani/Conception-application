@@ -2,7 +2,6 @@ package be.vinci.ipl.cae.api.models.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -66,6 +65,16 @@ public class Notification {
   @JoinColumn(name = "id_request")
   @JsonBackReference("request-notifications")
   private MembershipRequest membershipRequest;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "id_tournament")
+  @JsonBackReference("tournament-notifications")
+  private Tournament tournament;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "id_match")
+  @JsonBackReference("match-notifications")
+  private Match match;
 
   /**
    * Notification constructor.

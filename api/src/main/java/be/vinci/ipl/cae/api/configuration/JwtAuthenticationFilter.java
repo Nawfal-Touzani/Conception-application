@@ -1,7 +1,7 @@
 package be.vinci.ipl.cae.api.configuration;
 
-import be.vinci.ipl.cae.api.models.entities.User;
-import be.vinci.ipl.cae.api.services.UserService;
+import be.vinci.ipl.cae.api.models.entities.Member;
+import be.vinci.ipl.cae.api.services.AuthService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,52 +18,76 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * JwtAuthenticationFilter to handle user authentication.
+ * JWT authentication filter that intercepts incoming HTTP requests
+ * to validate the JWT token provided in the Authorization header.
+ * If the token is valid, the authenticated user is injected into
+ * the Spring Security context to be accessible throughout the application.
  */
 @Configuration
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-  private final UserService userService;
+  private final AuthService authService;
 
   /**
-   * Constructor for JwtAuthenticationFilter.
+   * Constructs a JwtAuthenticationFilter with the given AuthService.
    *
-   * @param userService the injected UserService.
+   * @param authService the service used to verify JWT tokens and retrieve users
    */
-  public JwtAuthenticationFilter(UserService userService) {
-    this.userService = userService;
+  public JwtAuthenticationFilter(AuthService authService) {
+    this.authService = authService;
   }
 
-  /**
-   * Filter to handle user authentication.
-   *
-   * @param request     the request.
-   * @param response    the response.
-   * @param filterChain the filter chain.
-   * @throws ServletException the servlet exception.
-   * @throws IOException      the IO exception.
-   */
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-      FilterChain filterChain) throws ServletException, IOException {
+  protected void doFilterInternal(HttpServletRequest request,
+                                  HttpServletResponse response,
+                                  FilterChain filterChain) throws ServletException, IOException {
+
     String token = request.getHeader("Authorization");
-    if (token != null) {
-      String username = userService.verifyJwtToken(token);
-      if (username != null) {
-        User user = userService.readOneFromUsername(username);
-        if (user != null) {
-          List<GrantedAuthority> authorities = new ArrayList<>();
-          if ("admin".equals(username)) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-          }
-          UsernamePasswordAuthenticationToken authentication =
-              new UsernamePasswordAuthenticationToken(
-                  user, null, authorities);
-          authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-          SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
-      }
+
+    // No token, let it through. It will be auto blocked later if needed.
+    if (token == null) {
+      filterChain.doFilter(request, response);
+      return;
     }
+
+    // Additional security: remove the "Bearer" prefix if the frontend sends it.
+    if (token.startsWith("Bearer ")) {
+      token = token.substring(7);
+    }
+
+    // Token verification
+    String email = authService.verifyJwtToken(token);
+    if (email == null) { // invalid token or expired
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired JWT");
+      return; // 401 & stop filtering
+    }
+
+    // User catch
+    Member member = authService.readOneFromEmail(email);
+    if (member == null) {
+      // user doesn't exist anymore
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User not found");
+      return;
+    }
+
+    // Valid token, the request can continue.
+    // The authentication object contains the user's identity and roles,
+    // and is stored in the SecurityContext to be accessible throughout the application.
+
+    // Role
+    List<GrantedAuthority> authorities = new ArrayList<>();
+    authorities.add(new SimpleGrantedAuthority("ROLE_MEMBER")); // EVERYONE has this basic role
+    if (member.isAdmin()) {
+      authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN")); // The admins ALSO have this role
+    }
+
+    // Identity injection into the SecurityContext
+    UsernamePasswordAuthenticationToken authentication =
+            new UsernamePasswordAuthenticationToken(member, null, authorities);
+    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    // We let the request continue to the controller
     filterChain.doFilter(request, response);
   }
 }

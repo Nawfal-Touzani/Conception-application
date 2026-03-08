@@ -66,9 +66,9 @@ public class MembershipRequest {
   private List<Notification> notifications = new ArrayList<>();
 
   /**
-   *MembershipRequest constructor.
+   * MembershipRequest constructor.
    */
-  public MembershipRequest( State state,
+  public MembershipRequest(State state,
       String refusalReason,
       LocalDateTime processingDate) {
 

@@ -1,0 +1,26 @@
+@baseUrl = http://localhost:3000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibmV3QHZpbmNpLmJlIiwiaWF0IjoxNzcyOTc3OTUwLCJleHAiOjE3NzMwNjQzNTB9.NgjovV44UlHtZH21DO5eAYpHl3qs1o31Lrh0Nvxde_Q
+
+### Assign secondary manager (should return 204)
+PUT {{baseUrl}}/teams/1/secondary-manager/2
+Authorization: Bearer {{token}}
+
+### Assign secondary manager - team not found (should return 404)
+PUT {{baseUrl}}/teams/999/secondary-manager/2
+Authorization: Bearer {{token}}
+
+### Assign secondary manager - member not found (should return 404)
+PUT {{baseUrl}}/teams/1/secondary-manager/999
+Authorization: Bearer {{token}}
+
+### Assign secondary manager - not responsible (should return 403)
+PUT {{baseUrl}}/teams/1/secondary-manager/2
+Authorization: Bearer <token_autre_membre>
+
+### Assign secondary manager - member not in team (should return 400)
+PUT {{baseUrl}}/teams/1/secondary-manager/5
+Authorization: Bearer {{token}}
+
+### Assign secondary manager - member is already responsible (should return 400)
+PUT {{baseUrl}}/teams/1/secondary-manager/1
+Authorization: Bearer {{token}}
