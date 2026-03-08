@@ -125,6 +125,7 @@ public class MemberServiceTest {
     ChangePasswordDto dto = new ChangePasswordDto();
     dto.setOldPassword("oldPswd");
     dto.setNewPassword("newPswd");
+    dto.setConfirmPassword("newPswd");
 
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
     when(passwordEncoder.matches("oldPswd", member.getPassword())).thenReturn(true);
@@ -163,6 +164,20 @@ public class MemberServiceTest {
     boolean result = memberService.changePassword(email, dto);
 
     assertFalse(result);
+  }
+
+  @Test
+  @DisplayName("Should return false when new password and confirmation do not match")
+  void changePassword4() {
+    ChangePasswordDto dto = new ChangePasswordDto();
+    dto.setOldPassword("oldPswd");
+    dto.setNewPassword("newPswd");
+    dto.setConfirmPassword("Pswd");
+
+    boolean result = memberService.changePassword(email, dto);
+
+    assertFalse(result);
+    verify(memberRepository, never()).findByEmail(any());
   }
 
 }
