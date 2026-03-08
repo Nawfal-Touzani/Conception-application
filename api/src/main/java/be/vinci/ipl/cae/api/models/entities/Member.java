@@ -23,7 +23,7 @@ import lombok.Setter;
  * Represents a user/player in the Vinci Arena platform.
  */
 @Entity
-@Table(name = "member")
+@Table(name = "members")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -49,7 +49,6 @@ public class Member {
   @Column(nullable = false, updatable = false)
   private LocalDateTime profileCreationDateTime = LocalDateTime.now();
 
-  // FK
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "image_id", nullable = false)
   private Image image;
@@ -62,35 +61,23 @@ public class Member {
   @JsonManagedReference("member-unavailabilities")
   private List<Unavailability> unavailabilities = new ArrayList<>();
 
-  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-  @JsonManagedReference("member-notifications")
-  private List<Notification> notifications = new ArrayList<>();
-
-  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-  @JsonManagedReference("member-requests")
-  private List<MembershipRequest> membershipRequests = new ArrayList<>();
-
   /**
-   * Instantiates a new Member.
+   * Constructs a Member with the given details.
    *
-   * @param email                   the email
-   * @param password                the password
-   * @param tag                     the tag
-   * @param isAdmin                 the is admin
-   * @param profileCreationDateTime the profile creation date time
-   * @param image                   the image
-   * @param speciality              the speciality
+   * @param email       the email address of the member
+   * @param password    the password of the member
+   * @param tag         the display tag of the member
+   * @param isAdmin     whether the member has admin privileges
+   * @param image       the profile image of the member
+   * @param speciality  the speciality of the member
    */
-  // Constructor
-  public Member(String email, String password, String tag, boolean isAdmin, LocalDateTime
-      profileCreationDateTime, Image image, Speciality speciality) {
+  public Member(String email, String password, String tag, boolean isAdmin, Image image,
+      Speciality speciality) {
     this.email = email;
     this.password = password;
     this.tag = tag;
     this.isAdmin = isAdmin;
-    this.profileCreationDateTime = profileCreationDateTime;
     this.image = image;
     this.speciality = speciality;
-
   }
 }
