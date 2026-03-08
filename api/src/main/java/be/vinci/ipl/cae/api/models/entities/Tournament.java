@@ -1,5 +1,7 @@
 package be.vinci.ipl.cae.api.models.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,8 +12,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -63,6 +68,10 @@ public class Tournament {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "organizer_id", nullable = false)
   private Member organizer;
+
+  @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonManagedReference("tournament-notifications")
+  private List<Notification> notifications = new ArrayList<>();
 
   // @OneToMany(mappedBy = "tournament")
   // private List<Match> matches = new ArrayList<>();

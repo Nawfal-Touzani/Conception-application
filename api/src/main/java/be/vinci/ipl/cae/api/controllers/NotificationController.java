@@ -5,6 +5,7 @@ import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.services.NotificationService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,6 +37,7 @@ public class NotificationController {
    * Gets all notifications of a member(optional filter by read status).
    */
   @GetMapping("/{id}/notifications")
+  @PreAuthorize("isAuthenticated()")
   public Iterable<Notification> getNotificationsOfMember(@PathVariable long id,
       @RequestParam(required = false) Boolean read) {
 
@@ -58,6 +60,7 @@ public class NotificationController {
    * Sends a notification to a member.
    */
   @PostMapping("/{id}/notifications")
+  @PreAuthorize("isAuthenticated()")
   @ResponseStatus(HttpStatus.CREATED)
   public Notification sendNotification(@PathVariable long id,
       @Valid @RequestBody NotificationDto dto) {
@@ -77,6 +80,7 @@ public class NotificationController {
    */
   @PatchMapping("/{idMember}/notifications/{idNotification}")
   @ResponseStatus(HttpStatus.OK)
+  @PreAuthorize("isAuthenticated()")
   public Notification markNotificationAsRead(@PathVariable long idMember,
       @PathVariable long idNotification) {
 
