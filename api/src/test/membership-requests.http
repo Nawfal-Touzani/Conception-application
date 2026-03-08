@@ -1,5 +1,5 @@
 @baseUrl = http://localhost:3000
-@token = <ton_token>
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsInVzZXJuYW1lIjoibWFuYWdlciIsImlhdCI6MTc3Mjk4NDI4MiwiZXhwIjoxNzczMDcwNjgyfQ.CaWuGQLW9547D2q65CVYE_74SuX8g3wlX0eETMt8uHE
 
 ### Approve a request (should return 204)
 PATCH {{baseUrl}}/membership-requests/1/approve
