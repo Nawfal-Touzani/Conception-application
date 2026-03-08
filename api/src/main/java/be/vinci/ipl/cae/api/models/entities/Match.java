@@ -21,9 +21,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/*
-Match entity.
-*/
+/*Match entity.*/
 @Getter
 @Setter
 @NoArgsConstructor
@@ -31,10 +29,7 @@ Match entity.
 @Table(name = "matchs")
 public class Match {
 
-
-/*
-  Match state.*/
-
+  /*Match state.*/
   public enum MatchState {
     SCHEDULED,
     PLAYED,
