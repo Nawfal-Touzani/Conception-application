@@ -4,7 +4,6 @@ import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.NotificationRepository;
-import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 
