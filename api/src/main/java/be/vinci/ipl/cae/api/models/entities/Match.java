@@ -57,17 +57,17 @@ public class Match {
   private Tournament tournament;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "id_equipe_A")
+  @JoinColumn(name = "id_team_A")
   private Team teamA;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "id_equipe_B")
+  @JoinColumn(name = "id_team_B")
   private Team teamB;
 
-  @Column(name = "numero_tour", nullable = false)
+  @Column(name = "round_number", nullable = false)
   private Integer roundNumber;
 
-  @Column(name = "date_et_heure", nullable = false)
+  @Column(name = "date_time", nullable = false)
   private LocalDateTime dateTime;
 
   @Enumerated(EnumType.STRING)
@@ -75,7 +75,7 @@ public class Match {
   private MatchState state;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "id_administrateur_responsable")
+  @JoinColumn(name = "id_responsible_admin")
   private Member responsibleAdmin;
 
   @Column(name = "score_A")
@@ -85,14 +85,14 @@ public class Match {
   private Integer scoreB;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "resultat_statut")
+  @Column(name = "result_status")
   private ResultStatus resultStatus;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "vainqueur")
+  @JoinColumn(name = "winner")
   private Team winner;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "prochainMatch")
+  @JoinColumn(name = "next_match")
   private Match nextMatch;
 }
