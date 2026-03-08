@@ -1,11 +1,13 @@
 package be.vinci.ipl.cae.api.controllers;
 
 import be.vinci.ipl.cae.api.models.dtos.NotificationDto;
+import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.services.NotificationService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,9 +41,14 @@ public class NotificationController {
   @GetMapping("/{id}/notifications")
   @PreAuthorize("isAuthenticated()")
   public Iterable<Notification> getNotificationsOfMember(@PathVariable long id,
-      @RequestParam(required = false) Boolean read) {
+      @RequestParam(required = false) Boolean read,
+      @AuthenticationPrincipal Member currentMember) {
 
     Iterable<Notification> notifications;
+
+    if (currentMember.getId() != id) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+    }
 
     if (read == null) {
       notifications = notificationService.getAllNotificationByMember(id);
@@ -63,10 +70,15 @@ public class NotificationController {
   @PreAuthorize("isAuthenticated()")
   @ResponseStatus(HttpStatus.CREATED)
   public Notification sendNotification(@PathVariable long id,
-      @Valid @RequestBody NotificationDto dto) {
+      @Valid @RequestBody NotificationDto dto,
+      @AuthenticationPrincipal Member currentMember) {
 
     Notification notification = new Notification(dto.type(), dto.message(), dto.sendDate());
     Notification result = notificationService.send(id, notification);
+
+    if (currentMember.getId() != id) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+    }
 
     if (result == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -82,10 +94,13 @@ public class NotificationController {
   @ResponseStatus(HttpStatus.OK)
   @PreAuthorize("isAuthenticated()")
   public Notification markNotificationAsRead(@PathVariable long idMember,
-      @PathVariable long idNotification) {
+      @PathVariable long idNotification, @AuthenticationPrincipal Member currentMember) {
 
     Notification result = notificationService.markNotificationRead(idNotification);
 
+    if (currentMember.getId() != idMember) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+    }
     if (result == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
