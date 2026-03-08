@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class UpdateMemberProfileDTO {
+public class UpdateMemberProfileDto {
   @Size(max = 50)
   private String speciality;
 
