@@ -1,7 +1,6 @@
 package be.vinci.ipl.cae.api.controllers;
 
 import be.vinci.ipl.cae.api.models.dtos.CreateTeamRequest;
-import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Team;
 import be.vinci.ipl.cae.api.services.TeamService;
 import org.springframework.http.HttpStatus;
@@ -18,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/teams")
-public class TeamController {
+public class TeamController extends BaseController {
 
   private final TeamService teamService;
 

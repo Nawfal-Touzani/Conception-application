@@ -1,6 +1,7 @@
 package be.vinci.ipl.cae.api.models.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -29,65 +30,60 @@ import lombok.Setter;
 
 public class Notification {
 
+  /**
+   * Type enumeration.
+   */
+  public enum Type {
+    TOURNAMENT, MATCH, RESULT, MEMBERSHIP_REQUEST, RESULT_CONFIRMATION
+  }
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private Type type;
+
   @Column(nullable = false, length = 200)
   private String message;
+
   @Column(nullable = false)
+  @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
   private LocalDateTime sendDate;
+
   @Column(nullable = false)
   private boolean read = false;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "id_member", nullable = false)
   @JsonBackReference("member-notifications")
+
   private Member member;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "id_request")
   @JsonBackReference("request-notifications")
   private MembershipRequest membershipRequest;
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "id_tournament")
+  @JsonBackReference("tournament-notifications")
+  private Tournament tournament;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "id_match")
+  @JsonBackReference("match-notifications")
+  private Match match;
+
   /**
    * Notification constructor.
-   *
-   * @param type     the type
-   * @param message  the message
-   * @param sendDate the send date
    */
   public Notification(Type type, String message, LocalDateTime sendDate) {
     this.type = type;
     this.message = message;
     this.sendDate = sendDate;
 
-  }
-
-  /**
-   * Type enumeration.
-   */
-  public enum Type {
-    /**
-     * Tournament type.
-     */
-    TOURNAMENT,
-    /**
-     * Match type.
-     */
-    MATCH,
-    /**
-     * Result type.
-     */
-    RESULT,
-    /**
-     * Membership request type.
-     */
-    MEMBERSHIP_REQUEST,
-    /**
-     * Result confirmation type.
-     */
-    RESULT_CONFIRMATION
   }
 
 }

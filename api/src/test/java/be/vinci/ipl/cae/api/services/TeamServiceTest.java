@@ -16,6 +16,7 @@ import be.vinci.ipl.cae.api.models.entities.TeamComposition;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
 import be.vinci.ipl.cae.api.repositories.TeamRepository;
+import be.vinci.ipl.cae.api.services.TeamService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

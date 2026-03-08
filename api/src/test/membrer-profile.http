@@ -1,0 +1,60 @@
+@baseUrl = http://localhost:3000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibmV3QHZpbmNpLmJlIiwiaWF0IjoxNzczMDAwMTkwLCJleHAiOjE3NzMwODY1OTB9.ZDumdwPQDrorDDvR1v78EBUIOg65AXJNZKeb6-Z2bQk
+
+### Get my profile
+GET {{baseUrl}}/members/me
+Authorization: Bearer {{token}}
+
+### Update my profile
+PATCH {{baseUrl}}/members/me
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "speciality": "Tacticien",
+  "profileImage": "img3.png"
+}
+
+### Change password (OK)
+PATCH {{baseUrl}}/members/change-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "oldPassword": "new",
+  "newPassword": "newPswd2026",
+  "confirmPassword": "newPswd2026"
+}
+
+### Change password (KO - Wrong old password)
+PATCH {{baseUrl}}/members/change-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "oldPassword": "old",
+  "newPassword": "newPswd2026",
+  "confirmPassword": "newPswd2026"
+}
+
+### Change password (KO - Wrong confirmation password)
+PATCH {{baseUrl}}/members/change-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "oldPassword": "new",
+  "newPassword": "newPswd2026",
+  "confirmPassword": "newPswd"
+}
+
+### Change password (KO - New password same as the previous)
+PATCH {{baseUrl}}/members/change-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "oldPassword": "new",
+  "newPassword": "new",
+  "confirmPassword": "new"
+}

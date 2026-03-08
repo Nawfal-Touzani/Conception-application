@@ -1,0 +1,98 @@
+package be.vinci.ipl.cae.api.controllers;
+
+import be.vinci.ipl.cae.api.models.dtos.ChangePasswordDto;
+import be.vinci.ipl.cae.api.models.dtos.MemberProfileResponseDto;
+import be.vinci.ipl.cae.api.models.dtos.UpdateMemberProfileDto;
+import be.vinci.ipl.cae.api.models.entities.Member;
+import be.vinci.ipl.cae.api.services.MemberService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+/**
+ * Controller handling member profile requests.
+ */
+@RestController
+@RequestMapping("/members")
+@PreAuthorize("isAuthenticated()")
+public class MemberController {
+
+  private final MemberService memberService;
+
+  /**
+   * Constructor for MemberController.
+   */
+  public MemberController(MemberService memberService) {
+    this.memberService = memberService;
+  }
+
+  /**
+   * Return the profile of the currently authenticated member.
+   *
+   * @param authentication the Spring Security authentication object
+   * @return the member profile DTO
+   */
+  @GetMapping("/me")
+  public MemberProfileResponseDto getMyProfile(Authentication authentication) {
+    Member principalMember = (Member) authentication.getPrincipal();
+    String email = principalMember.getEmail();
+    MemberProfileResponseDto profile = memberService.getProfile(email);
+
+    if (profile == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Member not found");
+    }
+
+    return profile;
+  }
+
+  /**
+   * Updates the profile of the currently authenticated member.
+   *
+   * @param authentication the Spring Security authentication object
+   * @param payload        the updated profile data
+   * @return the updated member profile DTO
+   */
+  @PatchMapping("/me")
+  @PreAuthorize("isAuthenticated()")
+  public MemberProfileResponseDto updateMyProfile(Authentication authentication,
+      @Valid @RequestBody UpdateMemberProfileDto payload) {
+
+    Member principalMember = (Member) authentication.getPrincipal();
+    String email = principalMember.getEmail();
+    MemberProfileResponseDto updatedProfile = memberService.updateProfile(email, payload);
+
+    if (updatedProfile == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Member not found");
+    }
+
+    return updatedProfile;
+  }
+
+  /**
+   * Updates the password of the currently authenticated member.
+   *
+   * @param authentication the Spring Security authentication object
+   * @param dto        the DTO containing the old and new password
+   * @throws  ResponseStatusException 400 if the old password is incorrect or 404 if member not found
+   */
+  @PatchMapping("/change-password")
+  @PreAuthorize("isAuthenticated()")
+  public void changePassword(Authentication authentication,
+      @Valid @RequestBody ChangePasswordDto dto) {
+
+    Member principalMember = (Member) authentication.getPrincipal();
+    boolean success = memberService.changePassword(principalMember.getEmail(), dto);
+
+    if (!success) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid old password");
+    }
+  }
+
+}

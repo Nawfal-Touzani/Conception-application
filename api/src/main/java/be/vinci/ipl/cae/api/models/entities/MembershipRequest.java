@@ -33,54 +33,48 @@ import lombok.Setter;
 
 public class MembershipRequest {
 
+  /**
+   * State enumeration.
+   */
+  public enum State {
+    PENDING, ACCEPTED, REFUSED
+  }
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long idRequest;
+  private Long id;
+
   @Column(nullable = false)
   private LocalDateTime requestDate = LocalDateTime.now();
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private State state;
+
   @Column(length = 200)
   private String refusalReason;
+
   private LocalDateTime processingDate;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "id_member", nullable = false)
   @JsonBackReference("member-requests")
   private Member member;
+
   @OneToMany(mappedBy = "membershipRequest", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonManagedReference("request-notifications")
   private List<Notification> notifications = new ArrayList<>();
 
   /**
    * MembershipRequest constructor.
-   *
-   * @param state          the state
-   * @param refusalReason  the refusal reason
-   * @param processingDate the processing date
    */
-  public MembershipRequest(State state, String refusalReason, LocalDateTime processingDate) {
+  public MembershipRequest(State state,
+      String refusalReason,
+      LocalDateTime processingDate) {
+
     this.state = state;
     this.refusalReason = refusalReason;
     this.processingDate = processingDate;
-  }
-
-  /**
-   * State enumeration.
-   */
-  public enum State {
-    /**
-     * Pending state.
-     */
-    PENDING,
-    /**
-     * Accepted state.
-     */
-    ACCEPTED,
-    /**
-     * Refused state.
-     */
-    REFUSED
   }
 
 }
