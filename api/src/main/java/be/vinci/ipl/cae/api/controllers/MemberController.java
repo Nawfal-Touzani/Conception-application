@@ -1,5 +1,6 @@
 package be.vinci.ipl.cae.api.controllers;
 
+import be.vinci.ipl.cae.api.models.dtos.ChangePasswordDto;
 import be.vinci.ipl.cae.api.models.dtos.MemberProfileResponseDto;
 import be.vinci.ipl.cae.api.models.dtos.UpdateMemberProfileDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
@@ -72,6 +73,26 @@ public class MemberController {
     }
 
     return updatedProfile;
+  }
+
+  /**
+   * Updates the password of the currently authenticated member.
+   *
+   * @param authentication the Spring Security authentication object
+   * @param dto        the DTO containing the old and new password
+   * @throws  ResponseStatusException 400 if the old password is incorrect or 404 if member not found
+   */
+  @PatchMapping("/change-password")
+  @PreAuthorize("isAuthenticated()")
+  public void changePassword(Authentication authentication,
+      @Valid @RequestBody ChangePasswordDto dto) {
+
+    Member principalMember = (Member) authentication.getPrincipal();
+    boolean success = memberService.changePassword(principalMember.getEmail(), dto);
+
+    if (!success) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid old password");
+    }
   }
 
 }
