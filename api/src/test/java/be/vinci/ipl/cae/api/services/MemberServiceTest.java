@@ -7,8 +7,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import be.vinci.ipl.cae.api.models.dtos.MemberProfileResponseDTO;
-import be.vinci.ipl.cae.api.models.dtos.UpdateMemberProfileDTO;
+import be.vinci.ipl.cae.api.models.dtos.MemberProfileResponseDto;
+import be.vinci.ipl.cae.api.models.dtos.UpdateMemberProfileDto;
 import be.vinci.ipl.cae.api.models.entities.Image;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Speciality;
@@ -66,7 +66,7 @@ public class MemberServiceTest {
   void getProfile_ShouldReturnDTO_WhenMemberExists() {
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
 
-    MemberProfileResponseDTO result = memberService.getProfile(email);
+    MemberProfileResponseDto result = memberService.getProfile(email);
 
     assertNotNull(result);
     assertEquals(email, result.getEmail());
@@ -79,7 +79,7 @@ public class MemberServiceTest {
   void getProfile_ShouldReturnNull_WhenMemberNotExists() {
     when(memberRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-    MemberProfileResponseDTO result = memberService.getProfile(email);
+    MemberProfileResponseDto result = memberService.getProfile(email);
 
     assertNull(result);
   }
@@ -87,7 +87,7 @@ public class MemberServiceTest {
   @Test
   @DisplayName("Should update profile and return new DTO")
   void updateProfile_ShouldUpdateAndReturnDTO() {
-    UpdateMemberProfileDTO payload = new UpdateMemberProfileDTO();
+    UpdateMemberProfileDto payload = new UpdateMemberProfileDto();
     payload.setSpeciality("Gardien");
     payload.setProfileImage("img2.png");
 
@@ -100,7 +100,7 @@ public class MemberServiceTest {
     when(specialityRepository.findByName("Gardien")).thenReturn(Optional.of(newSpec));
     when(imageRepository.findByUrl("img2.png")).thenReturn(Optional.of(newImg));
 
-    MemberProfileResponseDTO result = memberService.updateProfile(email, payload);
+    MemberProfileResponseDto result = memberService.updateProfile(email, payload);
 
     assertNotNull(result);
     verify(memberRepository).save(any(Member.class));

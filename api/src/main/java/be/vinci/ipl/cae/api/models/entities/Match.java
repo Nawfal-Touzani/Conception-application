@@ -16,10 +16,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
-/**
- * Match entity.
- */
+/*Match entity.*/
 @Getter
 @Setter
 @NoArgsConstructor
