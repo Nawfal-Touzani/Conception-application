@@ -1,7 +1,7 @@
 package be.vinci.ipl.cae.api.controllers;
 
-import be.vinci.ipl.cae.api.models.dtos.MemberProfileResponseDTO;
-import be.vinci.ipl.cae.api.models.dtos.UpdateMemberProfileDTO;
+import be.vinci.ipl.cae.api.models.dtos.MemberProfileResponseDto;
+import be.vinci.ipl.cae.api.models.dtos.UpdateMemberProfileDto;
 import be.vinci.ipl.cae.api.services.MemberService;
 import jakarta.validation.Valid;
 import org.springframework.boot.autoconfigure.neo4j.Neo4jProperties.Authentication;
@@ -36,9 +36,9 @@ public class MemberController {
    * @return the member profile DTO
    */
   @GetMapping("/me")
-  public MemberProfileResponseDTO getMyProfile(Authentication authentication) {
+  public MemberProfileResponseDto getMyProfile(Authentication authentication) {
     String email = authentication.getUsername();
-    MemberProfileResponseDTO profile = memberService.getProfile(email);
+    MemberProfileResponseDto profile = memberService.getProfile(email);
 
     if (profile == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Member not found");
@@ -55,11 +55,11 @@ public class MemberController {
    * @return the updated member profile DTO
    */
   @PatchMapping("/me")
-  public MemberProfileResponseDTO updateMyProfile(Authentication authentication,
-      @Valid @RequestBody UpdateMemberProfileDTO payload) {
+  public MemberProfileResponseDto updateMyProfile(Authentication authentication,
+      @Valid @RequestBody UpdateMemberProfileDto payload) {
 
     String email = authentication.getUsername();
-    MemberProfileResponseDTO updatedProfile = memberService.getProfile(email);
+    MemberProfileResponseDto updatedProfile = memberService.getProfile(email);
 
     if (updatedProfile == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Member not found");
