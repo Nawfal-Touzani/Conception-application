@@ -6,6 +6,7 @@ import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.services.MemberService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -19,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
  */
 @RestController
 @RequestMapping("/members")
+@PreAuthorize("isAuthenticated()")
 public class MemberController {
 
   private final MemberService memberService;
@@ -57,6 +59,7 @@ public class MemberController {
    * @return the updated member profile DTO
    */
   @PatchMapping("/me")
+  @PreAuthorize("isAuthenticated()")
   public MemberProfileResponseDto updateMyProfile(Authentication authentication,
       @Valid @RequestBody UpdateMemberProfileDto payload) {
 
