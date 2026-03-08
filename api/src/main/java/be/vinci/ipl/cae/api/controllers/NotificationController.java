@@ -82,7 +82,7 @@ public class NotificationController {
   @ResponseStatus(HttpStatus.OK)
   @PreAuthorize("isAuthenticated()")
   public Notification markNotificationAsRead(@PathVariable long idMember,
-      @PathVariable long idNotification  ) {
+      @PathVariable long idNotification) {
 
     Notification result = notificationService.markNotificationRead(idNotification);
 
