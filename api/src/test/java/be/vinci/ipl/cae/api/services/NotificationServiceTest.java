@@ -45,9 +45,9 @@ class NotificationServiceTest {
     notification1 = new Notification(Type.RESULT, "resultat du match 1-0", LocalDateTime.now());
     notification2 = new Notification(Type.TOURNAMENT, "TOURNOI commence le 4 mars",
         LocalDateTime.now());
-    member1 = new Member("test@test.com", "password", "tag1", false, LocalDateTime.now(), null,
+    member1 = new Member("test@test.com", "password", "tag1", false, null,
         null);
-    member1.setId(1l);
+    member1.setId(1L);
 
   }
 
