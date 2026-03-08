@@ -3,11 +3,17 @@
 
 ### Read all notifications of a member
 GET {{baseUrl}}/members/1/notifications
-Accept: application/json
+
+### Read all notifications read of a member
+GET {{baseUrl}}/members/1/notifications?read=true
+
+### Read all notifications unread of a member
+GET {{baseUrl}}/members/1/notifications?read=false
 
 ### Try to get notifications of a non-existent member (should return 404)
 GET {{baseUrl}}/members/999/notifications
-Accept: application/json
+
+
 
 ### Send a notification to a member
 POST {{baseUrl}}/members/1/notifications
@@ -16,6 +22,16 @@ Content-Type: application/json
 {
   "type": "RESULT",
   "message": "Match gagné 3-1",
+  "sendDate": "2026-03-05T12:30:00"
+}
+
+### Send a notification to a member
+POST {{baseUrl}}/members/1/notifications
+Content-Type: application/json
+
+{
+  "type": "RESULT",
+  "message": "Match gagné 3-9",
   "sendDate": "2026-03-05T12:30:00"
 }
 

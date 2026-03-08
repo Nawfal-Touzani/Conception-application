@@ -51,7 +51,7 @@ public class NotificationService {
   }
 
   /**
-   *Mark the notification to read.
+   * Mark the notification to read.
    */
   public Notification markNotificationRead(long id) {
     Optional<Notification> notificationOpt = notificationRepository.findById(id);
@@ -64,6 +64,20 @@ public class NotificationService {
 
     notification.setRead(true);
     return notificationRepository.save(notification);
+  }
+
+  /**
+   * Get the notification of a member by read status.
+   */
+  public Iterable<Notification> getNotificationsByReadStatus(long id, boolean read) {
+
+    Member member = getMemberIfExist(id);
+
+    if (member == null) {
+      return null;
+    }
+
+    return notificationRepository.findByMemberIdAndRead(id, read);
   }
 
   /**

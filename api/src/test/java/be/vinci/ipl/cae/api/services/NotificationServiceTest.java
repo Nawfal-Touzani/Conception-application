@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -116,13 +118,43 @@ class NotificationServiceTest {
   }
 
   @Test
-  void markNotificationReadNull(){
-    long unknowId= 9L;
+  void markNotificationReadNull() {
+    long unknowId = 9L;
     when(notificationRepository.findById(unknowId)).thenReturn(Optional.empty());
 
-    Notification result =notificationService.markNotificationRead(unknowId);
+    Notification result = notificationService.markNotificationRead(unknowId);
 
     assertNull(result);
-    verify(notificationRepository,never()).save(any());
+    verify(notificationRepository, never()).save(any());
+  }
+
+  @Test
+  void getNotificationReadStatus() {
+    Notification notification3 = new Notification(Type.RESULT, "ex", LocalDateTime.now());
+    notification1.setRead(true);
+    notification3.setRead(true);
+
+    when(memberRepository.findById(member1.getId())).thenReturn(Optional.of(member1));
+
+    when(notificationRepository.findByMemberIdAndRead(member1.getId(),true)).thenReturn(
+            Arrays.asList(notification1, notification3));
+
+    Iterable<Notification> result = notificationService.getNotificationsByReadStatus(
+        member1.getId(), true);
+
+    assertEquals(List.of(notification1, notification3), result);
+  }
+
+  @Test
+  void getNotificationReadStatusNull(){
+    long unknownId = 9L;
+
+    when(memberRepository.findById(unknownId)).thenReturn(Optional.empty());
+
+    Iterable<Notification> result =
+        notificationService.getNotificationsByReadStatus(unknownId, true);
+
+    assertNull(result);
+    verify(notificationRepository, never()).findByMemberIdAndRead(anyLong(), anyBoolean());
   }
 }

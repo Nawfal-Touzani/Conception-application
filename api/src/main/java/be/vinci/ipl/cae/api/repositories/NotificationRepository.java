@@ -11,11 +11,19 @@ import org.springframework.stereotype.Repository;
 public interface NotificationRepository extends CrudRepository<Notification, Long> {
 
   /**
-   * Finds a given member.
+   * Finds all notifications for a given member.
    *
-   * @param id the id member
+   * @param id the ID of the member
    * @return the member
    */
   Iterable<Notification> findByMemberId(long id);
 
+  /**
+   * Finds all notifications for a given member filtered by read status.
+   *
+   * @param id the ID of the member
+   * @param read true for read notifications, false for unread
+   * @return  notifications with the filter
+   */
+  Iterable<Notification> findByMemberIdAndRead(long id, boolean read);
 }
