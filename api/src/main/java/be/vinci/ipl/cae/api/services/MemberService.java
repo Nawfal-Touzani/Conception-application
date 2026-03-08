@@ -1,11 +1,13 @@
 package be.vinci.ipl.cae.api.services;
 
+import be.vinci.ipl.cae.api.models.dtos.ChangePasswordDto;
 import be.vinci.ipl.cae.api.models.dtos.MemberProfileResponseDto;
 import be.vinci.ipl.cae.api.models.dtos.UpdateMemberProfileDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.repositories.ImageRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -17,15 +19,17 @@ public class MemberService {
   private final MemberRepository memberRepository;
   private final SpecialityRepository specialityRepository;
   private final ImageRepository imageRepository;
+  private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
   /**
    * Constructor for MemberService.
    */
   public MemberService(ImageRepository imageRepository, MemberRepository memberRepository,
-      SpecialityRepository specialityRepository) {
+      SpecialityRepository specialityRepository, BCryptPasswordEncoder passwordEncoder) {
     this.imageRepository = imageRepository;
     this.memberRepository = memberRepository;
     this.specialityRepository = specialityRepository;
+    this.passwordEncoder = passwordEncoder;
   }
 
   /**
@@ -79,5 +83,29 @@ public class MemberService {
 
     memberRepository.save(member);
     return getProfile(email);
+  }
+
+  /**
+   * Updates a member's password after verifying the old one.
+   *
+   * @param email the member's email
+   * @param dto   the DTO containing the old and new password
+   * @return true if the password was changed, false if member not found or old password incorrect
+   */
+  public boolean changePassword(String email, ChangePasswordDto dto) {
+    Member member = memberRepository.findByEmail(email).orElse(null);
+
+    if (member == null) {
+      return false;
+    }
+
+    if (!passwordEncoder.matches(dto.getOldPassword(), member.getPassword())) {
+      return false;
+    }
+
+    member.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+    memberRepository.save(member);
+    return true;
+
   }
 }
