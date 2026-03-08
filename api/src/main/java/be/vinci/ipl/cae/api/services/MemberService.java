@@ -93,6 +93,10 @@ public class MemberService {
    * @return true if the password was changed, false if member not found or old password incorrect
    */
   public boolean changePassword(String email, ChangePasswordDto dto) {
+    if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
+      return false;
+    }
+
     Member member = memberRepository.findByEmail(email).orElse(null);
 
     if (member == null) {

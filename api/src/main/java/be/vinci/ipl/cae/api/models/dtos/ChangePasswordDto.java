@@ -18,4 +18,7 @@ public class ChangePasswordDto {
   @NotBlank
   @Size(min = 5)
   private String newPassword;
+
+  @NotBlank
+  private String confirmPassword;
 }
