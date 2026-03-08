@@ -97,6 +97,10 @@ public class MemberService {
       return false;
     }
 
+    if (!dto.getOldPassword().equals(dto.getNewPassword())) {
+      return false;
+    }
+
     Member member = memberRepository.findByEmail(email).orElse(null);
 
     if (member == null) {

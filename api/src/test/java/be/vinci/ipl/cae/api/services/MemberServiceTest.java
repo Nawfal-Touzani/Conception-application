@@ -180,4 +180,17 @@ public class MemberServiceTest {
     verify(memberRepository, never()).findByEmail(any());
   }
 
+  @Test
+  @DisplayName("Should return false when new password is the same as old password")
+  void changePassword5() {
+    ChangePasswordDto dto = new ChangePasswordDto();
+    dto.setOldPassword("PswdVinci");
+    dto.setNewPassword("PswdVinci");
+    dto.setConfirmPassword("PswdVinci");
+
+    boolean result = memberService.changePassword(email, dto);
+
+    assertFalse(result);
+    verify(memberRepository, never()).findByEmail(any());
+  }
 }
