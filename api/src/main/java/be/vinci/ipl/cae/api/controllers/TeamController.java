@@ -3,16 +3,15 @@ package be.vinci.ipl.cae.api.controllers;
 import be.vinci.ipl.cae.api.models.dtos.CreateTeamRequest;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Team;
-import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.services.TeamService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The type Team controller.
@@ -22,33 +21,28 @@ import org.springframework.web.server.ResponseStatusException;
 public class TeamController {
 
   private final TeamService teamService;
-  private final MemberRepository memberRepository;
 
   /**
    * Instantiates a new Team controller.
    *
-   * @param teamService      the team service
-   * @param memberRepository the member repository
+   * @param teamService the team service
    */
-  public TeamController(TeamService teamService, MemberRepository memberRepository) {
+  public TeamController(TeamService teamService) {
     this.teamService = teamService;
-    this.memberRepository = memberRepository;
   }
 
   /**
    * Create team response entity.
    *
    * @param request the request
+   * @param currentMember the authenticated member
    * @return the response entity
    */
   @PostMapping
-  public ResponseEntity<Team> createTeam(@RequestBody CreateTeamRequest request) {
-    String username = (String) SecurityContextHolder.getContext()
-        .getAuthentication().getPrincipal();
-
-    Member member = memberRepository.findByEmail(username)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Member not found"));
-    Team createdTeam = teamService.createTeam(member.getId(), request);
+  @PreAuthorize("isAuthenticated()")
+  public ResponseEntity<Team> createTeam(@RequestBody CreateTeamRequest request,
+      @AuthenticationPrincipal Member currentMember) {
+    Team createdTeam = teamService.createTeam(currentMember.getId(), request);
     return ResponseEntity.status(HttpStatus.CREATED).body(createdTeam);
   }
 }
