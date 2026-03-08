@@ -1,0 +1,17 @@
+@baseUrl = http://localhost:3000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibmV3QHZpbmNpLmJlIiwiaWF0IjoxNzcyOTgxNTkxLCJleHAiOjE3NzMwNjc5OTF9.wwZmDz5Cy80nZxxeGekMPe3UE_q2URPYrHUMEX9C3rY
+
+### Get my profile
+GET {{baseUrl}}/members/me
+Authorization: Bearer {{token}}
+
+### Update my profile
+PATCH {{baseUrl}}/members/me
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "speciality": "Tacticien",
+  "profileImage": "img3.png"
+}
+
