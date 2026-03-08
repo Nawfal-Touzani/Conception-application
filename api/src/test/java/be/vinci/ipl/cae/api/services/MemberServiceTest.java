@@ -128,7 +128,7 @@ public class MemberServiceTest {
 
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
     when(passwordEncoder.matches("oldPswd", member.getPassword())).thenReturn(true);
-    when(passwordEncoder.encode("newPass")).thenReturn("hashedNewPswd");
+    when(passwordEncoder.encode("newPswd")).thenReturn("hashedNewPswd");
 
     boolean result = memberService.changePassword(email, dto);
 
