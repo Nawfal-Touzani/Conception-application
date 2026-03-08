@@ -1,5 +1,5 @@
 @baseUrl = http://localhost:3000
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibmV3QHZpbmNpLmJlIiwiaWF0IjoxNzcyOTk5OTI5LCJleHAiOjE3NzMwODYzMjl9.A0q4C9ZIrFBU7qlU9sXUxHOu2UcOaI4_8YVP3xtI1FM
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibmV3QHZpbmNpLmJlIiwiaWF0IjoxNzczMDAwMTkwLCJleHAiOjE3NzMwODY1OTB9.ZDumdwPQDrorDDvR1v78EBUIOg65AXJNZKeb6-Z2bQk
 
 ### Get my profile
 GET {{baseUrl}}/members/me
@@ -43,7 +43,18 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "oldPassword": "old",
+  "oldPassword": "new",
   "newPassword": "newPswd2026",
   "confirmPassword": "newPswd"
+}
+
+### Change password (KO - New password same as the previous)
+PATCH {{baseUrl}}/members/change-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "oldPassword": "new",
+  "newPassword": "new",
+  "confirmPassword": "new"
 }

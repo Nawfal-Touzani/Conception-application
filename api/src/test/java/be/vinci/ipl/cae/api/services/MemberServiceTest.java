@@ -144,6 +144,7 @@ public class MemberServiceTest {
     ChangePasswordDto dto = new ChangePasswordDto();
     dto.setOldPassword("wrongPswd");
     dto.setNewPassword("newPswd");
+    dto.setConfirmPassword("newPswd");
 
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
     when(passwordEncoder.matches("wrongPswd", member.getPassword())).thenReturn(false);
@@ -158,6 +159,9 @@ public class MemberServiceTest {
   @DisplayName("Should return false when member not found")
   void changePassword3() {
     ChangePasswordDto dto = new ChangePasswordDto();
+    dto.setOldPassword("oldPswd");
+    dto.setNewPassword("newPswd");
+    dto.setConfirmPassword("newPswd");
 
     when(memberRepository.findByEmail(email)).thenReturn(Optional.empty());
 
