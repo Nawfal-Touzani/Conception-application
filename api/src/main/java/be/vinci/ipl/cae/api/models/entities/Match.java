@@ -21,7 +21,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/*Match entity.*/
+/**
+ * Match entity.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,7 +31,9 @@ import lombok.Setter;
 @Table(name = "matchs")
 public class Match {
 
-  /*Match state.*/
+  /**
+   *Match state.
+   */
   public enum MatchState {
     SCHEDULED,
     PLAYED,
@@ -53,28 +57,28 @@ public class Match {
   private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "id_tournoi", nullable = false)
+  @JoinColumn(name = "id_tournament", nullable = false)
   private Tournament tournament;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "id_equipe_A")
+  @JoinColumn(name = "id_team_A")
   private Team teamA;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "id_equipe_B")
+  @JoinColumn(name = "id_team_B")
   private Team teamB;
 
-  @Column(name = "numero_tour", nullable = false)
+  @Column(name = "round_number", nullable = false)
   private Integer roundNumber;
 
-  @Column(name = "date_et_heure", nullable = false)
+  @Column(name = "date_time", nullable = false)
   private LocalDateTime dateTime;
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private MatchState state;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "id_administrateur_responsable")
+  @JoinColumn(name = "id_responsible_admin")
   private Member responsibleAdmin;
 
   @Column(name = "score_A")
@@ -84,15 +88,15 @@ public class Match {
   private Integer scoreB;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "resultat_statut")
+  @Column(name = "result_statut")
   private ResultStatus resultStatus;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "vainqueur")
+  @JoinColumn(name = "winner")
   private Team winner;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "prochainMatch")
+  @JoinColumn(name = "next_game")
   private Match nextMatch;
 
   @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)

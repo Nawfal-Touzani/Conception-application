@@ -73,8 +73,8 @@ public class Tournament {
   @JsonManagedReference("tournament-notifications")
   private List<Notification> notifications = new ArrayList<>();
 
-  // @OneToMany(mappedBy = "tournament")
-  // private List<Match> matches = new ArrayList<>();
+  @OneToMany(mappedBy = "tournament")
+  private List<Match> matches = new ArrayList<>();
 
   /**
    * Constructor for Tournament.
