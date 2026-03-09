@@ -18,5 +18,5 @@ public interface UnavailabilityRepository extends JpaRepository<Unavailability, 
    * @param member the member whose unavailabilities are retrieved
    * @return the list of unavailabilities ordered by start date
    */
-  List<Unavailability> findAllMemberOrderByStartDate(Member member);
+  List<Unavailability> findAllByMemberOrderByStartDateAsc(Member member);
 }

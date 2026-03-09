@@ -99,7 +99,7 @@ public class UnavailabilityServiceTest {
     u.setEndDate(LocalDate.of(2026, 8, 16));
 
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
-    when(unavailabilityRepository.findAllMemberOrderByStartDate(member))
+    when(unavailabilityRepository.findAllByMemberOrderByStartDateAsc(member))
         .thenReturn(List.of(u));
 
     List<UnavailabilityDto> result = unavailabilityService.getMyUnavailabilities(email);

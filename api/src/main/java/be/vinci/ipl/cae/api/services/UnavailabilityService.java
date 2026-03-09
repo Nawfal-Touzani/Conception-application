@@ -70,7 +70,7 @@ public class UnavailabilityService {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
     List<Unavailability> unavailabilities =
-        unavailabilityRepository.findAllMemberOrderByStartDate(member);
+        unavailabilityRepository.findAllByMemberOrderByStartDateAsc(member);
 
     List<UnavailabilityDto> result = new ArrayList<>();
 
