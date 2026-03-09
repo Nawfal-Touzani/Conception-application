@@ -9,11 +9,13 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Services handling operations related to member unavailabilities.
  */
+@Service
 public class UnavailabilityService {
 
   private final UnavailabilityRepository unavailabilityRepository;
