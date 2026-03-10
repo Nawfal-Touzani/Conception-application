@@ -85,7 +85,7 @@ public class TeamService {
         .orElseThrow(() -> new ResponseStatusException(
             HttpStatus.NOT_FOUND, "Member has no team"));
 
-    if(composition.getTeam()==null){
+    if (composition.getTeam() == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team not found");
     }
     Long teamId = composition.getTeam().getId();
