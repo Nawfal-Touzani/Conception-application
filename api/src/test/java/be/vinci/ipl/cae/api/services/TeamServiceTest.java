@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import be.vinci.ipl.cae.api.models.dtos.CreateTeamRequest;
+import be.vinci.ipl.cae.api.models.entities.Image;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.MembershipRequest;
 import be.vinci.ipl.cae.api.models.entities.Notification;
@@ -67,6 +68,11 @@ class TeamServiceTest {
     member = new Member();
     member.setId(1L);
     member.setEmail("test@vinci.be");
+
+    Image image = new Image();
+    image.setId(1L);
+
+    member.setImage(image);
 
     request = new CreateTeamRequest("TestTeam");
   }
@@ -187,4 +193,62 @@ class TeamServiceTest {
     verify(membershipRequestRepository, never()).save(any());
     verify(notificationService, never()).send(anyLong(), any(Notification.class));
   }
+
+  /**
+   * Get members of my team should return list when member has a team.
+   */
+  @Test
+  void getMembersOfMyTeam_shouldReturnMembers_whenMemberHasTeam() {
+
+    Team team = new Team();
+    team.setId(10L);
+
+    TeamComposition composition = new TeamComposition();
+    composition.setTeam(team);
+    composition.setMember(member);
+
+    when(teamCompositionRepository.findByMemberId(1L))
+        .thenReturn(java.util.Optional.of(composition));
+
+    Member member2 = new Member();
+    member2.setId(2L);
+    member2.setTag("Player2");
+
+    Image image2 = new Image();
+    image2.setId(2L);
+
+    member2.setImage(image2);
+
+    TeamComposition composition2 = new TeamComposition();
+    composition2.setTeam(team);
+    composition2.setMember(member2);
+
+    when(teamCompositionRepository.findAllByTeamId(10L))
+        .thenReturn(java.util.List.of(composition, composition2));
+
+    var result = teamService.getMembersOfMyTeam(1L);
+
+    assertNotNull(result);
+    assertEquals(2, result.size());
+
+    verify(teamCompositionRepository, times(1)).findByMemberId(1L);
+    verify(teamCompositionRepository, times(1)).findAllByTeamId(10L);
+  }
+
+  /**
+   * Get members of my team should fail when member has no team.
+   */
+  @Test
+  void getMembersOfMyTeam_shouldFail_whenMemberHasNoTeam() {
+
+    when(teamCompositionRepository.findByMemberId(1L))
+        .thenReturn(java.util.Optional.empty());
+
+    assertThrows(ResponseStatusException.class,
+        () -> teamService.getMembersOfMyTeam(1L));
+
+    verify(teamCompositionRepository, times(1)).findByMemberId(1L);
+    verify(teamCompositionRepository, never()).findAllByTeamId(any());
+  }
 }
+
