@@ -145,4 +145,16 @@ public class TeamService {
         .toList();
   }
 
+  public Iterable<Team> getAllTeams() {
+    return teamRepository.findAll();
+  }
+
+  public void leaveTeam(Long memberId) {
+
+    TeamComposition composition =
+        teamCompositionRepository.findByMemberId(memberId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+    teamCompositionRepository.delete(composition);
+  }
 }

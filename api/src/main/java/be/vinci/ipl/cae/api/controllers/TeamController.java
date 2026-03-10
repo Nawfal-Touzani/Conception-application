@@ -11,6 +11,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -86,5 +87,16 @@ public class TeamController extends BaseController {
         teamService.getMembersOfMyTeam(getConnectedMember().getId());
 
     return ResponseEntity.ok(members);
+  }
+
+  @GetMapping
+  public Iterable<Team> getAllTeams() {
+    return teamService.getAllTeams();
+  }
+
+  @DeleteMapping("/leave")
+  public ResponseEntity<Void> leaveTeam() {
+    teamService.leaveTeam(getConnectedMember().getId());
+    return ResponseEntity.noContent().build();
   }
 }
