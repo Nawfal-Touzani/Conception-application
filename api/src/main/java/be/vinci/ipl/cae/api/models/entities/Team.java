@@ -1,5 +1,6 @@
 package be.vinci.ipl.cae.api.models.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -19,9 +20,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * The type Team.
- */
 @Entity
 @Table(name = "teams")
 @Getter
@@ -38,26 +36,21 @@ public class Team {
   private Boolean isActive = true;
   @Column(nullable = false)
   private LocalDateTime creationDate;
-  // FK
   @OneToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "responsible_id", nullable = false)
+  @JsonIgnore
   private Member responsible;
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "second_responsible_id")
+  @JsonIgnore
   private Member secondResponsible;
   @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
-  @JsonManagedReference("team-teamCompositions")
+  @JsonIgnore
   private List<TeamComposition> teamCompositions = new ArrayList<>();
+  @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonIgnore
+  private List<MembershipRequest> membershipRequests = new ArrayList<>();
 
-  /**
-   * Instantiates a new Team.
-   *
-   * @param name              the name
-   * @param isActive          the is active
-   * @param creationDate      the creation date
-   * @param responsible       the responsible
-   * @param secondResponsible the second responsible
-   */
   public Team(String name, Boolean isActive, LocalDateTime creationDate, Member responsible,
       Member secondResponsible) {
     this.name = name;

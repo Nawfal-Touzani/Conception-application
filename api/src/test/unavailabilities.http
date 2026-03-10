@@ -1,0 +1,46 @@
+@baseUrl = http://localhost:3000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibmV3QHZpbmNpLmJlIiwiaWF0IjoxNzczMDgzMTI1LCJleHAiOjE3NzMxNjk1MjV9.83yZ3lASOsdFD4scODpDvTZKwpzZl7CLLGxjMXLz_GM
+
+### Add unavailability (OK)
+POST {{baseUrl}}/members/me/unavailabilities
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "startDate": "2026-08-01",
+  "endDate": "2026-08-16"
+}
+
+### Get my unavailabilities (OK)
+GET {{baseUrl}}/members/me/unavailabilities
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Add unavailability (KO - End date before start date - 400 Bad Request)
+POST {{baseUrl}}/members/me/unavailabilities
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "startDate": "2026-08-10",
+  "endDate": "2026-08-04"
+}
+
+### Add unavailability (KO - Start date in the past - 400 Bad Request)
+POST {{baseUrl}}/members/me/unavailabilities
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "startDate": "2025-08-01",
+  "endDate": "2025-08-16"
+}
+
+### Add unavailability (KO - Not authenticated - 403 Forbidden)
+POST {{baseUrl}}/members/me/unavailabilities
+Content-Type: application/json
+
+{
+  "startDate": "2026-08-01",
+  "endDate": "2026-08-16"
+}

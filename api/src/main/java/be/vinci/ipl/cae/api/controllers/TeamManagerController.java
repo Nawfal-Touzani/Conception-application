@@ -3,6 +3,7 @@ package be.vinci.ipl.cae.api.controllers;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.services.TeamManagerService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/teams")
+@PreAuthorize("isAuthenticated()")
 public class TeamManagerController extends BaseController {
 
   private final TeamManagerService teamManagerService;

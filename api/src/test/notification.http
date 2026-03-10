@@ -27,7 +27,7 @@ Content-Type: application/json
   "specialityId": 1
 }
 
-### Login member 1
+### Login member 1 (copy token into @token)
 POST {{baseUrl}}/auths/login
 Content-Type: application/json
 
@@ -45,30 +45,30 @@ Content-Type: application/json
   "password": "test123"
 }
 
-### Read all notifications of a member
+### Read all notifications of member 3 (should return 200)
 GET {{baseUrl}}/members/3/notifications
 Authorization: Bearer {{token}}
 
-### Read all notifications read of a member
+### Read only read notifications of member 3 (should return 200)
 GET {{baseUrl}}/members/3/notifications?read=true
 Authorization: Bearer {{token}}
 
-### Read all notifications unread of a member
+### Read only unread notifications of member 3 (should return 200)
 GET {{baseUrl}}/members/3/notifications?read=false
 Authorization: Bearer {{token}}
 
-### Try to get notifications of a non-existent member (should return 404)
+### Try to get notifications of non-existent member (should return 404)
 GET {{baseUrl}}/members/999/notifications
 Authorization: Bearer {{token}}
 
-### Try to get notifications of another member (should return 403)
-GET {{baseUrl}}/members/1/notifications
+### Try to get notifications of another member with token2 (should return 403)
+GET {{baseUrl}}/members/3/notifications
 Authorization: Bearer {{token2}}
 
-### Send a notification to a member
-POST {{baseUrl}}/members/1/notifications
+### Send a notification to member 3 - any authenticated member can send (should return 201)
+POST {{baseUrl}}/members/3/notifications
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{token2}}
 
 {
   "type": "RESULT",
@@ -76,8 +76,8 @@ Authorization: Bearer {{token}}
   "sendDate": "2026-03-05T12:30:00"
 }
 
-### Send a notification to a member
-POST {{baseUrl}}/members/1/notifications
+### Send another notification to member 3 (should return 201)
+POST {{baseUrl}}/members/3/notifications
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -87,8 +87,8 @@ Authorization: Bearer {{token}}
   "sendDate": "2026-03-05T12:30:00"
 }
 
-### Try to send a notification with empty message (should fail 400)
-POST {{baseUrl}}/members/1/notifications
+### Try to send notification with empty message (should return 400)
+POST {{baseUrl}}/members/3/notifications
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -98,7 +98,7 @@ Authorization: Bearer {{token}}
   "sendDate": "2026-03-05T12:30:00"
 }
 
-### Try to send a notification to a non-existent member (should return 404)
+### Try to send notification to non-existent member (should return 404)
 POST {{baseUrl}}/members/999/notifications
 Content-Type: application/json
 Authorization: Bearer {{token}}
@@ -109,25 +109,14 @@ Authorization: Bearer {{token}}
   "sendDate": "2026-03-05T12:30:00"
 }
 
-### Try to send notification by another member (should return 403)
-POST {{baseUrl}}/members/1/notifications
-Content-Type: application/json
-Authorization: Bearer {{token2}}
-
-{
-  "type": "RESULT",
-  "message": "Tentative accès interdit",
-  "sendDate": "2026-03-05T12:30:00"
-}
-
-### Mark a notification as read
-PATCH {{baseUrl}}/members/1/notifications/1
+### Mark notification as read (should return 200)
+PATCH {{baseUrl}}/members/3/notifications/1
 Authorization: Bearer {{token}}
 
-### Try to mark a non-existent notification (should return 404)
-PATCH {{baseUrl}}/members/1/notifications/999
+### Try to mark non-existent notification (should return 404)
+PATCH {{baseUrl}}/members/3/notifications/999
 Authorization: Bearer {{token}}
 
-### Try to mark notification by another member(should return 403)
-PATCH {{baseUrl}}/members/1/notifications/1
+### Try to mark notification of member 3 with token2 (should return 403)
+PATCH {{baseUrl}}/members/3/notifications/1
 Authorization: Bearer {{token2}}
