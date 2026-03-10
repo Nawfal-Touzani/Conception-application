@@ -1,39 +1,50 @@
-import { useNavigate } from 'react-router-dom';
-import { useContext } from 'react';
 import { AppBar, Toolbar, Button, Typography } from '@mui/material';
-import { UserContext } from '../../contexts/UserContext';
-import { UserContextType } from '../../types';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext'; // Notre super hook !
 
 const NavBar = () => {
-  const { authenticatedUser, clearUser } =
-    useContext<UserContextType>(UserContext);
   const navigate = useNavigate();
+  const { user, logout } = useAuth(); // On récupère l'utilisateur et la fonction de déconnexion
 
   return (
-    <AppBar position="static">
+    <AppBar position="static" sx={{ backgroundColor: '#1e1e1e' }}>
       <Toolbar>
+        <Typography
+          variant="h6"
+          component="div"
+          sx={{ flexGrow: 1, fontWeight: 'bold' }}
+        >
+          VINCI ARENA
+        </Typography>
+
         <Button color="inherit" onClick={() => navigate('/')}>
-          Home
+          Accueil
         </Button>
-        {authenticatedUser ? (
+
+        {/* Si l'utilisateur est connecté, on affiche son Tag et le bouton Logout */}
+        {user ? (
           <>
-            <Button color="inherit" onClick={() => navigate('/add-pizza')}>
-              Ajouter une pizza
-            </Button>
-            <Button color="inherit" onClick={() => clearUser()}>
+            <Typography variant="body1" sx={{ mx: 2, color: 'primary.main' }}>
+              [{user.tag}]
+            </Typography>
+            <Button
+              color="inherit"
+              onClick={() => {
+                logout();
+                navigate('/login');
+              }}
+            >
               Se déconnecter
             </Button>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Hello dear {authenticatedUser.username}
-            </Typography>
           </>
         ) : (
+          /* Sinon, on affiche les boutons Login / Register */
           <>
-            <Button color="inherit" onClick={() => navigate('/register')}>
-              Créer un utilisateur
-            </Button>
             <Button color="inherit" onClick={() => navigate('/login')}>
-              Se connecter
+              Connexion
+            </Button>
+            <Button color="inherit" onClick={() => navigate('/register')}>
+              Inscription
             </Button>
           </>
         )}
