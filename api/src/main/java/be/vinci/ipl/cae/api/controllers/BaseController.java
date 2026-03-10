@@ -30,7 +30,7 @@ public abstract class BaseController {
     Object principal = SecurityContextHolder.getContext()
         .getAuthentication().getPrincipal();
 
-    if (principal == null || principal.equals("anonymousUser")) {
+    if (principal == null || "anonymousUser".equals(principal)) {
       throw new org.springframework.web.server.ResponseStatusException(
           org.springframework.http.HttpStatus.UNAUTHORIZED, "Not authenticated");
     }
