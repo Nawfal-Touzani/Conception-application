@@ -48,7 +48,7 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "name": "MonEquipe"
+  "name": "MarouTeam"
 }
 
 ### Try to create a team with empty name (should return 400)
@@ -78,3 +78,15 @@ Authorization: Bearer {{token}}
   "name": "AutreEquipe"
 }
 
+
+
+### Get team members (should return 200)
+GET {{baseUrl}}/teams/members
+Authorization: Bearer {{token}}
+
+### Member without team (should return 404)
+GET {{baseUrl}}/teams/members
+Authorization: Bearer {{token}}
+
+### No token (should return 401)
+GET {{baseUrl}}/teams/members
