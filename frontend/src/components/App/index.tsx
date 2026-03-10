@@ -10,7 +10,7 @@ const App = () => {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        backgroundColor: '#121212',
+        backgroundColor: '#1e2a44',
       }}
     >
       {/* Our navigation bar will always be visible at the top */}

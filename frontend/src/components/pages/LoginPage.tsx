@@ -6,10 +6,11 @@ import {
   Container,
   TextField,
   Typography,
-  Link,
   Paper,
   Alert,
   Grid,
+  Checkbox,
+  FormControlLabel,
 } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext'; // Adjust the path if needed
 
@@ -27,7 +28,7 @@ const LoginPage: React.FC = () => {
     event.preventDefault();
     setError(null);
 
-    // If fields are empty (although MUI's "required" attribute already blocks some)
+    // If fields are empty
     if (!email || !password) {
       return setError('Veuillez remplir tous les champs.');
     }
@@ -50,44 +51,55 @@ const LoginPage: React.FC = () => {
     }
   };
 
+  // Custom style for our rounded blue inputs
+  const roundedBlueInputStyle = {
+    '& .MuiOutlinedInput-root': {
+      borderRadius: '15px', // Rounded rectangle
+      '& fieldset': {
+        borderColor: '#1e2a44',
+        borderWidth: '2px',
+      },
+      '&:hover fieldset': {
+        borderColor: '#1e2a44',
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: '#1e2a44',
+      },
+    },
+    '& .MuiInputLabel-root.Mui-focused': {
+      color: '#1e2a44',
+    },
+  };
+
   return (
-    // Main Box with the same dark background as registration
+    // Main Box with the dark blue background
     <Box
       sx={{
         minHeight: '100vh',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#121212',
+        backgroundColor: '#1e2a44',
         padding: 2,
       }}
     >
-      <Container maxWidth="sm">
-        {/* Title above the card */}
-        <Typography
-          variant="h3"
-          component="h1"
-          align="center"
-          sx={{ color: '#fff', fontWeight: 'bold', mb: 4, letterSpacing: 2 }}
-        >
-          VINCI ARENA
-        </Typography>
-
+      <Container maxWidth="xs">
         {/* White card containing the form */}
-        <Paper elevation={6} sx={{ p: 4, borderRadius: 2 }}>
+        <Paper elevation={6} sx={{ p: 4, borderRadius: '20px' }}>
+          {/* Title aligned to the left and larger */}
           <Typography
-            variant="h5"
-            component="h2"
-            align="center"
+            variant="h4"
+            component="h1"
+            align="left"
             gutterBottom
-            sx={{ fontWeight: 'bold' }}
+            sx={{ fontWeight: 'bold', color: '#1e2a44', mb: 3 }}
           >
             Se connecter
           </Typography>
 
           {/* Display potential errors */}
           {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
+            <Alert severity="error" sx={{ mb: 2, borderRadius: '10px' }}>
               {error}
             </Alert>
           )}
@@ -104,6 +116,7 @@ const LoginPage: React.FC = () => {
               autoFocus
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              sx={roundedBlueInputStyle}
             />
 
             <TextField
@@ -117,26 +130,56 @@ const LoginPage: React.FC = () => {
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              sx={roundedBlueInputStyle}
             />
 
+            {/* Remember me and Forgot password on the same line */}
+            <Grid
+              container
+              alignItems="center"
+              justifyContent="space-between"
+              sx={{ mt: 1, mb: 3 }}
+            >
+              <Grid item>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      value="remember"
+                      color="primary"
+                      sx={{
+                        color: '#1e2a44',
+                        '&.Mui-checked': { color: '#1e2a44' },
+                      }}
+                    />
+                  }
+                  label={
+                    <Typography variant="body2" sx={{ color: '#1e2a44' }}>
+                      Se souvenir de moi
+                    </Typography>
+                  }
+                />
+              </Grid>
+            </Grid>
+
+            {/* Isolated login button at the bottom */}
             <Button
               type="submit"
               fullWidth
               variant="contained"
               disabled={isLoading}
-              sx={{ mt: 3, mb: 2, py: 1.5, fontWeight: 'bold' }}
+              sx={{
+                py: 1.5,
+                fontWeight: 'bold',
+                fontSize: '1.1rem',
+                backgroundColor: '#1e2a44',
+                color: 'white',
+                borderRadius: '50px', // Apple-style round button
+                textTransform: 'none',
+                '&:hover': { backgroundColor: '#151e32' },
+              }}
             >
               {isLoading ? 'Connexion...' : 'Se connecter'}
             </Button>
-
-            {/* Links below the button, aligned with a MUI Grid */}
-            <Grid container>
-              <Grid item xs>
-                <Link href="#" variant="body2">
-                  Mot de passe oublié ?
-                </Link>
-              </Grid>
-            </Grid>
           </Box>
         </Paper>
       </Container>
