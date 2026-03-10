@@ -48,6 +48,9 @@ public class Team {
   @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonManagedReference("team-teamCompositions")
   private List<TeamComposition> teamCompositions = new ArrayList<>();
+  @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonManagedReference("team-requests")
+  private List<MembershipRequest> membershipRequests = new ArrayList<>();
 
   /**
    * Instantiates a new Team.
