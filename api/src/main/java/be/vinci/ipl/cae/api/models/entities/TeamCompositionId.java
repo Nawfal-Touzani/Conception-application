@@ -35,6 +35,7 @@ public class TeamCompositionId implements Serializable {
     }
     return Objects.equals(memberId, that.memberId) && Objects.equals(teamId, that.teamId);
   }
+
   @Override
   public int hashCode() {
     return Objects.hash(memberId, teamId);

@@ -1,32 +1,28 @@
 package be.vinci.ipl.cae.api.repositories;
 
 import be.vinci.ipl.cae.api.models.entities.MembershipRequest;
-import be.vinci.ipl.cae.api.models.entities.MembershipRequest.State;
-import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * The interface Membership request repository.
+ * MembershipRequest repository.
  */
 @Repository
-public interface MembershipRequestRepository extends JpaRepository<MembershipRequest, Long> {
+public interface MembershipRequestRepository extends CrudRepository<MembershipRequest, Long> {
 
   /**
-   * Find all by team id and state list.
+   * Finds all membership requests for a given team.
    *
-   * @param teamId the team id
-   * @param state  the state
-   * @return the list
+   * @param teamId the ID of the team
+   * @return the membership requests
    */
-  List<MembershipRequest> findAllByTeamIdAndState(Long teamId, State state);
+  Iterable<MembershipRequest> findByTeamId(long teamId);
 
   /**
-   * Exists by member id and state boolean.
+   * Finds all membership requests for a given member.
    *
-   * @param memberId the member id
-   * @param state    the state
-   * @return the boolean
+   * @param memberId the ID of the member
+   * @return the membership requests
    */
-  boolean existsByMemberIdAndState(Long memberId, State state);
+  Iterable<MembershipRequest> findByMemberId(long memberId);
 }

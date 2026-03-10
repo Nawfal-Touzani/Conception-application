@@ -1,13 +1,19 @@
 package be.vinci.ipl.cae.api.services;
 
 import be.vinci.ipl.cae.api.models.dtos.CreateTeamRequest;
+import be.vinci.ipl.cae.api.models.dtos.TeamMemberDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
+import be.vinci.ipl.cae.api.models.entities.MembershipRequest;
+import be.vinci.ipl.cae.api.models.entities.MembershipRequest.State;
+import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.models.entities.Team;
 import be.vinci.ipl.cae.api.models.entities.TeamComposition;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
+import be.vinci.ipl.cae.api.repositories.MembershipRequestRepository;
 import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
 import be.vinci.ipl.cae.api.repositories.TeamRepository;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,6 +27,8 @@ public class TeamService {
   private final TeamRepository teamRepository;
   private final TeamCompositionRepository teamCompositionRepository;
   private final MemberRepository memberRepository;
+  private final MembershipRequestRepository membershipRequestRepository;
+  private final NotificationService notificationService;
 
   /**
    * Instantiates a new Team service.
@@ -30,14 +38,18 @@ public class TeamService {
    * @param memberRepository          the member repository
    */
   public TeamService(TeamRepository teamRepository,
-      TeamCompositionRepository teamCompositionRepository, MemberRepository memberRepository) {
+      TeamCompositionRepository teamCompositionRepository, MemberRepository memberRepository,
+      MembershipRequestRepository membershipRequestRepository,
+      NotificationService notificationService) {
     this.teamRepository = teamRepository;
     this.teamCompositionRepository = teamCompositionRepository;
     this.memberRepository = memberRepository;
+    this.membershipRequestRepository = membershipRequestRepository;
+    this.notificationService = notificationService;
   }
 
   /**
-   * Create team team.
+   * Create team.
    *
    * @param memberId the member id
    * @param request  the request
@@ -70,4 +82,67 @@ public class TeamService {
 
     return savedTeam;
   }
+
+  /**
+   * Creates a membership request for a member to join a team. Notifies the team responsible.
+   *
+   * @param memberId the ID of the member
+   * @param teamId   the ID of the team
+   * @return the created membership request, or null if member or team not found
+   */
+  public MembershipRequest createRequest(long memberId, long teamId) {
+    Member member = memberRepository.findById(memberId).orElse(null);
+    if (member == null) {
+      return null;
+    }
+
+    Team team = teamRepository.findById(teamId).orElse(null);
+    if (team == null) {
+      return null;
+    }
+
+    MembershipRequest request = new MembershipRequest(State.PENDING, null, null);
+    request.setMember(member);
+    request.setTeam(team);
+
+    MembershipRequest saved = membershipRequestRepository.save(request);
+
+    // Notify the team responsible
+    Notification notif = new Notification(
+        Notification.Type.MEMBERSHIP_REQUEST,
+        "Nouvelle demande d'adhésion de " + member.getTag() + " pour rejoindre " + team.getName(),
+        LocalDateTime.now()
+    );
+    notificationService.send(team.getResponsible().getId(), notif);
+
+    return saved;
+  }
+
+  /**
+   *Get members of my team list.
+   *
+   *@param memberId the member id
+   *@return the list
+   */
+  public List<TeamMemberDto> getMembersOfMyTeam(Long memberId) {
+
+    TeamComposition composition = teamCompositionRepository.findByMemberId(memberId)
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.NOT_FOUND, "Member has no team"));
+
+    if (composition.getTeam() == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team not found");
+    }
+    Long teamId = composition.getTeam().getId();
+
+    List<TeamComposition> compositions = teamCompositionRepository.findAllByTeamId(teamId);
+
+    return compositions.stream()
+        .map(tc -> new TeamMemberDto(
+            tc.getMember().getTag(),
+            tc.getMember().getImage().getId()
+        ))
+        .toList();
+  }
+
 }
