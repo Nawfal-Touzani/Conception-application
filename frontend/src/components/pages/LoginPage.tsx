@@ -1,86 +1,145 @@
-import { useState, SyntheticEvent, useContext } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
+  Container,
   TextField,
   Typography,
-  Checkbox,
-  FormControlLabel,
+  Link,
+  Paper,
+  Alert,
+  Grid,
 } from '@mui/material';
-import { AuthContextType } from '../../types';
-import { AuthContext } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext'; // Adjust the path if needed
 
-const LoginPage = () => {
-  const { loginMember }: AuthContextType = useContext(AuthContext);
+const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const { login } = useAuth(); // Retrieve the login function from our Context
+
+  // Form states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: SyntheticEvent) => {
-    e.preventDefault();
-    setErrorMsg('');
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError(null);
+
+    // If fields are empty (although MUI's "required" attribute already blocks some)
+    if (!email || !password) {
+      return setError('Veuillez remplir tous les champs.');
+    }
+
     try {
-      await loginMember({ email, password }, rememberMe);
+      setIsLoading(true);
+      // Call the backend via our Context
+      await login({ email, password });
+
+      // If login is successful, redirect to the home page
       navigate('/');
     } catch (err) {
-      console.error('LoginPage::error: ', err);
-      setErrorMsg('Identifiants incorrects.');
+      if (err instanceof Error) {
+        setError(err.message); // Displays "Email or password incorrect"
+      } else {
+        setError("Une erreur inattendue s'est produite.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
+    // Main Box with the same dark background as registration
     <Box
-      component="form"
-      onSubmit={handleSubmit}
-      sx={{ maxWidth: 400, mx: 'auto', mt: 4, p: 3, boxShadow: 2 }}
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#121212',
+        padding: 2,
+      }}
     >
-      <Typography variant="h4" mb={2}>
-        Se connecter
-      </Typography>
-
-      {errorMsg && (
-        <Typography color="error" mb={2}>
-          {errorMsg}
+      <Container maxWidth="sm">
+        {/* Title above the card */}
+        <Typography
+          variant="h3"
+          component="h1"
+          align="center"
+          sx={{ color: '#fff', fontWeight: 'bold', mb: 4, letterSpacing: 2 }}
+        >
+          VINCI ARENA
         </Typography>
-      )}
 
-      <TextField
-        label="Email"
-        id="email"
-        type="email"
-        fullWidth
-        margin="normal"
-        onChange={(e) => setEmail(e.target.value)}
-        value={email}
-        required
-      />
-      <TextField
-        label="Password"
-        id="password"
-        type="password"
-        fullWidth
-        margin="normal"
-        onChange={(e) => setPassword(e.target.value)}
-        value={password}
-        required
-      />
+        {/* White card containing the form */}
+        <Paper elevation={6} sx={{ p: 4, borderRadius: 2 }}>
+          <Typography
+            variant="h5"
+            component="h2"
+            align="center"
+            gutterBottom
+            sx={{ fontWeight: 'bold' }}
+          >
+            Se connecter
+          </Typography>
 
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-          />
-        }
-        label="Se souvenir de moi"
-      />
+          {/* Display potential errors */}
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
 
-      <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>
-        S'authentifier
-      </Button>
+          <Box component="form" onSubmit={handleSubmit} noValidate>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Adresse email"
+              name="email"
+              autoComplete="email"
+              autoFocus
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Mot de passe"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              disabled={isLoading}
+              sx={{ mt: 3, mb: 2, py: 1.5, fontWeight: 'bold' }}
+            >
+              {isLoading ? 'Connexion...' : 'Se connecter'}
+            </Button>
+
+            {/* Links below the button, aligned with a MUI Grid */}
+            <Grid container>
+              <Grid item xs>
+                <Link href="#" variant="body2">
+                  Mot de passe oublié ?
+                </Link>
+              </Grid>
+            </Grid>
+          </Box>
+        </Paper>
+      </Container>
     </Box>
   );
 };
