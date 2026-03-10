@@ -1,5 +1,5 @@
 @baseUrl = http://localhost:3000
-@token =
+@token =  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoicmVzcG9uc2libGVAdmluY2kuYmUiLCJpYXQiOjE3NzMxNzk1NTUsImV4cCI6MTc3MzI2NTk1NX0.k9x2bKrZYlXeaJb3hvcm0sndXJD9CdCXX4oFU2fLmu8
 ### Register responsible member
 POST {{baseUrl}}/auths/register
 Content-Type: application/json
