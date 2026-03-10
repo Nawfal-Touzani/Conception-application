@@ -1,7 +1,46 @@
 @baseUrl = http://localhost:3000
+@token =
+### Register responsible member
+POST {{baseUrl}}/auths/register
+Content-Type: application/json
 
-### Set token after login (copie depuis la réponse du login dans auth.http)
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoic2Fuc3Rva2VuQHZpbmNpLmJlIiwiaWF0IjoxNzczMTMxMTk3LCJleHAiOjE3NzMyMTc1OTd9.wDxEPRDrAN9EO-0ChwcqhyWia92Q6aG3eE4mxB47yIw
+{
+  "email": "responsible@vinci.be",
+  "password": "test123",
+  "tag": "Responsible",
+  "imageId": 1,
+  "specialityId": 1
+}
+
+### Register regular member
+POST {{baseUrl}}/auths/register
+Content-Type: application/json
+
+{
+  "email": "member@vinci.be",
+  "password": "test123",
+  "tag": "Member",
+  "imageId": 1,
+  "specialityId": 1
+}
+
+### Login responsible (copy token into @token)
+POST {{baseUrl}}/auths/login
+Content-Type: application/json
+
+{
+  "email": "responsible@vinci.be",
+  "password": "test123"
+}
+
+### Login regular member (copy token into @token2)
+POST {{baseUrl}}/auths/login
+Content-Type: application/json
+
+{
+  "email": "member@vinci.be",
+  "password": "test123"
+}
 
 ### Create a team (valid, should return 201)
 POST {{baseUrl}}/teams
@@ -38,6 +77,8 @@ Authorization: Bearer {{token}}
 {
   "name": "AutreEquipe"
 }
+
+
 
 ### Get team members (should return 200)
 GET {{baseUrl}}/teams/members

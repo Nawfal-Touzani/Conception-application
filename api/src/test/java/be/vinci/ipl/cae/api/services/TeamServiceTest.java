@@ -2,8 +2,10 @@ package be.vinci.ipl.cae.api.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -12,12 +14,17 @@ import static org.mockito.Mockito.when;
 import be.vinci.ipl.cae.api.models.dtos.CreateTeamRequest;
 import be.vinci.ipl.cae.api.models.entities.Image;
 import be.vinci.ipl.cae.api.models.entities.Member;
+import be.vinci.ipl.cae.api.models.entities.MembershipRequest;
+import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.models.entities.Team;
 import be.vinci.ipl.cae.api.models.entities.TeamComposition;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
+import be.vinci.ipl.cae.api.repositories.MembershipRequestRepository;
 import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
 import be.vinci.ipl.cae.api.repositories.TeamRepository;
 import be.vinci.ipl.cae.api.services.TeamService;
+import java.time.LocalDateTime;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +46,13 @@ class TeamServiceTest {
   private TeamCompositionRepository teamCompositionRepository;
 
   @Mock
+  private NotificationService notificationService;
+
+  @Mock
   private MemberRepository memberRepository;
+
+  @Mock
+  private MembershipRequestRepository membershipRequestRepository;
 
   @InjectMocks
   private TeamService teamService;
@@ -137,6 +150,48 @@ class TeamServiceTest {
 
     verify(teamRepository, never()).save(any());
     verify(teamCompositionRepository, never()).save(any());
+  }
+
+  @Test
+  void createRequest_shouldWork_whenMemberAndTeamExist() {
+    Team team = new Team("TeamTest", true, LocalDateTime.now(), member, null);
+    team.setId(1L);
+    MembershipRequest membershipRequest = new MembershipRequest(
+        MembershipRequest.State.PENDING, null, null);
+
+    when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+    when(teamRepository.findById(team.getId())).thenReturn(Optional.of(team));
+    when(membershipRequestRepository.save(any(MembershipRequest.class)))
+        .thenReturn(membershipRequest);
+
+    MembershipRequest result = teamService.createRequest(member.getId(), team.getId());
+
+    assertNotNull(result);
+    assertEquals(membershipRequest, result);
+    verify(notificationService).send(anyLong(), any(Notification.class));
+  }
+
+  @Test
+  void createRequest_shouldReturnNull_whenMemberNotFound() {
+    when(memberRepository.findById(999L)).thenReturn(Optional.empty());
+
+    MembershipRequest result = teamService.createRequest(999L, 1L);
+
+    assertNull(result);
+    verify(membershipRequestRepository, never()).save(any());
+    verify(notificationService, never()).send(anyLong(), any(Notification.class));
+  }
+
+  @Test
+  void createRequest_shouldReturnNull_whenTeamNotFound() {
+    when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+    when(teamRepository.findById(999L)).thenReturn(Optional.empty());
+
+    MembershipRequest result = teamService.createRequest(member.getId(), 999L);
+
+    assertNull(result);
+    verify(membershipRequestRepository, never()).save(any());
+    verify(notificationService, never()).send(anyLong(), any(Notification.class));
   }
 
   /**
