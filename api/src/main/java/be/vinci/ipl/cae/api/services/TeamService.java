@@ -1,6 +1,7 @@
 package be.vinci.ipl.cae.api.services;
 
 import be.vinci.ipl.cae.api.models.dtos.CreateTeamRequest;
+import be.vinci.ipl.cae.api.models.dtos.TeamMemberDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.MembershipRequest;
 import be.vinci.ipl.cae.api.models.entities.MembershipRequest.State;
@@ -12,6 +13,7 @@ import be.vinci.ipl.cae.api.repositories.MembershipRequestRepository;
 import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
 import be.vinci.ipl.cae.api.repositories.TeamRepository;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -114,6 +116,33 @@ public class TeamService {
     notificationService.send(team.getResponsible().getId(), notif);
 
     return saved;
+  }
+
+  /**
+   *Get members of my team list.
+   *
+   *@param memberId the member id
+   *@return the list
+   */
+  public List<TeamMemberDto> getMembersOfMyTeam(Long memberId) {
+
+    TeamComposition composition = teamCompositionRepository.findByMemberId(memberId)
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.NOT_FOUND, "Member has no team"));
+
+    if (composition.getTeam() == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team not found");
+    }
+    Long teamId = composition.getTeam().getId();
+
+    List<TeamComposition> compositions = teamCompositionRepository.findAllByTeamId(teamId);
+
+    return compositions.stream()
+        .map(tc -> new TeamMemberDto(
+            tc.getMember().getTag(),
+            tc.getMember().getImage().getId()
+        ))
+        .toList();
   }
 
 }
