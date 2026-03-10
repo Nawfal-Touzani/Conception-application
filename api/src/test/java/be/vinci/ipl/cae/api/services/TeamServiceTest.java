@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import be.vinci.ipl.cae.api.models.dtos.CreateTeamRequest;
+import be.vinci.ipl.cae.api.models.entities.Image;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Team;
 import be.vinci.ipl.cae.api.models.entities.TeamComposition;
@@ -54,6 +55,11 @@ class TeamServiceTest {
     member = new Member();
     member.setId(1L);
     member.setEmail("test@vinci.be");
+
+    Image image = new Image();
+    image.setId(1L);
+
+    member.setImage(image);
 
     request = new CreateTeamRequest("TestTeam");
   }
@@ -152,6 +158,11 @@ class TeamServiceTest {
     Member member2 = new Member();
     member2.setId(2L);
     member2.setTag("Player2");
+
+    Image image2 = new Image();
+    image2.setId(2L);
+
+    member2.setImage(image2);
 
     TeamComposition composition2 = new TeamComposition();
     composition2.setTeam(team);
