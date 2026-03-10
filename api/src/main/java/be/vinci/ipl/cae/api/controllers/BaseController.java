@@ -26,7 +26,15 @@ public abstract class BaseController {
    * @return the member
    */
   protected Member getConnectedMember() {
-    return (Member) SecurityContextHolder.getContext()
+
+    Object principal = SecurityContextHolder.getContext()
         .getAuthentication().getPrincipal();
+
+    if (principal == null || principal.equals("anonymousUser")) {
+      throw new org.springframework.web.server.ResponseStatusException(
+          org.springframework.http.HttpStatus.UNAUTHORIZED, "Not authenticated");
+    }
+
+    return (Member) principal;
   }
 }

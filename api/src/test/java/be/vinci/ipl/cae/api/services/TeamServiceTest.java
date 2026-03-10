@@ -132,4 +132,57 @@ class TeamServiceTest {
     verify(teamRepository, never()).save(any());
     verify(teamCompositionRepository, never()).save(any());
   }
+
+  /**
+   * Get members of my team should return list when member has a team.
+   */
+  @Test
+  void getMembersOfMyTeam_shouldReturnMembers_whenMemberHasTeam() {
+
+    Team team = new Team();
+    team.setId(10L);
+
+    TeamComposition composition = new TeamComposition();
+    composition.setTeam(team);
+    composition.setMember(member);
+
+    when(teamCompositionRepository.findByMemberId(1L))
+        .thenReturn(java.util.Optional.of(composition));
+
+    Member member2 = new Member();
+    member2.setId(2L);
+    member2.setTag("Player2");
+
+    TeamComposition composition2 = new TeamComposition();
+    composition2.setTeam(team);
+    composition2.setMember(member2);
+
+    when(teamCompositionRepository.findAllByTeamId(10L))
+        .thenReturn(java.util.List.of(composition, composition2));
+
+    var result = teamService.getMembersOfMyTeam(1L);
+
+    assertNotNull(result);
+    assertEquals(2, result.size());
+
+    verify(teamCompositionRepository, times(1)).findByMemberId(1L);
+    verify(teamCompositionRepository, times(1)).findAllByTeamId(10L);
+  }
+
+  /**
+   * Get members of my team should fail when member has no team.
+   */
+  @Test
+  void getMembersOfMyTeam_shouldFail_whenMemberHasNoTeam() {
+
+    when(teamCompositionRepository.findByMemberId(1L))
+        .thenReturn(java.util.Optional.empty());
+
+    assertThrows(ResponseStatusException.class,
+        () -> teamService.getMembersOfMyTeam(1L));
+
+    verify(teamCompositionRepository, times(1)).findByMemberId(1L);
+    verify(teamCompositionRepository, never()).findAllByTeamId(any());
+  }
 }
+

@@ -1,7 +1,7 @@
 @baseUrl = http://localhost:3000
 
 ### Set token after login (copie depuis la réponse du login dans auth.http)
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3NzI3MzY0NTMsImV4cCI6MTc3MjgyMjg1M30.M2wa5OyETf9cml5j4ZdgXTI0Hv-i2TfaeHfxX1S5Jmg
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoic2Fuc3Rva2VuQHZpbmNpLmJlIiwiaWF0IjoxNzczMTMxMTk3LCJleHAiOjE3NzMyMTc1OTd9.wDxEPRDrAN9EO-0ChwcqhyWia92Q6aG3eE4mxB47yIw
 
 ### Create a team (valid, should return 201)
 POST {{baseUrl}}/teams
@@ -9,7 +9,7 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "name": "MonEquipe"
+  "name": "MarouTeam"
 }
 
 ### Try to create a team with empty name (should return 400)
@@ -38,3 +38,14 @@ Authorization: Bearer {{token}}
 {
   "name": "AutreEquipe"
 }
+
+### Get team members (should return 200)
+GET {{baseUrl}}/teams/members
+Authorization: Bearer {{token}}
+
+### Member without team (should return 404)
+GET {{baseUrl}}/teams/members
+Authorization: Bearer {{token}}
+
+### No token (should return 401)
+GET {{baseUrl}}/teams/members

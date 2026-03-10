@@ -2,6 +2,7 @@ package be.vinci.ipl.cae.api.repositories;
 
 import be.vinci.ipl.cae.api.models.entities.TeamComposition;
 import be.vinci.ipl.cae.api.models.entities.TeamCompositionId;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -28,4 +29,12 @@ public interface TeamCompositionRepository extends
    * @return the optional
    */
   Optional<TeamComposition> findByMemberId(Long memberId);
+
+  /**
+   * Find all by team id list.
+   *
+   * @param teamId the team id
+   * @return the list
+   */
+  List<TeamComposition> findAllByTeamId(Long teamId);
 }
