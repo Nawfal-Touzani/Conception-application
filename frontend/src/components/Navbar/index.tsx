@@ -36,6 +36,21 @@ const NavBar = () => {
           >
             Tournois
           </Button>
+
+          <Button
+            onClick={() => navigate('/team')}
+            sx={{
+              backgroundColor: '#d8a46b',
+              color: 'white',
+              borderRadius: '10px',
+              textTransform: 'none',
+              fontWeight: 'bold',
+              px: 5,
+              '&:hover': { backgroundColor: '#c38d54' },
+            }}
+          >
+            Mon équipe
+          </Button>
         </Box>
 
         {/* RIGHT SIDE: Auth buttons or User info */}
