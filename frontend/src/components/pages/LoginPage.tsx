@@ -54,7 +54,7 @@ const LoginPage: React.FC = () => {
   // Custom style for our rounded blue inputs
   const roundedBlueInputStyle = {
     '& .MuiOutlinedInput-root': {
-      borderRadius: '15px', // Rounded rectangle
+      borderRadius: '10px', // Rounded rectangle
       '& fieldset': {
         borderColor: '#1e2a44',
         borderWidth: '2px',
