@@ -2,6 +2,7 @@ package be.vinci.ipl.cae.api.services;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.when;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.MembershipRequest;
 import be.vinci.ipl.cae.api.models.entities.MembershipRequest.State;
+import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.models.entities.Team;
 import be.vinci.ipl.cae.api.models.entities.TeamComposition;
 import be.vinci.ipl.cae.api.repositories.MembershipRequestRepository;
@@ -35,6 +37,9 @@ class MembershipRequestServiceTest {
 
   @Mock
   private TeamCompositionRepository teamCompositionRepository;
+
+  @Mock
+  private NotificationService notificationService;
 
   @InjectMocks
   private MembershipRequestService membershipRequestService;
@@ -74,7 +79,7 @@ class MembershipRequestServiceTest {
     when(membershipRequestRepository.findById(100L)).thenReturn(Optional.of(pendingRequest));
 
     membershipRequestService.approveRequest(100L, 1L);
-
+    verify(notificationService).send(anyLong(), any(Notification.class));
     verify(membershipRequestRepository, times(1)).save(any(MembershipRequest.class));
     verify(teamCompositionRepository, times(1)).save(any(TeamComposition.class));
   }
@@ -131,6 +136,7 @@ class MembershipRequestServiceTest {
 
     membershipRequestService.refuseRequest(100L, 1L, "Not a good fit");
 
+    verify(notificationService).send(anyLong(), any(Notification.class));
     verify(membershipRequestRepository, times(1)).save(any(MembershipRequest.class));
     verify(teamCompositionRepository, never()).save(any());
   }

@@ -1,74 +1,110 @@
 package be.vinci.ipl.cae.api.services;
 
-import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.MembershipRequest;
 import be.vinci.ipl.cae.api.models.entities.MembershipRequest.State;
 import be.vinci.ipl.cae.api.models.entities.Notification;
-import be.vinci.ipl.cae.api.models.entities.Team;
-import be.vinci.ipl.cae.api.repositories.MemberRepository;
+import be.vinci.ipl.cae.api.models.entities.Notification.Type;
+import be.vinci.ipl.cae.api.models.entities.TeamComposition;
 import be.vinci.ipl.cae.api.repositories.MembershipRequestRepository;
-import be.vinci.ipl.cae.api.repositories.TeamRepository;
+import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
 import java.time.LocalDateTime;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
- * MembershipRequest service.
+ * The type Membership request service.
  */
 @Service
 public class MembershipRequestService {
 
   private final MembershipRequestRepository membershipRequestRepository;
-  private final MemberRepository memberRepository;
-  private final TeamRepository teamRepository;
+  private final TeamCompositionRepository teamCompositionRepository;
   private final NotificationService notificationService;
 
   /**
-   * Creates a new MembershipRequestService.
+   * Instantiates a new Membership request service.
+   *
+   * @param membershipRequestRepository the membership request repository
+   * @param teamCompositionRepository   the team composition repository
    */
-  public MembershipRequestService(
-      MembershipRequestRepository membershipRequestRepository,
-      MemberRepository memberRepository,
-      TeamRepository teamRepository,
+  public MembershipRequestService(MembershipRequestRepository membershipRequestRepository,
+      TeamCompositionRepository teamCompositionRepository,
       NotificationService notificationService) {
     this.membershipRequestRepository = membershipRequestRepository;
-    this.memberRepository = memberRepository;
-    this.teamRepository = teamRepository;
+    this.teamCompositionRepository = teamCompositionRepository;
     this.notificationService = notificationService;
   }
 
   /**
-   * Creates a membership request for a member to join a team. Notifies the team responsible.
+   * Approve request.
    *
-   * @param memberId the ID of the member
-   * @param teamId   the ID of the team
-   * @return the created membership request, or null if member or team not found
+   * @param requestId     the request id
+   * @param responsibleId the responsible id
    */
-  public MembershipRequest createRequest(long memberId, long teamId) {
-    Member member = memberRepository.findById(memberId).orElse(null);
-    if (member == null) {
-      return null;
-    }
+  public void approveRequest(Long requestId, Long responsibleId) {
+    MembershipRequest request = getValidatedRequest(requestId, responsibleId);
 
-    Team team = teamRepository.findById(teamId).orElse(null);
-    if (team == null) {
-      return null;
-    }
-
-    MembershipRequest request = new MembershipRequest(State.PENDING, null, null);
-    request.setMember(member);
-    request.setTeam(team);
-
-    MembershipRequest saved = membershipRequestRepository.save(request);
-
-    // Notify the team responsible
+    request.setState(State.ACCEPTED);
+    request.setProcessingDate(LocalDateTime.now());
+    membershipRequestRepository.save(request);
     Notification notif = new Notification(
-        Notification.Type.MEMBERSHIP_REQUEST,
-        "Nouvelle demande d'adhésion de " + member.getTag() + " pour rejoindre " + team.getName(),
+        Type.MEMBERSHIP_REQUEST,
+        "Votre demande d'adhésion à " + request.getTeam().getName() + " a été acceptée !",
         LocalDateTime.now()
     );
-    notificationService.send(team.getResponsible().getId(), notif);
+    notificationService.send(request.getMember().getId(), notif);
 
-    return saved;
+    TeamComposition composition = new TeamComposition(
+        request.getMember(), request.getTeam(), LocalDateTime.now());
+    teamCompositionRepository.save(composition);
+  }
+
+  /**
+   * Refuse request.
+   *
+   * @param requestId     the request id
+   * @param responsibleId the responsible id
+   * @param refusalReason the refusal reason
+   */
+  public void refuseRequest(Long requestId, Long responsibleId, String refusalReason) {
+    MembershipRequest request = getValidatedRequest(requestId, responsibleId);
+
+    request.setState(State.REFUSED);
+    request.setRefusalReason(refusalReason);
+    request.setProcessingDate(LocalDateTime.now());
+    membershipRequestRepository.save(request);
+
+    Notification notif = new Notification(
+        Notification.Type.MEMBERSHIP_REQUEST,
+        "Votre demande d'adhésion à " + request.getTeam().getName() + " a été refusée : "
+            + refusalReason,
+        LocalDateTime.now()
+    );
+    notificationService.send(request.getMember().getId(), notif);
+  }
+
+  /**
+   * Get validated request.
+   *
+   * @param requestId     the request id
+   * @param responsibleId the responsible id
+   * @return the membership request
+   */
+  private MembershipRequest getValidatedRequest(Long requestId, Long responsibleId) {
+    MembershipRequest request = membershipRequestRepository.findById(requestId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+            "Request not found"));
+
+    if (!request.getTeam().getResponsible().getId().equals(responsibleId)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          "Only the team responsible can manage requests");
+    }
+
+    if (request.getState() != State.PENDING) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Request is already processed");
+    }
+
+    return request;
   }
 }
-
