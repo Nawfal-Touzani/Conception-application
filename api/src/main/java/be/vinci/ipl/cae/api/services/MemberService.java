@@ -93,11 +93,12 @@ public class MemberService {
    * @return true if the password was changed, false if member not found or old password incorrect
    */
   public boolean changePassword(String email, ChangePasswordDto dto) {
-    if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
+    if (dto == null || dto.getNewPassword() == null
+        || dto.getNewPassword().equals(dto.getOldPassword())) {
       return false;
     }
 
-    if (dto.getOldPassword().equals(dto.getNewPassword())) {
+    if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
       return false;
     }
 

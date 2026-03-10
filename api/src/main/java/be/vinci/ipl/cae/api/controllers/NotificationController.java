@@ -70,15 +70,11 @@ public class NotificationController {
   @PreAuthorize("isAuthenticated()")
   @ResponseStatus(HttpStatus.CREATED)
   public Notification sendNotification(@PathVariable long id,
-      @Valid @RequestBody NotificationDto dto,
-      @AuthenticationPrincipal Member currentMember) {
+      @Valid @RequestBody NotificationDto dto) {
 
     Notification notification = new Notification(dto.type(), dto.message(), dto.sendDate());
-    Notification result = notificationService.send(id, notification);
 
-    if (currentMember.getId() != id) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-    }
+    Notification result = notificationService.send(id, notification);
 
     if (result == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -95,12 +91,12 @@ public class NotificationController {
   @PreAuthorize("isAuthenticated()")
   public Notification markNotificationAsRead(@PathVariable long idMember,
       @PathVariable long idNotification, @AuthenticationPrincipal Member currentMember) {
-
-    Notification result = notificationService.markNotificationRead(idNotification);
-
     if (currentMember.getId() != idMember) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN);
     }
+
+    Notification result = notificationService.markNotificationRead(idNotification);
+
     if (result == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
