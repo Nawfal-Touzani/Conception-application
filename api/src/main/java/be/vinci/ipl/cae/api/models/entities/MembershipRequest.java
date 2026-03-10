@@ -65,6 +65,11 @@ public class MembershipRequest {
   @JsonManagedReference("request-notifications")
   private List<Notification> notifications = new ArrayList<>();
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "id_team", nullable = false)
+  @JsonBackReference("team-requests")
+  private Team team;
+
   /**
    * MembershipRequest constructor.
    */

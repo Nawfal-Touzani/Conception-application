@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/teams")
+@PreAuthorize("isAuthenticated()")
 public class TeamController extends BaseController {
 
   private final TeamService teamService;

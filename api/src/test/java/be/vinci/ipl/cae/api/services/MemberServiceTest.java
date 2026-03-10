@@ -97,7 +97,7 @@ public class MemberServiceTest {
 
   @Test
   @DisplayName("Should update profile and return new DTO")
-  void updateProfile() {
+  void updateProfile1() {
     UpdateMemberProfileDto payload = new UpdateMemberProfileDto();
     payload.setSpeciality("Gardien");
     payload.setProfileImage("img2.png");
@@ -117,6 +117,53 @@ public class MemberServiceTest {
     verify(memberRepository).save(any(Member.class));
     assertEquals("Gardien", result.getSpeciality());
     assertEquals("img2.png", result.getProfileImage());
+  }
+
+  @Test
+  @DisplayName("Should not update speciality or image if they don't exist in DB")
+  void updateProfile2() {
+    UpdateMemberProfileDto payload = new UpdateMemberProfileDto();
+    payload.setSpeciality("Strange");
+    payload.setProfileImage("nonExisting.png");
+
+    when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
+    when(specialityRepository.findByName("Strange")).thenReturn(Optional.empty());
+    when(imageRepository.findByUrl("nonExisting.png")).thenReturn(Optional.empty());
+
+    MemberProfileResponseDto result = memberService.updateProfile(email, payload);
+
+    assertNotNull(result);
+    assertEquals("Architect", result.getSpeciality());
+    assertEquals("img1.png", result.getProfileImage());
+    verify(memberRepository).save(member);
+  }
+
+  @Test
+  @DisplayName("Should return null when updating a non-existent member")
+  void updateProfile3() {
+    when(memberRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+    MemberProfileResponseDto result = memberService.updateProfile(email,
+        new UpdateMemberProfileDto());
+
+    assertNull(result);
+    verify(memberRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("Should skip updates when payload fields are null")
+  void updateProfile4() {
+    UpdateMemberProfileDto payload = new UpdateMemberProfileDto();
+    payload.setSpeciality(null);
+    payload.setProfileImage(null);
+
+    when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
+
+    memberService.updateProfile(email, payload);
+
+    verify(specialityRepository, never()).findByName(any());
+    verify(imageRepository, never()).findByUrl(any());
+    verify(memberRepository).save(member);
   }
 
   @Test
@@ -196,5 +243,33 @@ public class MemberServiceTest {
 
     assertFalse(result);
     verify(memberRepository, never()).findByEmail(any());
+  }
+
+  @Test
+  @DisplayName("Should return false when new password is null")
+  void changePassword6() {
+    ChangePasswordDto dto = new ChangePasswordDto();
+    dto.setOldPassword("old");
+    dto.setNewPassword(null);
+    assertFalse(memberService.changePassword(email, dto));
+  }
+
+  @Test
+  @DisplayName("Should return false when ChangePasswordDto is null")
+  void changePassword7() {
+    boolean result = memberService.changePassword(email, null);
+    assertFalse(result);
+  }
+
+  @Test
+  @DisplayName("Should return false when old password is null in DTO")
+  void changePassword8() {
+    ChangePasswordDto dto = new ChangePasswordDto();
+    dto.setOldPassword(null);
+    dto.setNewPassword("newPswd");
+    dto.setConfirmPassword("newPswd");
+
+    boolean result = memberService.changePassword(email, dto);
+    assertFalse(result);
   }
 }
