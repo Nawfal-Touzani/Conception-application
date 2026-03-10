@@ -77,7 +77,7 @@ const RegisterPage: React.FC = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#121212',
+        backgroundColor: '#1e2a44',
         padding: 2,
       }}
     >
