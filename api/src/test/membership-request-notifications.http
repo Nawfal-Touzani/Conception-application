@@ -1,0 +1,94 @@
+@baseUrl = http://localhost:3000
+@token =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoicmVzcG9uc2libGVAdmluY2kuYmUiLCJpYXQiOjE3NzMxNTg5NDUsImV4cCI6MTc3MzI0NTM0NX0.VFzI9uFSKVz9LBc3RKkkcPA0umcHRkq_kzbPFGqlUE4
+@token2 =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibWVtYmVyQHZpbmNpLmJlIiwiaWF0IjoxNzczMTU4OTY4LCJleHAiOjE3NzMyNDUzNjh9.VuYUEBs5eSBInAB4m_Dhz-1l65muSELnbtwQgUyoBQA
+
+### Register responsible member
+POST {{baseUrl}}/auths/register
+Content-Type: application/json
+
+{
+  "email": "responsible@vinci.be",
+  "password": "test123",
+  "tag": "Responsible",
+  "imageId": 1,
+  "specialityId": 1
+}
+
+### Register regular member
+POST {{baseUrl}}/auths/register
+Content-Type: application/json
+
+{
+  "email": "member@vinci.be",
+  "password": "test123",
+  "tag": "Member",
+  "imageId": 1,
+  "specialityId": 1
+}
+
+### Login responsible (copy token into @token)
+POST {{baseUrl}}/auths/login
+Content-Type: application/json
+
+{
+  "email": "responsible@vinci.be",
+  "password": "test123"
+}
+
+### Login regular member (copy token into @token2)
+POST {{baseUrl}}/auths/login
+Content-Type: application/json
+
+{
+  "email": "member@vinci.be",
+  "password": "test123"
+}
+
+### Create a team with responsible (should return 201)
+POST {{baseUrl}}/teams
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "TeamTest"
+}
+
+### Member sends membership request - responsible should receive notification (should return 201)
+POST {{baseUrl}}/teams/1/membership-requests
+Authorization: Bearer {{token2}}
+
+### Check responsible received membership request notification (should return 200 with notif)
+GET {{baseUrl}}/members/3/notifications
+Authorization: Bearer {{token}}
+
+### Try to send membership request for non-existent team (should return 404)
+POST {{baseUrl}}/teams/999/membership-requests
+Authorization: Bearer {{token2}}
+
+### Try to send membership request without token (should return 403)
+POST {{baseUrl}}/teams/1/membership-requests
+
+### Approve membership request - member should receive notification (should return 204)
+PATCH {{baseUrl}}/membership-requests/1/approve
+Authorization: Bearer {{token}}
+
+### Check member received approval notification (should return 200 with notif)
+GET {{baseUrl}}/members/4/notifications
+Authorization: Bearer {{token2}}
+
+### Member sends another membership request for refuse test (should return 201)
+POST {{baseUrl}}/teams/1/membership-requests
+Authorization: Bearer {{token2}}
+
+### Refuse membership request - member should receive notification (should return 204)
+PATCH {{baseUrl}}/membership-requests/2/refuse
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "reason": "La team ne recrute pas actuellement"
+}
+
+### Check member received refusal notification (should return 200 with notif)
+GET {{baseUrl}}/members/4/notifications
+Authorization: Bearer {{token2}}

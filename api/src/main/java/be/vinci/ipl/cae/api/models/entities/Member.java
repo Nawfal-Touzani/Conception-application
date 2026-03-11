@@ -12,7 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -47,7 +47,7 @@ public class Member {
   private boolean isAdmin = false;
 
   @Column(nullable = false, updatable = false)
-  private LocalDateTime profileCreationDateTime = LocalDateTime.now();
+  private LocalDate profileCreationDate;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "image_id", nullable = false)
@@ -64,19 +64,21 @@ public class Member {
   /**
    * Constructs a Member with the given details.
    *
-   * @param email       the email address of the member
-   * @param password    the password of the member
-   * @param tag         the display tag of the member
-   * @param isAdmin     whether the member has admin privileges
-   * @param image       the profile image of the member
-   * @param speciality  the speciality of the member
+   * @param email the email address of the member
+   * @param password the password of the member
+   * @param tag the display tag of the member
+   * @param isAdmin whether the member has admin privileges
+   * @param image the profile image of the member
+   * @param speciality the speciality of the member
+   * @param profileCreationDate creation date of the member
    */
-  public Member(String email, String password, String tag, boolean isAdmin, Image image,
-      Speciality speciality) {
+  public Member(String email, String password, String tag, boolean isAdmin,
+      LocalDate profileCreationDate, Image image, Speciality speciality) {
     this.email = email;
     this.password = password;
     this.tag = tag;
     this.isAdmin = isAdmin;
+    this.profileCreationDate = profileCreationDate;
     this.image = image;
     this.speciality = speciality;
   }

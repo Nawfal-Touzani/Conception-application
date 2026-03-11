@@ -61,14 +61,14 @@ public class MembershipRequest {
   @JsonBackReference("member-requests")
   private Member member;
 
-  @OneToMany(mappedBy = "membershipRequest", cascade = CascadeType.ALL, orphanRemoval = true)
-  @JsonManagedReference("request-notifications")
-  private List<Notification> notifications = new ArrayList<>();
-
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "id_team", nullable = false)
   @JsonBackReference("team-requests")
   private Team team;
+
+  @OneToMany(mappedBy = "membershipRequest", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonManagedReference("request-notifications")
+  private List<Notification> notifications = new ArrayList<>();
 
   /**
    * MembershipRequest constructor.

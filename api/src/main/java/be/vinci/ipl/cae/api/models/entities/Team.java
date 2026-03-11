@@ -1,6 +1,6 @@
 package be.vinci.ipl.cae.api.models.entities;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,7 +20,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * The type Team.
+ * Represents a team in the platform.
+ * We find a mandatory primary responsible member and optionally a secondary responsible.
+ * It is also linked to its compositions and membership requests.
  */
 @Entity
 @Table(name = "teams")
@@ -38,25 +40,29 @@ public class Team {
   private Boolean isActive = true;
   @Column(nullable = false)
   private LocalDateTime creationDate;
-  // FK
   @OneToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "responsible_id", nullable = false)
+  @JsonIgnore
   private Member responsible;
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "second_responsible_id")
+  @JsonIgnore
   private Member secondResponsible;
   @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
-  @JsonManagedReference("team-teamCompositions")
+  @JsonIgnore
   private List<TeamComposition> teamCompositions = new ArrayList<>();
+  @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonIgnore
+  private List<MembershipRequest> membershipRequests = new ArrayList<>();
 
   /**
-   * Instantiates a new Team.
+   * Full constructor to create a team with all essential attributes.
    *
-   * @param name              the name
-   * @param isActive          the is active
-   * @param creationDate      the creation date
-   * @param responsible       the responsible
-   * @param secondResponsible the second responsible
+   * @param name the unique team name (max 100 characters)
+   * @param isActive indicates if the team is active (true/false)
+   * @param creationDate the team creation date
+   * @param responsible the primary responsible member (mandatory)
+   * @param secondResponsible the secondary responsible member (optional, can be null)
    */
   public Team(String name, Boolean isActive, LocalDateTime creationDate, Member responsible,
       Member secondResponsible) {

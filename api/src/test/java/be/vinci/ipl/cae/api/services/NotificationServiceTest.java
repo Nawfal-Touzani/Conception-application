@@ -15,7 +15,7 @@ import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.models.entities.Notification.Type;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.NotificationRepository;
-
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -34,7 +34,6 @@ class NotificationServiceTest {
   Notification notification2;
   Member member1;
 
-
   @Mock
   private NotificationRepository notificationRepository;
 
@@ -48,8 +47,7 @@ class NotificationServiceTest {
     notification1 = new Notification(Type.RESULT, "resultat du match 1-0", LocalDateTime.now());
     notification2 = new Notification(Type.TOURNAMENT, "TOURNOI commence le 4 mars",
         LocalDateTime.now());
-    member1 = new Member("test@test.com", "password", "tag1", false, null,
-        null);
+    member1 = new Member("test@test.com", "password", "tag1", false, LocalDate.now(), null, null);
     member1.setId(1L);
 
   }
@@ -60,8 +58,8 @@ class NotificationServiceTest {
     notification2.setMember(member1);
 
     when(memberRepository.findById(member1.getId())).thenReturn(Optional.of(member1));
-    when(notificationRepository.findByMemberId(member1.getId()))
-        .thenReturn(Arrays.asList(notification1, notification2));
+    when(notificationRepository.findByMemberId(member1.getId())).thenReturn(
+        Arrays.asList(notification1, notification2));
 
     Iterable<Notification> result = notificationService.getAllNotificationByMember(member1.getId());
 
@@ -136,8 +134,8 @@ class NotificationServiceTest {
 
     when(memberRepository.findById(member1.getId())).thenReturn(Optional.of(member1));
 
-    when(notificationRepository.findByMemberIdAndRead(member1.getId(),true)).thenReturn(
-            Arrays.asList(notification1, notification3));
+    when(notificationRepository.findByMemberIdAndRead(member1.getId(), true)).thenReturn(
+        Arrays.asList(notification1, notification3));
 
     Iterable<Notification> result = notificationService.getNotificationsByReadStatus(
         member1.getId(), true);
@@ -146,13 +144,13 @@ class NotificationServiceTest {
   }
 
   @Test
-  void getNotificationReadStatusNull(){
+  void getNotificationReadStatusNull() {
     long unknownId = 9L;
 
     when(memberRepository.findById(unknownId)).thenReturn(Optional.empty());
 
-    Iterable<Notification> result =
-        notificationService.getNotificationsByReadStatus(unknownId, true);
+    Iterable<Notification> result = notificationService.getNotificationsByReadStatus(unknownId,
+        true);
 
     assertNull(result);
     verify(notificationRepository, never()).findByMemberIdAndRead(anyLong(), anyBoolean());

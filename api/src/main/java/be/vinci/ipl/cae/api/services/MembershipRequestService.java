@@ -2,6 +2,8 @@ package be.vinci.ipl.cae.api.services;
 
 import be.vinci.ipl.cae.api.models.entities.MembershipRequest;
 import be.vinci.ipl.cae.api.models.entities.MembershipRequest.State;
+import be.vinci.ipl.cae.api.models.entities.Notification;
+import be.vinci.ipl.cae.api.models.entities.Notification.Type;
 import be.vinci.ipl.cae.api.models.entities.TeamComposition;
 import be.vinci.ipl.cae.api.repositories.MembershipRequestRepository;
 import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
@@ -18,6 +20,7 @@ public class MembershipRequestService {
 
   private final MembershipRequestRepository membershipRequestRepository;
   private final TeamCompositionRepository teamCompositionRepository;
+  private final NotificationService notificationService;
 
   /**
    * Instantiates a new Membership request service.
@@ -26,9 +29,11 @@ public class MembershipRequestService {
    * @param teamCompositionRepository   the team composition repository
    */
   public MembershipRequestService(MembershipRequestRepository membershipRequestRepository,
-      TeamCompositionRepository teamCompositionRepository) {
+      TeamCompositionRepository teamCompositionRepository,
+      NotificationService notificationService) {
     this.membershipRequestRepository = membershipRequestRepository;
     this.teamCompositionRepository = teamCompositionRepository;
+    this.notificationService = notificationService;
   }
 
   /**
@@ -43,6 +48,12 @@ public class MembershipRequestService {
     request.setState(State.ACCEPTED);
     request.setProcessingDate(LocalDateTime.now());
     membershipRequestRepository.save(request);
+    Notification notif = new Notification(
+        Type.MEMBERSHIP_REQUEST,
+        "Votre demande d'adhésion à " + request.getTeam().getName() + " a été acceptée !",
+        LocalDateTime.now()
+    );
+    notificationService.send(request.getMember().getId(), notif);
 
     TeamComposition composition = new TeamComposition(
         request.getMember(), request.getTeam(), LocalDateTime.now());
@@ -63,6 +74,14 @@ public class MembershipRequestService {
     request.setRefusalReason(refusalReason);
     request.setProcessingDate(LocalDateTime.now());
     membershipRequestRepository.save(request);
+
+    Notification notif = new Notification(
+        Notification.Type.MEMBERSHIP_REQUEST,
+        "Votre demande d'adhésion à " + request.getTeam().getName() + " a été refusée : "
+            + refusalReason,
+        LocalDateTime.now()
+    );
+    notificationService.send(request.getMember().getId(), notif);
   }
 
   /**
