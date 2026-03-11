@@ -24,7 +24,7 @@ export const UnavailabilitySection = () => {
     setSuccess(false);
 
     if (!dates.startDate || !dates.endDate) {
-      setError('Veuillez sélectionner les deux dates.');
+      setError('Veuillez sélectionner les deux dates');
       return;
     }
 
@@ -34,7 +34,7 @@ export const UnavailabilitySection = () => {
     }
 
     if (dates.endDate < dates.startDate) {
-      setError('La date de fin doit être postérieure à la date de début.');
+      setError('La date de fin doit être postérieure à la date de début');
       return;
     }
 
