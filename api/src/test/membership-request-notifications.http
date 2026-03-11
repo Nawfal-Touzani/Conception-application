@@ -1,38 +1,14 @@
 @baseUrl = http://localhost:3000
-@token =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoicmVzcG9uc2libGVAdmluY2kuYmUiLCJpYXQiOjE3NzMxNTg5NDUsImV4cCI6MTc3MzI0NTM0NX0.VFzI9uFSKVz9LBc3RKkkcPA0umcHRkq_kzbPFGqlUE4
-@token2 =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibWVtYmVyQHZpbmNpLmJlIiwiaWF0IjoxNzczMTU4OTY4LCJleHAiOjE3NzMyNDUzNjh9.VuYUEBs5eSBInAB4m_Dhz-1l65muSELnbtwQgUyoBQA
-
-### Register responsible member
-POST {{baseUrl}}/auths/register
-Content-Type: application/json
-
-{
-  "email": "responsible@vinci.be",
-  "password": "test123",
-  "tag": "Responsible",
-  "imageId": 1,
-  "specialityId": 1
-}
-
-### Register regular member
-POST {{baseUrl}}/auths/register
-Content-Type: application/json
-
-{
-  "email": "member@vinci.be",
-  "password": "test123",
-  "tag": "Member",
-  "imageId": 1,
-  "specialityId": 1
-}
+@token =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibGVhQG1haWwuY29tIiwiaWF0IjoxNzczMjQ1NDkzLCJleHAiOjE3NzMzMzE4OTN9.GvAiRkj55ikWw0kFdoqqF4TOQMmLUTEcyexYQYko15w
+@token2 =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoidG9tQG1haWwuY29tIiwiaWF0IjoxNzczMjQ1NTIyLCJleHAiOjE3NzMzMzE5MjJ9.WLiEavhhJnvkpSHU3psArghO_0Smf1aJpcuis7yuhZA
 
 ### Login responsible (copy token into @token)
 POST {{baseUrl}}/auths/login
 Content-Type: application/json
 
 {
-  "email": "responsible@vinci.be",
-  "password": "test123"
+  "email": "lea@mail.com",
+  "password": "lea"
 }
 
 ### Login regular member (copy token into @token2)
@@ -40,8 +16,8 @@ POST {{baseUrl}}/auths/login
 Content-Type: application/json
 
 {
-  "email": "member@vinci.be",
-  "password": "test123"
+  "email": "tom@mail.com",
+  "password": "tom"
 }
 
 ### Create a team with responsible (should return 201)
@@ -81,7 +57,7 @@ POST {{baseUrl}}/teams/1/membership-requests
 Authorization: Bearer {{token2}}
 
 ### Refuse membership request - member should receive notification (should return 204)
-PATCH {{baseUrl}}/membership-requests/2/refuse
+PATCH {{baseUrl}}/membership-requests/3/refuse
 Authorization: Bearer {{token}}
 Content-Type: application/json
 

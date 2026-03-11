@@ -5,7 +5,7 @@
 
 ### 0. Tokens
 @userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibmV3QHZpbmNpLmJlIiwiaWF0IjoxNzcyODM2NDMwLCJleHAiOjE3NzI5MjI4MzB9.hOFxWtso3qoUXrOGWXWM8smSKO8_Va7fd2jIQFT_FvA
-@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoiYWRtaW5AdmluY2kuYmUiLCJpYXQiOjE3NzI4MzY1MTksImV4cCI6MTc3MjkyMjkxOX0.53GrDr1AKBy-omLIy4ZDJJm0yTmGyhWyOa657VT2EVc
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoiYWRtaW5AdmluY2kuYmUiLCJpYXQiOjE3NzMyNDEyNDksImV4cCI6MTc3MzMyNzY0OX0.KOt29e-Z4ahaT4TfER0KdB5jRsZ0gbAjh2M8R4nMmwo
 
 ### REGISTER & LOGIN (ok)
 ### 1. Valid new member registration (201)
