@@ -2,6 +2,7 @@ package be.vinci.ipl.cae.api.services;
 
 import be.vinci.ipl.cae.api.models.dtos.CreateTeamRequest;
 import be.vinci.ipl.cae.api.models.dtos.TeamMemberDto;
+import be.vinci.ipl.cae.api.models.dtos.TeamResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.MembershipRequest;
 import be.vinci.ipl.cae.api.models.entities.MembershipRequest.State;
@@ -15,7 +16,6 @@ import be.vinci.ipl.cae.api.repositories.TeamRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -33,15 +33,11 @@ public class TeamService {
 
   /**
    * Instantiates a new Team service.
-   *
-   * @param teamRepository            the team repository
-   * @param teamCompositionRepository the team composition repository
-   * @param memberRepository          the member repository
    */
   public TeamService(TeamRepository teamRepository,
-      TeamCompositionRepository teamCompositionRepository, MemberRepository memberRepository,
-      MembershipRequestRepository membershipRequestRepository,
-      NotificationService notificationService) {
+                     TeamCompositionRepository teamCompositionRepository, MemberRepository memberRepository,
+                     MembershipRequestRepository membershipRequestRepository,
+                     NotificationService notificationService) {
     this.teamRepository = teamRepository;
     this.teamCompositionRepository = teamCompositionRepository;
     this.memberRepository = memberRepository;
@@ -51,24 +47,18 @@ public class TeamService {
 
   /**
    * Create team.
-   *
-   * @param memberId the member id
-   * @param request  the request
-   * @return the team
    */
   public Team createTeam(Long memberId, CreateTeamRequest request) {
-
     if (request.isInvalid()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Team name is required");
     }
-
     if (teamCompositionRepository.existsByMemberId(memberId)) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Member already belongs to a team");
     }
-
     if (teamRepository.existsByName(request.getName())) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Team name already exists");
     }
+
     Member member = memberRepository.findById(memberId).orElseThrow(
         () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Member not found"));
 
@@ -77,6 +67,7 @@ public class TeamService {
     team.setIsActive(true);
     team.setCreationDate(LocalDateTime.now());
     team.setResponsible(member);
+
     Team savedTeam = teamRepository.save(team);
     TeamComposition composition = new TeamComposition(member, savedTeam, LocalDateTime.now());
     teamCompositionRepository.save(composition);
@@ -85,30 +76,20 @@ public class TeamService {
   }
 
   /**
-   * Creates a membership request for a member to join a team. Notifies the team responsible.
-   *
-   * @param memberId the ID of the member
-   * @param teamId   the ID of the team
-   * @return the created membership request, or null if member or team not found
+   * Creates a membership request for a member to join a team.
    */
   public MembershipRequest createRequest(long memberId, long teamId) {
     Member member = memberRepository.findById(memberId).orElse(null);
-    if (member == null) {
-      return null;
-    }
+    if (member == null) return null;
 
     Team team = teamRepository.findById(teamId).orElse(null);
-    if (team == null) {
-      return null;
-    }
+    if (team == null) return null;
 
     MembershipRequest request = new MembershipRequest(State.PENDING, null, null);
     request.setMember(member);
     request.setTeam(team);
-
     MembershipRequest saved = membershipRequestRepository.save(request);
 
-    // Notify the team responsible
     Notification notif = new Notification(
         Notification.Type.MEMBERSHIP_REQUEST,
         "Nouvelle demande d'adhésion de " + member.getTag() + " pour rejoindre " + team.getName(),
@@ -120,22 +101,17 @@ public class TeamService {
   }
 
   /**
-   *Get members of my team list.
-   *
-   *@param memberId the member id
-   *@return the list
+   * Get members of the connected member's team.
    */
   public List<TeamMemberDto> getMembersOfMyTeam(Long memberId) {
-
     TeamComposition composition = teamCompositionRepository.findByMemberId(memberId)
-        .orElseThrow(() -> new ResponseStatusException(
-            HttpStatus.NOT_FOUND, "Member has no team"));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Member has no team"));
 
     if (composition.getTeam() == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team not found");
     }
-    Long teamId = composition.getTeam().getId();
 
+    Long teamId = composition.getTeam().getId();
     List<TeamComposition> compositions = teamCompositionRepository.findAllByTeamId(teamId);
 
     return compositions.stream()
@@ -147,41 +123,43 @@ public class TeamService {
   }
 
   /**
-   * Get all teams.
-   * 
-   * @return all teams
+   * Get all teams as entities (internal use).
    */
   public Iterable<Team> getAllTeams() {
     return teamRepository.findAll();
   }
-   
-   /**
-    * Delete a player from a team.
-    * 
-    * @param memberId the member id
-    */
+
+  /**
+   * ✅ NEW — Get all teams as safe DTOs (avoids circular JSON serialization).
+   * Used by GET /teams endpoint.
+   */
+  public List<TeamResponseDto> getAllTeamDtos() {
+    return teamRepository.findAll().stream()
+        .map(team -> new TeamResponseDto(
+            team.getId(),
+            team.getName(),
+            team.getResponsible() != null ? team.getResponsible().getTag() : null,
+            team.getSecondResponsible() != null ? team.getSecondResponsible().getTag() : null,
+            team.getCreationDate()
+        ))
+        .toList();
+  }
+
+  /**
+   * Leave the current team.
+   */
   public void leaveTeam(Long memberId) {
-
-    TeamComposition composition =
-        teamCompositionRepository.findByMemberId(memberId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
+    TeamComposition composition = teamCompositionRepository.findByMemberId(memberId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     teamCompositionRepository.delete(composition);
   }
 
   /**
    * Get the team of the connected member.
-   *
-   * @param memberId the member id
-   * @return the team
    */
   public Team getTeamOfMember(Long memberId) {
-
     TeamComposition composition = teamCompositionRepository.findByMemberId(memberId)
-        .orElseThrow(() -> new ResponseStatusException(
-            HttpStatus.NOT_FOUND, "Member has no team"));
-
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Member has no team"));
     return composition.getTeam();
   }
-
 }
