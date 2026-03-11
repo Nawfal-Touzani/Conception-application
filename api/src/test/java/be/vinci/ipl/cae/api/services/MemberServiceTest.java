@@ -16,9 +16,12 @@ import be.vinci.ipl.cae.api.models.dtos.UpdateMemberProfileDto;
 import be.vinci.ipl.cae.api.models.entities.Image;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Speciality;
+import be.vinci.ipl.cae.api.models.entities.Team;
+import be.vinci.ipl.cae.api.models.entities.TeamComposition;
 import be.vinci.ipl.cae.api.repositories.ImageRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
+import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
 import java.time.LocalDate;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,6 +51,9 @@ public class MemberServiceTest {
   @Mock
   private BCryptPasswordEncoder passwordEncoder;
 
+  @Mock
+  private TeamCompositionRepository teamCompositionRepository;
+
   @InjectMocks
   MemberService memberService;
 
@@ -76,6 +82,7 @@ public class MemberServiceTest {
   @DisplayName("Should return profile DTO when member exists")
   void getProfile1() {
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
+    when(teamCompositionRepository.findByMemberId(any())).thenReturn(Optional.empty());
 
     MemberProfileResponseDto result = memberService.getProfile(email);
 
@@ -96,6 +103,26 @@ public class MemberServiceTest {
   }
 
   @Test
+  @DisplayName("Should include team name when member has a team")
+  void getProfile3() {
+
+    Team team = new Team();
+    team.setName("Vinci");
+
+    TeamComposition composition = new TeamComposition();
+    composition.setTeam(team);
+
+    when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
+    when(teamCompositionRepository.findByMemberId(any()))
+        .thenReturn(Optional.of(composition));
+
+    MemberProfileResponseDto result = memberService.getProfile(email);
+
+    assertNotNull(result);
+    assertEquals("Vinci", result.getTeamName());
+  }
+
+  @Test
   @DisplayName("Should update profile and return new DTO")
   void updateProfile1() {
     UpdateMemberProfileDto payload = new UpdateMemberProfileDto();
@@ -110,6 +137,7 @@ public class MemberServiceTest {
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
     when(specialityRepository.findByName("Gardien")).thenReturn(Optional.of(newSpec));
     when(imageRepository.findByUrl("img2.png")).thenReturn(Optional.of(newImg));
+    when(teamCompositionRepository.findByMemberId(any())).thenReturn(Optional.empty());
 
     MemberProfileResponseDto result = memberService.updateProfile(email, payload);
 
@@ -129,6 +157,7 @@ public class MemberServiceTest {
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
     when(specialityRepository.findByName("Strange")).thenReturn(Optional.empty());
     when(imageRepository.findByUrl("nonExisting.png")).thenReturn(Optional.empty());
+    when(teamCompositionRepository.findByMemberId(any())).thenReturn(Optional.empty());
 
     MemberProfileResponseDto result = memberService.updateProfile(email, payload);
 
@@ -158,6 +187,7 @@ public class MemberServiceTest {
     payload.setProfileImage(null);
 
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
+    when(teamCompositionRepository.findByMemberId(any())).thenReturn(Optional.empty());
 
     memberService.updateProfile(email, payload);
 
@@ -270,6 +300,20 @@ public class MemberServiceTest {
     dto.setConfirmPassword("newPswd");
 
     boolean result = memberService.changePassword(email, dto);
+    assertFalse(result);
+  }
+
+  @Test
+  @DisplayName("Should return false when confirm password is null")
+  void changePassword9() {
+
+    ChangePasswordDto dto = new ChangePasswordDto();
+    dto.setOldPassword("old");
+    dto.setNewPassword("new");
+    dto.setConfirmPassword(null);
+
+    boolean result = memberService.changePassword(email, dto);
+
     assertFalse(result);
   }
 }
