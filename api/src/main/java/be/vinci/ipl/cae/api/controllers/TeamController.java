@@ -43,18 +43,6 @@ public class TeamController extends BaseController {
     this.membershipRequestService = membershipRequestService;
   }
 
-  /**
-   * Helper: converts a Team entity to a safe DTO (avoids circular JSON serialization).
-   */
-  private TeamResponseDto toDto(Team team) {
-    return new TeamResponseDto(
-        team.getId(),
-        team.getName(),
-        team.getResponsible() != null ? team.getResponsible().getTag() : null,
-        team.getSecondResponsible() != null ? team.getSecondResponsible().getTag() : null,
-        team.getCreationDate()
-    );
-  }
 
   /**
    * POST /teams — Create a new team.
@@ -63,7 +51,7 @@ public class TeamController extends BaseController {
   @PostMapping
   public ResponseEntity<TeamResponseDto> createTeam(@RequestBody CreateTeamRequest request) {
     Team createdTeam = teamService.createTeam(getConnectedMember().getId(), request);
-    return ResponseEntity.status(HttpStatus.CREATED).body(toDto(createdTeam));
+    return ResponseEntity.status(HttpStatus.CREATED).body(teamService.toDto(createdTeam));
   }
 
   /**
@@ -104,7 +92,7 @@ public class TeamController extends BaseController {
   @GetMapping("/my-team")
   public ResponseEntity<TeamResponseDto> getMyTeam() {
     Team team = teamService.getTeamOfMember(getConnectedMember().getId());
-    return ResponseEntity.ok(toDto(team));
+    return ResponseEntity.ok(teamService.toDto(team));
   }
 
   /**

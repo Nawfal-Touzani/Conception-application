@@ -143,13 +143,7 @@ public class TeamService {
    */
   public List<TeamResponseDto> getAllTeamDtos() {
     return teamRepository.findAll().stream()
-        .map(team -> new TeamResponseDto(
-            team.getId(),
-            team.getName(),
-            team.getResponsible() != null ? team.getResponsible().getTag() : null,
-            team.getSecondResponsible() != null ? team.getSecondResponsible().getTag() : null,
-            team.getCreationDate()
-        ))
+        .map(this::toDto)
         .toList();
   }
 
@@ -169,5 +163,18 @@ public class TeamService {
     TeamComposition composition = teamCompositionRepository.findByMemberId(memberId)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Member has no team"));
     return composition.getTeam();
+  }
+
+  /**
+   * Helper: converts a Team entity to a safe DTO (avoids circular JSON serialization).
+   */
+  public TeamResponseDto toDto(Team team) {
+    return new TeamResponseDto(
+        team.getId(),
+        team.getName(),
+        team.getResponsible() != null ? team.getResponsible().getTag() : null,
+        team.getSecondResponsible() != null ? team.getSecondResponsible().getTag() : null,
+        team.getCreationDate()
+    );
   }
 }
