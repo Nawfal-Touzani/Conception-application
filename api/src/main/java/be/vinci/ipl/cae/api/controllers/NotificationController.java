@@ -94,7 +94,7 @@ public class NotificationController {
   @PatchMapping("/{idMember}/notifications/{idNotification}")
   @ResponseStatus(HttpStatus.OK)
   @PreAuthorize("isAuthenticated()")
-  public Notification markNotificationAsRead(@PathVariable long idMember,
+  public NotificationResponseDto markNotificationAsRead(@PathVariable long idMember,
       @PathVariable long idNotification, @AuthenticationPrincipal Member currentMember) {
     if (currentMember.getId() != idMember) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN);
@@ -106,7 +106,7 @@ public class NotificationController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
-    return result;
+    return toDto(result);
   }
 
   // conversion of nototification into NotificationResponseDto
