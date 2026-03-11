@@ -1,5 +1,5 @@
 @baseUrl = http://localhost:3000
-@token =
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibHVmZnlAdmluY2kuYmUiLCJpYXQiOjE3NzMxODgyODIsImV4cCI6MTc3MzI3NDY4Mn0.YyUXsyu5vYTLhq1AuxULk_aQ9P66EikdpJoVhNZQFnc
 ### Register responsible member
 POST {{baseUrl}}/auths/register
 Content-Type: application/json
@@ -48,7 +48,7 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "name": "MarouTeam"
+  "name": "luffyTeam"
 }
 
 ### Try to create a team with empty name (should return 400)

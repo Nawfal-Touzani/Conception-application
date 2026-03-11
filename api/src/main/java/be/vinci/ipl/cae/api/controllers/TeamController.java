@@ -4,7 +4,9 @@ import be.vinci.ipl.cae.api.models.dtos.CreateTeamRequest;
 import be.vinci.ipl.cae.api.models.dtos.TeamMemberDto;
 import be.vinci.ipl.cae.api.models.entities.MembershipRequest;
 import be.vinci.ipl.cae.api.models.entities.Team;
+import be.vinci.ipl.cae.api.models.entities.TeamComposition;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
+import be.vinci.ipl.cae.api.repositories.MembershipRequestRepository;
 import be.vinci.ipl.cae.api.services.MembershipRequestService;
 import be.vinci.ipl.cae.api.services.TeamService;
 import java.util.List;
@@ -89,14 +91,25 @@ public class TeamController extends BaseController {
     return ResponseEntity.ok(members);
   }
 
+  /**
+   * Get all teams.
+   * 
+   * @return all teams 
+   */
   @GetMapping
   public Iterable<Team> getAllTeams() {
     return teamService.getAllTeams();
   }
 
+  /**
+   * Delete a player from a team.
+   * 
+   * @return void
+   */
   @DeleteMapping("/leave")
   public ResponseEntity<Void> leaveTeam() {
     teamService.leaveTeam(getConnectedMember().getId());
     return ResponseEntity.noContent().build();
   }
+
 }

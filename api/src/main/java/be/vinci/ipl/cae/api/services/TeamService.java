@@ -15,6 +15,7 @@ import be.vinci.ipl.cae.api.repositories.TeamRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -145,10 +146,20 @@ public class TeamService {
         .toList();
   }
 
+  /**
+   * Get all teams.
+   * 
+   * @return all teams
+   */
   public Iterable<Team> getAllTeams() {
     return teamRepository.findAll();
   }
-
+   
+   /**
+    * Delete a player from a team.
+    * 
+    * @param memberId the member id
+    */
   public void leaveTeam(Long memberId) {
 
     TeamComposition composition =
@@ -157,4 +168,20 @@ public class TeamService {
 
     teamCompositionRepository.delete(composition);
   }
+
+  /**
+   * Get the team of the connected member.
+   *
+   * @param memberId the member id
+   * @return the team
+   */
+  public Team getTeamOfMember(Long memberId) {
+
+    TeamComposition composition = teamCompositionRepository.findByMemberId(memberId)
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.NOT_FOUND, "Member has no team"));
+
+    return composition.getTeam();
+  }
+
 }
