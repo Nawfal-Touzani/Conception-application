@@ -35,7 +35,8 @@ public class TeamService {
    * Instantiates a new Team service.
    */
   public TeamService(TeamRepository teamRepository,
-                     TeamCompositionRepository teamCompositionRepository, MemberRepository memberRepository,
+                     TeamCompositionRepository teamCompositionRepository,
+                     MemberRepository memberRepository,
                      MembershipRequestRepository membershipRequestRepository,
                      NotificationService notificationService) {
     this.teamRepository = teamRepository;
@@ -96,7 +97,10 @@ public class TeamService {
 
     Notification notif = new Notification(
         Notification.Type.MEMBERSHIP_REQUEST,
-        "Nouvelle demande d'adhésion de " + member.getTag() + " pour rejoindre " + team.getName(),
+        "Nouvelle demande d'adhésion de "
+            + member.getTag()
+            + " pour rejoindre "
+            + team.getName(),
         LocalDateTime.now()
     );
     notificationService.send(team.getResponsible().getId(), notif);
@@ -134,7 +138,7 @@ public class TeamService {
   }
 
   /**
-   * ✅ NEW — Get all teams as safe DTOs (avoids circular JSON serialization).
+   *  NEW — Get all teams as safe DTOs (avoids circular JSON serialization).
    * Used by GET /teams endpoint.
    */
   public List<TeamResponseDto> getAllTeamDtos() {
