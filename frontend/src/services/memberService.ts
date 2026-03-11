@@ -2,6 +2,11 @@ import { MemberProfile } from '../types/member';
 
 const API_URL = 'http://localhost:3000/members';
 
+export interface UnavailabilityDto {
+  startDate: string;
+  endDate: string;
+}
+
 export const getMyProfile = async (token: string): Promise<MemberProfile> => {
   const response = await fetch(`${API_URL}/me`, {
     method: 'GET',
@@ -47,4 +52,26 @@ export const changePassword = async (
     console.error('Erreur réseau ou serveur :', error);
     return false;
   }
+};
+
+export const addUnavailability = async (
+  token: string,
+  startDate: string,
+  endDate: string,
+) => {
+  const response = await fetch(`${API_URL}/me/unavailabilities`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ startDate, endDate }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Erreur');
+  }
+
+  return true;
 };
