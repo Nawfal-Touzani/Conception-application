@@ -1,10 +1,12 @@
 package be.vinci.ipl.cae.api.controllers;
 
 import be.vinci.ipl.cae.api.models.dtos.NotificationDto;
+import be.vinci.ipl.cae.api.models.dtos.NotificationResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.services.NotificationService;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -40,7 +42,7 @@ public class NotificationController {
    */
   @GetMapping("/{id}/notifications")
   @PreAuthorize("isAuthenticated()")
-  public Iterable<Notification> getNotificationsOfMember(@PathVariable long id,
+  public Iterable<NotificationResponseDto> getNotificationsOfMember(@PathVariable long id,
       @RequestParam(required = false) Boolean read,
       @AuthenticationPrincipal Member currentMember) {
 
@@ -59,7 +61,10 @@ public class NotificationController {
     if (notifications == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
-    return notifications;
+    return ((List<Notification>) notifications)
+        .stream()
+        .map(this::toDto)
+        .toList();
 
   }
 
@@ -69,7 +74,7 @@ public class NotificationController {
   @PostMapping("/{id}/notifications")
   @PreAuthorize("isAuthenticated()")
   @ResponseStatus(HttpStatus.CREATED)
-  public Notification sendNotification(@PathVariable long id,
+  public NotificationResponseDto sendNotification(@PathVariable long id,
       @Valid @RequestBody NotificationDto dto) {
 
     Notification notification = new Notification(dto.type(), dto.message(), dto.sendDate());
@@ -80,7 +85,7 @@ public class NotificationController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
-    return result;
+    return toDto(result);
   }
 
   /**
@@ -89,7 +94,7 @@ public class NotificationController {
   @PatchMapping("/{idMember}/notifications/{idNotification}")
   @ResponseStatus(HttpStatus.OK)
   @PreAuthorize("isAuthenticated()")
-  public Notification markNotificationAsRead(@PathVariable long idMember,
+  public NotificationResponseDto markNotificationAsRead(@PathVariable long idMember,
       @PathVariable long idNotification, @AuthenticationPrincipal Member currentMember) {
     if (currentMember.getId() != idMember) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN);
@@ -101,7 +106,19 @@ public class NotificationController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
-    return result;
+    return toDto(result);
+  }
+
+  // conversion of nototification into NotificationResponseDto
+  private NotificationResponseDto toDto(Notification notif) {
+    return new NotificationResponseDto(
+        notif.getId(),
+        notif.getType(),
+        notif.getMessage(),
+        notif.getSendDate(),
+        notif.isRead(),
+        notif.getMembershipRequest() != null ? notif.getMembershipRequest().getId() : null
+    );
   }
 
 }

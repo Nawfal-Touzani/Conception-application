@@ -1,6 +1,6 @@
 ### Set base URL
 @baseUrl = http://localhost:3000
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoidGVzdEB2aW5jaS5iZSIsImlhdCI6MTc3Mjk5NDc2NCwiZXhwIjoxNzczMDgxMTY0fQ.qAvTNTAff6empfV4XvVBdxYbweGWU9aWLSGPYk8FN98
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoidGVzdEB2aW5jaS5iZSIsImlhdCI6MTc3MzIzMTk4OSwiZXhwIjoxNzczMzE4Mzg5fQ.QACNaOfBMMUoGqPU6ERfsvjHf65eynBqNmBaWGynmkM
 @token2 =
 
 ### Register a member
@@ -66,9 +66,9 @@ GET {{baseUrl}}/members/3/notifications
 Authorization: Bearer {{token2}}
 
 ### Send a notification to member 3 - any authenticated member can send (should return 201)
-POST {{baseUrl}}/members/3/notifications
+POST {{baseUrl}}/members/4/notifications
 Content-Type: application/json
-Authorization: Bearer {{token2}}
+Authorization: Bearer {{token}}
 
 {
   "type": "RESULT",
