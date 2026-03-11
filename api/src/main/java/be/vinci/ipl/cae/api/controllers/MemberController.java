@@ -90,7 +90,7 @@ public class MemberController {
    * @throws ResponseStatusException 400 if the old password is incorrect or 404 if member not
    *                                 found
    */
-  @PatchMapping("/change-password")
+  @PatchMapping("/password")
   @PreAuthorize("isAuthenticated()")
   public void changePassword(Authentication authentication,
       @Valid @RequestBody ChangePasswordDto dto) {
