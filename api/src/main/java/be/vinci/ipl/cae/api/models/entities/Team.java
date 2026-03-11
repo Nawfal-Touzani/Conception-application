@@ -19,6 +19,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Represents a team in the platform.
+ * We find a mandatory primary responsible member and optionally a secondary responsible.
+ * It is also linked to its compositions and membership requests.
+ */
 @Entity
 @Table(name = "teams")
 @Getter
@@ -50,6 +55,15 @@ public class Team {
   @JsonIgnore
   private List<MembershipRequest> membershipRequests = new ArrayList<>();
 
+  /**
+   * Full constructor to create a team with all essential attributes.
+   *
+   * @param name the unique team name (max 100 characters)
+   * @param isActive indicates if the team is active (true/false)
+   * @param creationDate the team creation date
+   * @param responsible the primary responsible member (mandatory)
+   * @param secondResponsible the secondary responsible member (optional, can be null)
+   */
   public Team(String name, Boolean isActive, LocalDateTime creationDate, Member responsible,
       Member secondResponsible) {
     this.name = name;

@@ -3,96 +3,69 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
-  Container,
   TextField,
   Typography,
   Paper,
   Alert,
-  Grid,
   Checkbox,
   FormControlLabel,
 } from '@mui/material';
-import { useAuth } from '../../contexts/AuthContext'; // Adjust the path if needed
+import { useAuth } from '../../contexts/AuthContext';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { login } = useAuth(); // Retrieve the login function from our Context
+  const { login } = useAuth(); // Context for authentication
 
-  // Form states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError(null);
 
-    // If fields are empty
     if (!email || !password) {
-      return setError('Veuillez remplir tous les champs.');
+      setError('Veuillez remplir tous les champs.');
+      return;
     }
 
     try {
-      setIsLoading(true);
-      // Call the backend via our Context
-      await login({ email, password });
-
-      // If login is successful, redirect to the home page
+      await login({ email, password }, rememberMe); // Call the backend via our Context
       navigate('/');
     } catch (err) {
       if (err instanceof Error) {
-        setError(err.message); // Displays "Email or password incorrect"
+        setError(err.message); // Display the error message from the backend
       } else {
         setError("Une erreur inattendue s'est produite.");
       }
     } finally {
-      setIsLoading(false);
+      // Optionally, reset after a failed login attempt
+      setPassword('');
     }
   };
 
-  // Custom style for our rounded blue inputs
-  const roundedBlueInputStyle = {
-    '& .MuiOutlinedInput-root': {
-      borderRadius: '15px', // Rounded rectangle
-      '& fieldset': {
-        borderColor: '#1e2a44',
-        borderWidth: '2px',
-      },
-      '&:hover fieldset': {
-        borderColor: '#1e2a44',
-      },
-      '&.Mui-focused fieldset': {
-        borderColor: '#1e2a44',
-      },
-    },
-    '& .MuiInputLabel-root.Mui-focused': {
-      color: '#1e2a44',
-    },
-  };
-
   return (
-    // Main Box with the dark blue background
+    // Background
     <Box
       sx={{
         minHeight: '100vh',
+        backgroundColor: '#1e2a44',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#1e2a44',
-        padding: 2,
       }}
     >
-      <Container maxWidth="xs">
-        {/* White card containing the form */}
-        <Paper elevation={6} sx={{ p: 4, borderRadius: '20px' }}>
-          {/* Title aligned to the left and larger */}
+      {/* Card + button centered together */}
+      <Box display="flex" flexDirection="column" alignItems="center" mt={-10}>
+        {/* White card */}
+        <Paper elevation={10} sx={{ width: 520, borderRadius: '10px', p: 3 }}>
           <Typography
             variant="h4"
             component="h1"
-            align="left"
-            gutterBottom
-            sx={{ fontWeight: 'bold', color: '#1e2a44', mb: 3 }}
+            fontWeight="bold"
+            color="#1e2a44"
+            mb={3}
           >
             Se connecter
           </Typography>
@@ -104,85 +77,108 @@ const LoginPage: React.FC = () => {
             </Alert>
           )}
 
-          <Box component="form" onSubmit={handleSubmit} noValidate>
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            display={'flex'}
+            flexDirection="column"
+            gap={2}
+          >
             <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
               label="Adresse email"
-              name="email"
-              autoComplete="email"
-              autoFocus
+              type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              sx={roundedBlueInputStyle}
+              variant="filled"
+              InputProps={{ disableUnderline: true }}
+              sx={{
+                '& .MuiFilledInput-root': {
+                  backgroundColor: '#1a2744',
+                  borderRadius: '10px',
+                  color: '#ffffff',
+                },
+                '& .MuiFilledInput-root:hover': {
+                  backgroundColor: '#1a2744',
+                },
+                '& .MuiFilledInput-root.Mui-focused': {
+                  backgroundColor: '#1a2744',
+                },
+                '& .MuiInputLabel-root': {
+                  color: 'grey',
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: 'grey',
+                },
+              }}
             />
 
             <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
               label="Mot de passe"
               type="password"
-              id="password"
-              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              sx={roundedBlueInputStyle}
+              variant="filled"
+              InputProps={{ disableUnderline: true }}
+              sx={{
+                '& .MuiFilledInput-root': {
+                  backgroundColor: '#1a2744',
+                  borderRadius: '10px',
+                  color: '#ffffff',
+                },
+                '& .MuiFilledInput-root:hover': {
+                  backgroundColor: '#1a2744',
+                },
+                '& .MuiFilledInput-root.Mui-focused': {
+                  backgroundColor: '#1a2744',
+                },
+                '& .MuiInputLabel-root': {
+                  color: 'grey',
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: 'grey',
+                },
+              }}
             />
 
-            {/* Remember me and Forgot password on the same line */}
-            <Grid
-              container
-              alignItems="center"
-              justifyContent="space-between"
-              sx={{ mt: 1, mb: 3 }}
-            >
-              <Grid item>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      value="remember"
-                      color="primary"
-                      sx={{
-                        color: '#1e2a44',
-                        '&.Mui-checked': { color: '#1e2a44' },
-                      }}
-                    />
-                  }
-                  label={
-                    <Typography variant="body2" sx={{ color: '#1e2a44' }}>
-                      Se souvenir de moi
-                    </Typography>
-                  }
+            {/* Remember me */}
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  sx={{
+                    color: '#1e2a44',
+                    '&.Mui-checked': { color: '#1e2a44' },
+                  }}
                 />
-              </Grid>
-            </Grid>
-
-            {/* Isolated login button at the bottom */}
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              disabled={isLoading}
-              sx={{
-                py: 1.5,
-                fontWeight: 'bold',
-                fontSize: '1.1rem',
-                backgroundColor: '#1e2a44',
-                color: 'white',
-                borderRadius: '50px', // Apple-style round button
-                textTransform: 'none',
-                '&:hover': { backgroundColor: '#151e32' },
-              }}
-            >
-              {isLoading ? 'Connexion...' : 'Se connecter'}
-            </Button>
+              }
+              label={
+                <Typography fontWeight="bold" color="#1a2744">
+                  Se souvenir de moi
+                </Typography>
+              }
+            />
           </Box>
         </Paper>
-      </Container>
+
+        {/* Isolated login button at the bottom */}
+        <Button
+          onClick={handleSubmit}
+          variant="contained"
+          sx={{
+            mt: 3,
+            backgroundColor: 'white',
+            color: '#1e2a44',
+            borderRadius: '10px',
+            textTransform: 'none', // no uppercase
+            fontWeight: 'bold',
+            fontSize: '1.3rem',
+            px: 3,
+          }}
+        >
+          Se connecter
+        </Button>
+      </Box>
     </Box>
   );
 };

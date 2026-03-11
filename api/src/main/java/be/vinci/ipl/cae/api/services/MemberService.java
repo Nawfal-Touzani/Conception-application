@@ -50,7 +50,9 @@ public class MemberService {
     dto.setTag(member.getTag());
     dto.setSpeciality(member.getSpeciality().getName());
     dto.setProfileImage(member.getImage().getUrl());
-    dto.setCreationDate(member.getProfileCreationDateTime().toLocalDate());
+
+    dto.setCreationDate(member.getProfileCreationDate());
+
     // TODO: Add member's team
     // dto.setTeamName(member.getTeam() != null ? member.getTeam().getName() : "No team");
 

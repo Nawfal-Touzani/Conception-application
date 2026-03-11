@@ -6,6 +6,7 @@ import be.vinci.ipl.cae.api.models.entities.Speciality;
 import be.vinci.ipl.cae.api.repositories.ImageRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -48,27 +49,119 @@ public class BcryptConfiguration {
     return args -> {
 
 
-      // 1. Image
-      Image defaultImage;
-      List<Image> images = imageRepository.findAll();
-      if (images.isEmpty()) {
-        defaultImage = new Image();
-        defaultImage.setUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRTZjZFbcuX7hBSisFiZXdPRCG9t14Kt0Xxg&s");
-        defaultImage = imageRepository.save(defaultImage);
-      } else {
-        defaultImage = images.getFirst();
+      // 20 Images in DB
+      List<String> imageUrls = List.of(
+          "/images/avatar01.png",
+          "/images/avatar02.png",
+          "/images/avatar03.png",
+          "/images/avatar04.png",
+          "/images/avatar05.png",
+          "/images/avatar06.png",
+          "/images/avatar07.png",
+          "/images/avatar08.png",
+          "/images/avatar09.png",
+          "/images/avatar10.png",
+          "/images/avatar11.png",
+          "/images/avatar12.png",
+          "/images/avatar13.png",
+          "/images/avatar14.png",
+          "/images/avatar15.png",
+          "/images/avatar16.png",
+          "/images/avatar17.png",
+          "/images/avatar18.png",
+          "/images/avatar19.png",
+          "/images/avatar20.png"
+      );
+
+      for (String url : imageUrls) {
+        if (imageRepository.findByUrl(url).isEmpty()) {
+          Image i = new Image(url);
+          imageRepository.save(i);
+        }
       }
 
-      // 2. Speciality
-      Speciality defaultSpeciality;
-      List<Speciality> specialities = specialityRepository.findAll();
-      if (specialities.isEmpty()) {
-        defaultSpeciality = new Speciality();
-        defaultSpeciality.setName("Architecte");
-        defaultSpeciality = specialityRepository.save(defaultSpeciality);
-      } else {
-        defaultSpeciality = specialities.getFirst();
+      // All Speciality in DB
+      List<String> specialityNames = List.of(
+          "architecte",
+          "catalyseur",
+          "exécuteur",
+          "gardien",
+          "guérisseur",
+          "perturbateur",
+          "tacticien"
+      );
+
+      for (String name : specialityNames) {
+        if (specialityRepository.findByName(name).isEmpty()) {
+          Speciality s = new Speciality(name);
+          specialityRepository.save(s);
+        }
       }
+
+      // Members & Admins in DB
+      Speciality tacticien = specialityRepository.findByName("tacticien").orElseThrow();
+
+      if (!memberRepository.existsByEmail("lea@mail.com")) {
+        Member lea = new Member();
+        lea.setEmail("lea@mail.com");
+        lea.setPassword(passwordEncoder.encode("lea"));
+        lea.setTag("Lynx");
+        lea.setAdmin(false);
+        lea.setImage(imageRepository.findAll().getFirst());
+        lea.setSpeciality(tacticien);
+        lea.setProfileCreationDate(LocalDate.of(2025, 11, 12));
+
+        memberRepository.save(lea);
+      }
+
+      Speciality executeur = specialityRepository.findByName("exécuteur").orElseThrow();
+
+      if (!memberRepository.existsByEmail("tom@mail.com")) {
+        Member tom = new Member();
+        tom.setEmail("tom@mail.com");
+        tom.setPassword(passwordEncoder.encode("tom"));
+        tom.setTag("Rogue");
+        tom.setAdmin(false);
+        tom.setImage(imageRepository.findAll().get(3));
+        tom.setSpeciality(executeur);
+        tom.setProfileCreationDate(LocalDate.of(2025, 12, 3));
+
+        memberRepository.save(tom);
+      }
+
+      Speciality guerisseur = specialityRepository.findByName("guérisseur").orElseThrow();
+
+      if (!memberRepository.existsByEmail("ines@mail.com")) {
+        Member ines = new Member();
+        ines.setEmail("ines@mail.com");
+        ines.setPassword(passwordEncoder.encode("ines"));
+        ines.setTag("Pulse");
+        ines.setAdmin(true);
+        ines.setImage(imageRepository.findAll().get(15));
+        ines.setSpeciality(guerisseur);
+        ines.setProfileCreationDate(LocalDate.of(2026, 1, 18));
+
+        memberRepository.save(ines);
+      }
+
+      Speciality gardien = specialityRepository.findByName("gardien").orElseThrow();
+
+      if (!memberRepository.existsByEmail("tibo@mail.com")) {
+        Member tibo = new Member();
+        tibo.setEmail("tibo@mail.com");
+        tibo.setPassword(passwordEncoder.encode("tibo"));
+        tibo.setTag("Iron");
+        tibo.setAdmin(true);
+        tibo.setImage(imageRepository.findAll().get(19));
+        tibo.setSpeciality(gardien);
+        tibo.setProfileCreationDate(LocalDate.of(2025, 10, 27));
+
+        memberRepository.save(tibo);
+      }
+
+      // Defaults in DB
+      Speciality defaultSpeciality = specialityRepository.findAll().getFirst();
+      Image defaultImage = imageRepository.findAll().get(11);
 
       if (!memberRepository.existsByEmail("admin@vinci.be")) {
         Member admin = new Member();
@@ -78,20 +171,22 @@ public class BcryptConfiguration {
         admin.setAdmin(true);
         admin.setImage(defaultImage);
         admin.setSpeciality(defaultSpeciality);
+        admin.setProfileCreationDate(LocalDate.now());
 
         memberRepository.save(admin);
       }
 
-      if (!memberRepository.existsByEmail("user@vinci.be")) {
-        Member user = new Member();
-        user.setEmail("user@vinci.be");
-        user.setPassword(passwordEncoder.encode("user"));
-        user.setTag("User");
-        user.setAdmin(false);
-        user.setImage(defaultImage);
-        user.setSpeciality(defaultSpeciality);
+      if (!memberRepository.existsByEmail("member@vinci.be")) {
+        Member member = new Member();
+        member.setEmail("member@vinci.be");
+        member.setPassword(passwordEncoder.encode("member"));
+        member.setTag("Member");
+        member.setAdmin(false);
+        member.setImage(defaultImage);
+        member.setSpeciality(defaultSpeciality);
+        member.setProfileCreationDate(LocalDate.now());
 
-        memberRepository.save(user);
+        memberRepository.save(member);
       }
     };
   }

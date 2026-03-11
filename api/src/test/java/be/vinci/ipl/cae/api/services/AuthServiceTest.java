@@ -20,6 +20,7 @@ import be.vinci.ipl.cae.api.models.entities.Speciality;
 import be.vinci.ipl.cae.api.repositories.ImageRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
+import java.time.LocalDate;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,10 +62,10 @@ class AuthServiceTest {
     loginDto = new LoginCredentials("test@vinci.be", "test");
     mockImage = new Image("http://image.url");
     mockSpeciality = new Speciality("Architecte");
-    mockMember = new Member("test@vinci.be", "hashedPassword", "Gamer", false, mockImage,
-        mockSpeciality);
-    mockAdmin = new Member("admin@vinci.be", "hashedPassword", "Admin", true, mockImage,
-        mockSpeciality);
+    mockMember = new Member("test@vinci.be", "hashedPassword", "Gamer", false, LocalDate.now(),
+        mockImage, mockSpeciality);
+    mockAdmin = new Member("admin@vinci.be", "hashedPassword", "Admin", true, LocalDate.now(),
+        mockImage, mockSpeciality);
   }
 
   // REGISTER TESTS
