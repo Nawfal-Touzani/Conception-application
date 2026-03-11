@@ -19,7 +19,7 @@ import be.vinci.ipl.cae.api.models.entities.Speciality;
 import be.vinci.ipl.cae.api.repositories.ImageRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -69,7 +69,7 @@ public class MemberServiceTest {
     member.setTag("PlayerOne");
     member.setSpeciality(speciality);
     member.setImage(image);
-    member.setProfileCreationDateTime(LocalDateTime.now());
+    member.setProfileCreationDate(LocalDate.now());
   }
 
   @Test

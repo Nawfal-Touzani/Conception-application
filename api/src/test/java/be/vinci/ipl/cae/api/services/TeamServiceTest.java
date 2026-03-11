@@ -103,7 +103,7 @@ class TeamServiceTest {
    * Create team should fail when member already in a team.
    */
   @Test
-  void createTeam_shouldFail_whenMemberAlreadyInATeam() {
+  void createTeam_shouldFail_whenMemberAlreadyInTeam() {
     when(teamCompositionRepository.existsByMemberId(1L)).thenReturn(true);
 
     assertThrows(ResponseStatusException.class, () -> teamService.createTeam(1L, request));
