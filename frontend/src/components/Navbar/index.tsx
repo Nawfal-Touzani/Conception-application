@@ -1,14 +1,5 @@
-import {
-  AppBar,
-  Toolbar,
-  Button,
-  Typography,
-  Box,
-  IconButton,
-  Badge,
-} from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import notifLogo from '../../assets/images/notif-logo.png';
+import { AppBar, Toolbar, Button, Typography, Box } from '@mui/material';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext'; // hook
 import logo from '../../assets/images/logo.png';
 import member from '../../assets/images/member.png';
@@ -18,6 +9,7 @@ import { useEffect } from 'react';
 
 const NavBar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuth(); // On récupère l'utilisateur et la fonction de déconnexion
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -32,6 +24,8 @@ const NavBar = () => {
 
     fetchUnreadCount();
   }, [user]);
+
+  const isTeamPage = location.pathname === '/team';
 
   return (
     <AppBar position="static" sx={{ backgroundColor: '#ffffff', boxShadow: 1 }}>
@@ -61,6 +55,26 @@ const NavBar = () => {
           >
             Tournois
           </Button>
+
+          {/* Mon équipe (visible seulement si connecté) */}
+          {user && (
+            <Button
+              onClick={() => navigate('/team')}
+              sx={{
+                backgroundColor: isTeamPage ? '#d8a46b' : '#1e2a44',
+                color: 'white',
+                borderRadius: '10px',
+                textTransform: 'none',
+                fontWeight: 'bold',
+                px: 5,
+                '&:hover': {
+                  backgroundColor: isTeamPage ? '#c38d54' : '#151e32',
+                },
+              }}
+            >
+              Mon équipe
+            </Button>
+          )}
         </Box>
 
         {/* RIGHT SIDE: Auth buttons or User info */}
