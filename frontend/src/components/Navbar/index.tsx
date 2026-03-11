@@ -1,12 +1,37 @@
-import { AppBar, Toolbar, Button, Typography, Box } from '@mui/material';
+import {
+  AppBar,
+  Toolbar,
+  Button,
+  Typography,
+  Box,
+  IconButton,
+  Badge,
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import notifLogo from '../../assets/images/notif-logo.png';
 import { useAuth } from '../../contexts/AuthContext'; // hook
 import logo from '../../assets/images/logo.png';
 import member from '../../assets/images/member.png';
+import { useState } from 'react';
+import { getNotifications } from '../../services/notifications.service';
+import { useEffect } from 'react';
 
 const NavBar = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth(); // On récupère l'utilisateur et la fonction de déconnexion
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Fetch unread notifications count when user is logged in
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchUnreadCount = async () => {
+      const unread = await getNotifications(user.id, user.token, false);
+      setUnreadCount(unread.length);
+    };
+
+    fetchUnreadCount();
+  }, [user]);
 
   return (
     <AppBar position="static" sx={{ backgroundColor: '#ffffff', boxShadow: 1 }}>
@@ -43,6 +68,20 @@ const NavBar = () => {
           {user ? (
             <>
               {/* If user is logged in : Only show the tag + image */}
+
+              <IconButton
+                onClick={() => navigate('/notifications')}
+                sx={{ color: '#1e2a44' }}
+              >
+                <Badge badgeContent={unreadCount} color="error">
+                  <img
+                    src={notifLogo}
+                    alt="Notifications"
+                    style={{ height: '24px' }}
+                  />
+                </Badge>
+              </IconButton>
+
               <Typography
                 variant="body1"
                 sx={{ color: '#1e2a44', fontWeight: 'bold', px: 3 }}

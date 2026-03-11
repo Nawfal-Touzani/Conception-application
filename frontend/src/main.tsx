@@ -8,6 +8,7 @@ import App from './components/App/index.tsx';
 import HomePage from './components/pages/HomePage.tsx';
 import RegisterPage from './components/pages/RegisterPage.tsx';
 import LoginPage from './components/pages/LoginPage.tsx';
+import NotificationsPage from './components/pages/NotificationsPage.tsx';
 
 import { AuthProvider } from './contexts/AuthContext.tsx';
 
@@ -32,6 +33,10 @@ const router = createBrowserRouter([
       {
         path: 'login',
         element: <LoginPage />,
+      },
+      {
+        path: 'notifications',
+        element: <NotificationsPage />,
       },
     ],
   },

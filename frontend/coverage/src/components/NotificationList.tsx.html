@@ -1,15 +1,15 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>Code coverage report for src/components/App/index.tsx</title>
+    <title>Code coverage report for src/components/NotificationList.tsx</title>
     <meta charset="utf-8" />
-    <link rel="stylesheet" href="../../../prettify.css" />
-    <link rel="stylesheet" href="../../../base.css" />
-    <link rel="shortcut icon" type="image/x-icon" href="../../../favicon.png" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../../favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style type="text/css">
       .coverage-summary .sorter {
-        background-image: url(../../../sort-arrow-sprite.png);
+        background-image: url(../../sort-arrow-sprite.png);
       }
     </style>
   </head>
@@ -18,14 +18,14 @@
     <div class="wrapper">
       <div class="pad1">
         <h1>
-          <a href="../../../index.html">All files</a> /
-          <a href="index.html">src/components/App</a> index.tsx
+          <a href="../../index.html">All files</a> /
+          <a href="index.html">src/components</a> NotificationList.tsx
         </h1>
         <div class="clearfix">
           <div class="fl pad1y space-right2">
             <span class="strong">0% </span>
             <span class="quiet">Statements</span>
-            <span class="fraction">0/18</span>
+            <span class="fraction">0/15</span>
           </div>
 
           <div class="fl pad1y space-right2">
@@ -43,7 +43,7 @@
           <div class="fl pad1y space-right2">
             <span class="strong">0% </span>
             <span class="quiet">Lines</span>
-            <span class="fraction">0/18</span>
+            <span class="fraction">0/15</span>
           </div>
         </div>
         <p class="quiet">
@@ -86,63 +86,60 @@
 <a name='L25'></a><a href='#L25'>25</a>
 <a name='L26'></a><a href='#L26'>26</a>
 <a name='L27'></a><a href='#L27'>27</a>
-<a name='L28'></a><a href='#L28'>28</a>
-<a name='L29'></a><a href='#L29'>29</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L28'></a><a href='#L28'>28</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { Outlet } from 'react-router-dom';</span></span></span>
-<span class="cstat-no" title="statement not covered" >import { Box } from '@mui/material';</span>
-<span class="cstat-no" title="statement not covered" >import NavBar from '../Navbar';</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { List } from '@mui/material';</span></span></span>
+import { Notification } from '../types/notifications.types';
+<span class="cstat-no" title="statement not covered" >import NotificationItem from './NotificationItem';</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >const App = () =&gt; {</span>
+interface NotificationListProps {
+  notifications: Notification[];
+  onMarkAsRead: (notificationId: number) =&gt; void;
+}
+&nbsp;
+<span class="cstat-no" title="statement not covered" >const NotificationList = ({</span>
+<span class="cstat-no" title="statement not covered" >  notifications,</span>
+<span class="cstat-no" title="statement not covered" >  onMarkAsRead,</span>
+<span class="cstat-no" title="statement not covered" >}: NotificationListProps) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  return (</span>
-<span class="cstat-no" title="statement not covered" >    // Main Box taking the full height of the screen</span>
-<span class="cstat-no" title="statement not covered" >    &lt;Box</span>
-<span class="cstat-no" title="statement not covered" >      sx={{</span>
-<span class="cstat-no" title="statement not covered" >        display: 'flex',</span>
-<span class="cstat-no" title="statement not covered" >        flexDirection: 'column',</span>
-<span class="cstat-no" title="statement not covered" >        minHeight: '100vh',</span>
-<span class="cstat-no" title="statement not covered" >        backgroundColor: '#1e2a44',</span>
-<span class="cstat-no" title="statement not covered" >      }}</span>
-    &gt;
-      {/* Our navigation bar will always be visible at the top */}
-<span class="cstat-no" title="statement not covered" >      &lt;NavBar /&gt;</span>
-&nbsp;
-      {/* This is where the React Router magic happens! */}
-      {/* Outlet will be replaced by LoginPage, RegisterPage, or HomePage depending on the URL */}
-<span class="cstat-no" title="statement not covered" >      &lt;Box component="main" sx={{ flexGrow: 1 }}&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;Outlet /&gt;</span>
-      &lt;/Box&gt;
-    &lt;/Box&gt;
+<span class="cstat-no" title="statement not covered" >    &lt;List&gt;</span>
+<span class="cstat-no" title="statement not covered" >      {notifications.map((notif) =&gt; (</span>
+<span class="cstat-no" title="statement not covered" >        &lt;NotificationItem</span>
+<span class="cstat-no" title="statement not covered" >          key={notif.id}</span>
+<span class="cstat-no" title="statement not covered" >          notification={notif}</span>
+<span class="cstat-no" title="statement not covered" >          onMarkAsRead={onMarkAsRead}</span>
+        /&gt;
+      ))}
+    &lt;/List&gt;
   );
 <span class="cstat-no" title="statement not covered" >};</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >export default App;</span>
+<span class="cstat-no" title="statement not covered" >export default NotificationList;</span>
 &nbsp;</pre></td></tr></table></pre>
 
       <div class="push"></div>
@@ -159,13 +156,13 @@
       >
       at 2026-03-11T13:23:58.385Z
     </div>
-    <script src="../../../prettify.js"></script>
+    <script src="../../prettify.js"></script>
     <script>
       window.onload = function () {
         prettyPrint();
       };
     </script>
-    <script src="../../../sorter.js"></script>
-    <script src="../../../block-navigation.js"></script>
+    <script src="../../sorter.js"></script>
+    <script src="../../block-navigation.js"></script>
   </body>
 </html>

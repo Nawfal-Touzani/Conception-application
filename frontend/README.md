@@ -112,10 +112,10 @@ Dans les deux cas, `register` ou `login`, le développeur devra connaître les o
 
 Dans le cadre du site de la pizzeria, nous savons que l'API met à disposition ces deux opérations :
 
-| URI                  | Méthode HTTP | Opération                                                                                                                   |
-| -------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| URI                  | Méthode HTTP | Opération                                                                                                                                   |
+| -------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`auths/login`**    | **POST**     | Vérifier les registerCredentials d'une ressource de type "users" et renvoyer le username et un token JWT si les registerCredentials sont OK |
-| **`auths/register`** | **POST**     | Créer une ressource de type "users" et renvoyer le username et un token JWT                                                 |
+| **`auths/register`** | **POST**     | Créer une ressource de type "users" et renvoyer le username et un token JWT                                                                 |
 
 <br/>
 
@@ -593,7 +593,10 @@ Veuillez créer un nouveau script `/src/utils/session.ts` et y ajouter ce code-c
 import { AuthenticatedUser, MaybeAuthenticatedUser } from '../types';
 
 const storeAuthenticatedUser = (authenticatedMember: AuthenticatedUser) => {
-  localStorage.setItem('authenticatedMember', JSON.stringify(authenticatedMember));
+  localStorage.setItem(
+    'authenticatedMember',
+    JSON.stringify(authenticatedMember),
+  );
 };
 
 const getAuthenticatedUser = (): MaybeAuthenticatedUser => {
