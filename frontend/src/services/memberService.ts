@@ -27,3 +27,24 @@ export const updateMyProfile = async (
   });
   return response.ok;
 };
+
+export const changePassword = async (
+  token: string,
+  dto: unknown,
+): Promise<boolean> => {
+  try {
+    const response = await fetch(`${API_URL}/change-password`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(dto),
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error('Erreur réseau ou serveur :', error);
+    return false;
+  }
+};
