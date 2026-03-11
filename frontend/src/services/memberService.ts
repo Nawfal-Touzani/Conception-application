@@ -33,7 +33,7 @@ export const changePassword = async (
   dto: unknown,
 ): Promise<boolean> => {
   try {
-    const response = await fetch(`${API_URL}/change-password`, {
+    const response = await fetch(`${API_URL}/password`, {
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${token}`,
