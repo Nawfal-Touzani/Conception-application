@@ -48,7 +48,7 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "name": "MarouTeam"
+  "name": "luffyTeam"
 }
 
 ### Try to create a team with empty name (should return 400)
