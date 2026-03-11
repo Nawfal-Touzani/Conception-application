@@ -15,6 +15,7 @@ import '@fontsource/roboto/700.css';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './themes.ts';
+import { ProfilePage } from './components/pages/ProfilePage.tsx';
 import TeamPage from './components/pages/TeamPage.tsx';
 
 const router = createBrowserRouter([
@@ -33,6 +34,10 @@ const router = createBrowserRouter([
       {
         path: 'login',
         element: <LoginPage />,
+      },
+      {
+        path: 'members/me',
+        element: <ProfilePage />,
       },
       {
         path: 'team',

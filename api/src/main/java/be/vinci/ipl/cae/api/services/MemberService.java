@@ -7,6 +7,7 @@ import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.repositories.ImageRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
+import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,16 +21,19 @@ public class MemberService {
   private final SpecialityRepository specialityRepository;
   private final ImageRepository imageRepository;
   private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+  private final TeamCompositionRepository teamCompositionRepository;
 
   /**
    * Constructor for MemberService.
    */
   public MemberService(ImageRepository imageRepository, MemberRepository memberRepository,
-      SpecialityRepository specialityRepository, BCryptPasswordEncoder passwordEncoder) {
+      SpecialityRepository specialityRepository, BCryptPasswordEncoder passwordEncoder,
+      TeamCompositionRepository teamCompositionRepository) {
     this.imageRepository = imageRepository;
     this.memberRepository = memberRepository;
     this.specialityRepository = specialityRepository;
     this.passwordEncoder = passwordEncoder;
+    this.teamCompositionRepository = teamCompositionRepository;
   }
 
   /**
@@ -50,11 +54,11 @@ public class MemberService {
     dto.setTag(member.getTag());
     dto.setSpeciality(member.getSpeciality().getName());
     dto.setProfileImage(member.getImage().getUrl());
-
     dto.setCreationDate(member.getProfileCreationDate());
-
-    // TODO: Add member's team
-    // dto.setTeamName(member.getTeam() != null ? member.getTeam().getName() : "No team");
+    dto.setTeamName("No team");
+    teamCompositionRepository.findByMemberId(member.getId())
+        .ifPresent(composition -> dto.setTeamName(composition.getTeam()
+            .getName()));
 
     return dto;
   }
