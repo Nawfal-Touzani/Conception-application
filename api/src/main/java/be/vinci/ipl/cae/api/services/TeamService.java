@@ -80,10 +80,14 @@ public class TeamService {
    */
   public MembershipRequest createRequest(long memberId, long teamId) {
     Member member = memberRepository.findById(memberId).orElse(null);
-    if (member == null) return null;
+    if (member == null) {
+      return null;
+    }
 
     Team team = teamRepository.findById(teamId).orElse(null);
-    if (team == null) return null;
+    if (team == null) {
+      return null;
+    }
 
     MembershipRequest request = new MembershipRequest(State.PENDING, null, null);
     request.setMember(member);

@@ -15,7 +15,6 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import { useAuth } from '../../contexts/AuthContext';
 
-// ✅ Matches TeamResponseDto from the backend
 type TeamDto = {
   id: number;
   name: string;
@@ -33,7 +32,10 @@ const API = '/api';
 const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
   const { user } = useAuth();
 
-  const authHeaders = { Authorization: `Bearer ${user?.token ?? ''}` };
+  // ✅ Fix: extraire le token en variable primitive stable
+  // Un objet authHeaders recréé à chaque render causerait une boucle infinie
+  // si mis en dépendance de useEffect. On utilise le token (string) à la place.
+  const token = user?.token ?? '';
 
   const [teams, setTeams] = useState<TeamDto[]>([]);
   const [filteredTeams, setFilteredTeams] = useState<TeamDto[]>([]);
@@ -46,9 +48,12 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
     severity: 'success' | 'error';
   }>({ open: false, msg: '', severity: 'success' });
 
+  // ✅ Fix: dépendance sur `token` (string) et non sur `authHeaders` (objet recréé à chaque render)
   useEffect(() => {
-    if (!user) return;
-    fetch(`${API}/teams`, { headers: authHeaders })
+    if (!token) return;
+    fetch(`${API}/teams`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -57,7 +62,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
         }
       })
       .catch(() => {});
-  }, [user]);
+  }, [token]);
 
   useEffect(() => {
     if (!search.trim()) {
@@ -77,7 +82,10 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
     try {
       const res = await fetch(`${API}/teams`, {
         method: 'POST',
-        headers: { ...authHeaders, 'Content-Type': 'application/json' },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ name: teamName }),
       });
 
@@ -118,7 +126,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
         `${API}/teams/${selectedTeamId}/membership-requests`,
         {
           method: 'POST',
-          headers: authHeaders,
+          headers: { Authorization: `Bearer ${token}` },
         },
       );
 

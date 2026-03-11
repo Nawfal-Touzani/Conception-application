@@ -115,6 +115,7 @@ const TeamPage = () => {
 
   useEffect(() => {
     if (user) loadTeamData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const handleLeave = async () => {

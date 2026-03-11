@@ -93,7 +93,7 @@ public class TeamController extends BaseController {
    */
   @GetMapping
   public List<TeamResponseDto> getAllTeams() {
-    // ✅ Also returns DTOs to avoid circular serialization on the list
+    //  Also returns DTOs to avoid circular serialization on the list
     return teamService.getAllTeamDtos();
   }
 
