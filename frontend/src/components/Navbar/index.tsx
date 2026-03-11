@@ -1,4 +1,12 @@
-import { AppBar, Toolbar, Button, Typography, Box } from '@mui/material';
+import {
+  AppBar,
+  Toolbar,
+  Button,
+  Typography,
+  Box,
+  IconButton,
+  Badge,
+} from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext'; // hook
 import logo from '../../assets/images/logo.png';
@@ -6,6 +14,7 @@ import member from '../../assets/images/member.png';
 import { useState } from 'react';
 import { getNotifications } from '../../services/notifications.service';
 import { useEffect } from 'react';
+import notifLogo from '../../assets/images/notif-logo.png';
 
 const NavBar = () => {
   const navigate = useNavigate();
@@ -23,7 +32,7 @@ const NavBar = () => {
     };
 
     fetchUnreadCount();
-  }, [user]);
+  }, [user, location]);
 
   const isTeamPage = location.pathname === '/team';
 
