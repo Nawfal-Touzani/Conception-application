@@ -36,7 +36,17 @@ export const MemberInfoForm = ({ profile }: { profile: MemberProfile }) => {
     setSuccess(false);
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setError('Les mots de passe ne correspondent pas');
+      setError('Les nouveaux mots de passe ne correspondent pas.');
+      return;
+    }
+
+    if (passwordData.newPassword === passwordData.oldPassword) {
+      setError("Le nouveau mot de passe doit être différent de l'actuel.");
+      return;
+    }
+
+    if (passwordData.newPassword.length < 7) {
+      setError('Le nouveau mot de passe doit contenir au moins 7 caractères.');
       return;
     }
 
@@ -57,7 +67,7 @@ export const MemberInfoForm = ({ profile }: { profile: MemberProfile }) => {
           });
         }, 2000);
       } else {
-        setError('Ancien mot de passe incorrect ou données invalides');
+        setError("L'ancien mot de passe est incorrect");
       }
     } catch (err) {
       setError('Erreur de communication avec le serveur');
@@ -69,8 +79,20 @@ export const MemberInfoForm = ({ profile }: { profile: MemberProfile }) => {
       color: 'white',
       '& fieldset': { borderColor: '#ffffff' },
       '&:hover fieldset': { borderColor: 'white' },
+      '&.Mui-focused fieldset': { borderColor: 'white' },
     },
     '& .MuiInputLabel-root': { color: '#ffffff99' },
+    '&.Mui-focused': { color: 'white' },
+  };
+
+  const resetModal = () => {
+    setError(null);
+    setSuccess(false);
+    setPasswordData({
+      oldPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    });
   };
 
   return (
@@ -90,7 +112,13 @@ export const MemberInfoForm = ({ profile }: { profile: MemberProfile }) => {
 
       <Dialog
         open={openPasswordModal}
-        onClose={() => setOpenPasswordModal(false)}
+        onClose={() => {
+          setOpenPasswordModal(false);
+          resetModal();
+        }}
+        TransitionProps={{
+          onExited: resetModal,
+        }}
         PaperProps={{
           sx: {
             borderRadius: 4,
