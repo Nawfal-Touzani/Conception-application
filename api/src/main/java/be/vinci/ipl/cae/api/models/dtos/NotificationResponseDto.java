@@ -12,7 +12,8 @@ public record NotificationResponseDto(
     String message,
     LocalDateTime sendDate,
     boolean read,
-    Long membershipRequestId
+    Long membershipRequestId,
+    String requestState
 ) {
 
 }
