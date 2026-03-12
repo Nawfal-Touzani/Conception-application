@@ -1,5 +1,7 @@
 package be.vinci.ipl.cae.api.services;
 
+import jakarta.transaction.Transactional;
+
 import be.vinci.ipl.cae.api.models.dtos.CreateTeamRequest;
 import be.vinci.ipl.cae.api.models.dtos.TeamMemberDto;
 import be.vinci.ipl.cae.api.models.dtos.TeamResponseDto;
@@ -49,7 +51,8 @@ public class TeamService {
   /**
    * Create team.
    */
-  public Team createTeam(Long memberId, CreateTeamRequest request) {
+  @Transactional
+  public TeamResponseDto createTeam(Long memberId, CreateTeamRequest request) {
     if (request.isInvalid()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Team name is required");
     }
@@ -73,7 +76,7 @@ public class TeamService {
     TeamComposition composition = new TeamComposition(member, savedTeam, LocalDateTime.now());
     teamCompositionRepository.save(composition);
 
-    return savedTeam;
+    return toDto(savedTeam);
   }
 
   /**
@@ -141,6 +144,7 @@ public class TeamService {
    *  NEW — Get all teams as safe DTOs (avoids circular JSON serialization).
    * Used by GET /teams endpoint.
    */
+  @Transactional
   public List<TeamResponseDto> getAllTeamDtos() {
     return teamRepository.findAll().stream()
         .map(this::toDto)
@@ -150,19 +154,52 @@ public class TeamService {
   /**
    * Leave the current team.
    */
-  public void leaveTeam(Long memberId) {
-    TeamComposition composition = teamCompositionRepository.findByMemberId(memberId)
+  @Transactional
+  public void leaveTeam(String email) {
+    Member member = memberRepository.findByEmail(email)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-    teamCompositionRepository.delete(composition);
+
+    TeamComposition tc = teamCompositionRepository.findFirstByMemberId(member.getId())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Not in a team"));
+
+    Team team = tc.getTeam();
+
+    boolean isResponsible = team.getResponsible() != null
+        && team.getResponsible().getId().equals(member.getId());
+    boolean isSecondResponsible = team.getSecondResponsible() != null
+        && team.getSecondResponsible().getId().equals(member.getId());
+
+    int teamSize = teamCompositionRepository.findAllByTeamId(team.getId()).size();
+
+    if (isResponsible) {
+      if (teamSize > 1 && team.getSecondResponsible() == null) {
+        throw new ResponseStatusException(HttpStatus.CONFLICT,
+            "Vous êtes le seul responsable. Désignez un second responsable avant de quitter.");
+      } else if (team.getSecondResponsible() != null) {
+        team.setResponsible(team.getSecondResponsible());
+        team.setSecondResponsible(null);
+      }
+      // teamSize == 1 → seul dans l'équipe, on laisse passer
+    } else if (isSecondResponsible) {
+      team.setSecondResponsible(null);
+    }
+
+    teamRepository.save(team);
+    teamRepository.flush();
+
+    teamCompositionRepository.delete(tc);
+    teamCompositionRepository.flush();
   }
 
   /**
    * Get the team of the connected member.
    */
-  public Team getTeamOfMember(Long memberId) {
+  @Transactional
+  public TeamResponseDto getTeamOfMemberAsDto(Long memberId) {
     TeamComposition composition = teamCompositionRepository.findByMemberId(memberId)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Member has no team"));
-    return composition.getTeam();
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.NOT_FOUND, "Member has no team"));
+    return toDto(composition.getTeam());
   }
 
   /**

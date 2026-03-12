@@ -37,4 +37,12 @@ public interface TeamCompositionRepository extends
    * @return the list
    */
   List<TeamComposition> findAllByTeamId(Long teamId);
+
+  /**
+   * Find first by member id.
+   *
+   * @param memberId the member id
+   * @return team composition
+   */
+  Optional<TeamComposition> findFirstByMemberId(Long memberId);
 }

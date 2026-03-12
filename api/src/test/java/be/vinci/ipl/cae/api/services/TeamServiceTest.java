@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import be.vinci.ipl.cae.api.models.dtos.CreateTeamRequest;
+import be.vinci.ipl.cae.api.models.dtos.TeamResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Image;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.MembershipRequest;
@@ -91,7 +92,7 @@ class TeamServiceTest {
     savedTeam.setName("TestTeam");
     when(teamRepository.save(any(Team.class))).thenReturn(savedTeam);
 
-    Team result = teamService.createTeam(1L, request);
+    TeamResponseDto result = teamService.createTeam(1L, request);
 
     assertNotNull(result);
     assertEquals("TestTeam", result.getName());

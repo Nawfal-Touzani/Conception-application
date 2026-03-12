@@ -40,8 +40,8 @@ public class Team {
   private Boolean isActive = true;
   @Column(nullable = false)
   private LocalDateTime creationDate;
-  @OneToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "responsible_id", nullable = false)
+  @OneToOne(fetch = FetchType.LAZY, optional = true)
+  @JoinColumn(name = "responsible_id", nullable = true)
   @JsonIgnore
   private Member responsible;
   @OneToOne(fetch = FetchType.LAZY)
