@@ -4,7 +4,6 @@ import be.vinci.ipl.cae.api.models.dtos.CreateTeamRequest;
 import be.vinci.ipl.cae.api.models.dtos.TeamMemberDto;
 import be.vinci.ipl.cae.api.models.dtos.TeamResponseDto;
 import be.vinci.ipl.cae.api.models.entities.MembershipRequest;
-import be.vinci.ipl.cae.api.models.entities.Team;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.services.MembershipRequestService;
 import be.vinci.ipl.cae.api.services.TeamService;
@@ -50,8 +49,8 @@ public class TeamController extends BaseController {
    */
   @PostMapping
   public ResponseEntity<TeamResponseDto> createTeam(@RequestBody CreateTeamRequest request) {
-    Team createdTeam = teamService.createTeam(getConnectedMember().getId(), request);
-    return ResponseEntity.status(HttpStatus.CREATED).body(teamService.toDto(createdTeam));
+    TeamResponseDto dto = teamService.createTeam(getConnectedMember().getId(), request);
+    return ResponseEntity.status(HttpStatus.CREATED).body(dto);
   }
 
   /**
@@ -91,8 +90,8 @@ public class TeamController extends BaseController {
    */
   @GetMapping("/my-team")
   public ResponseEntity<TeamResponseDto> getMyTeam() {
-    Team team = teamService.getTeamOfMember(getConnectedMember().getId());
-    return ResponseEntity.ok(teamService.toDto(team));
+    TeamResponseDto dto = teamService.getTeamOfMemberAsDto(getConnectedMember().getId());
+    return ResponseEntity.ok(dto);
   }
 
   /**
@@ -100,7 +99,7 @@ public class TeamController extends BaseController {
    */
   @DeleteMapping("/leave")
   public ResponseEntity<Void> leaveTeam() {
-    teamService.leaveTeam(getConnectedMember().getId());
-    return ResponseEntity.noContent().build();
+    teamService.leaveTeam(getConnectedMember().getEmail());
+    return ResponseEntity.ok().build();
   }
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -14,16 +14,16 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  Alert,
 } from '@mui/material';
 import JoinOrCreateTeam from './JoinOrCreateTeam';
 import { useAuth } from '../../contexts/AuthContext';
 
 type Member = {
-  tag: string;
-  imageId: number;
+  gameTag: string;
+  avatarId: number;
 };
 
-// ✅ Matches TeamResponseDto from the backend
 type TeamDto = {
   id: number;
   name: string;
@@ -78,20 +78,22 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 const TeamPage = () => {
   const { user } = useAuth();
+  const token = user?.token ?? '';
+
   const [team, setTeam] = useState<TeamDto | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [hasTeam, setHasTeam] = useState<boolean | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [leaveLoading, setLeaveLoading] = useState(false);
+  const [leaveError, setLeaveError] = useState<string | null>(null);
 
-  const authHeaders = { Authorization: `Bearer ${user?.token ?? ''}` };
-
-  const loadTeamData = () => {
+  const loadTeamData = useCallback(() => {
     setHasTeam(null);
 
-    fetch(`${API}/teams/members`, { headers: authHeaders })
+    fetch(`${API}/teams/members`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
       .then(async (res) => {
-        // 404 = membre sans équipe → afficher JoinOrCreateTeam
         if (res.status === 404 || res.status === 401 || !res.ok) {
           setHasTeam(false);
           return;
@@ -101,9 +103,8 @@ const TeamPage = () => {
         setMembers(memberData);
         setHasTeam(true);
 
-        // Charger les infos complètes de l'équipe
         const teamRes = await fetch(`${API}/teams/my-team`, {
-          headers: authHeaders,
+          headers: { Authorization: `Bearer ${token}` },
         });
         if (teamRes.ok) {
           const teamData: TeamDto = await teamRes.json();
@@ -111,30 +112,41 @@ const TeamPage = () => {
         }
       })
       .catch(() => setHasTeam(false));
-  };
+  }, [token]);
 
   useEffect(() => {
     if (user) loadTeamData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user, loadTeamData]);
 
   const handleLeave = async () => {
     setLeaveLoading(true);
     try {
       const res = await fetch(`${API}/teams/leave`, {
         method: 'DELETE',
-        headers: authHeaders,
+        headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.ok) {
-        setHasTeam(false);
-        setTeam(null);
-        setMembers([]);
+
+      if (res.status === 409) {
+        const body = await res.json();
+        setLeaveError(
+          body.message || 'Désignez un second responsable avant de quitter.',
+        );
+        setConfirmOpen(false);
+        return;
       }
+
+      if (!res.ok) {
+        setLeaveError('Une erreur est survenue.');
+        setConfirmOpen(false);
+        return;
+      }
+
+      setConfirmOpen(false);
+      loadTeamData();
     } catch {
-      // silently fail
+      setLeaveError('Erreur réseau.');
     } finally {
       setLeaveLoading(false);
-      setConfirmOpen(false);
     }
   };
 
@@ -187,7 +199,17 @@ const TeamPage = () => {
             value={formatDate(team?.creationDate)}
           />
 
-          <Box sx={{ mt: 3.5 }}>
+          {leaveError && (
+            <Alert
+              severity="warning"
+              onClose={() => setLeaveError(null)}
+              sx={{ mt: 2, mb: 1 }}
+            >
+              {leaveError}
+            </Alert>
+          )}
+
+          <Box sx={{ mt: 2 }}>
             <Button
               variant="contained"
               onClick={() => setConfirmOpen(true)}
@@ -231,7 +253,7 @@ const TeamPage = () => {
           >
             {members.map((member) => (
               <ListItem
-                key={member.tag}
+                key={member.gameTag}
                 sx={{
                   backgroundColor: '#fff',
                   borderRadius: '8px',
@@ -241,13 +263,13 @@ const TeamPage = () => {
               >
                 <ListItemAvatar sx={{ minWidth: 48 }}>
                   <Avatar
-                    src={`/images/${member.imageId}.png`}
-                    alt={member.tag}
+                    src={`/images/${member.avatarId}.png`}
+                    alt={member.gameTag}
                     sx={{ width: 36, height: 36 }}
                   />
                 </ListItemAvatar>
                 <ListItemText
-                  primary={member.tag}
+                  primary={member.gameTag}
                   primaryTypographyProps={{
                     fontSize: '0.95rem',
                     fontWeight: 500,
