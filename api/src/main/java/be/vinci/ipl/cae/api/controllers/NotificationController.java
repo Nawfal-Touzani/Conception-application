@@ -117,7 +117,9 @@ public class NotificationController {
         notif.getMessage(),
         notif.getSendDate(),
         notif.isRead(),
-        notif.getMembershipRequest() != null ? notif.getMembershipRequest().getId() : null
+        notif.getMembershipRequest() != null ? notif.getMembershipRequest().getId() : null,
+        notif.getMembershipRequest() != null ? notif.getMembershipRequest()
+            .getState().name() : null
     );
   }
 
