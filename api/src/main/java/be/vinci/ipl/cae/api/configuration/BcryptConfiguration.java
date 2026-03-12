@@ -3,10 +3,15 @@ package be.vinci.ipl.cae.api.configuration;
 import be.vinci.ipl.cae.api.models.entities.Image;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Speciality;
+import be.vinci.ipl.cae.api.models.entities.Team;
+import be.vinci.ipl.cae.api.models.entities.TeamComposition;
 import be.vinci.ipl.cae.api.repositories.ImageRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
+import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
+import be.vinci.ipl.cae.api.repositories.TeamRepository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -45,6 +50,8 @@ public class BcryptConfiguration {
   public CommandLineRunner initUsers(MemberRepository memberRepository,
                                      ImageRepository imageRepository,
                                      SpecialityRepository specialityRepository,
+                                     TeamRepository teamRepository,
+                                     TeamCompositionRepository teamCompositionRepository,
                                      BCryptPasswordEncoder passwordEncoder) {
     return args -> {
 
@@ -187,6 +194,42 @@ public class BcryptConfiguration {
         member.setProfileCreationDate(LocalDate.now());
 
         memberRepository.save(member);
+      }
+
+      // Teams
+      Member lea = memberRepository.findByEmail("lea@mail.com").orElseThrow();
+      Member tibo = memberRepository.findByEmail("tibo@mail.com").orElseThrow();
+
+      if (!teamRepository.existsByName("TEAM_ALPHA")) {
+        Team teamAlpha = new Team("TEAM_ALPHA", true, LocalDateTime.now(), lea, null);
+        teamRepository.save(teamAlpha);
+      }
+
+      if (!teamRepository.existsByName("TEAM_OMEGA")) {
+        Team teamOmega = new Team("TEAM_OMEGA", true, LocalDateTime.now(), tibo, null);
+        teamRepository.save(teamOmega);
+      }
+
+      // Affectations
+      Member tom = memberRepository.findByEmail("tom@mail.com").orElseThrow();
+      Member ines = memberRepository.findByEmail("ines@mail.com").orElseThrow();
+
+      Team teamAlpha = teamRepository.findByName("TEAM_ALPHA").orElseThrow();
+
+      if (!teamCompositionRepository.existsByMemberId(lea.getId())) {
+        teamCompositionRepository.save(new TeamComposition(lea, teamAlpha, LocalDateTime.now()));
+      }
+      if (!teamCompositionRepository.existsByMemberId(tom.getId())) {
+        teamCompositionRepository.save(new TeamComposition(tom, teamAlpha, LocalDateTime.now()));
+      }
+      if (!teamCompositionRepository.existsByMemberId(ines.getId())) {
+        teamCompositionRepository.save(new TeamComposition(ines, teamAlpha, LocalDateTime.now()));
+      }
+
+      Team teamOmega = teamRepository.findByName("TEAM_OMEGA").orElseThrow();
+
+      if (!teamCompositionRepository.existsByMemberId(tibo.getId())) {
+        teamCompositionRepository.save(new TeamComposition(tibo, teamOmega, LocalDateTime.now()));
       }
     };
   }
