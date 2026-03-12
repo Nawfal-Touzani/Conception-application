@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
-  Container,
   TextField,
   Typography,
   Paper,
@@ -15,39 +14,78 @@ import {
 } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
 
+import { Speciality } from '../../types/speciality.types';
+import { ProfileImage } from '../../types/image.types';
+import * as specialityService from '../../services/speciality.service';
+import * as imageService from '../../services/image.service';
+
+// reusable styles for all input fields
+const inputSx = {
+  '& .MuiFilledInput-root': {
+    backgroundColor: '#1a2744',
+    borderRadius: '10px',
+    color: '#ffffff',
+  },
+  '& .MuiFilledInput-root:hover': {
+    backgroundColor: '#1a2744',
+  },
+  '& .MuiFilledInput-root.Mui-focused': {
+    backgroundColor: '#1a2744',
+  },
+  '& .MuiInputLabel-root': {
+    color: 'grey',
+  },
+  '& .MuiInputLabel-root.Mui-focused': {
+    color: 'grey',
+  },
+  '& .MuiSelect-icon': {
+    color: 'white',
+  },
+};
+
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
 
-  // Form states
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [tag, setTag] = useState('');
+  const [specialities, setSpecialities] = useState<Speciality[]>([]);
+  const [avatars, setAvatars] = useState<ProfileImage[]>([]);
 
-  // Foreign keys (imageId and specialityId), initialized as empty string for MUI Select,
-  // but converted to Number on submit.
-  const [imageId, setImageId] = useState<number | ''>('');
+  const [email, setEmail] = useState('');
+  const [tag, setTag] = useState('');
+  const [password, setPassword] = useState('');
   const [specialityId, setSpecialityId] = useState<number | ''>('');
+  const [imageId, setImageId] = useState<number | ''>('');
 
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+
+  // fetch images & specialities
+  useEffect(() => {
+    const fetchFormData = async () => {
+      try {
+        const [specsData, imagesData] = await Promise.all([
+          specialityService.getAll(),
+          imageService.getAll(),
+        ]);
+
+        setSpecialities(specsData);
+        setAvatars(imagesData);
+      } catch (err) {
+        setError('Impossible de charger les spécialités et les avatars.');
+      }
+    };
+
+    fetchFormData();
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError(null);
 
-    // Basic front-end validation
-    if (password !== confirmPassword) {
-      return setError('Passwords do not match.');
-    }
-    if (imageId === '' || specialityId === '') {
-      return setError('Please select an image and a speciality.');
+    if (!email || !tag || !password || specialityId === '' || imageId === '') {
+      return setError('Veuillez remplir tous les champs et choisir un avatar.');
     }
 
-    // Call the backend via our Context
     try {
-      setIsLoading(true);
       await register({
         email,
         password,
@@ -55,153 +93,223 @@ const RegisterPage: React.FC = () => {
         imageId: Number(imageId),
         specialityId: Number(specialityId),
       });
-
-      // Redirect to login on success
       navigate('/login');
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('An unexpected error occurred.');
+        setError("Une erreur inattendue s'est produite.");
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
   return (
-    // Main box with dark background
     <Box
       sx={{
         minHeight: '100vh',
+        backgroundColor: '#1e2a44',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#1e2a44',
-        padding: 2,
+        py: 4,
       }}
     >
-      <Container maxWidth="sm">
-        {/* Title above the card */}
-        <Typography
-          variant="h3"
-          component="h1"
-          align="center"
-          sx={{ color: '#fff', fontWeight: 'bold', mb: 4, letterSpacing: 2 }}
-        >
-          VINCI ARENA
-        </Typography>
+      <Box display="flex" flexDirection="column" alignItems="center">
+        {error && (
+          <Alert
+            severity="error"
+            sx={{ mb: 3, borderRadius: '10px', width: '100%', maxWidth: 800 }}
+          >
+            {error}
+          </Alert>
+        )}
 
-        {/* White card containing the form */}
-        <Paper elevation={6} sx={{ p: 4, borderRadius: 2 }}>
-          <Typography
-            variant="h5"
-            component="h2"
-            align="center"
-            gutterBottom
-            sx={{ fontWeight: 'bold' }}
+        {/* Global */}
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+        >
+          {/* 2 cards aligned */}
+          <Box
+            display="flex"
+            flexDirection={{ xs: 'column', md: 'row' }}
+            gap={4}
+            alignItems="flex-start"
+          >
+            {/* Left card */}
+            <Paper
+              elevation={10}
+              sx={{
+                width: 450,
+                borderRadius: '10px',
+                p: 4,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 3,
+              }}
+            >
+              <Typography
+                variant="h4"
+                component="h1"
+                fontWeight="bold"
+                color="#1e2a44"
+              >
+                S'inscrire
+              </Typography>
+
+              <TextField
+                label="Adresse email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                variant="filled"
+                InputProps={{ disableUnderline: true }}
+                sx={inputSx}
+              />
+
+              <TextField
+                label="Mot de passe"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                variant="filled"
+                InputProps={{ disableUnderline: true }}
+                sx={inputSx}
+              />
+
+              <TextField
+                label="Tag en jeu"
+                value={tag}
+                onChange={(e) => setTag(e.target.value)}
+                variant="filled"
+                InputProps={{ disableUnderline: true }}
+                sx={inputSx}
+              />
+
+              <FormControl variant="filled" fullWidth sx={inputSx}>
+                <InputLabel id="speciality-label">Spécialité</InputLabel>
+                <Select
+                  labelId="speciality-label"
+                  value={specialityId}
+                  onChange={(e) => setSpecialityId(e.target.value as number)}
+                  disableUnderline
+                  MenuProps={{
+                    anchorOrigin: {
+                      vertical: 'bottom',
+                      horizontal: 'left',
+                    },
+                    transformOrigin: {
+                      vertical: 'top',
+                      horizontal: 'left',
+                    },
+
+                    PaperProps: {
+                      sx: {
+                        maxHeight: 150, // limit the size for scrolling
+                        backgroundColor: '#1a2744',
+                        color: 'white',
+                        '& .MuiMenuItem-root:hover': {
+                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        },
+                        '& .Mui-selected': {
+                          backgroundColor:
+                            'rgba(255, 255, 255, 0.2) !important',
+                        },
+                      },
+                    },
+                  }}
+                >
+                  {specialities.map((s) => (
+                    <MenuItem key={s.id} value={s.id}>
+                      {s.name.charAt(0).toUpperCase() + s.name.slice(1)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Paper>
+
+            {/* Right card */}
+            <Paper
+              elevation={10}
+              sx={{
+                width: 450,
+                borderRadius: '10px',
+                p: 4,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 3,
+              }}
+            >
+              <Typography
+                variant="h4"
+                component="h1"
+                fontWeight="bold"
+                color="#1e2a44"
+              >
+                Choisir un avatar
+              </Typography>
+
+              {/* Grille des avatars */}
+              <Box
+                display="flex"
+                flexWrap="wrap"
+                gap={2}
+                justifyContent="center"
+              >
+                {avatars.map((avatar) => (
+                  <Box
+                    key={avatar.id}
+                    component="img"
+                    src={`http://localhost:3000${avatar.url}`}
+                    alt={`Avatar ${avatar.id}`}
+                    onClick={() => setImageId(avatar.id)}
+                    sx={{
+                      width: 60,
+                      height: 60,
+                      objectFit: 'contain', // <-- Empêche le zoom excessif et le rognage
+                      boxSizing: 'border-box', // <-- Assure que la bordure n'écrase pas l'image
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      border:
+                        imageId === avatar.id
+                          ? '3px solid #d32f2f'
+                          : '1px solid black',
+                      transition: 'all 0.1s ease-in-out',
+                      '&:hover': {
+                        transform: 'scale(1.3)',
+                      },
+                    }}
+                  />
+                ))}
+              </Box>
+            </Paper>
+          </Box>
+
+          {/* Register button */}
+          <Button
+            type="submit"
+            variant="contained"
+            sx={{
+              mt: 3,
+              backgroundColor: 'white',
+              color: '#1e2a44',
+              borderRadius: '10px',
+              textTransform: 'none', // no uppercase
+              fontWeight: 'bold',
+              fontSize: '1.3rem',
+              px: 5,
+              '&:hover': {
+                backgroundColor: '#f0f0f0',
+              },
+            }}
           >
             S'inscrire
-          </Typography>
-
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-
-          <Box component="form" onSubmit={handleSubmit} noValidate>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email address"
-              name="email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="confirmPassword"
-              label="Confirm password"
-              type="password"
-              id="confirmPassword"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="tag"
-              label="Username (Tag)"
-              name="tag"
-              value={tag}
-              onChange={(e) => setTag(e.target.value)}
-            />
-
-            {/* Speciality selector */}
-            <FormControl fullWidth margin="normal" required>
-              <InputLabel id="speciality-label">Spécialité</InputLabel>
-              <Select
-                labelId="speciality-label"
-                id="speciality"
-                value={specialityId}
-                label="Speciality"
-                onChange={(e) => setSpecialityId(e.target.value as number)}
-              >
-                {/* TODO: fetch real specialities from backend, hardcoded for now */}
-                <MenuItem value={1}>Architecte</MenuItem>
-                <MenuItem value={2}>Test2</MenuItem>
-              </Select>
-            </FormControl>
-
-            {/* Profile image selector */}
-            <FormControl fullWidth margin="normal" required>
-              <InputLabel id="image-label">Avatar</InputLabel>
-              <Select
-                labelId="image-label"
-                id="image"
-                value={imageId}
-                label="Profile picture"
-                onChange={(e) => setImageId(e.target.value as number)}
-              >
-                {/* TODO: fetch real images from backend, hardcoded for now */}
-                <MenuItem value={1}>Avatar 1</MenuItem>
-                <MenuItem value={2}>Avatar 2</MenuItem>
-              </Select>
-            </FormControl>
-
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              disabled={isLoading}
-              sx={{ mt: 3, mb: 2, py: 1.5, fontWeight: 'bold' }}
-            >
-              {isLoading ? 'Registering...' : 'Register'}
-            </Button>
-          </Box>
-        </Paper>
-      </Container>
+          </Button>
+        </Box>
+      </Box>
     </Box>
   );
 };

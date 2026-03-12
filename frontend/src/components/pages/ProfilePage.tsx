@@ -6,6 +6,7 @@ import { Container, Divider, Grid2, Paper, Typography } from '@mui/material';
 import { ProfileSidebar } from './ProfileSidebar';
 import { MemberInfoForm } from './MemberInfoForm';
 import { ActionSidebar } from './ActionsSideBar';
+import { UnavailabilitySection } from '../Unavailability/UnavailabilitySection';
 
 export const ProfilePage = () => {
   const { user } = useAuth();
@@ -44,6 +45,8 @@ export const ProfilePage = () => {
               sx={{ mb: 3, borderBottomWidth: 2, backgroundColor: '#1e2a44' }}
             />
             <MemberInfoForm profile={profile} />
+
+            <UnavailabilitySection />
           </Paper>
         </Grid2>
 
