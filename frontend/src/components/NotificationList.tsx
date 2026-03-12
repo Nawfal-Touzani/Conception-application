@@ -5,12 +5,11 @@ import NotificationItem from './NotificationItem';
 interface NotificationListProps {
   notifications: Notification[];
   onMarkAsRead: (notificationId: number) => void;
+  onApprove?: (membershipRequestId: number) => void;
+  onRefuse?: (membershipRequestId: number, reason: string) => void;
 }
 
-const NotificationList = ({
-  notifications,
-  onMarkAsRead,
-}: NotificationListProps) => {
+const NotificationList = ({ notifications, onMarkAsRead, onApprove, onRefuse } : NotificationListProps) => {
   return (
     <List>
       {notifications.map((notif) => (
@@ -18,6 +17,8 @@ const NotificationList = ({
           key={notif.id}
           notification={notif}
           onMarkAsRead={onMarkAsRead}
+          onApprove={onApprove}
+          onRefuse={onRefuse}
         />
       ))}
     </List>
