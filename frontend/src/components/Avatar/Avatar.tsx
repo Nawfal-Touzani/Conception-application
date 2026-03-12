@@ -21,6 +21,8 @@ export const AvatarModal = ({
   const [images, setImages] = useState<ProfileImage[]>([]);
   const [selectedImage, setSelectedImage] = useState(currentImage);
 
+  const BASE_URL = 'http://localhost:3000';
+
   useEffect(() => {
     if (open) {
       imageService.getAll().then(setImages).catch(console.error);
@@ -31,7 +33,9 @@ export const AvatarModal = ({
     <Dialog
       open={open}
       onClose={onClose}
-      PaperProps={{ sx: { borderRadius: 3, p: 2, textAlign: 'center' } }}
+      PaperProps={{
+        sx: { borderRadius: 3, p: 2, textAlign: 'center', maxWidth: '600px' },
+      }}
     >
       <DialogTitle
         sx={{ fontWeight: 'bold', fontSize: '1.8rem', color: '#1e2a44' }}
@@ -52,26 +56,42 @@ export const AvatarModal = ({
           <ArrowBackIosIcon />
         </IconButton>
 
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          {images.map((img) => (
-            <Box
-              key={img.url}
-              component="img"
-              src={img.url}
-              onClick={() => setSelectedImage(img.url)}
-              sx={{
-                width: 80,
-                height: 80,
-                cursor: 'pointer',
-                borderRadius: 2,
-                border:
-                  selectedImage === img.url
-                    ? '2px solid red'
-                    : '1px solid #ccc',
-                p: 0.5,
-              }}
-            />
-          ))}
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 2,
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+          }}
+        >
+          {images.map((img) => {
+            const fullUrl = `${BASE_URL}${img.url}`;
+
+            return (
+              <Box
+                key={img.id}
+                component="img"
+                src={fullUrl}
+                alt={`Avatar ${img.id}`}
+                onClick={() => setSelectedImage(fullUrl)}
+                sx={{
+                  width: 80,
+                  height: 80,
+                  cursor: 'pointer',
+                  borderRadius: '8px',
+                  objectFit: 'contain',
+                  border:
+                    selectedImage === fullUrl
+                      ? '3px solid #d32f2f'
+                      : '1px solid black',
+                  transition: 'all 0.1s ease-in-out',
+                  '&:hover': {
+                    transform: 'scale(1.2)',
+                  },
+                }}
+              />
+            );
+          })}
         </Box>
 
         <IconButton>

@@ -5,14 +5,21 @@ import { AvatarModal } from '../Avatar/Avatar';
 import * as memberService from '../../services/memberService';
 import { useAuth } from '../../contexts/AuthContext';
 
+const BASE_URL = 'http://localhost:3000';
+
 export const ProfileSidebar = ({ profile }: { profile: MemberProfile }) => {
   const { user } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
 
   const handleAvatarChange = async (newUrl: string) => {
     if (!user?.token) return;
+
+    const relativeUrl = newUrl.replace('http://localhost:3000', '');
+
     try {
-      await memberService.updateMyProfile(user.token, { profileImage: newUrl });
+      await memberService.updateMyProfile(user.token, {
+        profileImage: relativeUrl,
+      });
       setModalOpen(false);
       window.location.reload();
     } catch (error) {
@@ -29,7 +36,11 @@ export const ProfileSidebar = ({ profile }: { profile: MemberProfile }) => {
       sx={{ mt: 3 }}
     >
       <Avatar
-        src={profile.profileImage}
+        src={
+          profile.profileImage?.startsWith('/')
+            ? `${BASE_URL}${profile.profileImage}`
+            : profile.profileImage
+        }
         sx={{ width: 150, height: 150, mb: 5, border: '4px solid white' }}
       />
 
