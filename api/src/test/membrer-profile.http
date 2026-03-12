@@ -1,6 +1,5 @@
 @baseUrl = http://localhost:3000
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibmV3QHZpbmNpLmJlIiwiaWF0IjoxNzczMDAwMTkwLCJleHAiOjE3NzMwODY1OTB9.ZDumdwPQDrorDDvR1v78EBUIOg65AXJNZKeb6-Z2bQk
-
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibGVhQG1haWwuY29tIiwiaWF0IjoxNzczMzM0MDY3LCJleHAiOjE3NzM0MjA0Njd9.d9T21ZaX6oc7pT7TUkJVE0gi6Vb5mzm0fMMwk9AJGzw
 ### Get my profile
 GET {{baseUrl}}/members/me
 Authorization: Bearer {{token}}
@@ -11,7 +10,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "speciality": "Tacticien",
+  "speciality": "tacticien",
   "profileImage": "img3.png"
 }
 
