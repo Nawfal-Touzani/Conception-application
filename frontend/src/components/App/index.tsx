@@ -18,7 +18,10 @@ const App = () => {
 
       {/* This is where the React Router magic happens! */}
       {/* Outlet will be replaced by LoginPage, RegisterPage, or HomePage depending on the URL */}
-      <Box component="main" sx={{ flexGrow: 1 }}>
+      <Box
+        component="main"
+        sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}
+      >
         <Outlet />
       </Box>
     </Box>

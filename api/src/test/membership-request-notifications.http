@@ -1,6 +1,6 @@
 @baseUrl = http://localhost:3000
-@token =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibGVhQG1haWwuY29tIiwiaWF0IjoxNzczMjQ1NDkzLCJleHAiOjE3NzMzMzE4OTN9.GvAiRkj55ikWw0kFdoqqF4TOQMmLUTEcyexYQYko15w
-@token2 =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoidG9tQG1haWwuY29tIiwiaWF0IjoxNzczMjQ1NTIyLCJleHAiOjE3NzMzMzE5MjJ9.WLiEavhhJnvkpSHU3psArghO_0Smf1aJpcuis7yuhZA
+@token =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibGVhQG1haWwuY29tIiwiaWF0IjoxNzczMzM5ODM3LCJleHAiOjE3NzM0MjYyMzd9.Q35cz4tY0xNgJ9I0IdXjyuu1iGCEP9KI8brOf1iK_zY
+@token2 =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoidG9tQG1haWwuY29tIiwiaWF0IjoxNzczMzM5ODU3LCJleHAiOjE3NzM0MjYyNTd9.MYY0pBJUSQk3a9Sf60wViAsG-LpSRZEwJnOucKuY6aU
 
 ### Login responsible (copy token into @token)
 POST {{baseUrl}}/auths/login
@@ -34,7 +34,7 @@ POST {{baseUrl}}/teams/1/membership-requests
 Authorization: Bearer {{token2}}
 
 ### Check responsible received membership request notification (should return 200 with notif)
-GET {{baseUrl}}/members/3/notifications
+GET {{baseUrl}}/members/1/notifications
 Authorization: Bearer {{token}}
 
 ### Try to send membership request for non-existent team (should return 404)

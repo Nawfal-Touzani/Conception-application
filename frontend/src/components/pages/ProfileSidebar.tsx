@@ -75,49 +75,64 @@ export const ProfileSidebar = ({ profile }: { profile: MemberProfile }) => {
         }}
       />
 
-      <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 1 }}>
-        {profile.tag} {/* Demander ce qu'il faut mettre ici */}
-      </Typography>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 3,
+          width: '100%',
+          px: 6,
+          mt: 6,
+        }}
+      >
+        {[
+          { label: 'Rôle :', value: profile.admin ? 'Admin' : 'Joueur' },
+          {
+            label: 'Spécialité :',
+            value:
+              profile.speciality.charAt(0).toUpperCase() +
+              profile.speciality.slice(1),
+          },
+          { label: 'Équipe :', value: profile.teamName || '/' },
+          {
+            label: 'Depuis le :',
+            value: new Date(profile.creationDate).toLocaleDateString(),
+          },
+        ].map((info) => (
+          <Box
+            key={info.label}
+            sx={{ display: 'flex', alignItems: 'center', fontSize: '1.5rem' }}
+          >
+            <Typography
+              sx={{
+                fontWeight: 'bold',
+                minWidth: '140px',
+                fontSize: 'inherit',
+              }}
+            >
+              {info.label}
+            </Typography>
+            <Typography sx={{ fontSize: 'inherit' }}>{info.value}</Typography>
+          </Box>
+        ))}
 
-      <Box sx={{ textAlign: 'center', '& p': { mb: 4 } }}>
-        <Typography
-          sx={{
-            mt: 3,
-            fontSize: '1.5rem',
-          }}
-        >
-          {profile.speciality} des {profile.teamName || '[nomEquipe]'}
-        </Typography>
-        <Typography
-          sx={{
-            mt: 3,
-            fontSize: '1.5rem',
-          }}
-        >
-          Depuis le {new Date(profile.creationDate).toLocaleDateString()}
-        </Typography>
-        {profile.isAvailable ? (
+        <Box sx={{ display: 'flex', alignItems: 'center', fontSize: '1.5rem' }}>
+          <Typography
+            sx={{ fontWeight: 'bold', minWidth: '120px', fontSize: 'inherit' }}
+          >
+            Statut :
+          </Typography>
+
           <Typography
             sx={{
-              color: '#4caf50',
-              mt: 3,
-              fontSize: '1.5rem',
+              fontSize: 'inherit',
+              color: profile.available ? '#4caf50' : '#f44336',
+              fontWeight: profile.available ? 'normal' : 'bold',
             }}
           >
-            Actuellement disponible
+            {profile.available ? 'Disponible' : 'Indisponible'}
           </Typography>
-        ) : (
-          <Typography
-            sx={{
-              fontWeight: 'bold',
-              color: '#f44336',
-              mt: 3,
-              fontSize: '1.5rem',
-            }}
-          >
-            Actuellement indisponible
-          </Typography>
-        )}
+        </Box>
       </Box>
     </Box>
   );

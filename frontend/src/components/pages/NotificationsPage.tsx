@@ -4,6 +4,10 @@ import {
   getNotifications,
   markAsRead,
 } from '../../services/notifications.service';
+import {
+  approveRequest,
+  refuseRequest,
+} from '../../services/membership-request.service'; // ← AJOUT
 import { Notification } from '../../types/notifications.types';
 import NotificationList from '../NotificationList';
 import { Box, Typography, Button } from '@mui/material';
@@ -13,10 +17,8 @@ const NotifiationPage = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filter, setFilter] = useState<boolean | undefined>(undefined);
 
-  // Fetch notifications when the page loads or filter changes
   useEffect(() => {
     if (!user) return;
-
     const fetchNotifications = async () => {
       const data = await getNotifications(user.id, user.token, filter);
       setNotifications(data);
@@ -24,14 +26,30 @@ const NotifiationPage = () => {
     fetchNotifications();
   }, [user, filter]);
 
-  // Mark a notification as read
   const handleMarkAsRead = async (notificationId: number) => {
     if (!user) return;
-
     const updated = await markAsRead(user.id, notificationId, user.token);
     setNotifications((prev) =>
       prev.map((n) => (n.id === updated.id ? updated : n)),
     );
+  };
+
+  // ← AJOUT
+  const handleApprove = async (membershipRequestId: number) => {
+    if (!user) return;
+    await approveRequest(membershipRequestId, user.token);
+    // Refresh la liste après action
+    const data = await getNotifications(user.id, user.token, filter);
+    setNotifications(data);
+  };
+
+  // ← AJOUT
+  const handleRefuse = async (membershipRequestId: number, reason: string) => {
+    if (!user) return;
+    await refuseRequest(membershipRequestId, reason, user.token);
+    // Refresh la liste après action
+    const data = await getNotifications(user.id, user.token, filter);
+    setNotifications(data);
   };
 
   return (
@@ -41,7 +59,6 @@ const NotifiationPage = () => {
       </Typography>
 
       <Box sx={{ display: 'flex', gap: 4 }}>
-        {/* Filter buttons on the left */}
         <Box
           sx={{
             display: 'flex',
@@ -70,7 +87,6 @@ const NotifiationPage = () => {
           </Button>
         </Box>
 
-        {/* Notifications list on the right */}
         <Box sx={{ flex: 1 }}>
           {notifications.length === 0 ? (
             <Typography sx={{ color: 'white' }}>
@@ -80,6 +96,8 @@ const NotifiationPage = () => {
             <NotificationList
               notifications={notifications}
               onMarkAsRead={handleMarkAsRead}
+              onApprove={handleApprove}
+              onRefuse={handleRefuse}
             />
           )}
         </Box>

@@ -14,7 +14,6 @@ import be.vinci.ipl.cae.api.repositories.MembershipRequestRepository;
 import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
 import be.vinci.ipl.cae.api.repositories.TeamRepository;
 import jakarta.transaction.Transactional;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,10 +38,10 @@ public class TeamService {
    * Instantiates a new Team service.
    */
   public TeamService(TeamRepository teamRepository,
-                     TeamCompositionRepository teamCompositionRepository,
-                     MemberRepository memberRepository,
-                     MembershipRequestRepository membershipRequestRepository,
-                     NotificationService notificationService) {
+      TeamCompositionRepository teamCompositionRepository,
+      MemberRepository memberRepository,
+      MembershipRequestRepository membershipRequestRepository,
+      NotificationService notificationService) {
     this.teamRepository = teamRepository;
     this.teamCompositionRepository = teamCompositionRepository;
     this.memberRepository = memberRepository;
@@ -108,6 +107,7 @@ public class TeamService {
             + team.getName(),
         LocalDateTime.now()
     );
+    notif.setMembershipRequest(saved);
     notificationService.send(team.getResponsible().getId(), notif);
 
     return saved;
@@ -148,8 +148,8 @@ public class TeamService {
   }
 
   /**
-   *  NEW — Get all teams as safe DTOs (avoids circular JSON serialization).
-   * Used by GET /teams endpoint.
+   * NEW — Get all teams as safe DTOs (avoids circular JSON serialization). Used by GET /teams
+   * endpoint.
    */
   @Transactional
   public List<TeamResponseDto> getAllTeamDtos() {
@@ -205,6 +205,7 @@ public class TeamService {
     teamCompositionRepository.delete(tc);
     teamCompositionRepository.flush();
   }
+
   /**
    * Get the team of the connected member.
    */
