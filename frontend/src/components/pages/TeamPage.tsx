@@ -20,8 +20,10 @@ import JoinOrCreateTeam from './JoinOrCreateTeam';
 import { useAuth } from '../../contexts/AuthContext';
 
 type Member = {
+  memberId: number;
   gameTag: string;
   avatarId: number;
+  isAvailable: boolean;
 };
 
 type TeamDto = {
@@ -86,6 +88,10 @@ const TeamPage = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [leaveLoading, setLeaveLoading] = useState(false);
   const [leaveError, setLeaveError] = useState<string | null>(null);
+  const [nominateError, setNominateError] = useState<string | null>(null);
+  const [nominateSuccess, setNominateSuccess] = useState<string | null>(null);
+
+  const isSolo = members.length === 1;
 
   const loadTeamData = useCallback(() => {
     setHasTeam(null);
@@ -149,6 +155,38 @@ const TeamPage = () => {
       setLeaveLoading(false);
     }
   };
+
+  const handleNominate = async (memberId: number) => {
+    if (!team) return;
+    setNominateError(null);
+    setNominateSuccess(null);
+
+    try {
+      const res = await fetch(
+        `${API}/teams/${team.id}/secondary-manager/${memberId}`,
+        {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      if (!res.ok) {
+        setNominateError('Impossible de nommer ce membre.');
+        return;
+      }
+
+      setNominateSuccess('Second responsable nommé avec succès.');
+      loadTeamData();
+    } catch {
+      setNominateError('Erreur réseau.');
+    }
+  };
+
+  // Vérifie si l'utilisateur connecté est le responsable
+  const isResponsible =
+    team?.responsibleTag != null &&
+    members.find((m) => m.gameTag === team.responsibleTag) != null &&
+    user?.tag === team.responsibleTag;
 
   if (hasTeam === null) return null;
   if (!hasTeam) return <JoinOrCreateTeam onTeamCreated={loadTeamData} />;
@@ -247,38 +285,137 @@ const TeamPage = () => {
           >
             Tous ({members.length})
           </Typography>
+
+          {nominateError && (
+            <Alert
+              severity="error"
+              onClose={() => setNominateError(null)}
+              sx={{ mb: 1.5 }}
+            >
+              {nominateError}
+            </Alert>
+          )}
+          {nominateSuccess && (
+            <Alert
+              severity="success"
+              onClose={() => setNominateSuccess(null)}
+              sx={{ mb: 1.5 }}
+            >
+              {nominateSuccess}
+            </Alert>
+          )}
+
           <List
             disablePadding
             sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
           >
-            {members.map((member) => (
-              <ListItem
-                key={member.gameTag}
-                sx={{
-                  backgroundColor: '#fff',
-                  borderRadius: '8px',
-                  px: 2,
-                  py: 0.8,
-                }}
-              >
-                <ListItemAvatar sx={{ minWidth: 48 }}>
-                  <Avatar
-                    src={`/images/${member.avatarId}.png`}
-                    alt={member.gameTag}
-                    sx={{ width: 36, height: 36 }}
-                  />
-                </ListItemAvatar>
-                <ListItemText
-                  primary={member.gameTag}
-                  primaryTypographyProps={{
-                    fontSize: '0.95rem',
-                    fontWeight: 500,
-                    color: '#1a2744',
+            {members.map((member) => {
+              const isCurrentUser = member.gameTag === team?.responsibleTag;
+              return (
+                <ListItem
+                  key={member.gameTag}
+                  sx={{
+                    backgroundColor: '#fff',
+                    borderRadius: '8px',
+                    px: 2,
+                    py: 0.8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
                   }}
-                />
-              </ListItem>
-            ))}
+                >
+                  <ListItemAvatar sx={{ minWidth: 48 }}>
+                    <Avatar
+                      src={`/images/${member.avatarId}.png`}
+                      alt={member.gameTag}
+                      sx={{ width: 36, height: 36 }}
+                    />
+                  </ListItemAvatar>
+
+                  {/* Indicateur disponibilité */}
+                  <Box
+                    sx={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                      backgroundColor: member.isAvailable
+                        ? '#27ae60'
+                        : '#e74c3c',
+                      flexShrink: 0,
+                    }}
+                  />
+
+                  <ListItemText
+                    primary={member.gameTag}
+                    primaryTypographyProps={{
+                      fontSize: '0.95rem',
+                      fontWeight: 500,
+                      color: '#1a2744',
+                    }}
+                  />
+
+                  {/* Bouton Nommer — visible uniquement pour le responsable, sur les autres membres */}
+                  {isResponsible && !isCurrentUser && (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={() => handleNominate(member.memberId)}
+                      sx={{
+                        ml: 'auto',
+                        flexShrink: 0,
+                        borderColor: '#1a2744',
+                        color: '#1a2744',
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        fontSize: '0.8rem',
+                        borderRadius: '6px',
+                        '&:hover': {
+                          backgroundColor: '#1a2744',
+                          color: '#fff',
+                        },
+                      }}
+                    >
+                      Nommer
+                    </Button>
+                  )}
+                </ListItem>
+              );
+            })}
           </List>
+
+          {/* Légende */}
+          <Box sx={{ display: 'flex', gap: 3, mt: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box
+                sx={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: '50%',
+                  backgroundColor: '#27ae60',
+                }}
+              />
+              <Typography
+                sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.8rem' }}
+              >
+                Disponible
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box
+                sx={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: '50%',
+                  backgroundColor: '#e74c3c',
+                }}
+              />
+              <Typography
+                sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.8rem' }}
+              >
+                Indisponible
+              </Typography>
+            </Box>
+          </Box>
         </Box>
       </Box>
 
@@ -287,8 +424,9 @@ const TeamPage = () => {
         <DialogTitle>Quitter l'équipe</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Es-tu sûr de vouloir quitter l'équipe <strong>{team?.name}</strong>{' '}
-            ?
+            {isSolo
+              ? `Tu es le dernier membre. Quitter supprimera définitivement l'équipe "${team?.name}".`
+              : `Es-tu sûr de vouloir quitter l'équipe "${team?.name}" ?`}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
