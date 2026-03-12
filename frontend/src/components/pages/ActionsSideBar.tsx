@@ -1,18 +1,25 @@
 import { Paper, Typography, Divider, Box, Button } from '@mui/material';
-// voir pour les boutons si il faut les afficher ou pas ...
-export const ActionSidebar = () => {
+import { MemberProfile } from '../../types/member';
+import { useNavigate } from 'react-router-dom';
+
+export const ActionSidebar = ({ profile }: { profile: MemberProfile }) => {
+  const navigate = useNavigate();
+
   const actions = [
-    'Consulter mes tournois disputés',
-    'Visualiser mes tournois à venir',
-    'Créer/Rejoindre une team',
+    { text: 'Consulter mes tournois disputés', path: '#' },
+    { text: 'Visualiser mes tournois à venir', path: '#' },
   ];
+
+  if (!profile.teamName) {
+    actions.push({ text: 'Créer/Rejoindre une team', path: '/team' });
+  }
 
   return (
     <Paper
       sx={{
         p: 3,
         borderRadius: 3,
-        minHeight: '640px',
+        minHeight: '687px',
         display: 'flex',
         flexDirection: 'column',
       }}
@@ -37,11 +44,12 @@ export const ActionSidebar = () => {
           justifyContent: 'center',
         }}
       >
-        {actions.map((text) => (
+        {actions.map((action) => (
           <Button
-            key={text}
+            key={action.text}
             variant="contained"
             fullWidth
+            onClick={() => action.path !== '#' && navigate(action.path)}
             sx={{
               bgcolor: '#1e2a44',
               py: 1.8,
@@ -56,7 +64,7 @@ export const ActionSidebar = () => {
               '&:hover': { bgcolor: '#415060' },
             }}
           >
-            {text}
+            {action.text}
           </Button>
         ))}
       </Box>
