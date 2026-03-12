@@ -9,8 +9,8 @@ import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
 import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
 import be.vinci.ipl.cae.api.repositories.UnavailabilityRepository;
-import java.time.LocalDate;
 import jakarta.transaction.Transactional;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -72,6 +72,7 @@ public class MemberService {
     dto.setCreationDate(member.getProfileCreationDate());
     dto.setAdmin(member.getIsAdmin());
     dto.setAvailable(!isUnavailable);
+    dto.setId(member.getId());
     teamCompositionRepository.findByMemberId(member.getId())
         .ifPresent(composition -> dto.setTeamName(composition.getTeam()
             .getName()));
@@ -190,4 +191,10 @@ public class MemberService {
     return memberRepository.findByIsAdminTrue();
   }
 
+  @Transactional
+  public List<MemberProfileResponseDto> getAllMembers() {
+    return memberRepository.findAll().stream()
+        .map(m -> getProfile(m.getEmail()))
+        .toList();
+  }
 }

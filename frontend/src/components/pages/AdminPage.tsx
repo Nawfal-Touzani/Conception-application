@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   Box,
   Typography,
-  Paper,
   Avatar,
   Button,
   Alert,
@@ -10,10 +9,10 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogContentText,
   DialogActions,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -24,8 +23,8 @@ type MemberDto = {
   speciality: string;
   teamName: string | null;
   profileImage: string | null;
-  creationDate: string | null;
   isAvailable: boolean;
+  isAdmin: boolean;
 };
 
 const API = '/api';
@@ -36,72 +35,78 @@ const AdminPage = () => {
   const navigate = useNavigate();
   const token = user?.token ?? '';
 
-  const [allMembers, setAllMembers] = useState<MemberDto[]>([]);
   const [admins, setAdmins] = useState<MemberDto[]>([]);
+  const [allMembers, setAllMembers] = useState<MemberDto[]>([]);
   const [page, setPage] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
-  // Dialog pour nommer un admin
   const [promoteOpen, setPromoteOpen] = useState(false);
-  const [nonAdmins, setNonAdmins] = useState<MemberDto[]>([]);
-
-  // Dialog pour confirmer suppression
   const [demoteTarget, setDemoteTarget] = useState<MemberDto | null>(null);
 
   useEffect(() => {
     if (user && user.role !== 'ADMIN') navigate('/');
   }, [user, navigate]);
 
-  const loadMembers = useCallback(() => {
+  const loadAdmins = useCallback(() => {
+    fetch(`${API}/members/admins`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async (res) => {
+        if (!res.ok) return;
+        const data: MemberDto[] = await res.json();
+        setAdmins(data);
+      })
+      .catch(() => setError('Erreur lors du chargement des administrateurs.'));
+  }, [token]);
+
+  const loadAllMembers = useCallback(() => {
     fetch(`${API}/members`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(async (res) => {
         if (!res.ok) return;
         const data: MemberDto[] = await res.json();
-        setAllMembers(data);
+        setAllMembers(data.filter((m) => !m.isAdmin));
       })
       .catch(() => setError('Erreur lors du chargement des membres.'));
   }, [token]);
 
   useEffect(() => {
-    if (user) loadMembers();
-  }, [user, loadMembers]);
-
-  // Séparer admins et non-admins à partir de allMembers
-  // Le backend ne renvoie pas isAdmin directement dans le DTO
-  // On considère tous les membres comme potentiels admins à nommer
-  // La page affiche tous les membres pour l'instant — à adapter si le DTO inclut isAdmin
-  useEffect(() => {
-    setAdmins(allMembers);
-    setNonAdmins(allMembers);
-  }, [allMembers]);
+    if (user) {
+      loadAdmins();
+      loadAllMembers();
+    }
+  }, [user, loadAdmins, loadAllMembers]);
 
   const handlePromote = async (member: MemberDto) => {
     setError(null);
     setSuccess(null);
-    const res = await fetch(`${API}/members/${member.id}/promote`, {
-      method: 'PATCH',
+
+    const res = await fetch(`${API}/members/admins/${member.id}`, {
+      method: 'PUT',
       headers: { Authorization: `Bearer ${token}` },
     });
+
     if (!res.ok) {
       setError('Impossible de nommer cet administrateur.');
       return;
     }
     setSuccess(`${member.tag} est maintenant administrateur.`);
     setPromoteOpen(false);
-    loadMembers();
+    loadAdmins();
+    loadAllMembers();
   };
 
   const handleDemote = async () => {
     if (!demoteTarget) return;
     setError(null);
     setSuccess(null);
-    const res = await fetch(`${API}/members/${demoteTarget.id}/demote`, {
-      method: 'PATCH',
+
+    const res = await fetch(`${API}/members/admins/${demoteTarget.id}`, {
+      method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });
+
     if (!res.ok) {
       setError('Impossible de révoquer cet administrateur.');
       setDemoteTarget(null);
@@ -109,7 +114,8 @@ const AdminPage = () => {
     }
     setSuccess(`${demoteTarget.tag} n'est plus administrateur.`);
     setDemoteTarget(null);
-    loadMembers();
+    loadAdmins();
+    loadAllMembers();
   };
 
   const totalPages = Math.ceil(admins.length / PAGE_SIZE);
@@ -127,17 +133,7 @@ const AdminPage = () => {
         px: 2,
       }}
     >
-      <Paper
-        elevation={0}
-        sx={{
-          width: '100%',
-          maxWidth: 760,
-          borderRadius: '16px',
-          p: 4,
-          backgroundColor: '#1a2744',
-          border: '2px solid #fff',
-        }}
-      >
+      <Box sx={{ width: '100%', maxWidth: 760 }}>
         {/* Titre + bouton + */}
         <Box
           sx={{
@@ -170,9 +166,8 @@ const AdminPage = () => {
                 backgroundColor: '#27ae60',
                 color: '#fff',
                 fontWeight: 800,
-                fontSize: '1.4rem',
+                fontSize: '1.2rem',
                 p: 0,
-                lineHeight: 1,
                 '&:hover': { backgroundColor: '#219150' },
               }}
             >
@@ -197,7 +192,7 @@ const AdminPage = () => {
         )}
 
         {/* Liste des admins */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           {paginated.map((member) => (
             <Box
               key={member.email}
@@ -212,7 +207,11 @@ const AdminPage = () => {
               }}
             >
               <Avatar
-                src={member.profileImage ?? undefined}
+                src={
+                  member.profileImage
+                    ? `http://localhost:3000${member.profileImage}`
+                    : undefined
+                }
                 alt={member.tag}
                 sx={{ width: 40, height: 40 }}
               />
@@ -324,28 +323,50 @@ const AdminPage = () => {
             Tous les membres
           </Button>
         </Box>
-      </Paper>
+      </Box>
 
-      {/* Dialog — Nommer un admin */}
+      {/* Dialog — Ajouter un administrateur */}
       <Dialog
         open={promoteOpen}
         onClose={() => setPromoteOpen(false)}
         maxWidth="sm"
         fullWidth
+        PaperProps={{
+          sx: {
+            backgroundColor: '#1a2744',
+            borderRadius: '16px',
+            border: '2px solid #fff',
+          },
+        }}
       >
-        <DialogTitle>Nommer un administrateur</DialogTitle>
+        <DialogTitle
+          sx={{ color: '#fff', fontWeight: 800, textAlign: 'center' }}
+        >
+          Ajouter un administrateur
+        </DialogTitle>
         <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
-            {nonAdmins.map((member) => (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {allMembers.length === 0 && (
+              <Typography
+                sx={{
+                  color: 'rgba(255,255,255,0.6)',
+                  textAlign: 'center',
+                  mt: 2,
+                }}
+              >
+                Tous les membres sont déjà administrateurs.
+              </Typography>
+            )}
+            {allMembers.map((member) => (
               <Box
                 key={member.email}
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: 2,
-                  p: 1.5,
+                  p: 1.2,
                   borderRadius: '8px',
-                  border: '1px solid #ddd',
+                  backgroundColor: 'rgba(255,255,255,0.08)',
                 }}
               >
                 <Avatar
@@ -353,48 +374,70 @@ const AdminPage = () => {
                   alt={member.tag}
                   sx={{ width: 36, height: 36 }}
                 />
-                <Typography sx={{ flex: 1, fontWeight: 600, color: '#1a2744' }}>
+                <Typography sx={{ fontWeight: 700, color: '#fff', flex: 1 }}>
                   {member.tag}
                 </Typography>
-                <Typography sx={{ color: '#888', fontSize: '0.85rem', mr: 1 }}>
-                  {member.speciality}
-                </Typography>
-                <Button
-                  size="small"
-                  variant="contained"
-                  onClick={() => handlePromote(member)}
+                <Typography
                   sx={{
-                    backgroundColor: '#1a2744',
-                    color: '#fff',
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    borderRadius: '6px',
-                    '&:hover': { backgroundColor: '#151e32' },
+                    color: 'rgba(255,255,255,0.6)',
+                    fontSize: '0.85rem',
+                    mr: 1,
                   }}
                 >
-                  Nommer
-                </Button>
+                  {member.speciality}
+                </Typography>
+                <IconButton
+                  onClick={() => handlePromote(member)}
+                  sx={{
+                    backgroundColor: '#27ae60',
+                    color: '#fff',
+                    width: 30,
+                    height: 30,
+                    '&:hover': { backgroundColor: '#219150' },
+                  }}
+                >
+                  <AddIcon fontSize="small" />
+                </IconButton>
               </Box>
             ))}
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setPromoteOpen(false)}>Annuler</Button>
+        <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
+          <Button
+            onClick={() => setPromoteOpen(false)}
+            sx={{ color: '#fff', textTransform: 'none', fontWeight: 600 }}
+          >
+            Fermer
+          </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Dialog — Confirmer suppression admin */}
-      <Dialog open={!!demoteTarget} onClose={() => setDemoteTarget(null)}>
+      {/* Dialog — Confirmer révocation */}
+      <Dialog
+        open={!!demoteTarget}
+        onClose={() => setDemoteTarget(null)}
+        PaperProps={{ sx: { borderRadius: '12px' } }}
+      >
         <DialogTitle>Révoquer un administrateur</DialogTitle>
         <DialogContent>
-          <DialogContentText>
+          <Typography>
             Es-tu sûr de vouloir révoquer les droits administrateur de{' '}
             <strong>{demoteTarget?.tag}</strong> ?
-          </DialogContentText>
+          </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDemoteTarget(null)}>Annuler</Button>
-          <Button onClick={handleDemote} color="error" variant="contained">
+          <Button
+            onClick={() => setDemoteTarget(null)}
+            sx={{ textTransform: 'none' }}
+          >
+            Annuler
+          </Button>
+          <Button
+            onClick={handleDemote}
+            color="error"
+            variant="contained"
+            sx={{ textTransform: 'none' }}
+          >
             Confirmer
           </Button>
         </DialogActions>

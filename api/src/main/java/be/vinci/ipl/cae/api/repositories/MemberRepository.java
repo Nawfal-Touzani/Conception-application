@@ -41,4 +41,11 @@ public interface MemberRepository extends CrudRepository<Member, Long> {
    * @return a list of admin.
    */
   List<Member> findByIsAdminTrue();
+
+  /**
+   *Find all members.
+   *
+   * @return a list of members
+   */
+  List<Member> findAll();
 }
