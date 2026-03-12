@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -23,6 +24,7 @@ import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
 import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -316,4 +318,117 @@ public class MemberServiceTest {
 
     assertFalse(result);
   }
+
+  @Test
+  @DisplayName("Should promote a member to admin successfully")
+  void promoteToAdmin_success() {
+    member.setIsAdmin(false);
+    when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+
+    memberService.promoteToAdmin(1L);
+
+    assertTrue(member.getIsAdmin());
+    verify(memberRepository).save(member);
+  }
+
+  @Test
+  @DisplayName("Should throw exception if member is already admin")
+  void promoteToAdmin_alreadyAdmin() {
+    member.setIsAdmin(true);
+    when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+
+    RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+      memberService.promoteToAdmin(1L);
+    });
+
+    assertEquals("Member is already an administrator", exception.getMessage());
+    verify(memberRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("Should throw exception if member not found")
+  void promoteToAdmin_memberNotFound() {
+    when(memberRepository.findById(1L)).thenReturn(Optional.empty());
+
+    RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+      memberService.promoteToAdmin(1L);
+    });
+
+    assertEquals("Member not found", exception.getMessage());
+    verify(memberRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("Should demote admin successfully when not last admin")
+  void demoteFromAdmin_success() {
+    member.setIsAdmin(true);
+    when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+    when(memberRepository.countByIsAdminTrue()).thenReturn(2L);
+
+    memberService.demoteFromAdmin(1L);
+
+    assertFalse(member.getIsAdmin());
+    verify(memberRepository).save(member);
+  }
+
+  @Test
+  @DisplayName("Should throw exception if member is not admin")
+  void demoteFromAdmin_notAdmin() {
+    member.setIsAdmin(false);
+    when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+
+    RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+      memberService.demoteFromAdmin(1L);
+    });
+
+    assertEquals("Member is not an administrator", exception.getMessage());
+    verify(memberRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("Should throw exception if trying to remove last admin")
+  void demoteFromAdmin_lastAdmin() {
+    member.setIsAdmin(true);
+    when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+    when(memberRepository.countByIsAdminTrue()).thenReturn(1L);
+
+    RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+      memberService.demoteFromAdmin(1L);
+    });
+
+    assertEquals("Cannot remove the last administrator", exception.getMessage());
+    verify(memberRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("Should throw exception if member not found when demoting")
+  void demoteFromAdmin_memberNotFound() {
+    when(memberRepository.findById(1L)).thenReturn(Optional.empty());
+
+    RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+      memberService.demoteFromAdmin(1L);
+    });
+
+    assertEquals("Member not found", exception.getMessage());
+    verify(memberRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("Should return all admins")
+  void getAllAdmins_success() {
+    Member admin1 = new Member();
+    admin1.setIsAdmin(true);
+    Member admin2 = new Member();
+    admin2.setIsAdmin(true);
+
+    when(memberRepository.findByIsAdminTrue()).thenReturn(List.of(admin1, admin2));
+
+    List<Member> result = memberService.getAllAdmins();
+
+    assertNotNull(result);
+    assertEquals(2, result.size());
+    assertTrue(result.stream().allMatch(Member::getIsAdmin));
+    verify(memberRepository).findByIsAdminTrue();
+  }
+
 }

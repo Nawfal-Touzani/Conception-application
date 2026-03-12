@@ -1,6 +1,7 @@
 package be.vinci.ipl.cae.api.repositories;
 
 import be.vinci.ipl.cae.api.models.entities.Member;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -26,4 +27,18 @@ public interface MemberRepository extends CrudRepository<Member, Long> {
    * @return an Optional containing the member if found, or empty if not
    */
   Optional<Member> findByEmail(String email);
+
+  /**
+   * Counts how many members are administrators.
+   *
+   * @return the number of admin
+   */
+  long countByIsAdminTrue();
+
+  /**
+   * Find all admins.
+   *
+   * @return a list of admin.
+   */
+  List<Member> findByIsAdminTrue();
 }

@@ -4,4 +4,5 @@ export interface Notification {
   message: string;
   sendDate: string;
   read: boolean;
+  membershipRequestId?: number;
 }

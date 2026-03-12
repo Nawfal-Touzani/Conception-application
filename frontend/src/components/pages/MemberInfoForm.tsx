@@ -7,13 +7,19 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  MenuItem,
+  Select,
   TextField,
+  Typography,
 } from '@mui/material';
 import * as memberService from '../../services/memberService';
 import { MemberProfile } from '../../types/member';
 import { ProfileInputField } from './ProfileInputField';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import * as specialityService from '../../services/speciality.service';
+import { Speciality } from '../../types/speciality.types';
 
 export const MemberInfoForm = ({ profile }: { profile: MemberProfile }) => {
   const { user } = useAuth();
@@ -25,6 +31,8 @@ export const MemberInfoForm = ({ profile }: { profile: MemberProfile }) => {
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
+  const [specialities, setSpecialities] = useState<Speciality[]>([]);
+  const [selectedSpecId, setSelectedSpecId] = useState<number | ''>('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
@@ -74,6 +82,37 @@ export const MemberInfoForm = ({ profile }: { profile: MemberProfile }) => {
     }
   };
 
+  useEffect(() => {
+    specialityService
+      .getAll()
+      .then((data) => {
+        setSpecialities(data);
+        const currentSpec = data.find(
+          (s) => s.name.toLowerCase() === profile.speciality.toLowerCase(),
+        );
+        if (currentSpec) setSelectedSpecId(currentSpec.id);
+      })
+      .catch(() => setError('Impossible de charger les spécialités.'));
+  }, [profile.speciality]);
+
+  const handleSpecialityChange = async (newId: number) => {
+    if (!user?.token) return;
+
+    const newSpec = specialities.find((s) => s.id === newId);
+    if (!newSpec) return;
+    setSelectedSpecId(newId);
+
+    try {
+      await memberService.updateMyProfile(user.token, {
+        speciality: newSpec.name,
+      });
+
+      window.location.reload();
+    } catch (err) {
+      setError('Erreur lors du changement de spécialité');
+    }
+  };
+
   const fieldStyle = {
     '& .MuiOutlinedInput-root': {
       color: 'white',
@@ -96,7 +135,7 @@ export const MemberInfoForm = ({ profile }: { profile: MemberProfile }) => {
   };
 
   return (
-    <Box>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <ProfileInputField label="Adresse email :" value={profile.email} />
 
       <ProfileInputField
@@ -108,7 +147,56 @@ export const MemberInfoForm = ({ profile }: { profile: MemberProfile }) => {
 
       <ProfileInputField label="Tag de jeu :" value={profile.tag} />
 
-      <ProfileInputField label="Spécialité :" value={profile.speciality} />
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          width: '100%',
+          mb: 1,
+          ml: 2,
+        }}
+      >
+        <Typography sx={{ fontWeight: 'bold', minWidth: '160px' }}>
+          Spécialité :
+        </Typography>
+
+        <FormControl variant="outlined" sx={{ ...fieldStyle, ml: 8 }}>
+          <Select
+            value={selectedSpecId}
+            onChange={(e) => handleSpecialityChange(e.target.value as number)}
+            sx={{
+              width: '430px',
+              height: '40px',
+              backgroundColor: '#1e2a44',
+              borderRadius: '4px',
+              color: '#ffffff',
+              '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+              '& .MuiSelect-select': {
+                paddingRight: '32px !important',
+                textAlign: 'center',
+                fontWeight: 'bold',
+              },
+              '& .MuiSelect-icon': { color: 'white', right: '10px' },
+            }}
+            MenuProps={{
+              PaperProps: {
+                sx: {
+                  backgroundColor: '#1a2744',
+                  color: 'white',
+                  '& .MuiMenuItem-root': { justifyContent: 'center' },
+                },
+              },
+            }}
+          >
+            {specialities.map((s) => (
+              <MenuItem key={s.id} value={s.id}>
+                {s.name.charAt(0).toUpperCase() + s.name.slice(1)}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
 
       <Dialog
         open={openPasswordModal}
