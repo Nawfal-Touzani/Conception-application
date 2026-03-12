@@ -4,6 +4,7 @@ export interface MemberProfile {
   speciality: string;
   profileImage: string;
   creationDate: string;
-  isAvailable: boolean;
+  available: boolean;
   teamName?: string;
+  admin: boolean;
 }
