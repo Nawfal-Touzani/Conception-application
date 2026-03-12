@@ -3,15 +3,15 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/main.tsx</title>
+    <title>Code coverage report for src/components/pages/ProfilePage.tsx</title>
     <meta charset="utf-8" />
-    <link rel="stylesheet" href="../prettify.css" />
-    <link rel="stylesheet" href="../base.css" />
-    <link rel="shortcut icon" type="image/x-icon" href="../favicon.png" />
+    <link rel="stylesheet" href="../../../prettify.css" />
+    <link rel="stylesheet" href="../../../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../../../favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style type='text/css'>
         .coverage-summary .sorter {
-            background-image: url(../sort-arrow-sprite.png);
+            background-image: url(../../../sort-arrow-sprite.png);
         }
     </style>
 </head>
@@ -19,13 +19,13 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../index.html">All files</a> / <a href="index.html">src</a> main.tsx</h1>
+        <h1><a href="../../../index.html">All files</a> / <a href="index.html">src/components/pages</a> ProfilePage.tsx</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/64</span>
+                <span class='fraction'>0/63</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/64</span>
+                <span class='fraction'>0/63</span>
             </div>
         
             
@@ -126,8 +126,7 @@
 <a name='L61'></a><a href='#L61'>61</a>
 <a name='L62'></a><a href='#L62'>62</a>
 <a name='L63'></a><a href='#L63'>63</a>
-<a name='L64'></a><a href='#L64'>64</a>
-<a name='L65'></a><a href='#L65'>65</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L64'></a><a href='#L64'>64</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -190,71 +189,69 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import React from 'react';</span></span></span>
-<span class="cstat-no" title="statement not covered" >import ReactDOM from 'react-dom/client';</span>
-<span class="cstat-no" title="statement not covered" >import './index.css';</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { useEffect, useState } from 'react';</span></span></span>
+<span class="cstat-no" title="statement not covered" >import { useAuth } from '../../contexts/AuthContext';</span>
+<span class="cstat-no" title="statement not covered" >import { MemberProfile } from '../../types/member';</span>
+<span class="cstat-no" title="statement not covered" >import * as memberService from '../../services/memberService';</span>
+<span class="cstat-no" title="statement not covered" >import { Container, Divider, Grid2, Paper, Typography } from '@mui/material';</span>
+<span class="cstat-no" title="statement not covered" >import { ProfileSidebar } from './ProfileSidebar';</span>
+<span class="cstat-no" title="statement not covered" >import { MemberInfoForm } from './MemberInfoForm';</span>
+<span class="cstat-no" title="statement not covered" >import { ActionSidebar } from './ActionsSideBar';</span>
+<span class="cstat-no" title="statement not covered" >import { UnavailabilitySection } from '../Unavailability/UnavailabilitySection';</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >import { RouterProvider, createBrowserRouter } from 'react-router-dom';</span>
+<span class="cstat-no" title="statement not covered" >export const ProfilePage = () =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  const { user } = useAuth();</span>
+<span class="cstat-no" title="statement not covered" >  const [profile, setProfile] = useState&lt;MemberProfile | null&gt;(null);</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >import App from './components/App/index.tsx';</span>
-<span class="cstat-no" title="statement not covered" >import HomePage from './components/pages/HomePage.tsx';</span>
-<span class="cstat-no" title="statement not covered" >import RegisterPage from './components/pages/RegisterPage.tsx';</span>
-<span class="cstat-no" title="statement not covered" >import LoginPage from './components/pages/LoginPage.tsx';</span>
-<span class="cstat-no" title="statement not covered" >import NotificationsPage from './components/pages/NotificationsPage.tsx';</span>
+<span class="cstat-no" title="statement not covered" >  useEffect(() =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    if (user?.token) {</span>
+<span class="cstat-no" title="statement not covered" >      memberService.getMyProfile(user.token).then(setProfile);</span>
+<span class="cstat-no" title="statement not covered" >    }</span>
+<span class="cstat-no" title="statement not covered" >  }, [user]);</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >import { AuthProvider } from './contexts/AuthContext.tsx';</span>
+<span class="cstat-no" title="statement not covered" >  if (!profile) return &lt;Typography color="white"&gt;Chargement...&lt;/Typography&gt;;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >import '@fontsource/roboto/700.css';</span>
-<span class="cstat-no" title="statement not covered" >import CssBaseline from '@mui/material/CssBaseline';</span>
-<span class="cstat-no" title="statement not covered" >import { ThemeProvider } from '@mui/material/styles';</span>
-<span class="cstat-no" title="statement not covered" >import theme from './themes.ts';</span>
-<span class="cstat-no" title="statement not covered" >import { ProfilePage } from './components/pages/ProfilePage.tsx';</span>
-<span class="cstat-no" title="statement not covered" >import TeamPage from './components/pages/TeamPage.tsx';</span>
+<span class="cstat-no" title="statement not covered" >  return (</span>
+<span class="cstat-no" title="statement not covered" >    &lt;Container maxWidth="xl" sx={{ mt: 4, mb: 2, bgcolor: '#1e2a44', p: 2 }}&gt;</span>
+<span class="cstat-no" title="statement not covered" >      &lt;Typography</span>
+<span class="cstat-no" title="statement not covered" >        variant="h4"</span>
+<span class="cstat-no" title="statement not covered" >        color="white"</span>
+<span class="cstat-no" title="statement not covered" >        align="center"</span>
+<span class="cstat-no" title="statement not covered" >        sx={{ mb: 4, fontWeight: 'bold' }}</span>
+<span class="cstat-no" title="statement not covered" >      &gt;</span>
+<span class="cstat-no" title="statement not covered" >        Profil</span>
+<span class="cstat-no" title="statement not covered" >      &lt;/Typography&gt;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >const router = createBrowserRouter([</span>
-<span class="cstat-no" title="statement not covered" >  {</span>
-<span class="cstat-no" title="statement not covered" >    path: '/',</span>
-<span class="cstat-no" title="statement not covered" >    element: &lt;App /&gt;,</span>
-<span class="cstat-no" title="statement not covered" >    children: [</span>
-<span class="cstat-no" title="statement not covered" >      {</span>
-<span class="cstat-no" title="statement not covered" >        path: '',</span>
-<span class="cstat-no" title="statement not covered" >        element: &lt;HomePage /&gt;,</span>
-<span class="cstat-no" title="statement not covered" >      },</span>
-<span class="cstat-no" title="statement not covered" >      {</span>
-<span class="cstat-no" title="statement not covered" >        path: 'register',</span>
-<span class="cstat-no" title="statement not covered" >        element: &lt;RegisterPage /&gt;,</span>
-<span class="cstat-no" title="statement not covered" >      },</span>
-<span class="cstat-no" title="statement not covered" >      {</span>
-<span class="cstat-no" title="statement not covered" >        path: 'login',</span>
-<span class="cstat-no" title="statement not covered" >        element: &lt;LoginPage /&gt;,</span>
-<span class="cstat-no" title="statement not covered" >      },</span>
-<span class="cstat-no" title="statement not covered" >      {</span>
-<span class="cstat-no" title="statement not covered" >        path: 'notifications',</span>
-<span class="cstat-no" title="statement not covered" >        element: &lt;NotificationsPage /&gt;,</span>
-<span class="cstat-no" title="statement not covered" >      },</span>
-<span class="cstat-no" title="statement not covered" >      {</span>
-<span class="cstat-no" title="statement not covered" >        path: 'members/me',</span>
-<span class="cstat-no" title="statement not covered" >        element: &lt;ProfilePage /&gt;,</span>
-<span class="cstat-no" title="statement not covered" >      },</span>
-<span class="cstat-no" title="statement not covered" >      {</span>
-<span class="cstat-no" title="statement not covered" >        path: 'team',</span>
-<span class="cstat-no" title="statement not covered" >        element: &lt;TeamPage /&gt;,</span>
-<span class="cstat-no" title="statement not covered" >      },</span>
-<span class="cstat-no" title="statement not covered" >    ],</span>
-<span class="cstat-no" title="statement not covered" >  },</span>
-<span class="cstat-no" title="statement not covered" >]);</span>
+<span class="cstat-no" title="statement not covered" >      &lt;Grid2 container spacing={3}&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;Grid2 size={{ xs: 12, lg: 6 }}&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;Paper sx={{ p: 3, borderRadius: 3, minHeight: '550px' }}&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;Typography</span>
+<span class="cstat-no" title="statement not covered" >              variant="h4"</span>
+<span class="cstat-no" title="statement not covered" >              align="center"</span>
+<span class="cstat-no" title="statement not covered" >              sx={{ mb: 2, fontWeight: 'bold', color: '#1e2a44' }}</span>
+<span class="cstat-no" title="statement not covered" >            &gt;</span>
+<span class="cstat-no" title="statement not covered" >              Informations personnelles</span>
+<span class="cstat-no" title="statement not covered" >            &lt;/Typography&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;Divider</span>
+<span class="cstat-no" title="statement not covered" >              sx={{ mb: 3, borderBottomWidth: 2, backgroundColor: '#1e2a44' }}</span>
+<span class="cstat-no" title="statement not covered" >            /&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;MemberInfoForm profile={profile} /&gt;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >ReactDOM.createRoot(document.getElementById('root')!).render(</span>
-<span class="cstat-no" title="statement not covered" >  &lt;React.StrictMode&gt;</span>
-<span class="cstat-no" title="statement not covered" >    &lt;ThemeProvider theme={theme}&gt;</span>
-<span class="cstat-no" title="statement not covered" >      &lt;CssBaseline /&gt; {/* Global CSS reset from Material-UI */}</span>
-<span class="cstat-no" title="statement not covered" >      &lt;AuthProvider&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;RouterProvider router={router} /&gt;</span>
-<span class="cstat-no" title="statement not covered" >      &lt;/AuthProvider&gt;</span>
-<span class="cstat-no" title="statement not covered" >    &lt;/ThemeProvider&gt;</span>
-<span class="cstat-no" title="statement not covered" >  &lt;/React.StrictMode&gt;,</span>
-<span class="cstat-no" title="statement not covered" >);</span>
+<span class="cstat-no" title="statement not covered" >            &lt;UnavailabilitySection /&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;/Paper&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;/Grid2&gt;</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >        &lt;Grid2 size={{ xs: 12, md: 9, lg: 3 }}&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;ProfileSidebar profile={profile} /&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;/Grid2&gt;</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >        &lt;Grid2 size={{ xs: 12, md: 6, lg: 3 }}&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;ActionSidebar profile={profile} /&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;/Grid2&gt;</span>
+<span class="cstat-no" title="statement not covered" >      &lt;/Grid2&gt;</span>
+<span class="cstat-no" title="statement not covered" >    &lt;/Container&gt;</span>
+<span class="cstat-no" title="statement not covered" >  );</span>
+<span class="cstat-no" title="statement not covered" >};</span>
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -264,14 +261,14 @@
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
                 at 2026-03-12T23:32:17.145Z
             </div>
-        <script src="../prettify.js"></script>
+        <script src="../../../prettify.js"></script>
         <script>
             window.onload = function () {
                 prettyPrint();
             };
         </script>
-        <script src="../sorter.js"></script>
-        <script src="../block-navigation.js"></script>
+        <script src="../../../sorter.js"></script>
+        <script src="../../../block-navigation.js"></script>
     </body>
 </html>
     

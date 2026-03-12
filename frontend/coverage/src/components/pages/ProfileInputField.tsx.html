@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/components/Header/index.tsx</title>
+    <title>Code coverage report for src/components/pages/ProfileInputField.tsx</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../../prettify.css" />
     <link rel="stylesheet" href="../../../base.css" />
@@ -19,13 +19,13 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../../index.html">All files</a> / <a href="index.html">src/components/Header</a> index.tsx</h1>
+        <h1><a href="../../../index.html">All files</a> / <a href="index.html">src/components/pages</a> ProfileInputField.tsx</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/42</span>
+                <span class='fraction'>0/51</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/42</span>
+                <span class='fraction'>0/51</span>
             </div>
         
             
@@ -105,7 +105,16 @@
 <a name='L40'></a><a href='#L40'>40</a>
 <a name='L41'></a><a href='#L41'>41</a>
 <a name='L42'></a><a href='#L42'>42</a>
-<a name='L43'></a><a href='#L43'>43</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -147,48 +156,66 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { Box, Container, Typography, useTheme } from '@mui/material';</span></span></span>
-<span class="cstat-no" title="statement not covered" >import { useState } from 'react';</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { Grid2, Typography, TextField, IconButton } from '@mui/material';</span></span></span>
+<span class="cstat-no" title="statement not covered" >import EditIcon from '@mui/icons-material/Edit';</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >interface HeaderProps {</span>
-<span class="cstat-no" title="statement not covered" >  title: string;</span>
-<span class="cstat-no" title="statement not covered" >  version: number;</span>
-<span class="cstat-no" title="statement not covered" >  handleHeaderClick: () =&gt; void;</span>
+<span class="cstat-no" title="statement not covered" >interface ProfileInputFieldProps {</span>
+<span class="cstat-no" title="statement not covered" >  label: string;</span>
+<span class="cstat-no" title="statement not covered" >  value?: string;</span>
+<span class="cstat-no" title="statement not covered" >  type?: string;</span>
+<span class="cstat-no" title="statement not covered" >  onEditClick?: () =&gt; void;</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >const Header = ({ title, handleHeaderClick }: HeaderProps) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  const theme = useTheme();</span>
-<span class="cstat-no" title="statement not covered" >  const [menuPrinted, setMenuPrinted] = useState(false);</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >  const handleClick = () =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    console.log(`value of menuPrinted before click: ${menuPrinted}`);</span>
-<span class="cstat-no" title="statement not covered" >    setMenuPrinted(!menuPrinted);</span>
-<span class="cstat-no" title="statement not covered" >    handleHeaderClick();</span>
-<span class="cstat-no" title="statement not covered" >  };</span>
-<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >export const ProfileInputField = ({</span>
+<span class="cstat-no" title="statement not covered" >  label,</span>
+<span class="cstat-no" title="statement not covered" >  value,</span>
+<span class="cstat-no" title="statement not covered" >  type = 'text',</span>
+<span class="cstat-no" title="statement not covered" >  onEditClick,</span>
+<span class="cstat-no" title="statement not covered" >}: ProfileInputFieldProps) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  return (</span>
-<span class="cstat-no" title="statement not covered" >    &lt;Box</span>
-<span class="cstat-no" title="statement not covered" >      component="header"</span>
-<span class="cstat-no" title="statement not covered" >      sx={{</span>
-<span class="cstat-no" title="statement not covered" >        px: 2,</span>
-<span class="cstat-no" title="statement not covered" >        backgroundColor:</span>
-<span class="cstat-no" title="statement not covered" >          theme.palette.mode === 'light'</span>
-<span class="cstat-no" title="statement not covered" >            ? theme.palette.primary.light</span>
-<span class="cstat-no" title="statement not covered" >            : theme.palette.primary.dark,</span>
-<span class="cstat-no" title="statement not covered" >        color: (theme) =&gt; theme.palette.primary.contrastText,</span>
-<span class="cstat-no" title="statement not covered" >      }}</span>
-<span class="cstat-no" title="statement not covered" >      onClick={handleClick}</span>
-<span class="cstat-no" title="statement not covered" >    &gt;</span>
-<span class="cstat-no" title="statement not covered" >      &lt;Container maxWidth="sm"&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;Typography variant="h1"&gt;</span>
-<span class="cstat-no" title="statement not covered" >          {menuPrinted ? `${title}... and rarely do we hate it!` : title}</span>
-<span class="cstat-no" title="statement not covered" >        &lt;/Typography&gt;</span>
-<span class="cstat-no" title="statement not covered" >      &lt;/Container&gt;</span>
-<span class="cstat-no" title="statement not covered" >    &lt;/Box&gt;</span>
+<span class="cstat-no" title="statement not covered" >    &lt;Grid2 container alignItems="center" spacing={2} sx={{ px: 2, mb: 2 }}&gt;</span>
+<span class="cstat-no" title="statement not covered" >      &lt;Grid2 size={4}&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;Typography sx={{ fontWeight: 'bold' }}&gt;{label}&lt;/Typography&gt;</span>
+<span class="cstat-no" title="statement not covered" >      &lt;/Grid2&gt;</span>
+<span class="cstat-no" title="statement not covered" >      &lt;Grid2 size={8}&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;TextField</span>
+<span class="cstat-no" title="statement not covered" >          fullWidth</span>
+<span class="cstat-no" title="statement not covered" >          size="small"</span>
+<span class="cstat-no" title="statement not covered" >          type={type}</span>
+<span class="cstat-no" title="statement not covered" >          value={value}</span>
+<span class="cstat-no" title="statement not covered" >          sx={{</span>
+<span class="cstat-no" title="statement not covered" >            '&amp; .MuiInputBase-root': {</span>
+<span class="cstat-no" title="statement not covered" >              borderRadius: '4px',</span>
+<span class="cstat-no" title="statement not covered" >              bgcolor: '#1e2a44',</span>
+<span class="cstat-no" title="statement not covered" >              color: 'white',</span>
+<span class="cstat-no" title="statement not covered" >            },</span>
+<span class="cstat-no" title="statement not covered" >          }}</span>
+<span class="cstat-no" title="statement not covered" >          inputProps={{ style: { textAlign: 'center' } }}</span>
+<span class="cstat-no" title="statement not covered" >          InputProps={</span>
+<span class="cstat-no" title="statement not covered" >            onEditClick</span>
+<span class="cstat-no" title="statement not covered" >              ? {</span>
+<span class="cstat-no" title="statement not covered" >                  endAdornment: (</span>
+<span class="cstat-no" title="statement not covered" >                    &lt;IconButton onClick={onEditClick} size="small"&gt;</span>
+<span class="cstat-no" title="statement not covered" >                      &lt;EditIcon fontSize="small" sx={{ color: 'white' }} /&gt;</span>
+<span class="cstat-no" title="statement not covered" >                    &lt;/IconButton&gt;</span>
+<span class="cstat-no" title="statement not covered" >                  ),</span>
+<span class="cstat-no" title="statement not covered" >                }</span>
+<span class="cstat-no" title="statement not covered" >              : undefined</span>
+<span class="cstat-no" title="statement not covered" >          }</span>
+<span class="cstat-no" title="statement not covered" >        /&gt;</span>
+<span class="cstat-no" title="statement not covered" >      &lt;/Grid2&gt;</span>
+<span class="cstat-no" title="statement not covered" >    &lt;/Grid2&gt;</span>
 <span class="cstat-no" title="statement not covered" >  );</span>
 <span class="cstat-no" title="statement not covered" >};</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >export default Header;</span>
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->

@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/components/pages/NotificationsPage.tsx</title>
+    <title>Code coverage report for src/components/Avatar/Avatar.tsx</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../../prettify.css" />
     <link rel="stylesheet" href="../../../base.css" />
@@ -19,13 +19,13 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../../index.html">All files</a> / <a href="index.html">src/components/pages</a> NotificationsPage.tsx</h1>
+        <h1><a href="../../../index.html">All files</a> / <a href="index.html">src/components/Avatar</a> Avatar.tsx</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/109</span>
+                <span class='fraction'>0/123</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/109</span>
+                <span class='fraction'>0/123</span>
             </div>
         
             
@@ -172,7 +172,21 @@
 <a name='L107'></a><a href='#L107'>107</a>
 <a name='L108'></a><a href='#L108'>108</a>
 <a name='L109'></a><a href='#L109'>109</a>
-<a name='L110'></a><a href='#L110'>110</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L110'></a><a href='#L110'>110</a>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a>
+<a name='L120'></a><a href='#L120'>120</a>
+<a name='L121'></a><a href='#L121'>121</a>
+<a name='L122'></a><a href='#L122'>122</a>
+<a name='L123'></a><a href='#L123'>123</a>
+<a name='L124'></a><a href='#L124'>124</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -281,115 +295,143 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { useEffect, useState } from 'react';</span></span></span>
-<span class="cstat-no" title="statement not covered" >import { useAuth } from '../../contexts/AuthContext';</span>
-<span class="cstat-no" title="statement not covered" >import {</span>
-<span class="cstat-no" title="statement not covered" >  getNotifications,</span>
-<span class="cstat-no" title="statement not covered" >  markAsRead,</span>
-<span class="cstat-no" title="statement not covered" >} from '../../services/notifications.service';</span>
-<span class="cstat-no" title="statement not covered" >import {</span>
-<span class="cstat-no" title="statement not covered" >  approveRequest,</span>
-<span class="cstat-no" title="statement not covered" >  refuseRequest,</span>
-<span class="cstat-no" title="statement not covered" >} from '../../services/membership-request.service'; // ← AJOUT</span>
-<span class="cstat-no" title="statement not covered" >import { Notification } from '../../types/notifications.types';</span>
-<span class="cstat-no" title="statement not covered" >import NotificationList from '../NotificationList';</span>
-<span class="cstat-no" title="statement not covered" >import { Box, Typography, Button } from '@mui/material';</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { Box, Button, Dialog, DialogTitle, IconButton } from '@mui/material';</span></span></span>
+<span class="cstat-no" title="statement not covered" >import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';</span>
+<span class="cstat-no" title="statement not covered" >import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';</span>
+<span class="cstat-no" title="statement not covered" >import { useEffect, useState } from 'react';</span>
+<span class="cstat-no" title="statement not covered" >import * as imageService from '../../services/image.service';</span>
+<span class="cstat-no" title="statement not covered" >import { ProfileImage } from '../../types/image.types';</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >const NotifiationPage = () =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  const { user } = useAuth();</span>
-<span class="cstat-no" title="statement not covered" >  const [notifications, setNotifications] = useState&lt;Notification[]&gt;([]);</span>
-<span class="cstat-no" title="statement not covered" >  const [filter, setFilter] = useState&lt;boolean | undefined&gt;(undefined);</span>
+<span class="cstat-no" title="statement not covered" >interface AvatarModalProps {</span>
+<span class="cstat-no" title="statement not covered" >  open: boolean;</span>
+<span class="cstat-no" title="statement not covered" >  onClose: () =&gt; void;</span>
+<span class="cstat-no" title="statement not covered" >  onConfirm: (imageUrl: string) =&gt; void;</span>
+<span class="cstat-no" title="statement not covered" >  currentImage: string;</span>
+<span class="cstat-no" title="statement not covered" >}</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >export const AvatarModal = ({</span>
+<span class="cstat-no" title="statement not covered" >  open,</span>
+<span class="cstat-no" title="statement not covered" >  onClose,</span>
+<span class="cstat-no" title="statement not covered" >  onConfirm,</span>
+<span class="cstat-no" title="statement not covered" >  currentImage,</span>
+<span class="cstat-no" title="statement not covered" >}: AvatarModalProps) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  const [images, setImages] = useState&lt;ProfileImage[]&gt;([]);</span>
+<span class="cstat-no" title="statement not covered" >  const [selectedImage, setSelectedImage] = useState(currentImage);</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >  const BASE_URL = 'http://localhost:3000';</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  useEffect(() =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    if (!user) return;</span>
-<span class="cstat-no" title="statement not covered" >    const fetchNotifications = async () =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >      const data = await getNotifications(user.id, user.token, filter);</span>
-<span class="cstat-no" title="statement not covered" >      setNotifications(data);</span>
-<span class="cstat-no" title="statement not covered" >    };</span>
-<span class="cstat-no" title="statement not covered" >    fetchNotifications();</span>
-<span class="cstat-no" title="statement not covered" >  }, [user, filter]);</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >  const handleMarkAsRead = async (notificationId: number) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    if (!user) return;</span>
-<span class="cstat-no" title="statement not covered" >    const updated = await markAsRead(user.id, notificationId, user.token);</span>
-<span class="cstat-no" title="statement not covered" >    setNotifications((prev) =&gt;</span>
-<span class="cstat-no" title="statement not covered" >      prev.map((n) =&gt; (n.id === updated.id ? updated : n)),</span>
-<span class="cstat-no" title="statement not covered" >    );</span>
-<span class="cstat-no" title="statement not covered" >  };</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >  // ← AJOUT</span>
-<span class="cstat-no" title="statement not covered" >  const handleApprove = async (membershipRequestId: number) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    if (!user) return;</span>
-<span class="cstat-no" title="statement not covered" >    await approveRequest(membershipRequestId, user.token);</span>
-<span class="cstat-no" title="statement not covered" >    // Refresh la liste après action</span>
-<span class="cstat-no" title="statement not covered" >    const data = await getNotifications(user.id, user.token, filter);</span>
-<span class="cstat-no" title="statement not covered" >    setNotifications(data);</span>
-<span class="cstat-no" title="statement not covered" >  };</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >  // ← AJOUT</span>
-<span class="cstat-no" title="statement not covered" >  const handleRefuse = async (membershipRequestId: number, reason: string) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    if (!user) return;</span>
-<span class="cstat-no" title="statement not covered" >    await refuseRequest(membershipRequestId, reason, user.token);</span>
-<span class="cstat-no" title="statement not covered" >    // Refresh la liste après action</span>
-<span class="cstat-no" title="statement not covered" >    const data = await getNotifications(user.id, user.token, filter);</span>
-<span class="cstat-no" title="statement not covered" >    setNotifications(data);</span>
-<span class="cstat-no" title="statement not covered" >  };</span>
+<span class="cstat-no" title="statement not covered" >    if (open) {</span>
+<span class="cstat-no" title="statement not covered" >      imageService.getAll().then(setImages).catch(console.error);</span>
+<span class="cstat-no" title="statement not covered" >    }</span>
+<span class="cstat-no" title="statement not covered" >  }, [open]);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  return (</span>
-<span class="cstat-no" title="statement not covered" >    &lt;Box sx={{ mt: 4, mx: 'auto', maxWidth: 1200, px: 3 }}&gt;</span>
-<span class="cstat-no" title="statement not covered" >      &lt;Typography variant="h4" mb={3} sx={{ color: 'white' }}&gt;</span>
-<span class="cstat-no" title="statement not covered" >        Mes notifications</span>
-<span class="cstat-no" title="statement not covered" >      &lt;/Typography&gt;</span>
+<span class="cstat-no" title="statement not covered" >    &lt;Dialog</span>
+<span class="cstat-no" title="statement not covered" >      open={open}</span>
+<span class="cstat-no" title="statement not covered" >      onClose={onClose}</span>
+<span class="cstat-no" title="statement not covered" >      PaperProps={{</span>
+<span class="cstat-no" title="statement not covered" >        sx: { borderRadius: 3, p: 2, textAlign: 'center', maxWidth: '600px' },</span>
+<span class="cstat-no" title="statement not covered" >      }}</span>
+<span class="cstat-no" title="statement not covered" >    &gt;</span>
+<span class="cstat-no" title="statement not covered" >      &lt;DialogTitle</span>
+<span class="cstat-no" title="statement not covered" >        sx={{ fontWeight: 'bold', fontSize: '1.8rem', color: '#1e2a44' }}</span>
+<span class="cstat-no" title="statement not covered" >      &gt;</span>
+<span class="cstat-no" title="statement not covered" >        Choisir un avatar</span>
+<span class="cstat-no" title="statement not covered" >      &lt;/DialogTitle&gt;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >      &lt;Box sx={{ display: 'flex', gap: 4 }}&gt;</span>
+<span class="cstat-no" title="statement not covered" >      &lt;Box</span>
+<span class="cstat-no" title="statement not covered" >        sx={{</span>
+<span class="cstat-no" title="statement not covered" >          display: 'flex',</span>
+<span class="cstat-no" title="statement not covered" >          alignItems: 'center',</span>
+<span class="cstat-no" title="statement not covered" >          justifyContent: 'center',</span>
+<span class="cstat-no" title="statement not covered" >          gap: 2,</span>
+<span class="cstat-no" title="statement not covered" >          my: 3,</span>
+<span class="cstat-no" title="statement not covered" >        }}</span>
+<span class="cstat-no" title="statement not covered" >      &gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;IconButton&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;ArrowBackIosIcon /&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;/IconButton&gt;</span>
+<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >        &lt;Box</span>
 <span class="cstat-no" title="statement not covered" >          sx={{</span>
 <span class="cstat-no" title="statement not covered" >            display: 'flex',</span>
-<span class="cstat-no" title="statement not covered" >            flexDirection: 'column',</span>
 <span class="cstat-no" title="statement not covered" >            gap: 2,</span>
-<span class="cstat-no" title="statement not covered" >            minWidth: 200,</span>
+<span class="cstat-no" title="statement not covered" >            flexWrap: 'wrap',</span>
+<span class="cstat-no" title="statement not covered" >            justifyContent: 'center',</span>
 <span class="cstat-no" title="statement not covered" >          }}</span>
 <span class="cstat-no" title="statement not covered" >        &gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;Button</span>
-<span class="cstat-no" title="statement not covered" >            variant={filter === undefined ? 'contained' : 'outlined'}</span>
-<span class="cstat-no" title="statement not covered" >            onClick={() =&gt; setFilter(undefined)}</span>
-<span class="cstat-no" title="statement not covered" >          &gt;</span>
-<span class="cstat-no" title="statement not covered" >            Toutes</span>
-<span class="cstat-no" title="statement not covered" >          &lt;/Button&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;Button</span>
-<span class="cstat-no" title="statement not covered" >            variant={filter === false ? 'contained' : 'outlined'}</span>
-<span class="cstat-no" title="statement not covered" >            onClick={() =&gt; setFilter(false)}</span>
-<span class="cstat-no" title="statement not covered" >          &gt;</span>
-<span class="cstat-no" title="statement not covered" >            Non lues</span>
-<span class="cstat-no" title="statement not covered" >          &lt;/Button&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;Button</span>
-<span class="cstat-no" title="statement not covered" >            variant={filter === true ? 'contained' : 'outlined'}</span>
-<span class="cstat-no" title="statement not covered" >            onClick={() =&gt; setFilter(true)}</span>
-<span class="cstat-no" title="statement not covered" >          &gt;</span>
-<span class="cstat-no" title="statement not covered" >            Lues</span>
-<span class="cstat-no" title="statement not covered" >          &lt;/Button&gt;</span>
+<span class="cstat-no" title="statement not covered" >          {images.map((img) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            const fullUrl = `${BASE_URL}${img.url}`;</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >            return (</span>
+<span class="cstat-no" title="statement not covered" >              &lt;Box</span>
+<span class="cstat-no" title="statement not covered" >                key={img.id}</span>
+<span class="cstat-no" title="statement not covered" >                component="img"</span>
+<span class="cstat-no" title="statement not covered" >                src={fullUrl}</span>
+<span class="cstat-no" title="statement not covered" >                alt={`Avatar ${img.id}`}</span>
+<span class="cstat-no" title="statement not covered" >                onClick={() =&gt; setSelectedImage(fullUrl)}</span>
+<span class="cstat-no" title="statement not covered" >                sx={{</span>
+<span class="cstat-no" title="statement not covered" >                  width: 80,</span>
+<span class="cstat-no" title="statement not covered" >                  height: 80,</span>
+<span class="cstat-no" title="statement not covered" >                  cursor: 'pointer',</span>
+<span class="cstat-no" title="statement not covered" >                  borderRadius: '8px',</span>
+<span class="cstat-no" title="statement not covered" >                  objectFit: 'contain',</span>
+<span class="cstat-no" title="statement not covered" >                  border:</span>
+<span class="cstat-no" title="statement not covered" >                    selectedImage === fullUrl</span>
+<span class="cstat-no" title="statement not covered" >                      ? '3px solid #d32f2f'</span>
+<span class="cstat-no" title="statement not covered" >                      : '1px solid black',</span>
+<span class="cstat-no" title="statement not covered" >                  transition: 'all 0.1s ease-in-out',</span>
+<span class="cstat-no" title="statement not covered" >                  '&amp;:hover': {</span>
+<span class="cstat-no" title="statement not covered" >                    transform: 'scale(1.2)',</span>
+<span class="cstat-no" title="statement not covered" >                  },</span>
+<span class="cstat-no" title="statement not covered" >                }}</span>
+<span class="cstat-no" title="statement not covered" >              /&gt;</span>
+<span class="cstat-no" title="statement not covered" >            );</span>
+<span class="cstat-no" title="statement not covered" >          })}</span>
 <span class="cstat-no" title="statement not covered" >        &lt;/Box&gt;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        &lt;Box sx={{ flex: 1 }}&gt;</span>
-<span class="cstat-no" title="statement not covered" >          {notifications.length === 0 ? (</span>
-<span class="cstat-no" title="statement not covered" >            &lt;Typography sx={{ color: 'white' }}&gt;</span>
-<span class="cstat-no" title="statement not covered" >              Aucune notification.</span>
-<span class="cstat-no" title="statement not covered" >            &lt;/Typography&gt;</span>
-<span class="cstat-no" title="statement not covered" >          ) : (</span>
-<span class="cstat-no" title="statement not covered" >            &lt;NotificationList</span>
-<span class="cstat-no" title="statement not covered" >              notifications={notifications}</span>
-<span class="cstat-no" title="statement not covered" >              onMarkAsRead={handleMarkAsRead}</span>
-<span class="cstat-no" title="statement not covered" >              onApprove={handleApprove}</span>
-<span class="cstat-no" title="statement not covered" >              onRefuse={handleRefuse}</span>
-<span class="cstat-no" title="statement not covered" >            /&gt;</span>
-<span class="cstat-no" title="statement not covered" >          )}</span>
-<span class="cstat-no" title="statement not covered" >        &lt;/Box&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;IconButton&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;ArrowForwardIosIcon /&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;/IconButton&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;/Box&gt;</span>
-<span class="cstat-no" title="statement not covered" >    &lt;/Box&gt;</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >      &lt;Button</span>
+<span class="cstat-no" title="statement not covered" >        variant="contained"</span>
+<span class="cstat-no" title="statement not covered" >        onClick={() =&gt; onConfirm(selectedImage)}</span>
+<span class="cstat-no" title="statement not covered" >        sx={{</span>
+<span class="cstat-no" title="statement not covered" >          bgcolor: '#1e2a44',</span>
+<span class="cstat-no" title="statement not covered" >          color: 'white',</span>
+<span class="cstat-no" title="statement not covered" >          fontWeight: 'bold',</span>
+<span class="cstat-no" title="statement not covered" >          textTransform: 'none',</span>
+<span class="cstat-no" title="statement not covered" >          fontSize: '1.2rem',</span>
+<span class="cstat-no" title="statement not covered" >          borderRadius: 2,</span>
+<span class="cstat-no" title="statement not covered" >          px: 6,</span>
+<span class="cstat-no" title="statement not covered" >          py: 1,</span>
+<span class="cstat-no" title="statement not covered" >          alignSelf: 'center',</span>
+<span class="cstat-no" title="statement not covered" >          mb: 2,</span>
+<span class="cstat-no" title="statement not covered" >          '&amp;:hover': { bgcolor: '#2c3e61' },</span>
+<span class="cstat-no" title="statement not covered" >        }}</span>
+<span class="cstat-no" title="statement not covered" >      &gt;</span>
+<span class="cstat-no" title="statement not covered" >        Confirmer</span>
+<span class="cstat-no" title="statement not covered" >      &lt;/Button&gt;</span>
+<span class="cstat-no" title="statement not covered" >    &lt;/Dialog&gt;</span>
 <span class="cstat-no" title="statement not covered" >  );</span>
 <span class="cstat-no" title="statement not covered" >};</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >export default NotifiationPage;</span>
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->

@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/components/NotificationList.tsx</title>
+    <title>Code coverage report for src/services/membership-request.service.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,13 +19,13 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/components</a> NotificationList.tsx</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/services</a> membership-request.service.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/33</span>
+                <span class='fraction'>0/26</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/33</span>
+                <span class='fraction'>0/26</span>
             </div>
         
             
@@ -89,14 +89,7 @@
 <a name='L24'></a><a href='#L24'>24</a>
 <a name='L25'></a><a href='#L25'>25</a>
 <a name='L26'></a><a href='#L26'>26</a>
-<a name='L27'></a><a href='#L27'>27</a>
-<a name='L28'></a><a href='#L28'>28</a>
-<a name='L29'></a><a href='#L29'>29</a>
-<a name='L30'></a><a href='#L30'>30</a>
-<a name='L31'></a><a href='#L31'>31</a>
-<a name='L32'></a><a href='#L32'>32</a>
-<a name='L33'></a><a href='#L33'>33</a>
-<a name='L34'></a><a href='#L34'>34</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L27'></a><a href='#L27'>27</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -122,46 +115,32 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { List } from '@mui/material';</span></span></span>
-<span class="cstat-no" title="statement not covered" >import { Notification } from '../types/notifications.types';</span>
-<span class="cstat-no" title="statement not covered" >import NotificationItem from './NotificationItem';</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >const API_URL = 'http://localhost:3000';</span></span></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >interface NotificationListProps {</span>
-<span class="cstat-no" title="statement not covered" >  notifications: Notification[];</span>
-<span class="cstat-no" title="statement not covered" >  onMarkAsRead: (notificationId: number) =&gt; void;</span>
-<span class="cstat-no" title="statement not covered" >  onApprove?: (membershipRequestId: number) =&gt; void;</span>
-<span class="cstat-no" title="statement not covered" >  onRefuse?: (membershipRequestId: number, reason: string) =&gt; void;</span>
-<span class="cstat-no" title="statement not covered" >}</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >const NotificationList = ({</span>
-<span class="cstat-no" title="statement not covered" >  notifications,</span>
-<span class="cstat-no" title="statement not covered" >  onMarkAsRead,</span>
-<span class="cstat-no" title="statement not covered" >  onApprove,</span>
-<span class="cstat-no" title="statement not covered" >  onRefuse,</span>
-<span class="cstat-no" title="statement not covered" >}: NotificationListProps) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  return (</span>
-<span class="cstat-no" title="statement not covered" >    &lt;List&gt;</span>
-<span class="cstat-no" title="statement not covered" >      {notifications.map((notif) =&gt; (</span>
-<span class="cstat-no" title="statement not covered" >        &lt;NotificationItem</span>
-<span class="cstat-no" title="statement not covered" >          key={notif.id}</span>
-<span class="cstat-no" title="statement not covered" >          notification={notif}</span>
-<span class="cstat-no" title="statement not covered" >          onMarkAsRead={onMarkAsRead}</span>
-<span class="cstat-no" title="statement not covered" >          onApprove={onApprove}</span>
-<span class="cstat-no" title="statement not covered" >          onRefuse={onRefuse}</span>
-<span class="cstat-no" title="statement not covered" >        /&gt;</span>
-<span class="cstat-no" title="statement not covered" >      ))}</span>
-<span class="cstat-no" title="statement not covered" >    &lt;/List&gt;</span>
-<span class="cstat-no" title="statement not covered" >  );</span>
+<span class="cstat-no" title="statement not covered" >export const approveRequest = async (</span>
+<span class="cstat-no" title="statement not covered" >  membershipRequestId: number,</span>
+<span class="cstat-no" title="statement not covered" >  token: string,</span>
+<span class="cstat-no" title="statement not covered" >): Promise&lt;void&gt; =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  await fetch(`${API_URL}/membership-requests/${membershipRequestId}/approve`, {</span>
+<span class="cstat-no" title="statement not covered" >    method: 'PATCH',</span>
+<span class="cstat-no" title="statement not covered" >    headers: { Authorization: `Bearer ${token}` },</span>
+<span class="cstat-no" title="statement not covered" >  });</span>
 <span class="cstat-no" title="statement not covered" >};</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >export default NotificationList;</span>
+<span class="cstat-no" title="statement not covered" >export const refuseRequest = async (</span>
+<span class="cstat-no" title="statement not covered" >  membershipRequestId: number,</span>
+<span class="cstat-no" title="statement not covered" >  reason: string,</span>
+<span class="cstat-no" title="statement not covered" >  token: string,</span>
+<span class="cstat-no" title="statement not covered" >): Promise&lt;void&gt; =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  await fetch(`${API_URL}/membership-requests/${membershipRequestId}/refuse`, {</span>
+<span class="cstat-no" title="statement not covered" >    method: 'PATCH',</span>
+<span class="cstat-no" title="statement not covered" >    headers: {</span>
+<span class="cstat-no" title="statement not covered" >      Authorization: `Bearer ${token}`,</span>
+<span class="cstat-no" title="statement not covered" >      'Content-Type': 'application/json',</span>
+<span class="cstat-no" title="statement not covered" >    },</span>
+<span class="cstat-no" title="statement not covered" >    body: JSON.stringify({ reason }),</span>
+<span class="cstat-no" title="statement not covered" >  });</span>
+<span class="cstat-no" title="statement not covered" >};</span>
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
