@@ -1,6 +1,6 @@
 @baseUrl = http://localhost:3000
 @token =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibGVhQG1haWwuY29tIiwiaWF0IjoxNzczMjQ1NDkzLCJleHAiOjE3NzMzMzE4OTN9.GvAiRkj55ikWw0kFdoqqF4TOQMmLUTEcyexYQYko15w
-@token2 =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoidG9tQG1haWwuY29tIiwiaWF0IjoxNzczMjQ1NTIyLCJleHAiOjE3NzMzMzE5MjJ9.WLiEavhhJnvkpSHU3psArghO_0Smf1aJpcuis7yuhZA
+@token2 =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoidG9tQG1haWwuY29tIiwiaWF0IjoxNzczMjU0NzczLCJleHAiOjE3NzMzNDExNzN9._hTn7lC3yxJ3PaoILCznql-nOzdigZmK-so56sysI5Y
 
 ### Login responsible (copy token into @token)
 POST {{baseUrl}}/auths/login
