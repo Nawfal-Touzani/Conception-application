@@ -4,7 +4,6 @@ import be.vinci.ipl.cae.api.models.dtos.CreateTeamRequest;
 import be.vinci.ipl.cae.api.models.dtos.TeamMemberDto;
 import be.vinci.ipl.cae.api.models.dtos.TeamResponseDto;
 import be.vinci.ipl.cae.api.models.entities.MembershipRequest;
-import be.vinci.ipl.cae.api.models.entities.Team;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.services.MembershipRequestService;
 import be.vinci.ipl.cae.api.services.TeamService;
