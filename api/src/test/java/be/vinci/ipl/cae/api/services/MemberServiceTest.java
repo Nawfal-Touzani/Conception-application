@@ -24,6 +24,7 @@ import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
 import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -412,5 +413,22 @@ public class MemberServiceTest {
     verify(memberRepository, never()).save(any());
   }
 
+  @Test
+  @DisplayName("Should return all admins")
+  void getAllAdmins_success() {
+    Member admin1 = new Member();
+    admin1.setIsAdmin(true);
+    Member admin2 = new Member();
+    admin2.setIsAdmin(true);
+
+    when(memberRepository.findByIsAdminTrue()).thenReturn(List.of(admin1, admin2));
+
+    List<Member> result = memberService.getAllAdmins();
+
+    assertNotNull(result);
+    assertEquals(2, result.size());
+    assertTrue(result.stream().allMatch(Member::getIsAdmin));
+    verify(memberRepository).findByIsAdminTrue();
+  }
 
 }

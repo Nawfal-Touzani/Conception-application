@@ -163,4 +163,17 @@ public class MemberController {
     }
   }
 
+  /**
+   * Get All admins.
+   *
+   * @return all admins
+   */
+  @GetMapping("/admins")
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  public List<MemberProfileResponseDto> getAllAdmins() {
+    return memberService.getAllAdmins().stream()
+        .map(m -> memberService.getProfile(m.getEmail()))
+        .toList();
+  }
+
 }

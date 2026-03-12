@@ -1,6 +1,6 @@
 @baseUrl = http://localhost:3000
-@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoiYWRtaW5AdmluY2kuYmUiLCJpYXQiOjE3NzMzMzg4MDMsImV4cCI6MTc3MzQyNTIwM30.cB04mhNo2iLv_cKS8eyUXrsB9BPoi_TPXMBq40jUp1g
-@memberToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibGVhQG1haWwuY29tIiwiaWF0IjoxNzczMzM4ODI2LCJleHAiOjE3NzM0MjUyMjZ9.CJDqf4kt7uVQhBLFeNwEIKKQAGyM5V2hf14cmLnZrQU
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoiYWRtaW5AdmluY2kuYmUiLCJpYXQiOjE3NzMzNDA3OTEsImV4cCI6MTc3MzQyNzE5MX0.ohi086Zp3f3lEEVEx9RnexG-lyAUsLCldK5di8hK7BE
+@memberToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibGVhQG1haWwuY29tIiwiaWF0IjoxNzczMzQwMjE0LCJleHAiOjE3NzM0MjY2MTR9.bwGiqltccvtqpksbhxPDk4UYjM5hUB3lmKUYxNWiTJM
 @nonExistentMemberId = 999
 @existingMemberId = 2
 
@@ -53,4 +53,9 @@ Authorization: Bearer {{adminToken}}
 
 ### 8. Demote member 2 encore (pas admin → 400)
 DELETE {{baseUrl}}/members/admins/{{existingMemberId}}
+Authorization: Bearer {{adminToken}}
+
+
+### Get all admins
+GET {{baseUrl}}/members/admins
 Authorization: Bearer {{adminToken}}

@@ -8,6 +8,8 @@ import be.vinci.ipl.cae.api.repositories.ImageRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
 import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
+import jakarta.transaction.Transactional;
+import java.util.List;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -162,6 +164,16 @@ public class MemberService {
 
     member.setIsAdmin(false);
     memberRepository.save(member);
+  }
+
+  /**
+   * All the admins.
+   *
+   * @return A list of admin
+   */
+  @Transactional
+  public List<Member> getAllAdmins() {
+    return memberRepository.findByIsAdminTrue();
   }
 
 }
