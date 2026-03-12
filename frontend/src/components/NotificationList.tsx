@@ -9,7 +9,12 @@ interface NotificationListProps {
   onRefuse?: (membershipRequestId: number, reason: string) => void;
 }
 
-const NotificationList = ({ notifications, onMarkAsRead, onApprove, onRefuse } : NotificationListProps) => {
+const NotificationList = ({
+  notifications,
+  onMarkAsRead,
+  onApprove,
+  onRefuse,
+}: NotificationListProps) => {
   return (
     <List>
       {notifications.map((notif) => (

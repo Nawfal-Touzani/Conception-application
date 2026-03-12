@@ -4,7 +4,10 @@ import {
   getNotifications,
   markAsRead,
 } from '../../services/notifications.service';
-import { approveRequest, refuseRequest } from '../../services/membership-request.service'; // ← AJOUT
+import {
+  approveRequest,
+  refuseRequest,
+} from '../../services/membership-request.service'; // ← AJOUT
 import { Notification } from '../../types/notifications.types';
 import NotificationList from '../NotificationList';
 import { Box, Typography, Button } from '@mui/material';
@@ -56,7 +59,14 @@ const NotifiationPage = () => {
       </Typography>
 
       <Box sx={{ display: 'flex', gap: 4 }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 200 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            minWidth: 200,
+          }}
+        >
           <Button
             variant={filter === undefined ? 'contained' : 'outlined'}
             onClick={() => setFilter(undefined)}
@@ -79,13 +89,15 @@ const NotifiationPage = () => {
 
         <Box sx={{ flex: 1 }}>
           {notifications.length === 0 ? (
-            <Typography sx={{ color: 'white' }}>Aucune notification.</Typography>
+            <Typography sx={{ color: 'white' }}>
+              Aucune notification.
+            </Typography>
           ) : (
             <NotificationList
               notifications={notifications}
               onMarkAsRead={handleMarkAsRead}
-              onApprove={handleApprove}   
-              onRefuse={handleRefuse}     
+              onApprove={handleApprove}
+              onRefuse={handleRefuse}
             />
           )}
         </Box>

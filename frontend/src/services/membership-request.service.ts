@@ -5,7 +5,7 @@ export const approveRequest = async (
   token: string,
 ): Promise<void> => {
   await fetch(`${API_URL}/membership-requests/${membershipRequestId}/approve`, {
-    method: 'PATCH',  
+    method: 'PATCH',
     headers: { Authorization: `Bearer ${token}` },
   });
 };
@@ -16,7 +16,7 @@ export const refuseRequest = async (
   token: string,
 ): Promise<void> => {
   await fetch(`${API_URL}/membership-requests/${membershipRequestId}/refuse`, {
-    method: 'PATCH',  
+    method: 'PATCH',
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',

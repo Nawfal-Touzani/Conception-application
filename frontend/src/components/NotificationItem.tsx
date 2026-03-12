@@ -1,7 +1,14 @@
 import {
-  ListItem, ListItemText, Typography, Chip,
-  Button, Dialog, DialogTitle, DialogContent,
-  DialogActions, TextField,
+  ListItem,
+  ListItemText,
+  Typography,
+  Chip,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
 } from '@mui/material';
 import { useState } from 'react';
 import { Notification } from '../types/notifications.types';
@@ -22,7 +29,9 @@ const NotificationItem = ({
 }: NotificationItemProps) => {
   const [refuseOpen, setRefuseOpen] = useState(false);
   const [reason, setReason] = useState('');
-  const [actionDone, setActionDone] = useState<'approved' | 'refused' | null>(null); // ← AJOUT
+  const [actionDone, setActionDone] = useState<'approved' | 'refused' | null>(
+    null,
+  ); // ← AJOUT
 
   const handleRefuseConfirm = () => {
     if (notification.membershipRequestId && onRefuse) {
@@ -59,7 +68,9 @@ const NotificationItem = ({
             </Typography>
           }
           secondary={
-            <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem' }}>
+            <Typography
+              sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem' }}
+            >
               {`${notification.type} — ${new Date(notification.sendDate).toLocaleString()}`}
             </Typography>
           }
@@ -97,20 +108,31 @@ const NotificationItem = ({
             {actionDone === 'approved' && (
               <Chip
                 label="Accepté ✓"
-                sx={{ backgroundColor: '#e8f5e9', color: '#2e7d32', fontWeight: 600 }}
+                sx={{
+                  backgroundColor: '#e8f5e9',
+                  color: '#2e7d32',
+                  fontWeight: 600,
+                }}
               />
             )}
             {actionDone === 'refused' && (
               <Chip
                 label="Refusé ✗"
-                sx={{ backgroundColor: '#fce4ec', color: '#b71c1c', fontWeight: 600 }}
+                sx={{
+                  backgroundColor: '#fce4ec',
+                  color: '#b71c1c',
+                  fontWeight: 600,
+                }}
               />
             )}
           </>
         )}
 
         {notification.read && (
-          <Chip label="Lu" sx={{ mr: 1, backgroundColor: 'white', color: '#1e2a44' }} />
+          <Chip
+            label="Lu"
+            sx={{ mr: 1, backgroundColor: 'white', color: '#1e2a44' }}
+          />
         )}
         {!notification.read && (
           <img
