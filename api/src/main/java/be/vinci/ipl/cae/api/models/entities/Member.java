@@ -44,7 +44,7 @@ public class Member {
   private String tag;
 
   @Column(nullable = false)
-  private boolean isAdmin = false;
+  private Boolean isAdmin = false;
 
   @Column(nullable = false, updatable = false)
   private LocalDate profileCreationDate;
@@ -72,7 +72,7 @@ public class Member {
    * @param speciality the speciality of the member
    * @param profileCreationDate creation date of the member
    */
-  public Member(String email, String password, String tag, boolean isAdmin,
+  public Member(String email, String password, String tag, Boolean isAdmin,
       LocalDate profileCreationDate, Image image, Speciality speciality) {
     this.email = email;
     this.password = password;

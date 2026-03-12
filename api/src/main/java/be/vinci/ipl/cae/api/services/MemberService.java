@@ -121,6 +121,47 @@ public class MemberService {
     member.setPassword(passwordEncoder.encode(dto.getNewPassword()));
     memberRepository.save(member);
     return true;
-
   }
+
+  /**
+   * Promote a member to administrator.
+   *
+   * @param memberId the ID of the member to promote
+   * @throws RuntimeException if the member does not exist or is already admin
+   */
+  public void promoteToAdmin(Long memberId) {
+    Member member = memberRepository.findById(memberId)
+        .orElseThrow(() -> new RuntimeException("Member not found"));
+
+    if (member.getIsAdmin()) {
+      throw new RuntimeException("Member is already an administrator");
+    }
+
+    member.setIsAdmin(true);
+    memberRepository.save(member);
+  }
+
+  /**
+   * Demote an administrator to regular member.
+   *
+   * @param memberId the ID of the member to demote
+   * @throws RuntimeException if the member does not exist, is not admin, or is the last admin
+   */
+  public void demoteFromAdmin(Long memberId) {
+    Member member = memberRepository.findById(memberId)
+        .orElseThrow(() -> new RuntimeException("Member not found"));
+
+    if (!member.getIsAdmin()) {
+      throw new RuntimeException("Member is not an administrator");
+    }
+
+    long adminCount = memberRepository.countByIsAdminTrue();
+    if (adminCount <= 1) {
+      throw new RuntimeException("Cannot remove the last administrator");
+    }
+
+    member.setIsAdmin(false);
+    memberRepository.save(member);
+  }
+
 }

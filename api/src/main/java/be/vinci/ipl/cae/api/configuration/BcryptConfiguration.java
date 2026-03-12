@@ -113,7 +113,7 @@ public class BcryptConfiguration {
         lea.setEmail("lea@mail.com");
         lea.setPassword(passwordEncoder.encode("lea"));
         lea.setTag("Lynx");
-        lea.setAdmin(false);
+        lea.setIsAdmin(false);
         lea.setImage(imageRepository.findAll().getFirst());
         lea.setSpeciality(tacticien);
         lea.setProfileCreationDate(LocalDate.of(2025, 11, 12));
@@ -128,7 +128,7 @@ public class BcryptConfiguration {
         tom.setEmail("tom@mail.com");
         tom.setPassword(passwordEncoder.encode("tom"));
         tom.setTag("Rogue");
-        tom.setAdmin(false);
+        tom.setIsAdmin(false);
         tom.setImage(imageRepository.findAll().get(3));
         tom.setSpeciality(executeur);
         tom.setProfileCreationDate(LocalDate.of(2025, 12, 3));
@@ -143,7 +143,7 @@ public class BcryptConfiguration {
         ines.setEmail("ines@mail.com");
         ines.setPassword(passwordEncoder.encode("ines"));
         ines.setTag("Pulse");
-        ines.setAdmin(true);
+        ines.setIsAdmin(true);
         ines.setImage(imageRepository.findAll().get(15));
         ines.setSpeciality(guerisseur);
         ines.setProfileCreationDate(LocalDate.of(2026, 1, 18));
@@ -158,7 +158,7 @@ public class BcryptConfiguration {
         tibo.setEmail("tibo@mail.com");
         tibo.setPassword(passwordEncoder.encode("tibo"));
         tibo.setTag("Iron");
-        tibo.setAdmin(true);
+        tibo.setIsAdmin(true);
         tibo.setImage(imageRepository.findAll().get(19));
         tibo.setSpeciality(gardien);
         tibo.setProfileCreationDate(LocalDate.of(2025, 10, 27));
@@ -175,7 +175,7 @@ public class BcryptConfiguration {
         admin.setEmail("admin@vinci.be");
         admin.setPassword(passwordEncoder.encode("admin"));
         admin.setTag("Admin");
-        admin.setAdmin(true);
+        admin.setIsAdmin(true);
         admin.setImage(defaultImage);
         admin.setSpeciality(defaultSpeciality);
         admin.setProfileCreationDate(LocalDate.now());
@@ -188,7 +188,7 @@ public class BcryptConfiguration {
         member.setEmail("member@vinci.be");
         member.setPassword(passwordEncoder.encode("member"));
         member.setTag("Member");
-        member.setAdmin(false);
+        member.setIsAdmin(false);
         member.setImage(defaultImage);
         member.setSpeciality(defaultSpeciality);
         member.setProfileCreationDate(LocalDate.now());

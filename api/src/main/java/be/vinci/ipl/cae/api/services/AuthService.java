@@ -72,7 +72,7 @@ public class AuthService {
     newMember.setEmail(registerCredentials.email());
     newMember.setPassword(passwordEncoder.encode(registerCredentials.password()));
     newMember.setTag(registerCredentials.tag());
-    newMember.setAdmin(false); // By default
+    newMember.setIsAdmin(false); // By default
     newMember.setProfileCreationDate(LocalDate.now());
     newMember.setImage(image);
     newMember.setSpeciality(speciality);
@@ -105,7 +105,7 @@ public class AuthService {
 
     // For the front (JSON)
     String role;
-    if (member.isAdmin()) {
+    if (member.getIsAdmin()) {
       role = "ADMIN";
     } else {
       role = "MEMBER";

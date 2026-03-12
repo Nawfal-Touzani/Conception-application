@@ -26,4 +26,11 @@ public interface MemberRepository extends CrudRepository<Member, Long> {
    * @return an Optional containing the member if found, or empty if not
    */
   Optional<Member> findByEmail(String email);
+
+  /**
+   * Counts how many members are administrators.
+   *
+   * @return the number of admin
+   */
+  long countByIsAdminTrue();
 }

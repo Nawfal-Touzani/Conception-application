@@ -1,0 +1,56 @@
+@baseUrl = http://localhost:3000
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoiYWRtaW5AdmluY2kuYmUiLCJpYXQiOjE3NzMzMzg4MDMsImV4cCI6MTc3MzQyNTIwM30.cB04mhNo2iLv_cKS8eyUXrsB9BPoi_TPXMBq40jUp1g
+@memberToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibGVhQG1haWwuY29tIiwiaWF0IjoxNzczMzM4ODI2LCJleHAiOjE3NzM0MjUyMjZ9.CJDqf4kt7uVQhBLFeNwEIKKQAGyM5V2hf14cmLnZrQU
+@nonExistentMemberId = 999
+@existingMemberId = 2
+
+
+### 3. Login admin (CommandLineRunner)
+POST {{baseUrl}}/auths/login
+Content-Type: application/json
+
+{
+  "email": "admin@vinci.be",
+  "password": "admin"
+}
+
+### 2. Login new member (200 + Token)
+POST {{baseUrl}}/auths/login
+Content-Type: application/json
+
+{
+  "email": "lea@mail.com",
+  "password": "lea"
+}
+
+### 1. Promote member 2 (success) → devient admin
+PUT {{baseUrl}}/members/admins/{{existingMemberId}}
+Authorization: Bearer {{adminToken}}
+
+### 2. Promote member 2 encore (déjà admin → 400)
+PUT {{baseUrl}}/members/admins/{{existingMemberId}}
+Authorization: Bearer {{adminToken}}
+
+### 3. Promote avec token non-admin (→ 403)
+PUT {{baseUrl}}/members/admins/{{existingMemberId}}
+Authorization: Bearer {{memberToken}}
+
+### 4. Promote membre inexistant (→ 400)
+PUT {{baseUrl}}/members/admins/{{nonExistentMemberId}}
+Authorization: Bearer {{adminToken}}
+
+### 5. Demote avec token non-admin (→ 403)
+DELETE {{baseUrl}}/members/admins/{{existingMemberId}}
+Authorization: Bearer {{memberToken}}
+
+### 6. Demote last admin ID 1 (→ 400)
+DELETE {{baseUrl}}/members/admins/1
+Authorization: Bearer {{adminToken}}
+
+### 7. Demote member 2 (success) → redevient membre
+DELETE {{baseUrl}}/members/admins/{{existingMemberId}}
+Authorization: Bearer {{adminToken}}
+
+### 8. Demote member 2 encore (pas admin → 400)
+DELETE {{baseUrl}}/members/admins/{{existingMemberId}}
+Authorization: Bearer {{adminToken}}

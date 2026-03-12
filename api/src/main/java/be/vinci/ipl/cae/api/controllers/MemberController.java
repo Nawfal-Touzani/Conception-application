@@ -12,9 +12,12 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -128,6 +131,36 @@ public class MemberController {
   public List<UnavailabilityDto> getMyUnavailabilities(Authentication authentication) {
     Member principal = (Member) authentication.getPrincipal();
     return unavailabilityService.getMyUnavailabilities(principal.getEmail());
+  }
+
+  /**
+   * Promote a member to administrator. Only admins can perform this action.
+   *
+   * @param memberId the ID of the member to promote
+   */
+  @PutMapping("/admins/{memberId}")
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  public void promoteToAdmin(@PathVariable Long memberId) {
+    try {
+      memberService.promoteToAdmin(memberId);
+    } catch (RuntimeException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Demote an administrator. Only admins can perform this action.
+   *
+   * @param memberId the ID of the member to demote
+   */
+  @DeleteMapping("/admins/{memberId}")
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  public void demoteFromAdmin(@PathVariable Long memberId) {
+    try {
+      memberService.demoteFromAdmin(memberId);
+    } catch (RuntimeException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    }
   }
 
 }
