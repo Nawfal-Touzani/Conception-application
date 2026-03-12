@@ -53,6 +53,7 @@ public class MembershipRequestService {
         "Votre demande d'adhésion à " + request.getTeam().getName() + " a été acceptée !",
         LocalDateTime.now()
     );
+    notif.setMembershipRequest(request);
     notificationService.send(request.getMember().getId(), notif);
 
     TeamComposition composition = new TeamComposition(
@@ -81,6 +82,7 @@ public class MembershipRequestService {
             + refusalReason,
         LocalDateTime.now()
     );
+    notif.setMembershipRequest(request);
     notificationService.send(request.getMember().getId(), notif);
   }
 
