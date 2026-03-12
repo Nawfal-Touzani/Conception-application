@@ -47,5 +47,6 @@ public interface MemberRepository extends CrudRepository<Member, Long> {
    *
    * @return a list of members
    */
+  @Override
   List<Member> findAll();
 }
