@@ -171,15 +171,23 @@ public class TeamService {
 
     int teamSize = teamCompositionRepository.findAllByTeamId(team.getId()).size();
 
+    if (teamSize == 1) {
+      // Dernier membre → supprimer l'équipe entière
+      teamCompositionRepository.delete(tc);
+      teamCompositionRepository.flush();
+      teamRepository.delete(team);
+      teamRepository.flush();
+      return;
+    }
+
     if (isResponsible) {
-      if (teamSize > 1 && team.getSecondResponsible() == null) {
+      if (team.getSecondResponsible() == null) {
         throw new ResponseStatusException(HttpStatus.CONFLICT,
             "Vous êtes le seul responsable. Désignez un second responsable avant de quitter.");
-      } else if (team.getSecondResponsible() != null) {
+      } else {
         team.setResponsible(team.getSecondResponsible());
         team.setSecondResponsible(null);
       }
-      // teamSize == 1 → seul dans l'équipe, on laisse passer
     } else if (isSecondResponsible) {
       team.setSecondResponsible(null);
     }
@@ -190,7 +198,6 @@ public class TeamService {
     teamCompositionRepository.delete(tc);
     teamCompositionRepository.flush();
   }
-
   /**
    * Get the team of the connected member.
    */

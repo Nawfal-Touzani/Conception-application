@@ -41,7 +41,7 @@ public class Team {
   @Column(nullable = false)
   private LocalDateTime creationDate;
   @OneToOne(fetch = FetchType.LAZY, optional = true)
-  @JoinColumn(name = "responsible_id", nullable = true)
+  @JoinColumn(name = "responsible_id", nullable = true, unique = false)
   @JsonIgnore
   private Member responsible;
   @OneToOne(fetch = FetchType.LAZY)

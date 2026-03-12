@@ -87,6 +87,8 @@ const TeamPage = () => {
   const [leaveLoading, setLeaveLoading] = useState(false);
   const [leaveError, setLeaveError] = useState<string | null>(null);
 
+  const isSolo = members.length === 1;
+
   const loadTeamData = useCallback(() => {
     setHasTeam(null);
 
@@ -287,8 +289,9 @@ const TeamPage = () => {
         <DialogTitle>Quitter l'équipe</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Es-tu sûr de vouloir quitter l'équipe <strong>{team?.name}</strong>{' '}
-            ?
+            {isSolo
+              ? `Tu es le dernier membre. Quitter supprimera définitivement l'équipe "${team?.name}".`
+              : `Es-tu sûr de vouloir quitter l'équipe "${team?.name}" ?`}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
