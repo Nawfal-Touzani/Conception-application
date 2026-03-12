@@ -31,12 +31,12 @@ const NotificationItem = ({
   const [reason, setReason] = useState('');
   const [actionDone, setActionDone] = useState<'approved' | 'refused' | null>(
     null,
-  ); // ← AJOUT
+  );
 
   const handleRefuseConfirm = () => {
     if (notification.membershipRequestId && onRefuse) {
       onRefuse(notification.membershipRequestId, reason);
-      setActionDone('refused'); // ← AJOUT
+      setActionDone('refused');
     }
     setRefuseOpen(false);
     setReason('');
@@ -88,7 +88,7 @@ const NotificationItem = ({
                   onClick={() => {
                     if (notification.membershipRequestId) {
                       onApprove?.(notification.membershipRequestId);
-                      setActionDone('approved'); // ← AJOUT
+                      setActionDone('approved');
                     }
                   }}
                 >
@@ -104,7 +104,7 @@ const NotificationItem = ({
                 </Button>
               </>
             )}
-            {/* ← AJOUT : badge après action */}
+            {/* : badge après action */}
             {actionDone === 'approved' && (
               <Chip
                 label="Accepté ✓"

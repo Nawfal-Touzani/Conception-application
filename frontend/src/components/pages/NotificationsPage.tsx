@@ -7,7 +7,7 @@ import {
 import {
   approveRequest,
   refuseRequest,
-} from '../../services/membership-request.service'; // ← AJOUT
+} from '../../services/membership-request.service';
 import { Notification } from '../../types/notifications.types';
 import NotificationList from '../NotificationList';
 import { Box, Typography, Button } from '@mui/material';
@@ -34,7 +34,6 @@ const NotifiationPage = () => {
     );
   };
 
-  // ← AJOUT
   const handleApprove = async (membershipRequestId: number) => {
     if (!user) return;
     await approveRequest(membershipRequestId, user.token);
@@ -43,7 +42,6 @@ const NotifiationPage = () => {
     setNotifications(data);
   };
 
-  // ← AJOUT
   const handleRefuse = async (membershipRequestId: number, reason: string) => {
     if (!user) return;
     await refuseRequest(membershipRequestId, reason, user.token);
