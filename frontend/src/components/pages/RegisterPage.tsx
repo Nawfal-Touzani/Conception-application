@@ -59,6 +59,7 @@ const RegisterPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   // fetch images & specialities
+  // why not in a separate service?
   useEffect(() => {
     const fetchFormData = async () => {
       try {
@@ -106,7 +107,7 @@ const RegisterPage: React.FC = () => {
   return (
     <Box
       sx={{
-        minHeight: '100vh',
+        flexGrow: 1,
         backgroundColor: '#1e2a44',
         display: 'flex',
         alignItems: 'center',
@@ -252,7 +253,7 @@ const RegisterPage: React.FC = () => {
                 Choisir un avatar
               </Typography>
 
-              {/* Grille des avatars */}
+              {/* Avatars */}
               <Box
                 display="flex"
                 flexWrap="wrap"
@@ -269,8 +270,8 @@ const RegisterPage: React.FC = () => {
                     sx={{
                       width: 60,
                       height: 60,
-                      objectFit: 'contain', // <-- Empêche le zoom excessif et le rognage
-                      boxSizing: 'border-box', // <-- Assure que la bordure n'écrase pas l'image
+                      objectFit: 'contain',
+                      boxSizing: 'border-box',
                       borderRadius: '8px',
                       cursor: 'pointer',
                       border:
@@ -293,7 +294,7 @@ const RegisterPage: React.FC = () => {
             type="submit"
             variant="contained"
             sx={{
-              mt: 3,
+              mt: 5,
               backgroundColor: 'white',
               color: '#1e2a44',
               borderRadius: '10px',

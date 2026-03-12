@@ -49,7 +49,7 @@ const LoginPage: React.FC = () => {
     // Background
     <Box
       sx={{
-        minHeight: '100vh',
+        flexGrow: 1,
         backgroundColor: '#1e2a44',
         display: 'flex',
         alignItems: 'center',
@@ -166,7 +166,7 @@ const LoginPage: React.FC = () => {
           onClick={handleSubmit}
           variant="contained"
           sx={{
-            mt: 3,
+            mt: 5,
             backgroundColor: 'white',
             color: '#1e2a44',
             borderRadius: '10px',
