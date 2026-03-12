@@ -8,6 +8,8 @@ import be.vinci.ipl.cae.api.repositories.ImageRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
 import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
+import be.vinci.ipl.cae.api.repositories.UnavailabilityRepository;
+import java.time.LocalDate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,18 +24,20 @@ public class MemberService {
   private final ImageRepository imageRepository;
   private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
   private final TeamCompositionRepository teamCompositionRepository;
+  private final UnavailabilityRepository unavailabilityRepository;
 
   /**
    * Constructor for MemberService.
    */
   public MemberService(ImageRepository imageRepository, MemberRepository memberRepository,
-      SpecialityRepository specialityRepository, BCryptPasswordEncoder passwordEncoder,
-      TeamCompositionRepository teamCompositionRepository) {
+      SpecialityRepository specialityRepository,
+      TeamCompositionRepository teamCompositionRepository,
+      UnavailabilityRepository unavailabilityRepository) {
     this.imageRepository = imageRepository;
     this.memberRepository = memberRepository;
     this.specialityRepository = specialityRepository;
-    this.passwordEncoder = passwordEncoder;
     this.teamCompositionRepository = teamCompositionRepository;
+    this.unavailabilityRepository = unavailabilityRepository;
   }
 
   /**
@@ -49,13 +53,22 @@ public class MemberService {
       return null;
     }
 
+    LocalDate today = LocalDate.now();
+    boolean isUnavailable = unavailabilityRepository
+        .existsByMemberAndStartDateBeforeAndEndDateAfter(
+            member,
+            today.plusDays(1),
+            today.minusDays(1)
+        );
+
     MemberProfileResponseDto dto = new MemberProfileResponseDto();
     dto.setEmail(member.getEmail());
     dto.setTag(member.getTag());
     dto.setSpeciality(member.getSpeciality().getName());
     dto.setProfileImage(member.getImage().getUrl());
     dto.setCreationDate(member.getProfileCreationDate());
-    dto.setTeamName("No team");
+    dto.setAdmin(member.isAdmin());
+    dto.setAvailable(!isUnavailable);
     teamCompositionRepository.findByMemberId(member.getId())
         .ifPresent(composition -> dto.setTeamName(composition.getTeam()
             .getName()));

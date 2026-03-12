@@ -76,7 +76,7 @@ export const ProfileSidebar = ({ profile }: { profile: MemberProfile }) => {
       />
 
       <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 1 }}>
-        {profile.tag} {/* Demander ce qu'il faut mettre ici */}
+        {profile.admin ? 'Admin' : 'Joueur'}
       </Typography>
 
       <Box sx={{ textAlign: 'center', '& p': { mb: 4 } }}>
@@ -86,7 +86,8 @@ export const ProfileSidebar = ({ profile }: { profile: MemberProfile }) => {
             fontSize: '1.5rem',
           }}
         >
-          {profile.speciality} des {profile.teamName || '[nomEquipe]'}
+          {profile.speciality}{' '}
+          {profile.teamName ? `des ${profile.teamName}` : ''}
         </Typography>
         <Typography
           sx={{
@@ -96,7 +97,7 @@ export const ProfileSidebar = ({ profile }: { profile: MemberProfile }) => {
         >
           Depuis le {new Date(profile.creationDate).toLocaleDateString()}
         </Typography>
-        {profile.isAvailable ? (
+        {profile.available ? (
           <Typography
             sx={{
               color: '#4caf50',
@@ -104,7 +105,7 @@ export const ProfileSidebar = ({ profile }: { profile: MemberProfile }) => {
               fontSize: '1.5rem',
             }}
           >
-            Actuellement disponible
+            Disponible
           </Typography>
         ) : (
           <Typography

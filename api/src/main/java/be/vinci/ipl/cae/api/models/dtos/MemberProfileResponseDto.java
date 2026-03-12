@@ -16,4 +16,6 @@ public class MemberProfileResponseDto {
   private String teamName;
   private String profileImage;
   private LocalDate creationDate;
+  private boolean isAdmin;
+  private boolean isAvailable;
 }
