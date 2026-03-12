@@ -108,6 +108,7 @@ public class TeamService {
             + team.getName(),
         LocalDateTime.now()
     );
+    notif.setMembershipRequest(saved);
     notificationService.send(team.getResponsible().getId(), notif);
 
     return saved;
