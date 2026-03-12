@@ -24,7 +24,7 @@ public class MemberService {
   private final MemberRepository memberRepository;
   private final SpecialityRepository specialityRepository;
   private final ImageRepository imageRepository;
-  private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+  private BCryptPasswordEncoder passwordEncoder;
   private final TeamCompositionRepository teamCompositionRepository;
   private final UnavailabilityRepository unavailabilityRepository;
 
@@ -32,11 +32,12 @@ public class MemberService {
    * Constructor for MemberService.
    */
   public MemberService(ImageRepository imageRepository, MemberRepository memberRepository,
-      SpecialityRepository specialityRepository,
+      BCryptPasswordEncoder passwordEncoder, SpecialityRepository specialityRepository,
       TeamCompositionRepository teamCompositionRepository,
       UnavailabilityRepository unavailabilityRepository) {
     this.imageRepository = imageRepository;
     this.memberRepository = memberRepository;
+    this.passwordEncoder = passwordEncoder;
     this.specialityRepository = specialityRepository;
     this.teamCompositionRepository = teamCompositionRepository;
     this.unavailabilityRepository = unavailabilityRepository;
@@ -69,7 +70,7 @@ public class MemberService {
     dto.setSpeciality(member.getSpeciality().getName());
     dto.setProfileImage(member.getImage().getUrl());
     dto.setCreationDate(member.getProfileCreationDate());
-    dto.setAdmin(member.isAdmin());
+    dto.setAdmin(member.getIsAdmin());
     dto.setAvailable(!isUnavailable);
     teamCompositionRepository.findByMemberId(member.getId())
         .ifPresent(composition -> dto.setTeamName(composition.getTeam()
