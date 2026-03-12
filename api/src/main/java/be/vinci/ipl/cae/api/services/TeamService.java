@@ -1,7 +1,5 @@
 package be.vinci.ipl.cae.api.services;
 
-import jakarta.transaction.Transactional;
-
 import be.vinci.ipl.cae.api.models.dtos.CreateTeamRequest;
 import be.vinci.ipl.cae.api.models.dtos.TeamMemberDto;
 import be.vinci.ipl.cae.api.models.dtos.TeamResponseDto;
@@ -15,11 +13,13 @@ import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.MembershipRequestRepository;
 import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
 import be.vinci.ipl.cae.api.repositories.TeamRepository;
+import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
 
 /**
  * The type Team service.
