@@ -116,16 +116,33 @@ const NavBar = () => {
 
               {/* Profile (only if not on profile page) */}
               {!isProfilePage && (
-                <img
-                  src={member}
-                  alt="Profile picture"
-                  style={{
-                    height: '40px',
+                <Box
+                  onClick={() => navigate('/members/me')}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     borderRadius: '50%',
                     cursor: 'pointer',
+                    border: '2px solid transparent',
+                    transition: 'all 0.2s ease-in-out',
+                    '&:hover': {
+                      borderColor: '#1e2a44',
+                    },
                   }}
-                  onClick={() => navigate('/members/me')}
-                />
+                >
+                  <img
+                    src={member}
+                    alt="Profile picture"
+                    style={{
+                      height: '40px',
+                      width: '40px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      display: 'block',
+                    }}
+                  />
+                </Box>
               )}
 
               {/* Log out (only if on profile page) */}
