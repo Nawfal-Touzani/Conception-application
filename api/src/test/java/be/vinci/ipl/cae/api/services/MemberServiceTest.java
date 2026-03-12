@@ -23,6 +23,7 @@ import be.vinci.ipl.cae.api.repositories.ImageRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
 import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
+import be.vinci.ipl.cae.api.repositories.UnavailabilityRepository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -56,6 +57,9 @@ public class MemberServiceTest {
   @Mock
   private TeamCompositionRepository teamCompositionRepository;
 
+  @Mock
+  private UnavailabilityRepository unavailabilityRepository;
+
   @InjectMocks
   MemberService memberService;
 
@@ -86,6 +90,9 @@ public class MemberServiceTest {
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
     when(teamCompositionRepository.findByMemberId(any())).thenReturn(Optional.empty());
 
+    when(unavailabilityRepository.existsByMemberAndStartDateBeforeAndEndDateAfter(any(), any(),
+        any()))
+        .thenReturn(false);
     MemberProfileResponseDto result = memberService.getProfile(email);
 
     assertNotNull(result);
@@ -114,6 +121,9 @@ public class MemberServiceTest {
     TeamComposition composition = new TeamComposition();
     composition.setTeam(team);
 
+    when(unavailabilityRepository.existsByMemberAndStartDateBeforeAndEndDateAfter(any(), any(),
+        any()))
+        .thenReturn(false);
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
     when(teamCompositionRepository.findByMemberId(any()))
         .thenReturn(Optional.of(composition));
@@ -140,6 +150,9 @@ public class MemberServiceTest {
     when(specialityRepository.findByName("Gardien")).thenReturn(Optional.of(newSpec));
     when(imageRepository.findByUrl("img2.png")).thenReturn(Optional.of(newImg));
     when(teamCompositionRepository.findByMemberId(any())).thenReturn(Optional.empty());
+    when(unavailabilityRepository.existsByMemberAndStartDateBeforeAndEndDateAfter(any(), any(),
+        any()))
+        .thenReturn(false);
 
     MemberProfileResponseDto result = memberService.updateProfile(email, payload);
 
@@ -160,6 +173,9 @@ public class MemberServiceTest {
     when(specialityRepository.findByName("Strange")).thenReturn(Optional.empty());
     when(imageRepository.findByUrl("nonExisting.png")).thenReturn(Optional.empty());
     when(teamCompositionRepository.findByMemberId(any())).thenReturn(Optional.empty());
+    when(unavailabilityRepository.existsByMemberAndStartDateBeforeAndEndDateAfter(any(), any(),
+        any()))
+        .thenReturn(false);
 
     MemberProfileResponseDto result = memberService.updateProfile(email, payload);
 
@@ -190,6 +206,9 @@ public class MemberServiceTest {
 
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
     when(teamCompositionRepository.findByMemberId(any())).thenReturn(Optional.empty());
+    when(unavailabilityRepository.existsByMemberAndStartDateBeforeAndEndDateAfter(any(), any(),
+        any()))
+        .thenReturn(false);
 
     memberService.updateProfile(email, payload);
 

@@ -55,7 +55,7 @@ export const ProfilePage = () => {
         </Grid2>
 
         <Grid2 size={{ xs: 12, md: 6, lg: 3 }}>
-          <ActionSidebar />
+          <ActionSidebar profile={profile} />
         </Grid2>
       </Grid2>
     </Container>

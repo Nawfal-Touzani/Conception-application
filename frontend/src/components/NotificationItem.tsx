@@ -30,7 +30,11 @@ const NotificationItem = ({
   const [refuseOpen, setRefuseOpen] = useState(false);
   const [reason, setReason] = useState('');
   const [actionDone, setActionDone] = useState<'approved' | 'refused' | null>(
-    null,
+    notification.requestState === 'ACCEPTED'
+      ? 'approved'
+      : notification.requestState === 'REFUSED'
+        ? 'refused'
+        : null,
   );
 
   const handleRefuseConfirm = () => {
@@ -75,8 +79,6 @@ const NotificationItem = ({
             </Typography>
           }
         />
-
-        {/* Boutons Accepter / Refuser */}
         {isMembershipRequest && (
           <>
             {actionDone === null && (
@@ -104,7 +106,6 @@ const NotificationItem = ({
                 </Button>
               </>
             )}
-            {/* : badge après action */}
             {actionDone === 'approved' && (
               <Chip
                 label="Accepté ✓"
@@ -143,8 +144,6 @@ const NotificationItem = ({
           />
         )}
       </ListItem>
-
-      {/* Dialog motif de refus */}
       <Dialog open={refuseOpen} onClose={() => setRefuseOpen(false)}>
         <DialogTitle>Motif du refus</DialogTitle>
         <DialogContent>
