@@ -7,7 +7,9 @@ import jakarta.validation.constraints.NotBlank;
  */
 public record TeamMemberDto(
 
-    @NotBlank String gameTag,
-    Long avatarId
+    Long memberId,
+    String gameTag,
+    Long avatarId,
+    boolean isAvailable
 
 ) {}

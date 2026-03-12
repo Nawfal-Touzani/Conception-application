@@ -14,6 +14,8 @@ import be.vinci.ipl.cae.api.repositories.MembershipRequestRepository;
 import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
 import be.vinci.ipl.cae.api.repositories.TeamRepository;
 import jakarta.transaction.Transactional;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -114,22 +116,27 @@ public class TeamService {
   /**
    * Get members of the connected member's team.
    */
+  @Transactional
   public List<TeamMemberDto> getMembersOfMyTeam(Long memberId) {
     TeamComposition composition = teamCompositionRepository.findByMemberId(memberId)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Member has no team"));
 
-    if (composition.getTeam() == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team not found");
-    }
-
     Long teamId = composition.getTeam().getId();
     List<TeamComposition> compositions = teamCompositionRepository.findAllByTeamId(teamId);
+    LocalDate today = LocalDate.now();
 
     return compositions.stream()
-        .map(tc -> new TeamMemberDto(
-            tc.getMember().getTag(),
-            tc.getMember().getImage().getId()
-        ))
+        .map(tc -> {
+          Member m = tc.getMember();
+          boolean isAvailable = m.getUnavailabilities().stream()
+              .noneMatch(u -> !today.isBefore(u.getStartDate()) && !today.isAfter(u.getEndDate()));
+          return new TeamMemberDto(
+              m.getId(),
+              m.getTag(),
+              m.getImage().getId(),
+              isAvailable
+          );
+        })
         .toList();
   }
 
