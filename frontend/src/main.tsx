@@ -18,6 +18,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import theme from './themes.ts';
 import { ProfilePage } from './components/pages/ProfilePage.tsx';
 import TeamPage from './components/pages/TeamPage.tsx';
+import AdminPage from './components/pages/AdminPage.tsx';
 
 const router = createBrowserRouter([
   {
@@ -47,6 +48,10 @@ const router = createBrowserRouter([
       {
         path: 'team',
         element: <TeamPage />,
+      },
+      {
+        path: 'admin',
+        element: <AdminPage />,
       },
     ],
   },
