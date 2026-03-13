@@ -21,7 +21,18 @@ export const register = async (
   });
 
   if (!response.ok) {
-    throw new Error('Error when registering (email might already be in use)');
+    // 400 Bad Request (@Valid) email format
+    if (response.status === 400) {
+      throw new Error(
+        "Format des données invalide (Vérifiez que l'email est correct).",
+      );
+    }
+    // 409 Conflict (email already in use)
+    if (response.status === 409) {
+      throw new Error('Cet email est déjà utilisé par un autre joueur.');
+    }
+    // Base error message for other cases
+    throw new Error("Une erreur est survenue lors de l'inscription.");
   }
 };
 
@@ -39,7 +50,16 @@ export const login = async (
   });
 
   if (!response.ok) {
-    throw new Error('Email or password incorrect');
+    // 400 Bad Request (@Valid) email format
+    if (response.status === 400) {
+      throw new Error("Le format de l'email est invalide.");
+    }
+    // 401 Unauthorized email or password incorrect
+    if (response.status === 401) {
+      throw new Error('Email ou mot de passe incorrect.');
+    }
+    // Base error message for other cases
+    throw new Error('Une erreur est survenue lors de la connexion.');
   }
 
   return response.json();
@@ -56,7 +76,7 @@ export const getMe = async (token: string): Promise<AuthenticatedMember> => {
   });
 
   if (!response.ok) {
-    throw new Error('Invalid or expired token');
+    throw new Error('Jeton invalide ou expiré.');
   }
 
   return response.json();
