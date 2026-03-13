@@ -63,7 +63,7 @@ public class AuthController {
   public AuthenticatedMember login(@Valid @RequestBody LoginCredentials loginCredentials) {
     AuthenticatedMember authMember = authService.login(loginCredentials);
     if (authMember == null) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "");
     }
     return authMember;
   }

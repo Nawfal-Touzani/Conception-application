@@ -2,9 +2,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, useNavigate } from 'react-router-dom';
 import { describe, test, expect, vi } from 'vitest';
 import NotificationsPage from './components/pages/NotificationsPage';
-import * as AuthContext from './contexts/AuthContext';
 import * as notificationService from './services/notifications.service';
 import * as membershipRequestService from './services/membership-request.service';
+import { useAuth } from './contexts/useAuth';
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
@@ -14,7 +14,7 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-vi.mock('./contexts/AuthContext', () => ({
+vi.mock('./contexts/useAuth', () => ({
   useAuth: vi.fn(),
 }));
 
@@ -73,7 +73,7 @@ describe('NotificationsPage', () => {
     const navigateMock = vi.fn();
     vi.mocked(useNavigate).mockReturnValue(navigateMock);
 
-    vi.mocked(AuthContext.useAuth).mockReturnValue({
+    vi.mocked(useAuth).mockReturnValue({
       user: mockUser,
       login: vi.fn(),
       register: vi.fn(),
@@ -97,7 +97,7 @@ describe('NotificationsPage', () => {
     const navigateMock = vi.fn();
     vi.mocked(useNavigate).mockReturnValue(navigateMock);
 
-    vi.mocked(AuthContext.useAuth).mockReturnValue({
+    vi.mocked(useAuth).mockReturnValue({
       user: mockUser,
       login: vi.fn(),
       register: vi.fn(),
@@ -132,7 +132,7 @@ describe('NotificationsPage', () => {
     const navigateMock = vi.fn();
     vi.mocked(useNavigate).mockReturnValue(navigateMock);
 
-    vi.mocked(AuthContext.useAuth).mockReturnValue({
+    vi.mocked(useAuth).mockReturnValue({
       user: mockUser,
       login: vi.fn(),
       register: vi.fn(),
@@ -164,7 +164,7 @@ describe('NotificationsPage', () => {
     const navigateMock = vi.fn();
     vi.mocked(useNavigate).mockReturnValue(navigateMock);
 
-    vi.mocked(AuthContext.useAuth).mockReturnValue({
+    vi.mocked(useAuth).mockReturnValue({
       user: mockUser,
       login: vi.fn(),
       register: vi.fn(),
@@ -205,7 +205,7 @@ describe('NotificationsPage', () => {
     const navigateMock = vi.fn();
     vi.mocked(useNavigate).mockReturnValue(navigateMock);
 
-    vi.mocked(AuthContext.useAuth).mockReturnValue({
+    vi.mocked(useAuth).mockReturnValue({
       user: null,
       login: vi.fn(),
       register: vi.fn(),
@@ -227,7 +227,7 @@ describe('NotificationsPage', () => {
     const navigateMock = vi.fn();
     vi.mocked(useNavigate).mockReturnValue(navigateMock);
 
-    vi.mocked(AuthContext.useAuth).mockReturnValue({
+    vi.mocked(useAuth).mockReturnValue({
       user: mockUser,
       login: vi.fn(),
       register: vi.fn(),
@@ -260,7 +260,7 @@ describe('NotificationsPage', () => {
     const navigateMock = vi.fn();
     vi.mocked(useNavigate).mockReturnValue(navigateMock);
 
-    vi.mocked(AuthContext.useAuth).mockReturnValue({
+    vi.mocked(useAuth).mockReturnValue({
       user: null,
       login: vi.fn(),
       register: vi.fn(),
@@ -282,7 +282,7 @@ describe('NotificationsPage', () => {
     const navigateMock = vi.fn();
     vi.mocked(useNavigate).mockReturnValue(navigateMock);
 
-    vi.mocked(AuthContext.useAuth).mockReturnValue({
+    vi.mocked(useAuth).mockReturnValue({
       user: mockUser,
       login: vi.fn(),
       register: vi.fn(),
@@ -318,7 +318,7 @@ describe('NotificationsPage', () => {
     const navigateMock = vi.fn();
     vi.mocked(useNavigate).mockReturnValue(navigateMock);
 
-    vi.mocked(AuthContext.useAuth).mockReturnValue({
+    vi.mocked(useAuth).mockReturnValue({
       user: mockUser,
       login: vi.fn(),
       register: vi.fn(),
@@ -345,7 +345,7 @@ describe('NotificationsPage', () => {
     const navigateMock = vi.fn();
     vi.mocked(useNavigate).mockReturnValue(navigateMock);
 
-    vi.mocked(AuthContext.useAuth).mockReturnValue({
+    vi.mocked(useAuth).mockReturnValue({
       user: mockUser,
       login: vi.fn(),
       register: vi.fn(),
@@ -381,7 +381,7 @@ describe('NotificationsPage', () => {
     const navigateMock = vi.fn();
     vi.mocked(useNavigate).mockReturnValue(navigateMock);
 
-    vi.mocked(AuthContext.useAuth).mockReturnValue({
+    vi.mocked(useAuth).mockReturnValue({
       user: mockUser,
       login: vi.fn(),
       register: vi.fn(),
@@ -413,7 +413,7 @@ describe('NotificationsPage', () => {
     const navigateMock = vi.fn();
     vi.mocked(useNavigate).mockReturnValue(navigateMock);
 
-    vi.mocked(AuthContext.useAuth).mockReturnValue({
+    vi.mocked(useAuth).mockReturnValue({
       user: mockUser,
       login: vi.fn(),
       register: vi.fn(),
@@ -460,7 +460,7 @@ describe('NotificationsPage', () => {
     const navigateMock = vi.fn();
     vi.mocked(useNavigate).mockReturnValue(navigateMock);
 
-    vi.mocked(AuthContext.useAuth).mockReturnValue({
+    vi.mocked(useAuth).mockReturnValue({
       user: mockUser,
       login: vi.fn(),
       register: vi.fn(),

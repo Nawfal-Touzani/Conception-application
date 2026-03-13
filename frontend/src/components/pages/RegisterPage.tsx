@@ -12,7 +12,7 @@ import {
   InputLabel,
   FormControl,
 } from '@mui/material';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/useAuth';
 
 import { Speciality } from '../../types/speciality.types';
 import { ProfileImage } from '../../types/image.types';
