@@ -11,8 +11,8 @@ vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return { ...actual, useNavigate: vi.fn() };
 });
-vi.mock('../../services/speciality.service');
-vi.mock('../../services/image.service');
+vi.mock('../../../services/speciality.service');
+vi.mock('../../../services/image.service');
 
 describe('RegisterPage', () => {
   const registerMock = vi.fn();
