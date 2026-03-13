@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * REST controller for managing authentication.
- * Handles user registration, login and automatic re-authentication.
+ * REST controller for managing authentication. Handles user registration, login and automatic
+ * re-authentication.
  */
 @RestController
 @RequestMapping("/auths")
@@ -63,7 +63,8 @@ public class AuthController {
   public AuthenticatedMember login(@Valid @RequestBody LoginCredentials loginCredentials) {
     AuthenticatedMember authMember = authService.login(loginCredentials);
     if (authMember == null) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "");
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+          "Email ou mot de passe incorrect.");
     }
     return authMember;
   }
