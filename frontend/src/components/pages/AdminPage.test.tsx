@@ -6,7 +6,8 @@ import { AuthContext } from '../../contexts/AuthContext';
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
-  return { ...actual, useNavigate: vi.fn() };
+  const mockNavigate = vi.fn();
+  return { ...actual, useNavigate: vi.fn(() => mockNavigate) };
 });
 
 const mockAdmin = {
@@ -26,6 +27,7 @@ const adminMember = {
   profileImage: '/images/avatar1.png',
   isAvailable: true,
   isAdmin: true,
+  admin: true,
 };
 
 const regularMember = {
@@ -37,6 +39,7 @@ const regularMember = {
   profileImage: null,
   isAvailable: false,
   isAdmin: false,
+  admin: false,
 };
 
 const mockContextValue = {
@@ -204,28 +207,37 @@ describe('AdminPage', () => {
   });
 
   test('révoque un admin avec succès', async () => {
+    // OtherAdmin != user.tag (AdminTag) → pas de isSelf → message succès affiché
+    const otherAdmin = {
+      ...adminMember,
+      id: 99,
+      email: 'other@vinci.be',
+      tag: 'OtherAdmin',
+    };
+
     (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => [adminMember] })
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [adminMember, regularMember],
+        json: async () => [adminMember, otherAdmin],
       })
+      .mockResolvedValueOnce({ ok: true, json: async () => [regularMember] })
       .mockResolvedValueOnce({ ok: true })
-      .mockResolvedValueOnce({ ok: true, json: async () => [] })
+      .mockResolvedValueOnce({ ok: true, json: async () => [adminMember] })
       .mockResolvedValueOnce({ ok: true, json: async () => [regularMember] });
 
     renderAdminPage();
-    await screen.findByText('AdminTag');
+    await screen.findByText('OtherAdmin');
 
     const btns = getIconButtonsOutsideDialog();
-    if (btns.length > 0) fireEvent.click(btns[0]);
+    // btns[0] = AdminTag, btns[1] = OtherAdmin
+    if (btns.length > 1) fireEvent.click(btns[1]);
 
     await screen.findByText('Révoquer un administrateur');
     fireEvent.click(screen.getByText('Confirmer'));
 
     await waitFor(() => {
       expect(
-        screen.queryByText("AdminTag n'est plus administrateur."),
+        screen.queryByText("OtherAdmin n'est plus administrateur."),
       ).toBeTruthy();
     });
   });
