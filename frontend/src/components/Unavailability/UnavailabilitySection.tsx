@@ -37,11 +37,12 @@ export const UnavailabilitySection = () => {
     setSuccess(false);
 
     if (!dates.startDate || !dates.endDate) {
-      setError('Veuillez sélectionner les deux dates');
+      setError('Veuillez sélectionner une date de début et de fin');
       return;
     }
 
-    if (dates.startDate < dates.endDate) {
+    const today = new Date().toISOString().split('T')[0];
+    if (dates.startDate < today) {
       setError('La date de début ne peut pas être dans le passé');
       return;
     }
