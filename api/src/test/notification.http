@@ -1,0 +1,122 @@
+### Set base URL
+@baseUrl = http://localhost:3000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoidGVzdEB2aW5jaS5iZSIsImlhdCI6MTc3MzIzMTk4OSwiZXhwIjoxNzczMzE4Mzg5fQ.QACNaOfBMMUoGqPU6ERfsvjHf65eynBqNmBaWGynmkM
+@token2 =
+
+### Register a member
+POST {{baseUrl}}/auths/register
+Content-Type: application/json
+
+{
+  "email": "test@vinci.be",
+  "password": "test123",
+  "tag": "TestUser",
+  "imageId": 1,
+  "specialityId": 1
+}
+
+### Register a second member
+POST {{baseUrl}}/auths/register
+Content-Type: application/json
+
+{
+  "email": "test2@vinci.be",
+  "password": "test123",
+  "tag": "TestUser2",
+  "imageId": 1,
+  "specialityId": 1
+}
+
+### Login member 1 (copy token into @token)
+POST {{baseUrl}}/auths/login
+Content-Type: application/json
+
+{
+  "email": "test@vinci.be",
+  "password": "test123"
+}
+
+### Login member 2 (copy token into @token2)
+POST {{baseUrl}}/auths/login
+Content-Type: application/json
+
+{
+  "email": "test2@vinci.be",
+  "password": "test123"
+}
+
+### Read all notifications of member 3 (should return 200)
+GET {{baseUrl}}/members/3/notifications
+Authorization: Bearer {{token}}
+
+### Read only read notifications of member 3 (should return 200)
+GET {{baseUrl}}/members/3/notifications?read=true
+Authorization: Bearer {{token}}
+
+### Read only unread notifications of member 3 (should return 200)
+GET {{baseUrl}}/members/3/notifications?read=false
+Authorization: Bearer {{token}}
+
+### Try to get notifications of non-existent member (should return 404)
+GET {{baseUrl}}/members/999/notifications
+Authorization: Bearer {{token}}
+
+### Try to get notifications of another member with token2 (should return 403)
+GET {{baseUrl}}/members/3/notifications
+Authorization: Bearer {{token2}}
+
+### Send a notification to member 3 - any authenticated member can send (should return 201)
+POST {{baseUrl}}/members/4/notifications
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "type": "RESULT",
+  "message": "Match gagné 3-1",
+  "sendDate": "2026-03-05T12:30:00"
+}
+
+### Send another notification to member 3 (should return 201)
+POST {{baseUrl}}/members/3/notifications
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "type": "RESULT",
+  "message": "Match gagné 3-9",
+  "sendDate": "2026-03-05T12:30:00"
+}
+
+### Try to send notification with empty message (should return 400)
+POST {{baseUrl}}/members/3/notifications
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "type": "TOURNAMENT",
+  "message": "",
+  "sendDate": "2026-03-05T12:30:00"
+}
+
+### Try to send notification to non-existent member (should return 404)
+POST {{baseUrl}}/members/999/notifications
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "type": "RESULT",
+  "message": "Test membre inconnu",
+  "sendDate": "2026-03-05T12:30:00"
+}
+
+### Mark notification as read (should return 200)
+PATCH {{baseUrl}}/members/3/notifications/1
+Authorization: Bearer {{token}}
+
+### Try to mark non-existent notification (should return 404)
+PATCH {{baseUrl}}/members/3/notifications/999
+Authorization: Bearer {{token}}
+
+### Try to mark notification of member 3 with token2 (should return 403)
+PATCH {{baseUrl}}/members/3/notifications/1
+Authorization: Bearer {{token2}}

@@ -1,0 +1,70 @@
+@baseUrl = http://localhost:3000
+@token =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibGVhQG1haWwuY29tIiwiaWF0IjoxNzczMzUyNTk3LCJleHAiOjE3NzM0Mzg5OTd9.7BTbi5IjE-rmuPuZGm8Pn4y3ibwip_8VyMSIQzx6-6k
+@token2 =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibGVhQG1haWwuY29tIiwiaWF0IjoxNzczMzUyNTk3LCJleHAiOjE3NzM0Mzg5OTd9.7BTbi5IjE-rmuPuZGm8Pn4y3ibwip_8VyMSIQzx6-6k
+
+### Login responsible (copy token into @token)
+POST {{baseUrl}}/auths/login
+Content-Type: application/json
+
+{
+  "email": "lea@mail.com",
+  "password": "lea"
+}
+
+### Login regular member (copy token into @token2)
+POST {{baseUrl}}/auths/login
+Content-Type: application/json
+
+{
+  "email": "tom@mail.com",
+  "password": "tom"
+}
+
+### Create a team with responsible (should return 201)
+POST {{baseUrl}}/teams
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "TeamTest"
+}
+
+### Member sends membership request - responsible should receive notification (should return 201)
+POST {{baseUrl}}/teams/1/membership-requests
+Authorization: Bearer {{token2}}
+
+### Check responsible received membership request notification (should return 200 with notif)
+GET {{baseUrl}}/members/1/notifications
+Authorization: Bearer {{token}}
+
+### Try to send membership request for non-existent team (should return 404)
+POST {{baseUrl}}/teams/999/membership-requests
+Authorization: Bearer {{token2}}
+
+### Try to send membership request without token (should return 403)
+POST {{baseUrl}}/teams/1/membership-requests
+
+### Approve membership request - member should receive notification (should return 204)
+PATCH {{baseUrl}}/membership-requests/1/approve
+Authorization: Bearer {{token}}
+
+### Check member received approval notification (should return 200 with notif)
+GET {{baseUrl}}/members/4/notifications
+Authorization: Bearer {{token2}}
+
+### Member sends another membership request for refuse test (should return 201)
+POST {{baseUrl}}/teams/1/membership-requests
+Authorization: Bearer {{token2}}
+
+### Refuse membership request - member should receive notification (should return 204)
+PATCH {{baseUrl}}/membership-requests/3/refuse
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "reason": "La team ne recrute pas actuellement"
+}
+
+### Check member received refusal notification (should return 200 with notif)
+GET {{baseUrl}}/members/4/notifications
+Authorization: Bearer {{token2}}
