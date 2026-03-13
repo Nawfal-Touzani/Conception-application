@@ -17,7 +17,7 @@ import {
   Alert,
 } from '@mui/material';
 import JoinOrCreateTeam from './JoinOrCreateTeam';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/useAuth';
 
 type Member = {
   memberId: number;

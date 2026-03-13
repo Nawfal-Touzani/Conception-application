@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/useAuth';
 import {
   getNotifications,
   markAsRead,
@@ -12,7 +12,7 @@ import { Notification } from '../../types/notifications.types';
 import NotificationList from '../NotificationList';
 import { Box, Typography, Button } from '@mui/material';
 
-const NotifiationPage = () => {
+const NotificationPage = () => {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filter, setFilter] = useState<boolean | undefined>(undefined);
@@ -106,4 +106,4 @@ const NotifiationPage = () => {
   );
 };
 
-export default NotifiationPage;
+export default NotificationPage;

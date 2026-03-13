@@ -8,7 +8,7 @@ import {
   Badge,
 } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext'; // hook
+import { useAuth } from '../../contexts/useAuth'; // hook
 import logo from '../../assets/images/logo.png';
 import member from '../../assets/images/member.png';
 import { useState, useEffect } from 'react';

@@ -1,6 +1,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
-import { AuthProvider, useAuth } from './AuthContext';
+import { AuthProvider } from './AuthProvider';
+import { useAuth } from './useAuth';
 import * as authService from '../services/auth.service';
 
 // Mock AuthService

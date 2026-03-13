@@ -3,7 +3,7 @@ import { MemberProfile } from '../../types/member';
 import { useState } from 'react';
 import { AvatarModal } from '../Avatar/Avatar';
 import * as memberService from '../../services/memberService';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/useAuth';
 
 const BASE_URL = 'http://localhost:3000';
 
