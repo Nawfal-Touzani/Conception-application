@@ -37,7 +37,7 @@ const NotificationPage = () => {
   const handleApprove = async (membershipRequestId: number) => {
     if (!user) return;
     await approveRequest(membershipRequestId, user.token);
-    // Refresh la liste après action
+    // Refresh the list after action
     const data = await getNotifications(user.id, user.token, filter);
     setNotifications(data);
   };
@@ -45,7 +45,7 @@ const NotificationPage = () => {
   const handleRefuse = async (membershipRequestId: number, reason: string) => {
     if (!user) return;
     await refuseRequest(membershipRequestId, reason, user.token);
-    // Refresh la liste après action
+    // Refresh the list after action
     const data = await getNotifications(user.id, user.token, filter);
     setNotifications(data);
   };
