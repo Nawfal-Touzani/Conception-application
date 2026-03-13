@@ -21,7 +21,9 @@ interface AuthContextType {
 }
 
 // Create the Context with a default value of undefined
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined,
+);
 
 // Create the Provider (the component that will wrap our application)
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
