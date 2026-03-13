@@ -75,3 +75,16 @@ export const addUnavailability = async (
 
   return true;
 };
+
+export const getMyUnavailabilities = async (
+  token: string,
+): Promise<UnavailabilityDto[]> => {
+  const response = await fetch(`${API_URL}/me/unavailabilities`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) throw new Error('Failed to fetch unavailabilities');
+  return response.json();
+};
