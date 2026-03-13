@@ -93,7 +93,7 @@ class AuthServiceTest {
     // Act & Assert
     IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
         () -> authService.register(registerDto));
-    assertEquals("Email is already in use.", exception.getMessage());
+    assertEquals("Cet email est déjà utilisé.", exception.getMessage());
 
     // Verify
     verify(memberRepository, never()).save(any(Member.class));
@@ -108,7 +108,7 @@ class AuthServiceTest {
     // Act & Assert
     IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
         () -> authService.register(registerDto));
-    assertEquals("Image not found.", exception.getMessage());
+    assertEquals("Image introuvable.", exception.getMessage());
   }
 
   @Test
@@ -121,7 +121,7 @@ class AuthServiceTest {
     // Act & Assert
     IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
         () -> authService.register(registerDto));
-    assertEquals("Speciality not found.", exception.getMessage());
+    assertEquals("Spécialité introuvable.", exception.getMessage());
   }
 
   // LOGIN TESTS
