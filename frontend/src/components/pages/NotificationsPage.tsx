@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/useAuth';
 import {
   getNotifications,
   markAsRead,
@@ -7,12 +7,12 @@ import {
 import {
   approveRequest,
   refuseRequest,
-} from '../../services/membership-request.service'; // ← AJOUT
+} from '../../services/membership-request.service';
 import { Notification } from '../../types/notifications.types';
 import NotificationList from '../NotificationList';
 import { Box, Typography, Button } from '@mui/material';
 
-const NotifiationPage = () => {
+const NotificationPage = () => {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filter, setFilter] = useState<boolean | undefined>(undefined);
@@ -34,20 +34,18 @@ const NotifiationPage = () => {
     );
   };
 
-  // ← AJOUT
   const handleApprove = async (membershipRequestId: number) => {
     if (!user) return;
     await approveRequest(membershipRequestId, user.token);
-    // Refresh la liste après action
+    // Refresh the list after action
     const data = await getNotifications(user.id, user.token, filter);
     setNotifications(data);
   };
 
-  // ← AJOUT
   const handleRefuse = async (membershipRequestId: number, reason: string) => {
     if (!user) return;
     await refuseRequest(membershipRequestId, reason, user.token);
-    // Refresh la liste après action
+    // Refresh the list after action
     const data = await getNotifications(user.id, user.token, filter);
     setNotifications(data);
   };
@@ -106,4 +104,4 @@ const NotifiationPage = () => {
   );
 };
 
-export default NotifiationPage;
+export default NotificationPage;

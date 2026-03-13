@@ -17,12 +17,12 @@ import {
   Alert,
 } from '@mui/material';
 import JoinOrCreateTeam from './JoinOrCreateTeam';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/useAuth';
 
 type Member = {
   memberId: number;
   gameTag: string;
-  avatarId: number;
+  avatarUrl: string;
   isAvailable: boolean;
 };
 
@@ -194,7 +194,7 @@ const TeamPage = () => {
   return (
     <Box
       sx={{
-        minHeight: '100vh',
+        flexGrow: 1,
         backgroundColor: '#1a2744',
         display: 'flex',
         flexDirection: 'column',
@@ -326,7 +326,7 @@ const TeamPage = () => {
                 >
                   <ListItemAvatar sx={{ minWidth: 48 }}>
                     <Avatar
-                      src={`/images/${member.avatarId}.png`}
+                      src={`http://localhost:3000${member.avatarUrl}`}
                       alt={member.gameTag}
                       sx={{ width: 36, height: 36 }}
                     />

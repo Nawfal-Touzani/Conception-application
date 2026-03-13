@@ -12,12 +12,12 @@ import {
   InputLabel,
   FormControl,
 } from '@mui/material';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../../contexts/useAuth';
 
-import { Speciality } from '../../types/speciality.types';
-import { ProfileImage } from '../../types/image.types';
-import * as specialityService from '../../services/speciality.service';
-import * as imageService from '../../services/image.service';
+import { Speciality } from '../../../types/speciality.types';
+import { ProfileImage } from '../../../types/image.types';
+import * as specialityService from '../../../services/speciality.service';
+import * as imageService from '../../../services/image.service';
 
 // reusable styles for all input fields
 const inputSx = {

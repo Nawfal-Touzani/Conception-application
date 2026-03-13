@@ -1,8 +1,8 @@
 import React from 'react';
 import { Box, Button, Typography, Paper } from '@mui/material';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../../contexts/useAuth'; // hook
 import { useNavigate } from 'react-router-dom';
-import homeImage from '../../assets/images/home_logo.png';
+import homeImage from '../../../assets/images/home_logo.png';
 
 // Static for now
 const TOURNAMENTS_DATA = [
@@ -96,10 +96,12 @@ const HomePage: React.FC = () => {
             sx={{
               backgroundColor: '#1e2a44',
               color: 'white',
+              mt: 1,
               borderRadius: '10px',
-              textTransform: 'none',
+              textTransform: 'none', // no uppercase
               fontWeight: 'bold',
-              px: 4,
+              fontSize: '1.3rem',
+              px: 3,
             }}
           >
             Rejoindre la compétition
@@ -200,14 +202,14 @@ const HomePage: React.FC = () => {
           onClick={() => navigate('/tournaments')}
           variant="contained"
           sx={{
+            mt: 1,
             backgroundColor: 'white',
             color: '#1e2a44',
             borderRadius: '10px',
-            textTransform: 'none',
+            textTransform: 'none', // no uppercase
             fontWeight: 'bold',
-            px: 4,
-            mt: 1,
-            '&:hover': { backgroundColor: '#f0f0f0' },
+            fontSize: '1.3rem',
+            px: 3,
           }}
         >
           En savoir plus

@@ -5,4 +5,5 @@ export interface Notification {
   sendDate: string;
   read: boolean;
   membershipRequestId?: number;
+  requestState?: string;
 }

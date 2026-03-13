@@ -133,7 +133,7 @@ public class TeamService {
           return new TeamMemberDto(
               m.getId(),
               m.getTag(),
-              m.getImage().getId(),
+              m.getImage().getUrl(),
               isAvailable
           );
         })

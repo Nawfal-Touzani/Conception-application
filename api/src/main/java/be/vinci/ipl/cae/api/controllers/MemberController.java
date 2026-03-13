@@ -176,4 +176,12 @@ public class MemberController {
         .toList();
   }
 
+  /**
+   * Get all members (admin only).
+   */
+  @GetMapping
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  public List<MemberProfileResponseDto> getAllMembers() {
+    return memberService.getAllMembers();
+  }
 }

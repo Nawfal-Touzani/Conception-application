@@ -7,7 +7,7 @@ public record TeamMemberDto(
 
     Long memberId,
     String gameTag,
-    Long avatarId,
+    String avatarUrl,
     boolean isAvailable
 
 ) {}

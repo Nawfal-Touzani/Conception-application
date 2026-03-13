@@ -10,7 +10,7 @@ import {
   Checkbox,
   FormControlLabel,
 } from '@mui/material';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../../contexts/useAuth'; // hook
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -57,7 +57,14 @@ const LoginPage: React.FC = () => {
       }}
     >
       {/* Card + button centered together */}
-      <Box display="flex" flexDirection="column" alignItems="center" mt={-10}>
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        mt={-10}
+      >
         {/* White card */}
         <Paper elevation={10} sx={{ width: 520, borderRadius: '10px', p: 3 }}>
           <Typography
@@ -77,13 +84,7 @@ const LoginPage: React.FC = () => {
             </Alert>
           )}
 
-          <Box
-            component="form"
-            onSubmit={handleSubmit}
-            display={'flex'}
-            flexDirection="column"
-            gap={2}
-          >
+          <Box display={'flex'} flexDirection="column" gap={2}>
             <TextField
               label="Adresse email"
               type="email"
@@ -163,7 +164,7 @@ const LoginPage: React.FC = () => {
 
         {/* Isolated login button at the bottom */}
         <Button
-          onClick={handleSubmit}
+          type="submit"
           variant="contained"
           sx={{
             mt: 5,
