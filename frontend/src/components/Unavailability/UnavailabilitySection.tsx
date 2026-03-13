@@ -6,6 +6,14 @@ import {
   Button,
   Collapse,
   Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  CircularProgress,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
 } from '@mui/material';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { useState } from 'react';
@@ -17,6 +25,11 @@ export const UnavailabilitySection = () => {
   const [dates, setDates] = useState({ startDate: '', endDate: '' });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [unavailabilities, setUnavailabilities] = useState<
+    memberService.UnavailabilityDto[]
+  >([]);
+  const [loadingList, setLoadingList] = useState(false);
 
   const handleConfirm = async () => {
     if (!user?.token) return;
@@ -51,6 +64,20 @@ export const UnavailabilitySection = () => {
       setTimeout(() => setSuccess(false), 3000);
     } else {
       setError('Erreur : Dates invalides');
+    }
+  };
+
+  const handleShowList = async () => {
+    if (!user?.token) return;
+    setOpenModal(true);
+    setLoadingList(true);
+    try {
+      const data = await memberService.getMyUnavailabilities(user.token);
+      setUnavailabilities(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingList(false);
     }
   };
 
@@ -115,7 +142,30 @@ export const UnavailabilitySection = () => {
               />
             </Box>
 
-            <Box textAlign="center" mt={2}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                mt: 2,
+                pl: '56px',
+              }}
+            >
+              <Button
+                variant="contained"
+                size="small"
+                onClick={handleShowList}
+                sx={{
+                  borderRadius: 2,
+                  px: 4,
+                  bgcolor: 'white',
+                  color: '#1e2a44',
+                  fontWeight: 'bold',
+                  textTransform: 'none',
+                }}
+              >
+                Voir mes indisponibilités
+              </Button>
+
               <Button
                 variant="contained"
                 size="small"
@@ -135,6 +185,47 @@ export const UnavailabilitySection = () => {
           </Box>
         </Grid>
       </Grid>
+
+      <Dialog
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle sx={{ fontWeight: 'bold', color: '#1e2a44' }}>
+          Mes Indisponibilités
+        </DialogTitle>
+        <DialogContent dividers>
+          {loadingList ? (
+            <Box display="flex" justifyContent="center" p={3}>
+              <CircularProgress size={24} />
+            </Box>
+          ) : unavailabilities.length > 0 ? (
+            <List>
+              {unavailabilities.map((item, index) => (
+                <Box key={index}>
+                  <ListItem>
+                    <ListItemText
+                      primary={`Du ${new Date(item.startDate).toLocaleDateString()}`}
+                      secondary={`Au ${new Date(item.endDate).toLocaleDateString()}`}
+                    />
+                  </ListItem>
+                  {index < unavailabilities.length - 1 && <Divider />}
+                </Box>
+              ))}
+            </List>
+          ) : (
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              align="center"
+              p={2}
+            >
+              Aucune indisponibilité enregistrée.
+            </Typography>
+          )}
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };

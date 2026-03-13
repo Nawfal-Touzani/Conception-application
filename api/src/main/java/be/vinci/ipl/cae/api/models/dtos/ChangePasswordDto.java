@@ -1,7 +1,6 @@
 package be.vinci.ipl.cae.api.models.dtos;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,7 +15,6 @@ public class ChangePasswordDto {
   private String oldPassword;
 
   @NotBlank
-  @Size(min = 5)
   private String newPassword;
 
   @NotBlank
