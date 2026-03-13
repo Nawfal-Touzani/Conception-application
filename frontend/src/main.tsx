@@ -10,7 +10,7 @@ import RegisterPage from './components/pages/RegisterPage.tsx';
 import LoginPage from './components/pages/LoginPage.tsx';
 import NotificationsPage from './components/pages/NotificationsPage.tsx';
 
-import { AuthProvider } from './contexts/AuthContext.tsx';
+import { AuthProvider } from './contexts/AuthProvider.tsx';
 
 import '@fontsource/roboto/700.css';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -18,6 +18,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import theme from './themes.ts';
 import { ProfilePage } from './components/pages/ProfilePage.tsx';
 import TeamPage from './components/pages/TeamPage.tsx';
+import AdminPage from './components/pages/AdminPage.tsx';
 
 const router = createBrowserRouter([
   {
@@ -47,6 +48,10 @@ const router = createBrowserRouter([
       {
         path: 'team',
         element: <TeamPage />,
+      },
+      {
+        path: 'admin',
+        element: <AdminPage />,
       },
     ],
   },

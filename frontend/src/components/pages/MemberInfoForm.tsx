@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/useAuth';
 import { MemberProfile } from '../../types/member';
 import * as memberService from '../../services/memberService';
 import { ProfileInputField } from './ProfileInputField';

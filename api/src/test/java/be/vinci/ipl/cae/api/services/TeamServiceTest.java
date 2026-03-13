@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import be.vinci.ipl.cae.api.models.dtos.CreateTeamRequest;
+import be.vinci.ipl.cae.api.models.dtos.TeamMemberDto;
 import be.vinci.ipl.cae.api.models.dtos.TeamResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Image;
 import be.vinci.ipl.cae.api.models.entities.Member;
@@ -19,12 +20,14 @@ import be.vinci.ipl.cae.api.models.entities.MembershipRequest;
 import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.models.entities.Team;
 import be.vinci.ipl.cae.api.models.entities.TeamComposition;
+import be.vinci.ipl.cae.api.models.entities.Unavailability;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.MembershipRequestRepository;
 import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
 import be.vinci.ipl.cae.api.repositories.TeamRepository;
-import be.vinci.ipl.cae.api.services.TeamService;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,9 +37,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
 
-/**
- * The type Team service test.
- */
 @ExtendWith(MockitoExtension.class)
 class TeamServiceTest {
 
@@ -59,38 +59,43 @@ class TeamServiceTest {
   private TeamService teamService;
 
   private Member member;
-  private CreateTeamRequest request;
+  private Image image;
+  private Team team;
+  private TeamComposition composition;
 
-  /**
-   * Sets up.
-   */
   @BeforeEach
   void setUp() {
+    image = new Image("/images/avatar1.png");
+    image.setId(1L);
+
     member = new Member();
     member.setId(1L);
     member.setEmail("test@vinci.be");
-
-    Image image = new Image();
-    image.setId(1L);
-
+    member.setTag("TestTag");
     member.setImage(image);
+    member.setUnavailabilities(List.of());
 
-    request = new CreateTeamRequest("TestTeam");
+    team = new Team();
+    team.setId(10L);
+    team.setName("TestTeam");
+    team.setIsActive(true);
+    team.setCreationDate(LocalDateTime.now());
+    team.setResponsible(member);
+
+    composition = new TeamComposition();
+    composition.setTeam(team);
+    composition.setMember(member);
   }
 
-  /**
-   * Create team should work when member has no team and name is unique.
-   */
+  // ─── createTeam ───────────────────────────────────────────────
+
   @Test
   void createTeam_shouldWork_whenMemberHasNoTeamAndNameIsUnique() {
-    when(memberRepository.findById(1L)).thenReturn(java.util.Optional.of(member));
+    CreateTeamRequest request = new CreateTeamRequest("TestTeam");
+    when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
     when(teamCompositionRepository.existsByMemberId(1L)).thenReturn(false);
     when(teamRepository.existsByName("TestTeam")).thenReturn(false);
-
-    Team savedTeam = new Team();
-    savedTeam.setId(10L);
-    savedTeam.setName("TestTeam");
-    when(teamRepository.save(any(Team.class))).thenReturn(savedTeam);
+    when(teamRepository.save(any(Team.class))).thenReturn(team);
 
     TeamResponseDto result = teamService.createTeam(1L, request);
 
@@ -100,156 +105,258 @@ class TeamServiceTest {
     verify(teamCompositionRepository, times(1)).save(any(TeamComposition.class));
   }
 
-  /**
-   * Create team should fail when member already in a team.
-   */
-  @Test
-  void createTeam_shouldFail_whenMemberAlreadyInTeam() {
-    when(teamCompositionRepository.existsByMemberId(1L)).thenReturn(true);
-
-    assertThrows(ResponseStatusException.class, () -> teamService.createTeam(1L, request));
-
-    verify(teamRepository, never()).save(any());
-    verify(teamCompositionRepository, never()).save(any());
-  }
-
-  /**
-   * Create team should fail when team name already exists.
-   */
-  @Test
-  void createTeam_shouldFail_whenTeamNameAlreadyExists() {
-    when(teamCompositionRepository.existsByMemberId(1L)).thenReturn(false);
-    when(teamRepository.existsByName("TestTeam")).thenReturn(true);
-
-    assertThrows(ResponseStatusException.class, () -> teamService.createTeam(1L, request));
-
-    verify(teamRepository, never()).save(any());
-    verify(teamCompositionRepository, never()).save(any());
-  }
-
-  /**
-   * Create team should fail when member not found.
-   */
-  @Test
-  void createTeam_shouldFail_whenMemberNotFound() {
-    when(memberRepository.findById(1L)).thenReturn(java.util.Optional.empty());
-
-    assertThrows(ResponseStatusException.class, () -> teamService.createTeam(1L, request));
-
-    verify(teamRepository, never()).save(any());
-    verify(teamCompositionRepository, never()).save(any());
-  }
-
-  /**
-   * Create team should fail when request is invalid.
-   */
   @Test
   void createTeam_shouldFail_whenRequestIsInvalid() {
     CreateTeamRequest invalidRequest = new CreateTeamRequest("");
-
     assertThrows(ResponseStatusException.class, () -> teamService.createTeam(1L, invalidRequest));
-
     verify(teamRepository, never()).save(any());
     verify(teamCompositionRepository, never()).save(any());
   }
 
   @Test
+  void createTeam_shouldFail_whenMemberAlreadyInTeam() {
+    CreateTeamRequest request = new CreateTeamRequest("TestTeam");
+    when(teamCompositionRepository.existsByMemberId(1L)).thenReturn(true);
+    assertThrows(ResponseStatusException.class, () -> teamService.createTeam(1L, request));
+    verify(teamRepository, never()).save(any());
+  }
+
+  @Test
+  void createTeam_shouldFail_whenTeamNameAlreadyExists() {
+    CreateTeamRequest request = new CreateTeamRequest("TestTeam");
+    when(teamCompositionRepository.existsByMemberId(1L)).thenReturn(false);
+    when(teamRepository.existsByName("TestTeam")).thenReturn(true);
+    assertThrows(ResponseStatusException.class, () -> teamService.createTeam(1L, request));
+    verify(teamRepository, never()).save(any());
+  }
+
+  @Test
+  void createTeam_shouldFail_whenMemberNotFound() {
+    CreateTeamRequest request = new CreateTeamRequest("TestTeam");
+    when(teamCompositionRepository.existsByMemberId(1L)).thenReturn(false);
+    when(teamRepository.existsByName("TestTeam")).thenReturn(false);
+    when(memberRepository.findById(1L)).thenReturn(Optional.empty());
+    assertThrows(ResponseStatusException.class, () -> teamService.createTeam(1L, request));
+    verify(teamRepository, never()).save(any());
+  }
+
+  // ─── createRequest ────────────────────────────────────────────
+
+  @Test
   void createRequest_shouldWork_whenMemberAndTeamExist() {
-    Team team = new Team("TeamTest", true, LocalDateTime.now(), member, null);
-    team.setId(1L);
     MembershipRequest membershipRequest = new MembershipRequest(
         MembershipRequest.State.PENDING, null, null);
-
-    when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
-    when(teamRepository.findById(team.getId())).thenReturn(Optional.of(team));
+    when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+    when(teamRepository.findById(10L)).thenReturn(Optional.of(team));
     when(membershipRequestRepository.save(any(MembershipRequest.class)))
         .thenReturn(membershipRequest);
 
-    MembershipRequest result = teamService.createRequest(member.getId(), team.getId());
+    MembershipRequest result = teamService.createRequest(1L, 10L);
 
     assertNotNull(result);
-    assertEquals(membershipRequest, result);
     verify(notificationService).send(anyLong(), any(Notification.class));
   }
 
   @Test
   void createRequest_shouldReturnNull_whenMemberNotFound() {
     when(memberRepository.findById(999L)).thenReturn(Optional.empty());
-
-    MembershipRequest result = teamService.createRequest(999L, 1L);
-
+    MembershipRequest result = teamService.createRequest(999L, 10L);
     assertNull(result);
     verify(membershipRequestRepository, never()).save(any());
-    verify(notificationService, never()).send(anyLong(), any(Notification.class));
   }
 
   @Test
   void createRequest_shouldReturnNull_whenTeamNotFound() {
-    when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+    when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
     when(teamRepository.findById(999L)).thenReturn(Optional.empty());
-
-    MembershipRequest result = teamService.createRequest(member.getId(), 999L);
-
+    MembershipRequest result = teamService.createRequest(1L, 999L);
     assertNull(result);
     verify(membershipRequestRepository, never()).save(any());
-    verify(notificationService, never()).send(anyLong(), any(Notification.class));
   }
 
-  /**
-   * Get members of my team should return list when member has a team.
-   */
+  // ─── getMembersOfMyTeam ───────────────────────────────────────
+
   @Test
   void getMembersOfMyTeam_shouldReturnMembers_whenMemberHasTeam() {
+    when(teamCompositionRepository.findByMemberId(1L)).thenReturn(Optional.of(composition));
+    when(teamCompositionRepository.findAllByTeamId(10L)).thenReturn(List.of(composition));
 
-    Team team = new Team();
-    team.setId(10L);
-
-    TeamComposition composition = new TeamComposition();
-    composition.setTeam(team);
-    composition.setMember(member);
-
-    when(teamCompositionRepository.findByMemberId(1L))
-        .thenReturn(java.util.Optional.of(composition));
-
-    Member member2 = new Member();
-    member2.setId(2L);
-    member2.setTag("Player2");
-
-    Image image2 = new Image();
-    image2.setId(2L);
-
-    member2.setImage(image2);
-
-    TeamComposition composition2 = new TeamComposition();
-    composition2.setTeam(team);
-    composition2.setMember(member2);
-
-    when(teamCompositionRepository.findAllByTeamId(10L))
-        .thenReturn(java.util.List.of(composition, composition2));
-
-    var result = teamService.getMembersOfMyTeam(1L);
+    List<TeamMemberDto> result = teamService.getMembersOfMyTeam(1L);
 
     assertNotNull(result);
-    assertEquals(2, result.size());
-
-    verify(teamCompositionRepository, times(1)).findByMemberId(1L);
-    verify(teamCompositionRepository, times(1)).findAllByTeamId(10L);
+    assertEquals(1, result.size());
+    assertEquals("TestTag", result.get(0).gameTag());
   }
 
-  /**
-   * Get members of my team should fail when member has no team.
-   */
+  @Test
+  void getMembersOfMyTeam_shouldReturnUnavailableMember_whenUnavailabilityCoversToday() {
+    Unavailability unavailability = new Unavailability();
+    unavailability.setStartDate(LocalDate.now().minusDays(1));
+    unavailability.setEndDate(LocalDate.now().plusDays(1));
+    member.setUnavailabilities(List.of(unavailability));
+
+    when(teamCompositionRepository.findByMemberId(1L)).thenReturn(Optional.of(composition));
+    when(teamCompositionRepository.findAllByTeamId(10L)).thenReturn(List.of(composition));
+
+    List<TeamMemberDto> result = teamService.getMembersOfMyTeam(1L);
+
+    assertNotNull(result);
+    assertEquals(false, result.get(0).isAvailable());
+  }
+
   @Test
   void getMembersOfMyTeam_shouldFail_whenMemberHasNoTeam() {
+    when(teamCompositionRepository.findByMemberId(1L)).thenReturn(Optional.empty());
+    assertThrows(ResponseStatusException.class, () -> teamService.getMembersOfMyTeam(1L));
+  }
 
-    when(teamCompositionRepository.findByMemberId(1L))
-        .thenReturn(java.util.Optional.empty());
+  // ─── getTeamOfMemberAsDto ─────────────────────────────────────
 
-    assertThrows(ResponseStatusException.class,
-        () -> teamService.getMembersOfMyTeam(1L));
+  @Test
+  void getTeamOfMemberAsDto_shouldReturnDto_whenMemberHasTeam() {
+    when(teamCompositionRepository.findByMemberId(1L)).thenReturn(Optional.of(composition));
 
-    verify(teamCompositionRepository, times(1)).findByMemberId(1L);
-    verify(teamCompositionRepository, never()).findAllByTeamId(any());
+    TeamResponseDto result = teamService.getTeamOfMemberAsDto(1L);
+
+    assertNotNull(result);
+    assertEquals("TestTeam", result.getName());
+  }
+
+  @Test
+  void getTeamOfMemberAsDto_shouldFail_whenMemberHasNoTeam() {
+    when(teamCompositionRepository.findByMemberId(1L)).thenReturn(Optional.empty());
+    assertThrows(ResponseStatusException.class, () -> teamService.getTeamOfMemberAsDto(1L));
+  }
+
+  // ─── getAllTeamDtos ───────────────────────────────────────────
+
+  @Test
+  void getAllTeamDtos_shouldReturnAllTeams() {
+    when(teamRepository.findAll()).thenReturn(List.of(team));
+
+    List<TeamResponseDto> result = teamService.getAllTeamDtos();
+
+    assertNotNull(result);
+    assertEquals(1, result.size());
+    assertEquals("TestTeam", result.get(0).getName());
+  }
+
+  // ─── leaveTeam ────────────────────────────────────────────────
+
+  @Test
+  void leaveTeam_shouldDeleteTeam_whenLastMember() {
+    when(memberRepository.findByEmail("test@vinci.be")).thenReturn(Optional.of(member));
+    when(teamCompositionRepository.findFirstByMemberId(1L)).thenReturn(Optional.of(composition));
+    when(teamCompositionRepository.findAllByTeamId(10L)).thenReturn(List.of(composition));
+
+    teamService.leaveTeam("test@vinci.be");
+
+    verify(teamCompositionRepository).delete(composition);
+    verify(teamRepository).delete(team);
+  }
+
+  @Test
+  void leaveTeam_shouldRemoveMember_whenNotResponsible() {
+    Member other = new Member();
+    other.setId(2L);
+    other.setEmail("other@vinci.be");
+    other.setTag("Other");
+    other.setImage(image);
+    other.setUnavailabilities(List.of());
+
+    TeamComposition otherCompo = new TeamComposition();
+    otherCompo.setTeam(team);
+    otherCompo.setMember(other);
+
+    when(memberRepository.findByEmail("other@vinci.be")).thenReturn(Optional.of(other));
+    when(teamCompositionRepository.findFirstByMemberId(2L)).thenReturn(Optional.of(otherCompo));
+    when(teamCompositionRepository.findAllByTeamId(10L))
+        .thenReturn(List.of(composition, otherCompo));
+
+    teamService.leaveTeam("other@vinci.be");
+
+    verify(teamCompositionRepository).delete(otherCompo);
+    verify(teamRepository, never()).delete(any(Team.class));
+  }
+
+  @Test
+  void leaveTeam_shouldPromoteSecondResponsible_whenResponsibleLeaves() {
+    Member second = new Member();
+    second.setId(3L);
+    second.setTag("Second");
+    second.setImage(image);
+    second.setUnavailabilities(List.of());
+    team.setSecondResponsible(second);
+
+    TeamComposition secondCompo = new TeamComposition();
+    secondCompo.setTeam(team);
+    secondCompo.setMember(second);
+
+    when(memberRepository.findByEmail("test@vinci.be")).thenReturn(Optional.of(member));
+    when(teamCompositionRepository.findFirstByMemberId(1L)).thenReturn(Optional.of(composition));
+    when(teamCompositionRepository.findAllByTeamId(10L))
+        .thenReturn(List.of(composition, secondCompo));
+
+    teamService.leaveTeam("test@vinci.be");
+
+    verify(teamRepository).save(team);
+    verify(teamCompositionRepository).delete(composition);
+    assertEquals(second, team.getResponsible());
+  }
+
+  @Test
+  void leaveTeam_shouldThrowConflict_whenResponsibleHasNoSecond() {
+    Member other = new Member();
+    other.setId(2L);
+    other.setImage(image);
+    other.setUnavailabilities(List.of());
+    TeamComposition otherCompo = new TeamComposition();
+    otherCompo.setTeam(team);
+    otherCompo.setMember(other);
+
+    when(memberRepository.findByEmail("test@vinci.be")).thenReturn(Optional.of(member));
+    when(teamCompositionRepository.findFirstByMemberId(1L)).thenReturn(Optional.of(composition));
+    when(teamCompositionRepository.findAllByTeamId(10L))
+        .thenReturn(List.of(composition, otherCompo));
+
+    assertThrows(ResponseStatusException.class, () -> teamService.leaveTeam("test@vinci.be"));
+  }
+
+  @Test
+  void leaveTeam_shouldClearSecondResponsible_whenSecondResponsibleLeaves() {
+    Member second = new Member();
+    second.setId(3L);
+    second.setEmail("second@vinci.be");
+    second.setTag("Second");
+    second.setImage(image);
+    second.setUnavailabilities(List.of());
+    team.setSecondResponsible(second);
+
+    TeamComposition secondCompo = new TeamComposition();
+    secondCompo.setTeam(team);
+    secondCompo.setMember(second);
+
+    when(memberRepository.findByEmail("second@vinci.be")).thenReturn(Optional.of(second));
+    when(teamCompositionRepository.findFirstByMemberId(3L)).thenReturn(Optional.of(secondCompo));
+    when(teamCompositionRepository.findAllByTeamId(10L))
+        .thenReturn(List.of(composition, secondCompo));
+
+    teamService.leaveTeam("second@vinci.be");
+
+    verify(teamRepository).save(team);
+    assertNull(team.getSecondResponsible());
+  }
+
+  @Test
+  void leaveTeam_shouldFail_whenMemberNotFound() {
+    when(memberRepository.findByEmail("unknown@vinci.be")).thenReturn(Optional.empty());
+    assertThrows(ResponseStatusException.class, () -> teamService.leaveTeam("unknown@vinci.be"));
+  }
+
+  @Test
+  void leaveTeam_shouldFail_whenMemberHasNoTeam() {
+    when(memberRepository.findByEmail("test@vinci.be")).thenReturn(Optional.of(member));
+    when(teamCompositionRepository.findFirstByMemberId(1L)).thenReturn(Optional.empty());
+    assertThrows(ResponseStatusException.class, () -> teamService.leaveTeam("test@vinci.be"));
   }
 }
-

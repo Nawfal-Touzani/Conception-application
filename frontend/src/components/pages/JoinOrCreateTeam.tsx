@@ -13,7 +13,7 @@ import {
   Alert,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/useAuth'; // hook
 
 type TeamDto = {
   id: number;
