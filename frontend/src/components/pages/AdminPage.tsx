@@ -131,7 +131,7 @@ const AdminPage = () => {
   return (
     <Box
       sx={{
-        minHeight: '100vh',
+        flexGrow: 1,
         backgroundColor: '#1a2744',
         display: 'flex',
         flexDirection: 'column',
