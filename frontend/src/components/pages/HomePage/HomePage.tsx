@@ -1,8 +1,8 @@
 import React from 'react';
 import { Box, Button, Typography, Paper } from '@mui/material';
-import { useAuth } from '../../contexts/useAuth'; // hook
+import { useAuth } from '../../../contexts/useAuth'; // hook
 import { useNavigate } from 'react-router-dom';
-import homeImage from '../../assets/images/home_logo.png';
+import homeImage from '../../../assets/images/home_logo.png';
 
 // Static for now
 const TOURNAMENTS_DATA = [

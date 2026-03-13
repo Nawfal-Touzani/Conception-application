@@ -5,9 +5,9 @@ import './index.css';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 import App from './components/App/index.tsx';
-import HomePage from './components/pages/HomePage.tsx';
-import RegisterPage from './components/pages/RegisterPage.tsx';
-import LoginPage from './components/pages/LoginPage.tsx';
+import HomePage from './components/pages/HomePage/HomePage.tsx';
+import RegisterPage from './components/pages/RegisterPage/RegisterPage.tsx';
+import LoginPage from './components/pages/LoginPage/LoginPage.tsx';
 import NotificationsPage from './components/pages/NotificationsPage.tsx';
 
 import { AuthProvider } from './contexts/AuthProvider.tsx';

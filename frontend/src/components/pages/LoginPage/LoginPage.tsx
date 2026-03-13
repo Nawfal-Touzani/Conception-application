@@ -10,7 +10,7 @@ import {
   Checkbox,
   FormControlLabel,
 } from '@mui/material';
-import { useAuth } from '../../contexts/useAuth'; // hook
+import { useAuth } from '../../../contexts/useAuth'; // hook
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();

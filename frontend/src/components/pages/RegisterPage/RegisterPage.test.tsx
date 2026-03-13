@@ -2,9 +2,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, useNavigate } from 'react-router-dom';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import RegisterPage from './RegisterPage';
-import { AuthContext } from '../../contexts/AuthContext';
-import * as specialityService from '../../services/speciality.service';
-import * as imageService from '../../services/image.service';
+import { AuthContext } from '../../../contexts/AuthContext';
+import * as specialityService from '../../../services/speciality.service';
+import * as imageService from '../../../services/image.service';
 
 // Mocking the router & API calls (isolations)
 vi.mock('react-router-dom', async () => {
