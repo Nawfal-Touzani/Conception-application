@@ -25,6 +25,7 @@ type MemberDto = {
   profileImage: string | null;
   isAvailable: boolean;
   isAdmin: boolean;
+  admin: boolean;
 };
 
 const API = '/api';
@@ -66,7 +67,7 @@ const AdminPage = () => {
       .then(async (res) => {
         if (!res.ok) return;
         const data: MemberDto[] = await res.json();
-        setAllMembers(data.filter((m) => !m.isAdmin));
+        setAllMembers(data.filter((m) => !m.isAdmin && !m.admin));
       })
       .catch(() => setError('Erreur lors du chargement des membres.'));
   }, [token]);
