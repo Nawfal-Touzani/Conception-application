@@ -58,14 +58,14 @@ public class AuthService {
   public void register(RegisterCredentials registerCredentials) {
     // Verifications
     if (memberRepository.existsByEmail(registerCredentials.email())) {
-      throw new IllegalArgumentException("Email is already in use.");
+      throw new IllegalArgumentException("Cet email est déjà utilisé.");
     }
 
     Image image = imageRepository.findById(registerCredentials.imageId())
-        .orElseThrow(() -> new IllegalArgumentException("Image not found."));
+        .orElseThrow(() -> new IllegalArgumentException("Image introuvable."));
 
     Speciality speciality = specialityRepository.findById(registerCredentials.specialityId())
-        .orElseThrow(() -> new IllegalArgumentException("Speciality not found."));
+        .orElseThrow(() -> new IllegalArgumentException("Spécialité introuvable."));
 
     // Add to database
     Member newMember = new Member();

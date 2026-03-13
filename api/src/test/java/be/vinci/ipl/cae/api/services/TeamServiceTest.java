@@ -132,10 +132,10 @@ class TeamServiceTest {
 
   @Test
   void createTeam_shouldFail_whenMemberNotFound() {
-    CreateTeamRequest request = new CreateTeamRequest("TestTeam");
     when(teamCompositionRepository.existsByMemberId(1L)).thenReturn(false);
     when(teamRepository.existsByName("TestTeam")).thenReturn(false);
     when(memberRepository.findById(1L)).thenReturn(Optional.empty());
+    CreateTeamRequest request = new CreateTeamRequest("TestTeam");
     assertThrows(ResponseStatusException.class, () -> teamService.createTeam(1L, request));
     verify(teamRepository, never()).save(any());
   }
