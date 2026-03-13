@@ -42,6 +42,19 @@ const regularMember = {
   admin: false,
 };
 
+// Admin différent de l'utilisateur connecté (AdminTag) → bouton poubelle visible
+const otherAdmin = {
+  id: 99,
+  email: 'other@vinci.be',
+  tag: 'OtherAdmin',
+  speciality: 'Gardien',
+  teamName: null,
+  profileImage: null,
+  isAvailable: true,
+  isAdmin: true,
+  admin: true,
+};
+
 const mockContextValue = {
   user: mockAdmin,
   login: vi.fn(),
@@ -191,14 +204,14 @@ describe('AdminPage', () => {
 
   test('ouvre le dialog de confirmation de révocation', async () => {
     (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => [adminMember] })
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [adminMember, regularMember],
-      });
+        json: async () => [adminMember, otherAdmin],
+      })
+      .mockResolvedValueOnce({ ok: true, json: async () => [regularMember] });
 
     renderAdminPage();
-    await screen.findByText('AdminTag');
+    await screen.findByText('OtherAdmin');
 
     const btns = getIconButtonsOutsideDialog();
     if (btns.length > 0) fireEvent.click(btns[0]);
@@ -229,8 +242,8 @@ describe('AdminPage', () => {
     await screen.findByText('OtherAdmin');
 
     const btns = getIconButtonsOutsideDialog();
-    // btns[0] = AdminTag, btns[1] = OtherAdmin
-    if (btns.length > 1) fireEvent.click(btns[1]);
+    // AdminTag n'a pas de bouton poubelle (c'est soi-même), donc btns[0] = OtherAdmin
+    if (btns.length > 0) fireEvent.click(btns[0]);
 
     await screen.findByText('Révoquer un administrateur');
     fireEvent.click(screen.getByText('Confirmer'));
@@ -244,15 +257,15 @@ describe('AdminPage', () => {
 
   test('affiche erreur si la révocation échoue', async () => {
     (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => [adminMember] })
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [adminMember, regularMember],
+        json: async () => [adminMember, otherAdmin],
       })
+      .mockResolvedValueOnce({ ok: true, json: async () => [regularMember] })
       .mockResolvedValueOnce({ ok: false });
 
     renderAdminPage();
-    await screen.findByText('AdminTag');
+    await screen.findByText('OtherAdmin');
 
     const btns = getIconButtonsOutsideDialog();
     if (btns.length > 0) fireEvent.click(btns[0]);
@@ -269,14 +282,14 @@ describe('AdminPage', () => {
 
   test('annule la révocation', async () => {
     (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => [adminMember] })
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [adminMember, regularMember],
-      });
+        json: async () => [adminMember, otherAdmin],
+      })
+      .mockResolvedValueOnce({ ok: true, json: async () => [regularMember] });
 
     renderAdminPage();
-    await screen.findByText('AdminTag');
+    await screen.findByText('OtherAdmin');
 
     const btns = getIconButtonsOutsideDialog();
     if (btns.length > 0) fireEvent.click(btns[0]);

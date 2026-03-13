@@ -25,7 +25,6 @@ type MemberDto = {
   profileImage: string | null;
   isAvailable: boolean;
   isAdmin: boolean;
-  admin: boolean;
 };
 
 const API = '/api';
@@ -67,7 +66,7 @@ const AdminPage = () => {
       .then(async (res) => {
         if (!res.ok) return;
         const data: MemberDto[] = await res.json();
-        setAllMembers(data.filter((m) => !m.admin));
+        setAllMembers(data.filter((m) => !m.isAdmin));
       })
       .catch(() => setError('Erreur lors du chargement des membres.'));
   }, [token]);
@@ -131,7 +130,7 @@ const AdminPage = () => {
   return (
     <Box
       sx={{
-        flexGrow: 1,
+        minHeight: '100vh',
         backgroundColor: '#1a2744',
         display: 'flex',
         flexDirection: 'column',
@@ -247,15 +246,17 @@ const AdminPage = () => {
                 </Typography>
               </Box>
 
-              <IconButton
-                onClick={() => setDemoteTarget(member)}
-                sx={{
-                  color: '#e74c3c',
-                  '&:hover': { backgroundColor: 'rgba(231,76,60,0.1)' },
-                }}
-              >
-                <DeleteIcon />
-              </IconButton>
+              {member.tag !== user?.tag && (
+                <IconButton
+                  onClick={() => setDemoteTarget(member)}
+                  sx={{
+                    color: '#e74c3c',
+                    '&:hover': { backgroundColor: 'rgba(231,76,60,0.1)' },
+                  }}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              )}
             </Box>
           ))}
         </Box>
