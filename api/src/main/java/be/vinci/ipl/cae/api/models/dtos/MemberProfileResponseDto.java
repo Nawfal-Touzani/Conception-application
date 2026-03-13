@@ -18,5 +18,6 @@ public class MemberProfileResponseDto {
   private String profileImage;
   private LocalDate creationDate;
   private boolean isAdmin;
+  private boolean admin;
   private boolean isAvailable;
 }
