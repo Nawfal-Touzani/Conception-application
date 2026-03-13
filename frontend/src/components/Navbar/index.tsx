@@ -36,6 +36,7 @@ const NavBar = () => {
   }, [user, location]);
 
   const isTeamPage = location.pathname === '/team';
+  const isAdminPage = location.pathname === '/admin';
   const isProfilePage = location.pathname === '/members/me';
 
   return (
@@ -83,6 +84,25 @@ const NavBar = () => {
               }}
             >
               Mon équipe
+            </Button>
+          )}
+
+          {user && user.role === 'ADMIN' && (
+            <Button
+              onClick={() => navigate('/admin')}
+              sx={{
+                backgroundColor: isAdminPage ? '#d8a46b' : '#1e2a44',
+                color: 'white',
+                borderRadius: '10px',
+                textTransform: 'none',
+                fontWeight: 'bold',
+                px: 5,
+                '&:hover': {
+                  backgroundColor: isAdminPage ? '#c38d54' : '#151e32',
+                },
+              }}
+            >
+              Administration
             </Button>
           )}
         </Box>
