@@ -25,13 +25,14 @@ type MemberDto = {
   profileImage: string | null;
   isAvailable: boolean;
   isAdmin: boolean;
+  admin: boolean;
 };
 
 const API = '/api';
 const PAGE_SIZE = 4;
 
 const AdminPage = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const token = user?.token ?? '';
 
@@ -66,7 +67,7 @@ const AdminPage = () => {
       .then(async (res) => {
         if (!res.ok) return;
         const data: MemberDto[] = await res.json();
-        setAllMembers(data.filter((m) => !m.isAdmin));
+        setAllMembers(data.filter((m) => !m.admin));
       })
       .catch(() => setError('Erreur lors du chargement des membres.'));
   }, [token]);
@@ -112,8 +113,14 @@ const AdminPage = () => {
       setDemoteTarget(null);
       return;
     }
-    setSuccess(`${demoteTarget.tag} n'est plus administrateur.`);
+    const isSelf = demoteTarget.tag === user?.tag;
     setDemoteTarget(null);
+    if (isSelf) {
+      logout();
+      navigate('/');
+      return;
+    }
+    setSuccess(`${demoteTarget.tag} n'est plus administrateur.`);
     loadAdmins();
     loadAllMembers();
   };
@@ -370,7 +377,11 @@ const AdminPage = () => {
                 }}
               >
                 <Avatar
-                  src={member.profileImage ?? undefined}
+                  src={
+                    member.profileImage
+                      ? `http://localhost:3000${member.profileImage}`
+                      : undefined
+                  }
                   alt={member.tag}
                   sx={{ width: 36, height: 36 }}
                 />

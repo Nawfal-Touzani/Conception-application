@@ -32,7 +32,7 @@ const API = '/api';
 const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
   const { user } = useAuth();
 
-  // ✅ Fix: extraire le token en variable primitive stable
+  //  Fix: extraire le token en variable primitive stable
   // Un objet authHeaders recréé à chaque render causerait une boucle infinie
   // si mis en dépendance de useEffect. On utilise le token (string) à la place.
   const token = user?.token ?? '';
@@ -48,7 +48,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
     severity: 'success' | 'error';
   }>({ open: false, msg: '', severity: 'success' });
 
-  // ✅ Fix: dépendance sur `token` (string) et non sur `authHeaders` (objet recréé à chaque render)
+  //  Fix: dépendance sur `token` (string) et non sur `authHeaders` (objet recréé à chaque render)
   useEffect(() => {
     if (!token) return;
     fetch(`${API}/teams`, {
