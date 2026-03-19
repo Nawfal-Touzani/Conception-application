@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
-  TextField,
   Typography,
   Paper,
   Alert,
   Checkbox,
   FormControlLabel,
 } from '@mui/material';
+import TextFieldStyle from '../../ui/TextFieldStyle/TextFieldStyle'; // Reusable styled TextField
 import { useAuth } from '../../../contexts/useAuth'; // hook
 
 const LoginPage: React.FC = () => {
@@ -85,60 +85,21 @@ const LoginPage: React.FC = () => {
           )}
 
           <Box display={'flex'} flexDirection="column" gap={2}>
-            <TextField
+            <TextFieldStyle
               label="Adresse email"
-              type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              variant="filled"
-              InputProps={{ disableUnderline: true }}
-              sx={{
-                '& .MuiFilledInput-root': {
-                  backgroundColor: '#1a2744',
-                  borderRadius: '10px',
-                  color: '#ffffff',
-                },
-                '& .MuiFilledInput-root:hover': {
-                  backgroundColor: '#1a2744',
-                },
-                '& .MuiFilledInput-root.Mui-focused': {
-                  backgroundColor: '#1a2744',
-                },
-                '& .MuiInputLabel-root': {
-                  color: 'grey',
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: 'grey',
-                },
-              }}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setEmail(e.target.value)
+              }
             />
 
-            <TextField
+            <TextFieldStyle
               label="Mot de passe"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              variant="filled"
-              InputProps={{ disableUnderline: true }}
-              sx={{
-                '& .MuiFilledInput-root': {
-                  backgroundColor: '#1a2744',
-                  borderRadius: '10px',
-                  color: '#ffffff',
-                },
-                '& .MuiFilledInput-root:hover': {
-                  backgroundColor: '#1a2744',
-                },
-                '& .MuiFilledInput-root.Mui-focused': {
-                  backgroundColor: '#1a2744',
-                },
-                '& .MuiInputLabel-root': {
-                  color: 'grey',
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: 'grey',
-                },
-              }}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setPassword(e.target.value)
+              }
             />
 
             {/* Remember me */}
