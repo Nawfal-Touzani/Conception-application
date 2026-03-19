@@ -1,6 +1,7 @@
 package be.vinci.ipl.cae.api.repositories;
 
 import be.vinci.ipl.cae.api.models.entities.Team;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -26,4 +27,11 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
    * @return the boolean
    */
   boolean existsByName(String name);
+
+  /**
+   * Find active teams.
+   *
+   * @return all active teams
+   */
+  List<Team> findByIsActiveTrue();
 }

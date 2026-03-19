@@ -5,6 +5,7 @@ import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.services.MembershipRequestService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -56,7 +57,7 @@ public class MembershipRequestController extends BaseController {
   @PatchMapping("/{requestId}/refuse")
   @PreAuthorize("isAuthenticated()")
   public ResponseEntity<Void> refuseRequest(@PathVariable Long requestId,
-      @RequestBody RefuseRequestDto body) {
+                                            @RequestBody RefuseRequestDto body, AuthenticationPrincipal principal) {
     membershipRequestService.refuseRequest(requestId, getConnectedMember().getId(),
         body.getReason());
     return ResponseEntity.noContent().build();

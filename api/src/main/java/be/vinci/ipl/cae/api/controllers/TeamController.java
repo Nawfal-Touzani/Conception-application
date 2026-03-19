@@ -48,9 +48,15 @@ public class TeamController extends BaseController {
    * Returns 201 + TeamResponseDto.
    */
   @PostMapping
-  public ResponseEntity<TeamResponseDto> createTeam(@RequestBody CreateTeamRequest request) {
-    TeamResponseDto dto = teamService.createTeam(getConnectedMember().getId(), request);
-    return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+  @ResponseStatus(HttpStatus.CREATED)
+  public TeamResponseDto createTeam(@RequestBody CreateTeamRequest request) {
+    try {
+      return teamService.createTeam(getConnectedMember().getId(), request);
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    } catch (IllegalStateException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+    }
   }
 
   /**
@@ -59,20 +65,23 @@ public class TeamController extends BaseController {
   @PostMapping("/{teamId}/membership-requests")
   @ResponseStatus(HttpStatus.CREATED)
   public MembershipRequest createRequest(@PathVariable long teamId) {
-    MembershipRequest result = teamService.createRequest(getConnectedMember().getId(), teamId);
-    if (result == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    try {
+      return teamService.createRequest(getConnectedMember().getId(), teamId);
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
-    return result;
   }
 
   /**
    * GET /teams/members — Get members of the connected member's team.
    */
   @GetMapping("/members")
-  public ResponseEntity<List<TeamMemberDto>> getTeamMembers() {
-    List<TeamMemberDto> members = teamService.getMembersOfMyTeam(getConnectedMember().getId());
-    return ResponseEntity.ok(members);
+  public List<TeamMemberDto> getTeamMembers() {
+    try {
+      return teamService.getMembersOfMyTeam(getConnectedMember().getId());
+    } catch (IllegalStateException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    }
   }
 
   /**
@@ -89,17 +98,26 @@ public class TeamController extends BaseController {
    * Returns 404 if the member has no team.
    */
   @GetMapping("/my-team")
-  public ResponseEntity<TeamResponseDto> getMyTeam() {
-    TeamResponseDto dto = teamService.getTeamOfMemberAsDto(getConnectedMember().getId());
-    return ResponseEntity.ok(dto);
+  public TeamResponseDto getMyTeam() {
+    try {
+      return teamService.getTeamOfMemberAsDto(getConnectedMember().getId());
+    } catch (IllegalStateException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    }
   }
 
   /**
    * DELETE /teams/leave — Leave the current team.
    */
   @DeleteMapping("/leave")
-  public ResponseEntity<Void> leaveTeam() {
-    teamService.leaveTeam(getConnectedMember().getEmail());
-    return ResponseEntity.ok().build();
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void leaveTeam() {
+    try {
+      teamService.leaveTeam(getConnectedMember().getEmail());
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    } catch (IllegalStateException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+    }
   }
 }
