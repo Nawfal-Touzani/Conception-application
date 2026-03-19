@@ -1,5 +1,3 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -11,73 +9,28 @@ import {
   InputLabel,
   FormControl,
 } from '@mui/material';
-import { useAuth } from '../../../contexts/useAuth';
+
+import { useRegisterForm } from '../../../hooks/useRegisterForm/useRegisterForm';
 import TextFieldStyle from '../../ui/TextFieldStyle/TextFieldStyle'; // Reusable styled TextField
 import { inputSx, menuPropsSx } from '../../ui/sharedStyles'; // Reusable styles
 
-import { Speciality } from '../../../types/speciality.types';
-import { ProfileImage } from '../../../types/image.types';
-import * as specialityService from '../../../services/speciality/speciality.service';
-import * as imageService from '../../../services/image/image.service';
-
 const RegisterPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { register } = useAuth();
-
-  const [specialities, setSpecialities] = useState<Speciality[]>([]);
-  const [avatars, setAvatars] = useState<ProfileImage[]>([]);
-
-  const [email, setEmail] = useState('');
-  const [tag, setTag] = useState('');
-  const [password, setPassword] = useState('');
-  const [specialityId, setSpecialityId] = useState<number | ''>('');
-  const [imageId, setImageId] = useState<number | ''>('');
-
-  const [error, setError] = useState<string | null>(null);
-
-  // Fetch specialities and images
-  useEffect(() => {
-    const fetchFormData = async () => {
-      try {
-        const [specsData, imagesData] = await Promise.all([
-          specialityService.getAll(),
-          imageService.getAll(),
-        ]);
-        setSpecialities(specsData);
-        setAvatars(imagesData);
-      } catch (err) {
-        setError('Impossible de charger les spécialités et les avatars.');
-      }
-    };
-    fetchFormData();
-  }, []);
-
-  // Validate inputs, call register from AuthContext, then redirect to login
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setError(null);
-
-    if (!email || !tag || !password || specialityId === '' || imageId === '') {
-      return setError('Veuillez remplir tous les champs et choisir un avatar.');
-    }
-
-    try {
-      await register({
-        email,
-        password,
-        tag,
-        imageId: Number(imageId),
-        specialityId: Number(specialityId),
-      });
-      navigate('/login');
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Une erreur inattendue s'est produite.");
-      }
-    }
-  };
+  const {
+    specialities,
+    avatars,
+    email,
+    setEmail,
+    tag,
+    setTag,
+    password,
+    setPassword,
+    specialityId,
+    setSpecialityId,
+    imageId,
+    setImageId,
+    error,
+    handleSubmit,
+  } = useRegisterForm();
 
   return (
     <Box
