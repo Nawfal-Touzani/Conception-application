@@ -15,8 +15,7 @@ public interface SpecialityRepository extends ListCrudRepository<Speciality, Lon
    * Finds a speciality by its name.
    *
    * @param name the name of the speciality to find.
-   * @return an Optional containing the found speciality, or empty if no speciality matches the
-   * name.
+   * @return an Optional containing the found speciality, or empty if no matches
    */
   Optional<Speciality> findByName(String name);
 }
