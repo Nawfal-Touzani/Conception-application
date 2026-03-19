@@ -1,4 +1,4 @@
-import { ProfileImage } from '../types/image.types';
+import { ProfileImage } from '../../types/image.types';
 
 const API_URL = 'http://localhost:3000/images';
 

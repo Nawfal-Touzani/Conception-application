@@ -1,9 +1,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { SpecialityMenu } from './SpecialityMenu';
-import * as specialityService from '../../services/speciality.service';
+import * as specialityService from '../../services/speciality/speciality.service';
 
-vi.mock('../../services/speciality.service');
+vi.mock('../../services/speciality/speciality.service');
 
 describe('SpecialityMenu', () => {
   const mockSpecs = [

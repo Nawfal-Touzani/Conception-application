@@ -16,8 +16,8 @@ import { useAuth } from '../../../contexts/useAuth';
 
 import { Speciality } from '../../../types/speciality.types';
 import { ProfileImage } from '../../../types/image.types';
-import * as specialityService from '../../../services/speciality.service';
-import * as imageService from '../../../services/image.service';
+import * as specialityService from '../../../services/speciality/speciality.service';
+import * as imageService from '../../../services/image/image.service';
 
 // reusable styles for all input fields
 const inputSx = {

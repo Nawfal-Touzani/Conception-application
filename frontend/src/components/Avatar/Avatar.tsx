@@ -2,7 +2,7 @@ import { Box, Button, Dialog, DialogTitle, IconButton } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { useEffect, useState } from 'react';
-import * as imageService from '../../services/image.service';
+import * as imageService from '../../services/image/image.service';
 import { ProfileImage } from '../../types/image.types';
 
 interface AvatarModalProps {

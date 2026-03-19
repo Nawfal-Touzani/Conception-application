@@ -3,16 +3,16 @@ import { MemoryRouter, useNavigate } from 'react-router-dom';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import RegisterPage from './RegisterPage';
 import { AuthContext } from '../../../contexts/AuthContext';
-import * as specialityService from '../../../services/speciality.service';
-import * as imageService from '../../../services/image.service';
+import * as specialityService from '../../../services/speciality/speciality.service';
+import * as imageService from '../../../services/image/image.service';
 
 // Mocking the router & API calls (isolations)
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return { ...actual, useNavigate: vi.fn() };
 });
-vi.mock('../../../services/speciality.service');
-vi.mock('../../../services/image.service');
+vi.mock('../../../services/speciality/speciality.service');
+vi.mock('../../../services/image/image.service');
 
 describe('RegisterPage', () => {
   const registerMock = vi.fn();

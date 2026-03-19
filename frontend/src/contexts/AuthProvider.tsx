@@ -4,7 +4,7 @@ import {
   LoginCredentials,
   RegisterCredentials,
 } from '../types/auth.types';
-import * as authService from '../services/auth.service';
+import * as authService from '../services/auth/auth.service';
 import { AuthContext } from './AuthContext';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
