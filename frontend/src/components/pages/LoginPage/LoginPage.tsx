@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -10,40 +8,19 @@ import {
   FormControlLabel,
 } from '@mui/material';
 import TextFieldStyle from '../../ui/TextFieldStyle/TextFieldStyle'; // Reusable styled TextField
-import { useAuth } from '../../../contexts/useAuth'; // hook
+import { useLoginForm } from '../../../hooks/useLoginForm/useLoginForm'; // hook
 
 const LoginPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { login } = useAuth(); // Context for authentication
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setError(null);
-
-    if (!email || !password) {
-      setError('Veuillez remplir tous les champs.');
-      return;
-    }
-
-    try {
-      await login({ email, password }, rememberMe); // Call the backend via our Context
-      navigate('/');
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message); // Display the error message from the backend
-      } else {
-        setError("Une erreur inattendue s'est produite.");
-      }
-    } finally {
-      // Optionally, reset after a failed login attempt
-      setPassword('');
-    }
-  };
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    rememberMe,
+    setRememberMe,
+    error,
+    handleSubmit,
+  } = useLoginForm();
 
   return (
     // Background
