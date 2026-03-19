@@ -2,7 +2,7 @@ import {
   AuthenticatedMember,
   LoginCredentials,
   RegisterCredentials,
-} from '../types/auth.types';
+} from '../../types/auth.types';
 
 const API_URL = 'http://localhost:3000/auths';
 

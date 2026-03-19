@@ -17,7 +17,13 @@ describe('auth.service', () => {
 
   // register tests
   describe('register()', () => {
-    const credentials = { email: 'test@mail.com', password: 'test' };
+    const credentials = {
+      email: 'test@mail.com',
+      password: 'test',
+      tag: 'Test',
+      imageId: 1,
+      specialityId: 1,
+    };
 
     test('calls POST /auths/register with the correct method, headers and body', async () => {
       mockFetch(201);
