@@ -119,7 +119,12 @@ const RegisterPage: React.FC = () => {
         {error && (
           <Alert
             severity="error"
-            sx={{ mb: 3, borderRadius: '10px', width: '100%', maxWidth: 800 }}
+            sx={{
+              mb: 3,
+              borderRadius: '10px',
+              width: '100%',
+              maxWidth: 1000,
+            }}
           >
             {error}
           </Alert>
