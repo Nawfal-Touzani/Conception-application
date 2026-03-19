@@ -53,9 +53,9 @@ public class TeamController extends BaseController {
     try {
       return teamService.createTeam(getConnectedMember().getId(), request);
     } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
     }
   }
 
@@ -68,7 +68,7 @@ public class TeamController extends BaseController {
     try {
       return teamService.createRequest(getConnectedMember().getId(), teamId);
     } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
 
@@ -80,7 +80,7 @@ public class TeamController extends BaseController {
     try {
       return teamService.getMembersOfMyTeam(getConnectedMember().getId());
     } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
 
@@ -102,7 +102,7 @@ public class TeamController extends BaseController {
     try {
       return teamService.getTeamOfMemberAsDto(getConnectedMember().getId());
     } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
 
@@ -115,9 +115,9 @@ public class TeamController extends BaseController {
     try {
       teamService.leaveTeam(getConnectedMember().getEmail());
     } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
     }
   }
 }
