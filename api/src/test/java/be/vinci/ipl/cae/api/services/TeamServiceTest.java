@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
@@ -35,25 +36,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
 class TeamServiceTest {
 
-  @Mock
-  private TeamRepository teamRepository;
-
-  @Mock
-  private TeamCompositionRepository teamCompositionRepository;
-
-  @Mock
-  private NotificationService notificationService;
-
-  @Mock
-  private MemberRepository memberRepository;
-
-  @Mock
-  private MembershipRequestRepository membershipRequestRepository;
+  @Mock private TeamRepository teamRepository;
+  @Mock private TeamCompositionRepository teamCompositionRepository;
+  @Mock private NotificationService notificationService;
+  @Mock private MemberRepository memberRepository;
+  @Mock private MembershipRequestRepository membershipRequestRepository;
 
   @InjectMocks
   private TeamService teamService;
@@ -108,7 +99,7 @@ class TeamServiceTest {
   @Test
   void createTeam_shouldFail_whenRequestIsInvalid() {
     CreateTeamRequest invalidRequest = new CreateTeamRequest("");
-    assertThrows(ResponseStatusException.class, () -> teamService.createTeam(1L, invalidRequest));
+    assertThrows(IllegalArgumentException.class, () -> teamService.createTeam(1L, invalidRequest));
     verify(teamRepository, never()).save(any());
     verify(teamCompositionRepository, never()).save(any());
   }
@@ -117,7 +108,7 @@ class TeamServiceTest {
   void createTeam_shouldFail_whenMemberAlreadyInTeam() {
     CreateTeamRequest request = new CreateTeamRequest("TestTeam");
     when(teamCompositionRepository.existsByMemberId(1L)).thenReturn(true);
-    assertThrows(ResponseStatusException.class, () -> teamService.createTeam(1L, request));
+    assertThrows(IllegalStateException.class, () -> teamService.createTeam(1L, request));
     verify(teamRepository, never()).save(any());
   }
 
@@ -126,7 +117,7 @@ class TeamServiceTest {
     CreateTeamRequest request = new CreateTeamRequest("TestTeam");
     when(teamCompositionRepository.existsByMemberId(1L)).thenReturn(false);
     when(teamRepository.existsByName("TestTeam")).thenReturn(true);
-    assertThrows(ResponseStatusException.class, () -> teamService.createTeam(1L, request));
+    assertThrows(IllegalStateException.class, () -> teamService.createTeam(1L, request));
     verify(teamRepository, never()).save(any());
   }
 
@@ -136,7 +127,7 @@ class TeamServiceTest {
     when(teamRepository.existsByName("TestTeam")).thenReturn(false);
     when(memberRepository.findById(1L)).thenReturn(Optional.empty());
     CreateTeamRequest request = new CreateTeamRequest("TestTeam");
-    assertThrows(ResponseStatusException.class, () -> teamService.createTeam(1L, request));
+    assertThrows(IllegalArgumentException.class, () -> teamService.createTeam(1L, request));
     verify(teamRepository, never()).save(any());
   }
 
@@ -158,19 +149,17 @@ class TeamServiceTest {
   }
 
   @Test
-  void createRequest_shouldReturnNull_whenMemberNotFound() {
+  void createRequest_shouldFail_whenMemberNotFound() {
     when(memberRepository.findById(999L)).thenReturn(Optional.empty());
-    MembershipRequest result = teamService.createRequest(999L, 10L);
-    assertNull(result);
+    assertThrows(IllegalArgumentException.class, () -> teamService.createRequest(999L, 10L));
     verify(membershipRequestRepository, never()).save(any());
   }
 
   @Test
-  void createRequest_shouldReturnNull_whenTeamNotFound() {
+  void createRequest_shouldFail_whenTeamNotFound() {
     when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
     when(teamRepository.findById(999L)).thenReturn(Optional.empty());
-    MembershipRequest result = teamService.createRequest(1L, 999L);
-    assertNull(result);
+    assertThrows(IllegalArgumentException.class, () -> teamService.createRequest(1L, 999L));
     verify(membershipRequestRepository, never()).save(any());
   }
 
@@ -201,13 +190,13 @@ class TeamServiceTest {
     List<TeamMemberDto> result = teamService.getMembersOfMyTeam(1L);
 
     assertNotNull(result);
-    assertEquals(false, result.get(0).isAvailable());
+    assertFalse(result.get(0).isAvailable());
   }
 
   @Test
   void getMembersOfMyTeam_shouldFail_whenMemberHasNoTeam() {
     when(teamCompositionRepository.findByMemberId(1L)).thenReturn(Optional.empty());
-    assertThrows(ResponseStatusException.class, () -> teamService.getMembersOfMyTeam(1L));
+    assertThrows(IllegalStateException.class, () -> teamService.getMembersOfMyTeam(1L));
   }
 
   // ─── getTeamOfMemberAsDto ─────────────────────────────────────
@@ -225,14 +214,14 @@ class TeamServiceTest {
   @Test
   void getTeamOfMemberAsDto_shouldFail_whenMemberHasNoTeam() {
     when(teamCompositionRepository.findByMemberId(1L)).thenReturn(Optional.empty());
-    assertThrows(ResponseStatusException.class, () -> teamService.getTeamOfMemberAsDto(1L));
+    assertThrows(IllegalStateException.class, () -> teamService.getTeamOfMemberAsDto(1L));
   }
 
   // ─── getAllTeamDtos ───────────────────────────────────────────
 
   @Test
-  void getAllTeamDtos_shouldReturnAllTeams() {
-    when(teamRepository.findAll()).thenReturn(List.of(team));
+  void getAllTeamDtos_shouldReturnOnlyActiveTeams() {
+    when(teamRepository.findByIsActiveTrue()).thenReturn(List.of(team));
 
     List<TeamResponseDto> result = teamService.getAllTeamDtos();
 
@@ -244,15 +233,18 @@ class TeamServiceTest {
   // ─── leaveTeam ────────────────────────────────────────────────
 
   @Test
-  void leaveTeam_shouldDeleteTeam_whenLastMember() {
+  void leaveTeam_shouldDeactivateTeam_whenLastMember() {
     when(memberRepository.findByEmail("test@vinci.be")).thenReturn(Optional.of(member));
     when(teamCompositionRepository.findFirstByMemberId(1L)).thenReturn(Optional.of(composition));
     when(teamCompositionRepository.findAllByTeamId(10L)).thenReturn(List.of(composition));
 
     teamService.leaveTeam("test@vinci.be");
 
+    assertFalse(team.getIsActive());
+    assertNull(team.getResponsible());
+    assertNull(team.getSecondResponsible());
     verify(teamCompositionRepository).delete(composition);
-    verify(teamRepository).delete(team);
+    verify(teamRepository, never()).delete(any(Team.class));
   }
 
   @Test
@@ -299,9 +291,9 @@ class TeamServiceTest {
 
     teamService.leaveTeam("test@vinci.be");
 
-    verify(teamRepository).save(team);
     verify(teamCompositionRepository).delete(composition);
     assertEquals(second, team.getResponsible());
+    assertNull(team.getSecondResponsible());
   }
 
   @Test
@@ -319,7 +311,7 @@ class TeamServiceTest {
     when(teamCompositionRepository.findAllByTeamId(10L))
         .thenReturn(List.of(composition, otherCompo));
 
-    assertThrows(ResponseStatusException.class, () -> teamService.leaveTeam("test@vinci.be"));
+    assertThrows(IllegalStateException.class, () -> teamService.leaveTeam("test@vinci.be"));
   }
 
   @Test
@@ -343,20 +335,19 @@ class TeamServiceTest {
 
     teamService.leaveTeam("second@vinci.be");
 
-    verify(teamRepository).save(team);
     assertNull(team.getSecondResponsible());
   }
 
   @Test
   void leaveTeam_shouldFail_whenMemberNotFound() {
     when(memberRepository.findByEmail("unknown@vinci.be")).thenReturn(Optional.empty());
-    assertThrows(ResponseStatusException.class, () -> teamService.leaveTeam("unknown@vinci.be"));
+    assertThrows(IllegalArgumentException.class, () -> teamService.leaveTeam("unknown@vinci.be"));
   }
 
   @Test
   void leaveTeam_shouldFail_whenMemberHasNoTeam() {
     when(memberRepository.findByEmail("test@vinci.be")).thenReturn(Optional.of(member));
     when(teamCompositionRepository.findFirstByMemberId(1L)).thenReturn(Optional.empty());
-    assertThrows(ResponseStatusException.class, () -> teamService.leaveTeam("test@vinci.be"));
+    assertThrows(IllegalStateException.class, () -> teamService.leaveTeam("test@vinci.be"));
   }
 }
