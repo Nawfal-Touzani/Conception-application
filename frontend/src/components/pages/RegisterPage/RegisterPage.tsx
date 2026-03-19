@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
-  TextField,
   Typography,
   Paper,
   Alert,
@@ -13,35 +12,13 @@ import {
   FormControl,
 } from '@mui/material';
 import { useAuth } from '../../../contexts/useAuth';
+import TextFieldStyle from '../../ui/TextFieldStyle/TextFieldStyle'; // Reusable styled TextField
+import { inputSx, menuPropsSx } from '../../ui/sharedStyles'; // Reusable styles
 
 import { Speciality } from '../../../types/speciality.types';
 import { ProfileImage } from '../../../types/image.types';
 import * as specialityService from '../../../services/speciality/speciality.service';
 import * as imageService from '../../../services/image/image.service';
-
-// reusable styles for all input fields
-const inputSx = {
-  '& .MuiFilledInput-root': {
-    backgroundColor: '#1a2744',
-    borderRadius: '10px',
-    color: '#ffffff',
-  },
-  '& .MuiFilledInput-root:hover': {
-    backgroundColor: '#1a2744',
-  },
-  '& .MuiFilledInput-root.Mui-focused': {
-    backgroundColor: '#1a2744',
-  },
-  '& .MuiInputLabel-root': {
-    color: 'grey',
-  },
-  '& .MuiInputLabel-root.Mui-focused': {
-    color: 'grey',
-  },
-  '& .MuiSelect-icon': {
-    color: 'white',
-  },
-};
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -58,8 +35,7 @@ const RegisterPage: React.FC = () => {
 
   const [error, setError] = useState<string | null>(null);
 
-  // fetch images & specialities
-  // why not in a separate service?
+  // Fetch specialities and images
   useEffect(() => {
     const fetchFormData = async () => {
       try {
@@ -67,17 +43,16 @@ const RegisterPage: React.FC = () => {
           specialityService.getAll(),
           imageService.getAll(),
         ]);
-
         setSpecialities(specsData);
         setAvatars(imagesData);
       } catch (err) {
         setError('Impossible de charger les spécialités et les avatars.');
       }
     };
-
     fetchFormData();
   }, []);
 
+  // Validate inputs, call register from AuthContext, then redirect to login
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError(null);
@@ -119,12 +94,7 @@ const RegisterPage: React.FC = () => {
         {error && (
           <Alert
             severity="error"
-            sx={{
-              mb: 3,
-              borderRadius: '10px',
-              width: '100%',
-              maxWidth: 1000,
-            }}
+            sx={{ mb: 3, borderRadius: '10px', width: '100%', maxWidth: 1000 }}
           >
             {error}
           </Alert>
@@ -145,7 +115,7 @@ const RegisterPage: React.FC = () => {
             gap={4}
             alignItems="flex-start"
           >
-            {/* Left card */}
+            {/* Left card — text inputs */}
             <Paper
               elevation={10}
               sx={{
@@ -166,35 +136,34 @@ const RegisterPage: React.FC = () => {
                 S'inscrire
               </Typography>
 
-              <TextField
+              {/* Input fields */}
+              <TextFieldStyle
                 label="Adresse email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                variant="filled"
-                InputProps={{ disableUnderline: true }}
-                sx={inputSx}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setEmail(e.target.value)
+                }
               />
 
-              <TextField
+              <TextFieldStyle
                 label="Mot de passe"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                variant="filled"
-                InputProps={{ disableUnderline: true }}
-                sx={inputSx}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setPassword(e.target.value)
+                }
               />
 
-              <TextField
+              <TextFieldStyle
                 label="Tag en jeu"
                 value={tag}
-                onChange={(e) => setTag(e.target.value)}
-                variant="filled"
-                InputProps={{ disableUnderline: true }}
-                sx={inputSx}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setTag(e.target.value)
+                }
               />
 
+              {/* Select cannot use TextFieldStyle — it's a different MUI component */}
               <FormControl variant="filled" fullWidth sx={inputSx}>
                 <InputLabel id="speciality-label">Spécialité</InputLabel>
                 <Select
@@ -202,31 +171,7 @@ const RegisterPage: React.FC = () => {
                   value={specialityId}
                   onChange={(e) => setSpecialityId(e.target.value as number)}
                   disableUnderline
-                  MenuProps={{
-                    anchorOrigin: {
-                      vertical: 'bottom',
-                      horizontal: 'left',
-                    },
-                    transformOrigin: {
-                      vertical: 'top',
-                      horizontal: 'left',
-                    },
-
-                    PaperProps: {
-                      sx: {
-                        maxHeight: 150, // limit the size for scrolling
-                        backgroundColor: '#1a2744',
-                        color: 'white',
-                        '& .MuiMenuItem-root:hover': {
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                        },
-                        '& .Mui-selected': {
-                          backgroundColor:
-                            'rgba(255, 255, 255, 0.2) !important',
-                        },
-                      },
-                    },
-                  }}
+                  MenuProps={menuPropsSx}
                 >
                   {specialities.map((s) => (
                     <MenuItem key={s.id} value={s.id}>
@@ -237,7 +182,7 @@ const RegisterPage: React.FC = () => {
               </FormControl>
             </Paper>
 
-            {/* Right card */}
+            {/* Right card — avatar picker */}
             <Paper
               elevation={10}
               sx={{
@@ -258,7 +203,6 @@ const RegisterPage: React.FC = () => {
                 Choisir un avatar
               </Typography>
 
-              {/* Avatars */}
               <Box
                 display="flex"
                 flexWrap="wrap"
@@ -284,9 +228,7 @@ const RegisterPage: React.FC = () => {
                           ? '3px solid #d32f2f'
                           : '1px solid black',
                       transition: 'all 0.1s ease-in-out',
-                      '&:hover': {
-                        transform: 'scale(1.3)',
-                      },
+                      '&:hover': { transform: 'scale(1.3)' },
                     }}
                   />
                 ))}
@@ -294,7 +236,7 @@ const RegisterPage: React.FC = () => {
             </Paper>
           </Box>
 
-          {/* Register button */}
+          {/* Submit button */}
           <Button
             type="submit"
             variant="contained"
@@ -303,13 +245,11 @@ const RegisterPage: React.FC = () => {
               backgroundColor: 'white',
               color: '#1e2a44',
               borderRadius: '10px',
-              textTransform: 'none', // no uppercase
+              textTransform: 'none',
               fontWeight: 'bold',
               fontSize: '1.3rem',
               px: 5,
-              '&:hover': {
-                backgroundColor: '#f0f0f0',
-              },
+              '&:hover': { backgroundColor: '#f0f0f0' },
             }}
           >
             S'inscrire
