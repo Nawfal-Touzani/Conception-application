@@ -17,24 +17,9 @@ import {
   Alert,
 } from '@mui/material';
 import JoinOrCreateTeam from './JoinOrCreateTeam';
-import { useAuth } from '../../contexts/useAuth';
-
-type Member = {
-  memberId: number;
-  gameTag: string;
-  avatarUrl: string;
-  isAvailable: boolean;
-};
-
-type TeamDto = {
-  id: number;
-  name: string;
-  responsibleTag: string | null;
-  secondResponsibleTag: string | null;
-  creationDate: string | null;
-};
-
-const API = '/api';
+import { useAuth } from '../../../contexts/useAuth';
+import * as teamService from '../../../services/team.service';
+import { TeamDto, TeamMember } from '../../../types/team.types';
 
 function formatDate(dateStr?: string | null) {
   if (!dateStr) return '—';
@@ -45,6 +30,7 @@ function formatDate(dateStr?: string | null) {
   });
 }
 
+// Composant réutilisable pour afficher une ligne label + valeur dans un bloc bleu
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5, gap: 2 }}>
@@ -79,11 +65,11 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 }
 
 const TeamPage = () => {
-  const { user } = useAuth();
-  const token = user?.token ?? '';
+  const { user } = useAuth(); // on recup le user connecté depuis le contexte globale
+  const token = user?.token ?? ''; // extrait le token en string pour eviter les boucles useEffects
 
   const [team, setTeam] = useState<TeamDto | null>(null);
-  const [members, setMembers] = useState<Member[]>([]);
+  const [members, setMembers] = useState<TeamMember[]>([]);
   const [hasTeam, setHasTeam] = useState<boolean | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [leaveLoading, setLeaveLoading] = useState(false);
@@ -91,32 +77,24 @@ const TeamPage = () => {
   const [nominateError, setNominateError] = useState<string | null>(null);
   const [nominateSuccess, setNominateSuccess] = useState<string | null>(null);
 
+  // pour savoir si le membre est le dernier de son ekip
   const isSolo = members.length === 1;
 
+  // Obtenir lequipe et les membres de celle ci dun joueur connecté
   const loadTeamData = useCallback(() => {
-    setHasTeam(null);
+    setHasTeam(null); // etat du chargement en cours, affiche rien pendant le fetch
 
-    fetch(`${API}/teams/members`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(async (res) => {
-        if (res.status === 404 || res.status === 401 || !res.ok) {
-          setHasTeam(false);
-          return;
-        }
-
-        const memberData: Member[] = await res.json();
+    teamService
+      .getMyTeamMembers(token)
+      // .then sexecute quand le fetch reussi et memberdata contient le tableau des joueurs
+      .then(async (memberData) => {
         setMembers(memberData);
         setHasTeam(true);
 
-        const teamRes = await fetch(`${API}/teams/my-team`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (teamRes.ok) {
-          const teamData: TeamDto = await teamRes.json();
-          setTeam(teamData);
-        }
+        const teamData = await teamService.getMyTeam(token);
+        setTeam(teamData);
       })
+      // sexecute si le membre n'a pas de team
       .catch(() => setHasTeam(false));
   }, [token]);
 
@@ -124,13 +102,11 @@ const TeamPage = () => {
     if (user) loadTeamData();
   }, [user, loadTeamData]);
 
+  // Quitter une equipe
   const handleLeave = async () => {
-    setLeaveLoading(true);
+    setLeaveLoading(true); // desac le bouton confirmer pendant la requete
     try {
-      const res = await fetch(`${API}/teams/leave`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await teamService.leaveTeam(token);
 
       if (res.status === 409) {
         const body = await res.json();
@@ -156,18 +132,17 @@ const TeamPage = () => {
     }
   };
 
+  // Nommer un second responsable
   const handleNominate = async (memberId: number) => {
     if (!team) return;
     setNominateError(null);
     setNominateSuccess(null);
 
     try {
-      const res = await fetch(
-        `${API}/teams/${team.id}/secondary-manager/${memberId}`,
-        {
-          method: 'PUT',
-          headers: { Authorization: `Bearer ${token}` },
-        },
+      const res = await teamService.nominateSecondaryManager(
+        token,
+        team.id,
+        memberId,
       );
 
       if (!res.ok) {
