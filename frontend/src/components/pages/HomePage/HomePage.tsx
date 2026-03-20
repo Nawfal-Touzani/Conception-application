@@ -1,40 +1,36 @@
 import React from 'react';
 import { Box, Button, Typography, Paper } from '@mui/material';
-import { useAuth } from '../../../contexts/useAuth'; // hook
+import { useAuth } from '../../../contexts/useAuth';
 import { useNavigate } from 'react-router-dom';
 import homeImage from '../../../assets/images/home_logo.png';
+import TournamentCard from '../../ui/TournamentCard/TournamentCard';
+import { Tournament } from '../../../types/tournament.types';
 
-// Static for now
-const TOURNAMENTS_DATA = [
+// Static data matching the real Tournament type — will be replaced by backend fetch later
+const TOURNAMENTS_DATA: Tournament[] = [
   {
     id: 1,
-    status: 'Dernier',
-    title: 'Winter Cup 2026',
-    dates: '5 jan - 19 jan',
-    phaseLabel: 'VAINQUEUR',
-    phaseValue: 'Vinci Woluwe',
-    teams: '16',
-    state: 'Terminé',
+    status: 'FINISHED',
+    name: 'Winter Cup 2026',
+    startDate: '2026-01-05T00:00:00',
+    endDate: '2026-01-19T00:00:00',
+    maxParticipants: 16,
   },
   {
     id: 2,
-    status: 'À la une',
-    title: 'Vinci Bounty 2026',
-    dates: '16 fév - 23 fév',
-    phaseLabel: 'PHASE',
-    phaseValue: 'Quarts de finale',
-    teams: '8',
-    state: 'En cours',
+    status: 'IN_PROGRESS',
+    name: 'Vinci Bounty 2026',
+    startDate: '2026-02-16T00:00:00',
+    endDate: '2026-02-23T00:00:00',
+    maxParticipants: 8,
   },
   {
     id: 3,
-    status: 'Prochain',
-    title: 'Vinci Major 2026',
-    dates: '25 fév - 1 mar',
-    phaseLabel: '',
-    phaseValue: 'Inscriptions Ouvertes',
-    teams: '9/16',
-    state: 'Ouvert',
+    status: 'PREPARATION',
+    name: 'Vinci Major 2026',
+    startDate: '2026-02-25T00:00:00',
+    endDate: '2026-03-01T00:00:00',
+    maxParticipants: 16,
   },
 ];
 
@@ -98,7 +94,7 @@ const HomePage: React.FC = () => {
               color: 'white',
               mt: 1,
               borderRadius: '10px',
-              textTransform: 'none', // no uppercase
+              textTransform: 'none',
               fontWeight: 'bold',
               fontSize: '1.3rem',
               px: 3,
@@ -116,85 +112,8 @@ const HomePage: React.FC = () => {
         </Typography>
 
         <Box display="flex" gap={2} flexWrap="wrap" justifyContent="center">
-          {/* Cards */}
           {TOURNAMENTS_DATA.map((tournament) => (
-            <Paper
-              key={tournament.id}
-              sx={{
-                p: 1,
-                borderRadius: '10px',
-                width: 200,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 1,
-              }}
-            >
-              {/* Tournament Status section */}
-              <Box
-                sx={{
-                  backgroundColor: '#1e2a44',
-                  color: 'white',
-                  borderRadius: '8px',
-                  py: 1.5,
-                  textAlign: 'center',
-                }}
-              >
-                <Typography variant="h6" fontWeight="bold">
-                  {tournament.status}
-                </Typography>
-              </Box>
-
-              {/* Tournaments details */}
-              <Box
-                sx={{
-                  backgroundColor: '#1e2a44',
-                  color: 'white',
-                  borderRadius: '8px',
-                  p: 2,
-                  flexGrow: 1,
-                  textAlign: 'center',
-                }}
-              >
-                <Typography variant="h6" fontWeight="bold" fontSize="1.2rem">
-                  {tournament.title}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  display="block"
-                  mb={3}
-                  fontSize="0.8rem"
-                >
-                  {tournament.dates}
-                </Typography>
-
-                <Typography variant="caption" display="block" fontWeight="bold">
-                  {tournament.phaseLabel}
-                </Typography>
-                <Typography
-                  variant="body1"
-                  fontWeight="bold"
-                  mb={3}
-                  fontSize="1.1rem"
-                >
-                  {tournament.phaseValue}
-                </Typography>
-
-                <Typography variant="caption" display="block">
-                  TEAMS
-                </Typography>
-                <Typography
-                  variant="body2"
-                  mb={1}
-                  fontWeight="bold"
-                  fontSize="1rem"
-                >
-                  {tournament.teams}
-                </Typography>
-                <Typography variant="caption" display="block" fontWeight="bold">
-                  {tournament.state}
-                </Typography>
-              </Box>
-            </Paper>
+            <TournamentCard key={tournament.id} tournament={tournament} />
           ))}
         </Box>
 
@@ -206,7 +125,7 @@ const HomePage: React.FC = () => {
             backgroundColor: 'white',
             color: '#1e2a44',
             borderRadius: '10px',
-            textTransform: 'none', // no uppercase
+            textTransform: 'none',
             fontWeight: 'bold',
             fontSize: '1.3rem',
             px: 3,
