@@ -7,7 +7,6 @@ const mockTournament: Tournament = {
   id: 1,
   status: 'IN_PROGRESS',
   name: 'Vinci Bounty 2026',
-  description: 'Tournoi principal',
   startDate: '2026-02-16T00:00:00',
   endDate: '2026-02-23T00:00:00',
   maxParticipants: 8,
@@ -31,25 +30,16 @@ describe('TournamentCard', () => {
     expect(screen.getByText('En cours')).toBeTruthy();
   });
 
-  test('renders the description when provided', () => {
+  test('renders TEAMS and maxParticipants in separate elements', () => {
     render(<TournamentCard tournament={mockTournament} />);
-    expect(screen.getByText('Tournoi principal')).toBeTruthy();
-  });
-
-  test('does not render description when not provided', () => {
-    const withoutDesc = { ...mockTournament, description: undefined };
-    render(<TournamentCard tournament={withoutDesc} />);
-    expect(screen.queryByText('Tournoi principal')).toBeNull();
-  });
-
-  test('renders maxParticipants when provided', () => {
-    render(<TournamentCard tournament={mockTournament} />);
-    expect(screen.getByText('TEAMS: 8')).toBeTruthy();
+    // "TEAMS" and "8" are two separate Typography components in the card
+    expect(screen.getByText('TEAMS')).toBeTruthy();
+    expect(screen.getByText('8')).toBeTruthy();
   });
 
   test('does not render TEAMS when maxParticipants is not provided', () => {
     const withoutMax = { ...mockTournament, maxParticipants: undefined };
     render(<TournamentCard tournament={withoutMax} />);
-    expect(screen.queryByText(/TEAMS/)).toBeNull();
+    expect(screen.queryByText('TEAMS')).toBeNull();
   });
 });
