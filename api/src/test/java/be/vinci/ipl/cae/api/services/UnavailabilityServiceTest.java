@@ -69,7 +69,7 @@ public class UnavailabilityServiceTest {
     UnavailabilityDto dto = new UnavailabilityDto(LocalDate.of(2026, 9, 19),
         LocalDate.of(2026, 9, 11));
 
-    assertThrows(ResponseStatusException.class, () -> {
+    assertThrows(IllegalArgumentException.class, () -> {
       unavailabilityService.addUnavailability(email, dto);
     });
 
@@ -82,7 +82,7 @@ public class UnavailabilityServiceTest {
     UnavailabilityDto dto = new UnavailabilityDto(LocalDate.now().minusDays(1),
         LocalDate.now().plusDays(5));
 
-    assertThrows(ResponseStatusException.class, () -> {
+    assertThrows(IllegalArgumentException.class, () -> {
       unavailabilityService.addUnavailability(email, dto);
     });
 
