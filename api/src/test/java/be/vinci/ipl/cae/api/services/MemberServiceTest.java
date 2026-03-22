@@ -96,8 +96,8 @@ public class MemberServiceTest {
     MemberProfileResponseDto result = memberService.getProfile(email);
 
     assertNotNull(result);
-    assertEquals(email, result.getEmail());
-    assertEquals("Architect", result.getSpeciality());
+    assertEquals(email, result.email());
+    assertEquals("Architect", result.speciality());
     verify(memberRepository).findByEmail(email);
   }
 
@@ -131,15 +131,13 @@ public class MemberServiceTest {
     MemberProfileResponseDto result = memberService.getProfile(email);
 
     assertNotNull(result);
-    assertEquals("Vinci", result.getTeamName());
+    assertEquals("Vinci", result.teamName());
   }
 
   @Test
   @DisplayName("Should update profile and return new DTO")
   void updateProfile1() {
-    UpdateMemberProfileDto payload = new UpdateMemberProfileDto();
-    payload.setSpeciality("Gardien");
-    payload.setProfileImage("img2.png");
+    UpdateMemberProfileDto payload = new UpdateMemberProfileDto("Gardien", "img2.png");
 
     Speciality newSpec = new Speciality();
     newSpec.setName("Gardien");
@@ -158,16 +156,14 @@ public class MemberServiceTest {
 
     assertNotNull(result);
     verify(memberRepository).save(any(Member.class));
-    assertEquals("Gardien", result.getSpeciality());
-    assertEquals("img2.png", result.getProfileImage());
+    assertEquals("Gardien", result.speciality());
+    assertEquals("img2.png", result.profileImage());
   }
 
   @Test
   @DisplayName("Should not update speciality or image if they don't exist in DB")
   void updateProfile2() {
-    UpdateMemberProfileDto payload = new UpdateMemberProfileDto();
-    payload.setSpeciality("Strange");
-    payload.setProfileImage("nonExisting.png");
+    UpdateMemberProfileDto payload = new UpdateMemberProfileDto("Strange", "nonExisting.png");
 
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
     when(specialityRepository.findByName("Strange")).thenReturn(Optional.empty());
@@ -180,8 +176,8 @@ public class MemberServiceTest {
     MemberProfileResponseDto result = memberService.updateProfile(email, payload);
 
     assertNotNull(result);
-    assertEquals("Architect", result.getSpeciality());
-    assertEquals("img1.png", result.getProfileImage());
+    assertEquals("Architect", result.speciality());
+    assertEquals("img1.png", result.profileImage());
     verify(memberRepository).save(member);
   }
 
@@ -191,7 +187,7 @@ public class MemberServiceTest {
     when(memberRepository.findByEmail(email)).thenReturn(Optional.empty());
 
     MemberProfileResponseDto result = memberService.updateProfile(email,
-        new UpdateMemberProfileDto());
+        new UpdateMemberProfileDto(null, null));
 
     assertNull(result);
     verify(memberRepository, never()).save(any());
@@ -200,9 +196,7 @@ public class MemberServiceTest {
   @Test
   @DisplayName("Should skip updates when payload fields are null")
   void updateProfile4() {
-    UpdateMemberProfileDto payload = new UpdateMemberProfileDto();
-    payload.setSpeciality(null);
-    payload.setProfileImage(null);
+    UpdateMemberProfileDto payload = new UpdateMemberProfileDto(null, null);
 
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
     when(teamCompositionRepository.findByMemberId(any())).thenReturn(Optional.empty());
@@ -220,10 +214,7 @@ public class MemberServiceTest {
   @Test
   @DisplayName("Should change password when old password matches")
   void changePassword1() {
-    ChangePasswordDto dto = new ChangePasswordDto();
-    dto.setOldPassword("oldPswd");
-    dto.setNewPassword("newPswd");
-    dto.setConfirmPassword("newPswd");
+    ChangePasswordDto dto = new ChangePasswordDto("oldPswd", "newPswd", "newPswd");
 
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
     when(passwordEncoder.matches("oldPswd", member.getPassword())).thenReturn(true);
@@ -239,10 +230,7 @@ public class MemberServiceTest {
   @Test
   @DisplayName("Should return false when old password doesn't matches")
   void changePassword2() {
-    ChangePasswordDto dto = new ChangePasswordDto();
-    dto.setOldPassword("wrongPswd");
-    dto.setNewPassword("newPswd");
-    dto.setConfirmPassword("newPswd");
+    ChangePasswordDto dto = new ChangePasswordDto("wrongPswd", "newPswd", "newPswd");
 
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
     when(passwordEncoder.matches("wrongPswd", member.getPassword())).thenReturn(false);
@@ -256,10 +244,7 @@ public class MemberServiceTest {
   @Test
   @DisplayName("Should return false when member not found")
   void changePassword3() {
-    ChangePasswordDto dto = new ChangePasswordDto();
-    dto.setOldPassword("oldPswd");
-    dto.setNewPassword("newPswd");
-    dto.setConfirmPassword("newPswd");
+    ChangePasswordDto dto = new ChangePasswordDto("oldPswd", "newPswd", "newPswd");
 
     when(memberRepository.findByEmail(email)).thenReturn(Optional.empty());
 
@@ -271,10 +256,7 @@ public class MemberServiceTest {
   @Test
   @DisplayName("Should return false when new password and confirmation do not match")
   void changePassword4() {
-    ChangePasswordDto dto = new ChangePasswordDto();
-    dto.setOldPassword("oldPswd");
-    dto.setNewPassword("newPswd");
-    dto.setConfirmPassword("Pswd");
+    ChangePasswordDto dto = new ChangePasswordDto("oldPswd", "newPswd", "Pswd");
 
     boolean result = memberService.changePassword(email, dto);
 
@@ -285,10 +267,7 @@ public class MemberServiceTest {
   @Test
   @DisplayName("Should return false when new password is the same as old password")
   void changePassword5() {
-    ChangePasswordDto dto = new ChangePasswordDto();
-    dto.setOldPassword("PswdVinci");
-    dto.setNewPassword("PswdVinci");
-    dto.setConfirmPassword("PswdVinci");
+    ChangePasswordDto dto = new ChangePasswordDto("PswdVinci", "PswdVinci", "PswdVinci");
 
     boolean result = memberService.changePassword(email, dto);
 
@@ -299,9 +278,7 @@ public class MemberServiceTest {
   @Test
   @DisplayName("Should return false when new password is null")
   void changePassword6() {
-    ChangePasswordDto dto = new ChangePasswordDto();
-    dto.setOldPassword("old");
-    dto.setNewPassword(null);
+    ChangePasswordDto dto = new ChangePasswordDto("old", null, null);
     assertFalse(memberService.changePassword(email, dto));
   }
 
@@ -315,10 +292,7 @@ public class MemberServiceTest {
   @Test
   @DisplayName("Should return false when old password is null in DTO")
   void changePassword8() {
-    ChangePasswordDto dto = new ChangePasswordDto();
-    dto.setOldPassword(null);
-    dto.setNewPassword("newPswd");
-    dto.setConfirmPassword("newPswd");
+    ChangePasswordDto dto = new ChangePasswordDto(null, "newPswd", "newPswd");
 
     boolean result = memberService.changePassword(email, dto);
     assertFalse(result);
@@ -328,10 +302,7 @@ public class MemberServiceTest {
   @DisplayName("Should return false when confirm password is null")
   void changePassword9() {
 
-    ChangePasswordDto dto = new ChangePasswordDto();
-    dto.setOldPassword("old");
-    dto.setNewPassword("new");
-    dto.setConfirmPassword(null);
+    ChangePasswordDto dto = new ChangePasswordDto("old", "new", null);
 
     boolean result = memberService.changePassword(email, dto);
 

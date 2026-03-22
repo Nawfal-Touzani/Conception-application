@@ -40,11 +40,11 @@ public class UnavailabilityService {
    * @param dto   the unavailability data to add
    */
   public void addUnavailability(String email, UnavailabilityDto dto) {
-    if (dto.getEndDate().isBefore(dto.getStartDate())) {
+    if (dto.endDate().isBefore(dto.startDate())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "End date must be after start date");
     }
-    if (dto.getStartDate().isBefore(LocalDate.now())) {
+    if (dto.startDate().isBefore(LocalDate.now())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "Start date cannot be in the past");
     }
@@ -52,8 +52,8 @@ public class UnavailabilityService {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
     Unavailability unavailability = new Unavailability();
-    unavailability.setStartDate(dto.getStartDate());
-    unavailability.setEndDate(dto.getEndDate());
+    unavailability.setStartDate(dto.startDate());
+    unavailability.setEndDate(dto.endDate());
     unavailability.setMember(member);
 
     unavailabilityRepository.save(unavailability);
@@ -75,9 +75,7 @@ public class UnavailabilityService {
     List<UnavailabilityDto> result = new ArrayList<>();
 
     for (Unavailability a : unavailabilities) {
-      UnavailabilityDto dto = new UnavailabilityDto();
-      dto.setStartDate(a.getStartDate());
-      dto.setEndDate(a.getEndDate());
+      UnavailabilityDto dto = new UnavailabilityDto(a.getStartDate(), a.getEndDate());
       result.add(dto);
     }
 

@@ -64,18 +64,21 @@ public class MemberService {
             today.minusDays(1)
         );
 
-    MemberProfileResponseDto dto = new MemberProfileResponseDto();
-    dto.setEmail(member.getEmail());
-    dto.setTag(member.getTag());
-    dto.setSpeciality(member.getSpeciality().getName());
-    dto.setProfileImage(member.getImage().getUrl());
-    dto.setCreationDate(member.getProfileCreationDate());
-    dto.setAdmin(member.getIsAdmin());
-    dto.setAvailable(!isUnavailable);
-    dto.setId(member.getId());
-    teamCompositionRepository.findByMemberId(member.getId())
-        .ifPresent(composition -> dto.setTeamName(composition.getTeam()
-            .getName()));
+    String teamName = teamCompositionRepository.findByMemberId(member.getId())
+        .map(compo -> compo.getTeam().getName())
+        .orElse(null);
+
+    MemberProfileResponseDto dto = new MemberProfileResponseDto(
+        member.getId(),
+        member.getEmail(),
+        member.getTag(),
+        member.getSpeciality().getName(),
+        teamName,
+        member.getImage().getUrl(),
+        member.getProfileCreationDate(),
+        member.getIsAdmin(),
+        !isUnavailable
+    );
 
     return dto;
   }
@@ -94,13 +97,13 @@ public class MemberService {
       return null;
     }
 
-    if (payload.getSpeciality() != null) {
-      specialityRepository.findByName(payload.getSpeciality())
+    if (payload.speciality() != null) {
+      specialityRepository.findByName(payload.speciality())
           .ifPresent(member::setSpeciality);
     }
 
-    if (payload.getProfileImage() != null) {
-      imageRepository.findByUrl(payload.getProfileImage())
+    if (payload.profileImage() != null) {
+      imageRepository.findByUrl(payload.profileImage())
           .ifPresent(member::setImage);
     }
 
@@ -116,12 +119,12 @@ public class MemberService {
    * @return true if the password was changed, false if member not found or old password incorrect
    */
   public boolean changePassword(String email, ChangePasswordDto dto) {
-    if (dto == null || dto.getNewPassword() == null
-        || dto.getNewPassword().equals(dto.getOldPassword())) {
+    if (dto == null || dto.newPassword() == null
+        || dto.newPassword().equals(dto.oldPassword())) {
       return false;
     }
 
-    if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
+    if (!dto.newPassword().equals(dto.confirmPassword())) {
       return false;
     }
 
@@ -131,11 +134,11 @@ public class MemberService {
       return false;
     }
 
-    if (!passwordEncoder.matches(dto.getOldPassword(), member.getPassword())) {
+    if (!passwordEncoder.matches(dto.oldPassword(), member.getPassword())) {
       return false;
     }
 
-    member.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+    member.setPassword(passwordEncoder.encode(dto.newPassword()));
     memberRepository.save(member);
     return true;
   }
