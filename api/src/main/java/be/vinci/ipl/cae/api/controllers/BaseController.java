@@ -2,7 +2,9 @@ package be.vinci.ipl.cae.api.controllers;
 
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The type Base controller.
@@ -26,15 +28,12 @@ public abstract class BaseController {
    * @return the member
    */
   protected Member getConnectedMember() {
-
     Object principal = SecurityContextHolder.getContext()
         .getAuthentication().getPrincipal();
 
     if (principal == null || "anonymousUser".equals(principal)) {
-      throw new org.springframework.web.server.ResponseStatusException(
-          org.springframework.http.HttpStatus.UNAUTHORIZED, "Not authenticated");
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
     }
-
     return (Member) principal;
   }
 }

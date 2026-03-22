@@ -34,23 +34,30 @@ public class Team {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
   @Column(nullable = false, unique = true, length = 100)
   private String name;
+
   @Column(nullable = false)
   private Boolean isActive = true;
+
   @Column(nullable = false)
   private LocalDateTime creationDate;
+
   @OneToOne(fetch = FetchType.LAZY, optional = true)
   @JoinColumn(name = "responsible_id", nullable = true, unique = false)
   @JsonIgnore
   private Member responsible;
+
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "second_responsible_id")
   @JsonIgnore
   private Member secondResponsible;
+
   @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonIgnore
   private List<TeamComposition> teamCompositions = new ArrayList<>();
+
   @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonIgnore
   private List<MembershipRequest> membershipRequests = new ArrayList<>();
