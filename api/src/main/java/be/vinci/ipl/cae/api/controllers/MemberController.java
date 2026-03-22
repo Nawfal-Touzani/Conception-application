@@ -102,7 +102,7 @@ public class MemberController {
     boolean success = memberService.changePassword(principalMember.getEmail(), dto);
 
     if (!success) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid old password");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid password change request");
     }
   }
 
@@ -117,7 +117,12 @@ public class MemberController {
   public void addAvailability(Authentication authentication,
       @Valid @RequestBody UnavailabilityDto dto) {
     Member principal = (Member) authentication.getPrincipal();
-    unavailabilityService.addUnavailability(principal.getEmail(), dto);
+
+    try {
+      unavailabilityService.addUnavailability(principal.getEmail(), dto);
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
   }
 
 
