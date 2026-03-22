@@ -128,7 +128,7 @@ public class MemberController {
    * @return a list of the member's unavailabilities
    */
   @GetMapping("/me/unavailabilities")
-  public List<UnavailabilityDto> getMyUnavailabilities(Authentication authentication) {
+  public Iterable<UnavailabilityDto> getMyUnavailabilities(Authentication authentication) {
     Member principal = (Member) authentication.getPrincipal();
     return unavailabilityService.getMyUnavailabilities(principal.getEmail());
   }

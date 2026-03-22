@@ -8,9 +8,8 @@ import be.vinci.ipl.cae.api.repositories.UnavailabilityRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.http.HttpStatus;
+import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Services handling operations related to member unavailabilities.
@@ -38,18 +37,18 @@ public class UnavailabilityService {
    *
    * @param email the email of the member
    * @param dto   the unavailability data to add
+   * @throws IllegalArgumentException if datas are invalid
+   * @throws NoSuchElementException   if memmber not found
    */
   public void addUnavailability(String email, UnavailabilityDto dto) {
     if (dto.endDate().isBefore(dto.startDate())) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "End date must be after start date");
+      throw new IllegalArgumentException("End date must be after start date");
     }
     if (dto.startDate().isBefore(LocalDate.now())) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Start date cannot be in the past");
+      throw new IllegalArgumentException("Start date cannot be in the past");
     }
     Member member = memberRepository.findByEmail(email)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        .orElseThrow(() -> new NoSuchElementException("Member not found with email : " + email));
 
     Unavailability unavailability = new Unavailability();
     unavailability.setStartDate(dto.startDate());
@@ -65,9 +64,9 @@ public class UnavailabilityService {
    * @param email the email of the member
    * @return the list of unavailabilities for the member
    */
-  public List<UnavailabilityDto> getMyUnavailabilities(String email) {
+  public Iterable<UnavailabilityDto> getMyUnavailabilities(String email) {
     Member member = memberRepository.findByEmail(email)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        .orElseThrow(() -> new NoSuchElementException("Member not found"));
 
     List<Unavailability> unavailabilities =
         unavailabilityRepository.findAllByMemberOrderByStartDateAsc(member);

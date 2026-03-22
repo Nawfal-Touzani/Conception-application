@@ -14,6 +14,7 @@ import be.vinci.ipl.cae.api.models.entities.Unavailability;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.UnavailabilityRepository;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -99,11 +100,15 @@ public class UnavailabilityServiceTest {
     when(unavailabilityRepository.findAllByMemberOrderByStartDateAsc(member))
         .thenReturn(List.of(u));
 
-    List<UnavailabilityDto> result = unavailabilityService.getMyUnavailabilities(email);
+    Iterable<UnavailabilityDto> result = unavailabilityService.getMyUnavailabilities(email);
 
     assertNotNull(result);
-    assertEquals(1, result.size());
-    assertEquals(LocalDate.of(2026, 8, 1), result.get(0).startDate());
+
+    List<UnavailabilityDto> resultList = new ArrayList<>();
+    result.forEach(resultList::add);
+
+    assertEquals(1, resultList.size());
+    assertEquals(LocalDate.of(2026, 8, 1), resultList.get(0).startDate());
 
   }
 
