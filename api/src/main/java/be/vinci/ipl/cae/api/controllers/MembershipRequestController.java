@@ -1,6 +1,7 @@
 package be.vinci.ipl.cae.api.controllers;
 
 import be.vinci.ipl.cae.api.models.dtos.RefuseRequestDto;
+import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.services.MembershipRequestService;
 import org.springframework.http.ResponseEntity;
@@ -42,8 +43,9 @@ public class MembershipRequestController extends BaseController {
    */
   @PatchMapping("/{requestId}/approve")
   @PreAuthorize("isAuthenticated()")
-  public ResponseEntity<Void> approveRequest(@PathVariable Long requestId) {
-    membershipRequestService.approveRequest(requestId, getConnectedMember().getId());
+  public ResponseEntity<Void> approveRequest(@PathVariable Long requestId,
+      @AuthenticationPrincipal Member member) {
+    membershipRequestService.approveRequest(requestId, member.getId());
     return ResponseEntity.noContent().build();
   }
 
@@ -57,11 +59,10 @@ public class MembershipRequestController extends BaseController {
   @PatchMapping("/{requestId}/refuse")
   @PreAuthorize("isAuthenticated()")
   public ResponseEntity<Void> refuseRequest(@PathVariable Long requestId,
-                                            @RequestBody RefuseRequestDto body, AuthenticationPrincipal principal) {
-    membershipRequestService.refuseRequest(requestId, getConnectedMember().getId(),
-        body.getReason());
+      @RequestBody RefuseRequestDto body,
+      @AuthenticationPrincipal Member member) {
+    membershipRequestService.refuseRequest(requestId, member.getId(), body.getReason());
     return ResponseEntity.noContent().build();
   }
-
 }
 
