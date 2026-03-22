@@ -68,7 +68,7 @@ public class MemberService {
         .map(compo -> compo.getTeam().getName())
         .orElse(null);
 
-    MemberProfileResponseDto dto = new MemberProfileResponseDto(
+    return new MemberProfileResponseDto(
         member.getId(),
         member.getEmail(),
         member.getTag(),
@@ -79,8 +79,6 @@ public class MemberService {
         member.getIsAdmin(),
         !isUnavailable
     );
-
-    return dto;
   }
 
   /**
