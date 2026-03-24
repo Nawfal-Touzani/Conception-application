@@ -59,9 +59,9 @@ class TournamentServiceTest {
 
         "tournoi-test",
         "description test",
-        LocalDateTime.now().plusDays(1),
         LocalDateTime.now().plusDays(2),
-        LocalDateTime.now(),
+        LocalDateTime.now().plusDays(3),
+        LocalDateTime.now().plusDays(1),
         3
     );
 
