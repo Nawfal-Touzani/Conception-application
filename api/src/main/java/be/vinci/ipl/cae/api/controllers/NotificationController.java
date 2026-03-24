@@ -60,7 +60,7 @@ public class NotificationController {
           .map(this::toDto)
           .toList();
     } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(),e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
 
   }
@@ -79,7 +79,7 @@ public class NotificationController {
     try {
       return toDto(notificationService.send(id, notification));
     } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(),e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
 
@@ -99,7 +99,7 @@ public class NotificationController {
     try {
       return toDto(notificationService.markNotificationRead(idNotification));
     } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(),e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
 

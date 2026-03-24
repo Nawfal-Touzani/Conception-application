@@ -1,0 +1,153 @@
+
+@baseUrl = http://localhost:3000
+@tokenAdmin = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoiYWRtaW5AdmluY2kuYmUiLCJpYXQiOjE3NzQzNzkzNzgsImV4cCI6MTc3NDQ2NTc3OH0.fQIAuSokAyCOHmK24lcYA7dSeJW_1yIw0l37_50yYlM
+@tokenUser = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibGVhQG1haWwuY29tIiwiaWF0IjoxNzc0Mzc5NDA2LCJleHAiOjE3NzQ0NjU4MDZ9.cNdT5GZ69UQ4yPe-gfWpa-eTFh1oOzR4FJZ3PtZ_9tc
+
+### -------------------------------------------
+### LOGIN ADMIN (copie le token dans @tokenAdmin)
+### -------------------------------------------
+POST {{baseUrl}}/auths/login
+Content-Type: application/json
+
+{
+  "email": "admin@vinci.be",
+  "password": "admin"
+}
+
+### -------------------------------------------
+### LOGIN USER (copie le token dans @tokenUser)
+### -------------------------------------------
+POST {{baseUrl}}/auths/login
+Content-Type: application/json
+
+{
+  "email": "lea@mail.com",
+  "password": "lea"
+}
+
+### ------------------------------------------------------
+### 1) Create tournament (ADMIN + organizerId correct) 201
+### ------------------------------------------------------
+POST {{baseUrl}}/tournaments/5
+Content-Type: application/json
+Authorization: Bearer {{tokenAdmin}}
+
+{
+  "name": "Tournoi FIFA",
+  "description": "Tournoi entre étudiants",
+  "startDate": "2026-06-01T10:00:00",
+  "endDate": "2026-06-02T18:00:00",
+  "registrationDeadline": "2026-05-30T23:59:00",
+  "maxParticipant": 8
+}
+
+### -------------------------------------------------------------------
+### 2) Create tournament FAILED (maxParticipant not a power of two) 400
+### -------------------------------------------------------------------
+POST {{baseUrl}}/tournaments/5
+Content-Type: application/json
+Authorization: Bearer {{tokenAdmin}}
+
+{
+  "name": "Tournoi invalide",
+  "description": "Test erreur",
+  "startDate": "2026-06-01T10:00:00",
+  "endDate": "2026-06-02T18:00:00",
+  "registrationDeadline": "2026-05-30T23:59:00",
+  "maxParticipant": 7
+}
+
+### ---------------------------------------------
+### 3) Create tournament FAILED (past dates) 400
+### ---------------------------------------------
+POST {{baseUrl}}/tournaments/5
+Content-Type: application/json
+Authorization: Bearer {{tokenAdmin}}
+
+{
+  "name": "Tournoi passé",
+  "description": "Erreur date",
+  "startDate": "2024-01-01T10:00:00",
+  "endDate": "2024-01-02T18:00:00",
+  "registrationDeadline": "2023-12-30T23:59:00",
+  "maxParticipant": 8
+}
+
+### ---------------------------------------------------------------------------------
+### 4) Create tournament FAILED (registrationDeadline after startDate) BAD_REQUEST 400
+### ---------------------------------------------------------------------------------
+POST {{baseUrl}}/tournaments/5
+Content-Type: application/json
+Authorization: Bearer {{tokenAdmin}}
+
+{
+  "name": "Deadline après start",
+  "description": "Erreur deadline",
+  "startDate": "2026-06-01T10:00:00",
+  "endDate": "2026-06-02T18:00:00",
+  "registrationDeadline": "2026-06-05T12:00:00",
+  "maxParticipant": 8
+}
+
+### --------------------------------------------------------------------
+### 5) Create tournament FAILED (wrong organizerId ≠ currentUser) 403
+### --------------------------------------------------------------------
+POST {{baseUrl}}/tournaments/1
+Content-Type: application/json
+Authorization: Bearer {{tokenAdmin}}
+
+{
+  "name": "Tournoi interdit",
+  "description": "Pas le bon organizer",
+  "startDate": "2026-06-01T10:00:00",
+  "endDate": "2026-06-02T18:00:00",
+  "registrationDeadline": "2026-05-30T23:59:00",
+  "maxParticipant": 8
+}
+
+### -----------------------------------------------------------------
+### 6) Create tournament FAILED (organizer does not exist) 404
+### -----------------------------------------------------------------
+POST {{baseUrl}}/tournaments/999
+Content-Type: application/json
+Authorization: Bearer {{tokenAdmin}}
+
+{
+  "name": "Tournoi inconnu",
+  "description": "Organizer inexistant",
+  "startDate": "2026-06-01T10:00:00",
+  "endDate": "2026-06-02T18:00:00",
+  "registrationDeadline": "2026-05-30T23:59:00",
+  "maxParticipant": 8
+}
+
+### --------------------------------------------------------
+### 7) Create tournament FAILED (no token provided) 403
+### --------------------------------------------------------
+POST {{baseUrl}}/tournaments/1
+Content-Type: application/json
+
+{
+  "name": "Tournoi sans auth",
+  "description": "Erreur sécurité",
+  "startDate": "2026-06-01T10:00:00",
+  "endDate": "2026-06-02T18:00:00",
+  "registrationDeadline": "2026-05-30T23:59:00",
+  "maxParticipant": 8
+}
+
+### ------------------------------------------------------------------
+### 8) Create tournament FAILED (user is not admin, only USER role) 403
+### ------------------------------------------------------------------
+POST {{baseUrl}}/tournaments/1
+Content-Type: application/json
+Authorization: Bearer {{tokenUser}}
+
+{
+  "name": "Forbidden user",
+  "description": "Pas admin",
+  "startDate": "2026-06-01T10:00:00",
+  "endDate": "2026-06-02T18:00:00",
+  "registrationDeadline": "2026-05-30T23:59:00",
+  "maxParticipant": 8
+}
