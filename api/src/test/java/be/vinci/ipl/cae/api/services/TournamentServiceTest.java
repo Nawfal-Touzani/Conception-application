@@ -46,12 +46,16 @@ class TournamentServiceTest {
     member = new Member("test@test.com", "password", "tag1", true, LocalDate.now(), null, null);
     member.setId(1L);
 
+
+
+    LocalDateTime now = LocalDateTime.now();
+
     dto1 = new TournamentDto(
         "tournoi-test",
         "description test",
-        LocalDateTime.now().plusDays(1),
-        LocalDateTime.now().plusDays(2),
-        LocalDateTime.now().plusDays(1),
+        now.plusDays(5),
+        now.plusDays(6),
+        now.plusDays(1),
         4
     );
 
