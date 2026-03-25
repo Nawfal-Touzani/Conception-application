@@ -4,13 +4,19 @@ interface AvatarItemProps {
   url: string;
   isSelected: boolean;
   onClick: () => void;
+  altText: string;
 }
 
-export const AvatarItem = ({ url, isSelected, onClick }: AvatarItemProps) => (
+export const AvatarItem = ({
+  url,
+  isSelected,
+  onClick,
+  altText,
+}: AvatarItemProps) => (
   <Box
     component="img"
     src={url}
-    alt="Avatar Option"
+    alt={altText}
     onClick={onClick}
     sx={{
       width: 80,
