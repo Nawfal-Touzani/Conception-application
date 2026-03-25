@@ -41,7 +41,9 @@ describe('ProfileSidebar', () => {
   });
 
   test('should handle successful avatar change and reload page', async () => {
-    vi.mocked(memberService.updateMyProfile).mockResolvedValue({} as any);
+    const updateSpy = vi
+      .spyOn(memberService, 'updateMyProfile')
+      .mockResolvedValue({} as any);
 
     render(
       <AuthContext.Provider value={{ user: { token: 'tok' } } as any}>
@@ -51,19 +53,18 @@ describe('ProfileSidebar', () => {
 
     fireEvent.click(screen.getByText('Changer son avatar'));
 
-    const avatarOptions = screen.getAllByRole('button');
-
-    fireEvent.click(avatarOptions[avatarOptions.length - 1]);
+    const confirmBtn = screen.getByText('Confirmer');
+    fireEvent.click(confirmBtn);
 
     await waitFor(() => {
-      expect(memberService.updateMyProfile).toHaveBeenCalled();
+      expect(updateSpy).toHaveBeenCalled();
       expect(reloadSpy).toHaveBeenCalled();
     });
   });
 
   test('should display an alert when the service fails', async () => {
     const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-    vi.mocked(memberService.updateMyProfile).mockRejectedValue(
+    vi.spyOn(memberService, 'updateMyProfile').mockRejectedValue(
       new Error('API Error'),
     );
 
@@ -75,16 +76,14 @@ describe('ProfileSidebar', () => {
 
     fireEvent.click(screen.getByText('Changer son avatar'));
 
-    const avatarOptions = screen.getAllByRole('button');
-    fireEvent.click(avatarOptions[avatarOptions.length - 1]);
+    const confirmBtn = screen.getByText('Confirmer');
+    fireEvent.click(confirmBtn);
 
     await waitFor(() => {
       expect(alertSpy).toHaveBeenCalledWith(
         "Erreur lors du changement d'avatar",
       );
     });
-
-    alertSpy.mockRestore();
   });
 
   test('should correctly handle absolute and relative image URLs', () => {
