@@ -38,6 +38,7 @@ const NavBar = () => {
   const isTeamPage = location.pathname === '/team';
   const isAdminPage = location.pathname === '/admin';
   const isProfilePage = location.pathname === '/members/me';
+  const isCreateTournamentPage = location.pathname === '/tournament/create';
 
   return (
     <AppBar position="static" sx={{ backgroundColor: '#ffffff', boxShadow: 1 }}>
@@ -103,6 +104,27 @@ const NavBar = () => {
               }}
             >
               Administration
+            </Button>
+          )}
+
+          {user && user.role === 'ADMIN' && (
+            <Button
+              onClick={() => navigate('/tournament/create')}
+              sx={{
+                backgroundColor: isCreateTournamentPage ? '#d8a46b' : '#1e2a44',
+                color: 'white',
+                borderRadius: '10px',
+                textTransform: 'none',
+                fontWeight: 'bold',
+                px: 5,
+                '&:hover': {
+                  backgroundColor: isCreateTournamentPage
+                    ? '#c38d54'
+                    : '#151e32',
+                },
+              }}
+            >
+              Créer un tournoi
             </Button>
           )}
         </Box>

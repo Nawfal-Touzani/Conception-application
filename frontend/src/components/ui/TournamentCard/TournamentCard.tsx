@@ -77,13 +77,13 @@ const TournamentCard = ({ tournament }: TournamentCardProps) => (
         {stateLabel[tournament.status]}
       </Typography>
 
-      {tournament.maxParticipants && (
+      {tournament.maxParticipant != null && (
         <>
           <Typography variant="caption" display="block">
             TEAMS
           </Typography>
           <Typography variant="body2" mb={1} fontWeight="bold" fontSize="1rem">
-            {tournament.maxParticipants}
+            {tournament.maxParticipant}
           </Typography>
         </>
       )}

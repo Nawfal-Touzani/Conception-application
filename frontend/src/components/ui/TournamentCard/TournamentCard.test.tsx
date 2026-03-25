@@ -9,7 +9,7 @@ const mockTournament: Tournament = {
   name: 'Vinci Bounty 2026',
   startDate: '2026-02-16T00:00:00',
   endDate: '2026-02-23T00:00:00',
-  maxParticipants: 8,
+  maxParticipant: 8,
 };
 
 describe('TournamentCard', () => {
@@ -37,8 +37,8 @@ describe('TournamentCard', () => {
     expect(screen.getByText('8')).toBeTruthy();
   });
 
-  test('does not render TEAMS when maxParticipants is not provided', () => {
-    const withoutMax = { ...mockTournament, maxParticipants: undefined };
+  test('does not render TEAMS when maxParticipant is not provided', () => {
+    const withoutMax = { ...mockTournament, maxParticipant: undefined };
     render(<TournamentCard tournament={withoutMax} />);
     expect(screen.queryByText('TEAMS')).toBeNull();
   });

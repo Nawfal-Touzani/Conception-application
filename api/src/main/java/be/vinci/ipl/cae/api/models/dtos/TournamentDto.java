@@ -1,6 +1,6 @@
 package be.vinci.ipl.cae.api.models.dtos;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 /**
  * Tournament dto.
@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 public record TournamentDto(
     String name,
     String description,
-    LocalDateTime startDate,
-    LocalDateTime endDate,
-    LocalDateTime registrationDeadline,
+    LocalDate startDate,
+    LocalDate endDate,
+    LocalDate registrationDeadline,
     Integer maxParticipant
 ) {}
