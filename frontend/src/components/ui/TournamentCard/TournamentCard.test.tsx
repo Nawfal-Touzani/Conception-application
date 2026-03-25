@@ -9,7 +9,7 @@ const mockTournament: Tournament = {
   name: 'Vinci Bounty 2026',
   startDate: '2026-02-16T00:00:00',
   endDate: '2026-02-23T00:00:00',
-  maxParticipants: 8,
+  maxParticipant: 8,
 };
 
 describe('TournamentCard', () => {
