@@ -1,4 +1,4 @@
-import { Speciality } from '../types/speciality.types';
+import { Speciality } from '../../types/speciality.types';
 
 const API_URL = 'http://localhost:3000/specialities';
 

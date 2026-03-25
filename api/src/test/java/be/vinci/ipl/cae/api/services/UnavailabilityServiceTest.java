@@ -14,6 +14,7 @@ import be.vinci.ipl.cae.api.models.entities.Unavailability;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.UnavailabilityRepository;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,9 +53,8 @@ public class UnavailabilityServiceTest {
   @Test
   @DisplayName("Should add unavailability when dates are valid")
   void addUnavailability1() {
-    UnavailabilityDto dto = new UnavailabilityDto();
-    dto.setStartDate(LocalDate.of(2026, 8, 1));
-    dto.setEndDate(LocalDate.of(2026, 8, 16));
+    UnavailabilityDto dto = new UnavailabilityDto(LocalDate.of(2026, 8, 1),
+        LocalDate.of(2026, 8, 16));
 
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
 
@@ -66,11 +66,10 @@ public class UnavailabilityServiceTest {
   @Test
   @DisplayName("Should throw exception when end date is before start date")
   void addUnavailability2() {
-    UnavailabilityDto dto = new UnavailabilityDto();
-    dto.setStartDate(LocalDate.of(2026, 9, 19));
-    dto.setEndDate(LocalDate.of(2026, 9, 11));
+    UnavailabilityDto dto = new UnavailabilityDto(LocalDate.of(2026, 9, 19),
+        LocalDate.of(2026, 9, 11));
 
-    assertThrows(ResponseStatusException.class, () -> {
+    assertThrows(IllegalArgumentException.class, () -> {
       unavailabilityService.addUnavailability(email, dto);
     });
 
@@ -80,11 +79,10 @@ public class UnavailabilityServiceTest {
   @Test
   @DisplayName("Should throw exception when start date is in the past")
   void addUnavailability3() {
-    UnavailabilityDto dto = new UnavailabilityDto();
-    dto.setStartDate(LocalDate.now().minusDays(1));
-    dto.setEndDate(LocalDate.now().plusDays(5));
+    UnavailabilityDto dto = new UnavailabilityDto(LocalDate.now().minusDays(1),
+        LocalDate.now().plusDays(5));
 
-    assertThrows(ResponseStatusException.class, () -> {
+    assertThrows(IllegalArgumentException.class, () -> {
       unavailabilityService.addUnavailability(email, dto);
     });
 
@@ -102,11 +100,15 @@ public class UnavailabilityServiceTest {
     when(unavailabilityRepository.findAllByMemberOrderByStartDateAsc(member))
         .thenReturn(List.of(u));
 
-    List<UnavailabilityDto> result = unavailabilityService.getMyUnavailabilities(email);
+    Iterable<UnavailabilityDto> result = unavailabilityService.getMyUnavailabilities(email);
 
     assertNotNull(result);
-    assertEquals(1, result.size());
-    assertEquals(LocalDate.of(2026, 8, 1), result.get(0).getStartDate());
+
+    List<UnavailabilityDto> resultList = new ArrayList<>();
+    result.forEach(resultList::add);
+
+    assertEquals(1, resultList.size());
+    assertEquals(LocalDate.of(2026, 8, 1), resultList.get(0).startDate());
 
   }
 

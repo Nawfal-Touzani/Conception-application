@@ -1,22 +1,19 @@
 package be.vinci.ipl.cae.api.models.dtos;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.Pattern;
 
 /**
  * Dto to update the password.
  */
-@Getter
-@Setter
-public class ChangePasswordDto {
+public record ChangePasswordDto(
 
-  @NotBlank
-  private String oldPassword;
+    @NotBlank String oldPassword,
 
-  @NotBlank
-  private String newPassword;
+    @Pattern(regexp = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$",
+        message = "Le mot de passe doit contenir moins 8 caractères,"
+            + " une majuscule, une minuscule, un chiffre et un caractère spécial")
+    @NotBlank String newPassword,
 
-  @NotBlank
-  private String confirmPassword;
-}
+    @NotBlank String confirmPassword
+){}

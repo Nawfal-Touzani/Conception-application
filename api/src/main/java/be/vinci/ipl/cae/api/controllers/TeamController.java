@@ -7,9 +7,7 @@ import be.vinci.ipl.cae.api.models.entities.MembershipRequest;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.services.MembershipRequestService;
 import be.vinci.ipl.cae.api.services.TeamService;
-import java.util.List;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,9 +46,15 @@ public class TeamController extends BaseController {
    * Returns 201 + TeamResponseDto.
    */
   @PostMapping
-  public ResponseEntity<TeamResponseDto> createTeam(@RequestBody CreateTeamRequest request) {
-    TeamResponseDto dto = teamService.createTeam(getConnectedMember().getId(), request);
-    return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+  @ResponseStatus(HttpStatus.CREATED)
+  public TeamResponseDto createTeam(@RequestBody CreateTeamRequest request) {
+    try {
+      return teamService.createTeam(getConnectedMember().getId(), request);
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    } catch (IllegalStateException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
+    }
   }
 
   /**
@@ -59,27 +63,30 @@ public class TeamController extends BaseController {
   @PostMapping("/{teamId}/membership-requests")
   @ResponseStatus(HttpStatus.CREATED)
   public MembershipRequest createRequest(@PathVariable long teamId) {
-    MembershipRequest result = teamService.createRequest(getConnectedMember().getId(), teamId);
-    if (result == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    try {
+      return teamService.createRequest(getConnectedMember().getId(), teamId);
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
-    return result;
   }
 
   /**
    * GET /teams/members — Get members of the connected member's team.
    */
   @GetMapping("/members")
-  public ResponseEntity<List<TeamMemberDto>> getTeamMembers() {
-    List<TeamMemberDto> members = teamService.getMembersOfMyTeam(getConnectedMember().getId());
-    return ResponseEntity.ok(members);
+  public Iterable<TeamMemberDto> getTeamMembers() {
+    try {
+      return teamService.getMembersOfMyTeam(getConnectedMember().getId());
+    } catch (IllegalStateException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
   }
 
   /**
    * GET /teams — Get all teams.
    */
   @GetMapping
-  public List<TeamResponseDto> getAllTeams() {
+  public Iterable<TeamResponseDto> getAllTeams() {
     //  Also returns DTOs to avoid circular serialization on the list
     return teamService.getAllTeamDtos();
   }
@@ -89,17 +96,26 @@ public class TeamController extends BaseController {
    * Returns 404 if the member has no team.
    */
   @GetMapping("/my-team")
-  public ResponseEntity<TeamResponseDto> getMyTeam() {
-    TeamResponseDto dto = teamService.getTeamOfMemberAsDto(getConnectedMember().getId());
-    return ResponseEntity.ok(dto);
+  public TeamResponseDto getMyTeam() {
+    try {
+      return teamService.getTeamOfMemberAsDto(getConnectedMember().getId());
+    } catch (IllegalStateException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
   }
 
   /**
    * DELETE /teams/leave — Leave the current team.
    */
   @DeleteMapping("/leave")
-  public ResponseEntity<Void> leaveTeam() {
-    teamService.leaveTeam(getConnectedMember().getEmail());
-    return ResponseEntity.ok().build();
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void leaveTeam() {
+    try {
+      teamService.leaveTeam(getConnectedMember().getEmail());
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    } catch (IllegalStateException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
+    }
   }
 }

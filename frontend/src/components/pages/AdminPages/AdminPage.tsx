@@ -13,22 +13,11 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-import { useAuth } from '../../contexts/useAuth';
+import { useAuth } from '../../../contexts/useAuth';
 import { useNavigate } from 'react-router-dom';
+import * as adminService from '../../../services/admin.service';
+import { MemberDto } from '../../../types/admin.types';
 
-type MemberDto = {
-  id: number;
-  email: string;
-  tag: string;
-  speciality: string;
-  teamName: string | null;
-  profileImage: string | null;
-  isAvailable: boolean;
-  isAdmin: boolean;
-  admin: boolean;
-};
-
-const API = '/api';
 const PAGE_SIZE = 4;
 
 const AdminPage = () => {
@@ -49,26 +38,16 @@ const AdminPage = () => {
   }, [user, navigate]);
 
   const loadAdmins = useCallback(() => {
-    fetch(`${API}/members/admins`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(async (res) => {
-        if (!res.ok) return;
-        const data: MemberDto[] = await res.json();
-        setAdmins(data);
-      })
+    adminService
+      .getAdmins(token)
+      .then((data) => setAdmins(data))
       .catch(() => setError('Erreur lors du chargement des administrateurs.'));
   }, [token]);
 
   const loadAllMembers = useCallback(() => {
-    fetch(`${API}/members`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(async (res) => {
-        if (!res.ok) return;
-        const data: MemberDto[] = await res.json();
-        setAllMembers(data.filter((m) => !m.isAdmin && !m.admin));
-      })
+    adminService
+      .getAllMembers(token)
+      .then((data) => setAllMembers(data.filter((m) => !m.isAdmin && !m.admin)))
       .catch(() => setError('Erreur lors du chargement des membres.'));
   }, [token]);
 
@@ -83,10 +62,7 @@ const AdminPage = () => {
     setError(null);
     setSuccess(null);
 
-    const res = await fetch(`${API}/members/admins/${member.id}`, {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await adminService.promoteToAdmin(token, member.id);
 
     if (!res.ok) {
       setError('Impossible de nommer cet administrateur.');
@@ -98,15 +74,13 @@ const AdminPage = () => {
     loadAllMembers();
   };
 
+  // Supprimer un admin
   const handleDemote = async () => {
     if (!demoteTarget) return;
     setError(null);
     setSuccess(null);
 
-    const res = await fetch(`${API}/members/admins/${demoteTarget.id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await adminService.revokeAdmin(token, demoteTarget.id);
 
     if (!res.ok) {
       setError('Impossible de révoquer cet administrateur.');

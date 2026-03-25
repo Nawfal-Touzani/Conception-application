@@ -1,6 +1,6 @@
 import { Box, FormControl, MenuItem, Select, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import * as specialityService from '../../services/speciality.service';
+import * as specialityService from '../../services/speciality/speciality.service';
 import { Speciality } from '../../types/speciality.types';
 
 interface SpecialitySelectProps {

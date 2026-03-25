@@ -13,91 +13,79 @@ import {
   Alert,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { useAuth } from '../../contexts/useAuth'; // hook
-
-type TeamDto = {
-  id: number;
-  name: string;
-  responsibleTag: string | null;
-  secondResponsibleTag: string | null;
-  creationDate: string | null;
-};
+import { useAuth } from '../../../../contexts/useAuth';
+import * as teamService from '../../../../services/team.service';
+import { TeamDto } from '../../../../types/team.types';
 
 type Props = {
-  onTeamCreated: () => void;
+  onTeamCreated: () => void; // callback appelé par le parent (TeamPage) après création réussie
 };
 
-const API = '/api';
-
 const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
-  const { user } = useAuth();
+  const { user } = useAuth(); // récupère l'utilisateur connecté depuis le contexte global
 
   //  Fix: extraire le token en variable primitive stable
   // Un objet authHeaders recréé à chaque render causerait une boucle infinie
   // si mis en dépendance de useEffect. On utilise le token (string) à la place.
   const token = user?.token ?? '';
 
-  const [teams, setTeams] = useState<TeamDto[]>([]);
-  const [filteredTeams, setFilteredTeams] = useState<TeamDto[]>([]);
-  const [search, setSearch] = useState('');
-  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
-  const [teamName, setTeamName] = useState('');
+  // États de la page
+  const [teams, setTeams] = useState<TeamDto[]>([]); // liste complète des équipes du serveur
+  const [filteredTeams, setFilteredTeams] = useState<TeamDto[]>([]); // liste filtrée selon la recherche
+  const [search, setSearch] = useState(''); // texte tapé dans le champ de recherche
+  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null); // id de l'équipe cliquée
+  const [teamName, setTeamName] = useState(''); // texte tapé dans le champ "créer une équipe"
   const [snack, setSnack] = useState<{
-    open: boolean;
-    msg: string;
-    severity: 'success' | 'error';
+    open: boolean; // true = notification visible
+    msg: string; // texte affiché
+    severity: 'success' | 'error'; // couleur : vert ou rouge
   }>({ open: false, msg: '', severity: 'success' });
 
   //  Fix: dépendance sur `token` (string) et non sur `authHeaders` (objet recréé à chaque render)
+  // Charge la liste des équipes au montage et si le token change
   useEffect(() => {
     if (!token) return;
-    fetch(`${API}/teams`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
+    teamService
+      .getTeams(token) // GET /api/teams → retourne toutes les équipes
       .then((data) => {
         if (Array.isArray(data)) {
-          setTeams(data);
-          setFilteredTeams(data);
+          setTeams(data); // stocke la liste complète
+          setFilteredTeams(data); // initialise aussi la liste filtrée avec tout
         }
       })
       .catch(() => {});
   }, [token]);
 
+  // Filtre la liste affichée à chaque fois que la recherche ou les équipes changent
   useEffect(() => {
     if (!search.trim()) {
-      setFilteredTeams(teams);
+      setFilteredTeams(teams); // recherche vide → affiche tout
     } else {
       setFilteredTeams(
         teams.filter((t) =>
-          t.name.toLowerCase().includes(search.toLowerCase()),
+          t.name.toLowerCase().includes(search.toLowerCase()), // insensible à la casse
         ),
       );
     }
-    setSelectedTeamId(null);
+    setSelectedTeamId(null); // désélectionne si on change la recherche
   }, [search, teams]);
 
   const createTeam = async () => {
-    if (!teamName.trim()) return;
+    if (!teamName.trim()) return; // sécurité : ne pas envoyer un nom vide
     try {
-      const res = await fetch(`${API}/teams`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name: teamName }),
-      });
+      const res = await teamService.createTeam(token, teamName); // POST /api/teams
 
       if (res.status === 201) {
-        onTeamCreated();
+        onTeamCreated(); // succès → notifie le parent (TeamPage) pour recharger
       } else if (res.status === 409) {
+        // 409 Conflict : le nom est déjà pris
         setSnack({
           open: true,
           msg: "Ce nom d'équipe existe déjà.",
           severity: 'error',
         });
       } else if (res.status === 400) {
+        // 400 Bad Request : nom invalide (trop court, caractères interdits...)
         setSnack({
           open: true,
           msg: "Nom d'équipe invalide.",
@@ -113,22 +101,16 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
     } catch {
       setSnack({
         open: true,
-        msg: 'Impossible de joindre le serveur.',
+        msg: 'Impossible de joindre le serveur.', // erreur réseau
         severity: 'error',
       });
     }
   };
 
   const joinTeam = async () => {
-    if (selectedTeamId === null) return;
+    if (selectedTeamId === null) return; // sécurité : ne pas envoyer sans sélection
     try {
-      const res = await fetch(
-        `${API}/teams/${selectedTeamId}/membership-requests`,
-        {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      const res = await teamService.sendJoinRequest(token, selectedTeamId); // POST /api/teams/{id}/membership-requests
 
       if (res.ok || res.status === 201) {
         setSnack({
@@ -136,7 +118,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
           msg: 'Demande envoyée avec succès !',
           severity: 'success',
         });
-        setSelectedTeamId(null);
+        setSelectedTeamId(null); // désélectionne après envoi
       } else {
         setSnack({
           open: true,
@@ -213,7 +195,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
             fullWidth
             placeholder="Nom de l'équipe"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)} // met à jour search → déclenche le useEffect de filtre
             size="small"
             InputProps={{
               endAdornment: (
@@ -252,7 +234,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
               {filteredTeams.map((team) => (
                 <ListItem
                   key={team.id}
-                  onClick={() => setSelectedTeamId(team.id)}
+                  onClick={() => setSelectedTeamId(team.id)} // sélectionne l'équipe cliquée
                   sx={{
                     cursor: 'pointer',
                     borderRadius: '6px',
@@ -260,7 +242,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
                     py: 0.6,
                     backgroundColor:
                       selectedTeamId === team.id
-                        ? 'rgba(255,255,255,0.2)'
+                        ? 'rgba(255,255,255,0.2)' // surligne l'équipe sélectionnée
                         : 'transparent',
                     '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' },
                     transition: 'background 0.15s',
@@ -271,7 +253,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
                     primaryTypographyProps={{
                       color: '#fff',
                       fontSize: '0.9rem',
-                      fontWeight: selectedTeamId === team.id ? 600 : 400,
+                      fontWeight: selectedTeamId === team.id ? 600 : 400, // gras si sélectionné
                     }}
                   />
                 </ListItem>
@@ -282,7 +264,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
           <Box sx={{ textAlign: 'center' }}>
             <Button
               variant="contained"
-              disabled={selectedTeamId === null}
+              disabled={selectedTeamId === null} // désactivé tant qu'aucune équipe n'est sélectionnée
               onClick={joinTeam}
               sx={{
                 backgroundColor: '#1a2744',
@@ -352,7 +334,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
             fullWidth
             value={teamName}
             onChange={(e) => setTeamName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && createTeam()}
+            onKeyDown={(e) => e.key === 'Enter' && createTeam()} // permet de créer en appuyant sur Entrée
             size="small"
             sx={{
               mb: 3,
@@ -367,7 +349,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
           <Box sx={{ mt: 'auto', textAlign: 'center' }}>
             <Button
               variant="contained"
-              disabled={!teamName.trim()}
+              disabled={!teamName.trim()} // désactivé si le champ est vide
               onClick={createTeam}
               sx={{
                 backgroundColor: '#1a2744',
@@ -388,10 +370,11 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
         </Paper>
       </Box>
 
+      {/* Notification toast en bas de page */}
       <Snackbar
         open={snack.open}
-        autoHideDuration={4000}
-        onClose={() => setSnack((s) => ({ ...s, open: false }))}
+        autoHideDuration={4000} // disparaît automatiquement après 4 secondes
+        onClose={() => setSnack((s) => ({ ...s, open: false }))} // ...s garde msg et severity, écrase open
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert

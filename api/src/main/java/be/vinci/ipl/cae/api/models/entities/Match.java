@@ -1,5 +1,6 @@
 package be.vinci.ipl.cae.api.models.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -58,6 +59,7 @@ public class Match {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "id_tournament", nullable = false)
+  @JsonBackReference("tournament-matches")
   private Tournament tournament;
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -102,4 +104,5 @@ public class Match {
   @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonManagedReference("match-notifications")
   private List<Notification> notifications = new ArrayList<>();
+
 }

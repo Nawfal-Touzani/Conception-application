@@ -2,10 +2,10 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import { AuthProvider } from './AuthProvider';
 import { useAuth } from './useAuth';
-import * as authService from '../services/auth.service';
+import * as authService from '../services/auth/auth.service';
 
 // Mock AuthService
-vi.mock('../services/auth.service');
+vi.mock('../services/auth/auth.service');
 
 describe('AuthContext', () => {
   const mockUser = {

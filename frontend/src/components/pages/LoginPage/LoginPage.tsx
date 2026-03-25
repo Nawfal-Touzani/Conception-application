@@ -1,49 +1,26 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
-  TextField,
   Typography,
   Paper,
   Alert,
   Checkbox,
   FormControlLabel,
 } from '@mui/material';
-import { useAuth } from '../../../contexts/useAuth'; // hook
+import TextFieldStyle from '../../ui/TextFieldStyle/TextFieldStyle'; // Reusable styled TextField
+import { useLoginForm } from '../../../hooks/useLoginForm/useLoginForm'; // hook
 
 const LoginPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { login } = useAuth(); // Context for authentication
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setError(null);
-
-    if (!email || !password) {
-      setError('Veuillez remplir tous les champs.');
-      return;
-    }
-
-    try {
-      await login({ email, password }, rememberMe); // Call the backend via our Context
-      navigate('/');
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message); // Display the error message from the backend
-      } else {
-        setError("Une erreur inattendue s'est produite.");
-      }
-    } finally {
-      // Optionally, reset after a failed login attempt
-      setPassword('');
-    }
-  };
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    rememberMe,
+    setRememberMe,
+    error,
+    handleSubmit,
+  } = useLoginForm();
 
   return (
     // Background
@@ -85,60 +62,21 @@ const LoginPage: React.FC = () => {
           )}
 
           <Box display={'flex'} flexDirection="column" gap={2}>
-            <TextField
+            <TextFieldStyle
               label="Adresse email"
-              type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              variant="filled"
-              InputProps={{ disableUnderline: true }}
-              sx={{
-                '& .MuiFilledInput-root': {
-                  backgroundColor: '#1a2744',
-                  borderRadius: '10px',
-                  color: '#ffffff',
-                },
-                '& .MuiFilledInput-root:hover': {
-                  backgroundColor: '#1a2744',
-                },
-                '& .MuiFilledInput-root.Mui-focused': {
-                  backgroundColor: '#1a2744',
-                },
-                '& .MuiInputLabel-root': {
-                  color: 'grey',
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: 'grey',
-                },
-              }}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setEmail(e.target.value)
+              }
             />
 
-            <TextField
+            <TextFieldStyle
               label="Mot de passe"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              variant="filled"
-              InputProps={{ disableUnderline: true }}
-              sx={{
-                '& .MuiFilledInput-root': {
-                  backgroundColor: '#1a2744',
-                  borderRadius: '10px',
-                  color: '#ffffff',
-                },
-                '& .MuiFilledInput-root:hover': {
-                  backgroundColor: '#1a2744',
-                },
-                '& .MuiFilledInput-root.Mui-focused': {
-                  backgroundColor: '#1a2744',
-                },
-                '& .MuiInputLabel-root': {
-                  color: 'grey',
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: 'grey',
-                },
-              }}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setPassword(e.target.value)
+              }
             />
 
             {/* Remember me */}

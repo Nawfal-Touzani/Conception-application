@@ -1,7 +1,7 @@
 package be.vinci.ipl.cae.api.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,17 +40,16 @@ class NotificationServiceTest {
 
   @Mock
   private MemberRepository memberRepository;
+
   @InjectMocks
   private NotificationService notificationService;
 
   @BeforeEach
   void setUp() {
     notification1 = new Notification(Type.RESULT, "resultat du match 1-0", LocalDateTime.now());
-    notification2 = new Notification(Type.TOURNAMENT, "TOURNOI commence le 4 mars",
-        LocalDateTime.now());
+    notification2 = new Notification(Type.TOURNAMENT, "TOURNOI commence le 4 mars", LocalDateTime.now());
     member1 = new Member("test@test.com", "password", "tag1", false, LocalDate.now(), null, null);
     member1.setId(1L);
-
   }
 
   @Test
@@ -67,21 +67,20 @@ class NotificationServiceTest {
   }
 
   @Test
-  void getAllNotificationByMemberNull() {
-    long unknowId = 23;
+  void getAllNotificationByMemberNotFound() {
+    long unknownId = 23L;
 
-    when(memberRepository.findById(unknowId)).thenReturn(Optional.empty());
+    when(memberRepository.findById(unknownId)).thenReturn(Optional.empty());
 
-    Iterable<Notification> result = notificationService.getAllNotificationByMember(unknowId);
+    assertThrows(NoSuchElementException.class,
+        () -> notificationService.getAllNotificationByMember(unknownId));
 
-    assertNull(result);
-    verify(notificationRepository, never()).findByMemberId(unknowId);
+    verify(notificationRepository, never()).findByMemberId(unknownId);
   }
 
   @Test
   void send() {
     when(memberRepository.findById(member1.getId())).thenReturn(Optional.of(member1));
-
     when(notificationRepository.save(notification1)).thenReturn(notification1);
 
     Notification result = notificationService.send(member1.getId(), notification1);
@@ -90,14 +89,14 @@ class NotificationServiceTest {
   }
 
   @Test
-  void sendWhenMemberNull() {
-    long unknowId = 76;
+  void sendMemberNotFound() {
+    long unknownId = 76L;
 
-    when(memberRepository.findById(unknowId)).thenReturn(Optional.empty());
+    when(memberRepository.findById(unknownId)).thenReturn(Optional.empty());
 
-    Notification result = notificationService.send(unknowId, notification2);
+    assertThrows(NoSuchElementException.class,
+        () -> notificationService.send(unknownId, notification2));
 
-    assertNull(result);
     verify(notificationRepository, never()).save(notification2);
   }
 
@@ -106,7 +105,6 @@ class NotificationServiceTest {
     notification1.setId(1L);
     when(notificationRepository.findById(notification1.getId())).thenReturn(
         Optional.of(notification1));
-
     when(notificationRepository.save(notification1)).thenReturn(notification1);
 
     Notification result = notificationService.markNotificationRead(notification1.getId());
@@ -116,24 +114,24 @@ class NotificationServiceTest {
   }
 
   @Test
-  void markNotificationReadNull() {
-    long unknowId = 9L;
-    when(notificationRepository.findById(unknowId)).thenReturn(Optional.empty());
+  void markNotificationReadNotFound() {
+    long unknownId = 9L;
 
-    Notification result = notificationService.markNotificationRead(unknowId);
+    when(notificationRepository.findById(unknownId)).thenReturn(Optional.empty());
 
-    assertNull(result);
+    assertThrows(NoSuchElementException.class,
+        () -> notificationService.markNotificationRead(unknownId));
+
     verify(notificationRepository, never()).save(any());
   }
 
   @Test
-  void getNotificationReadStatus() {
+  void getNotificationsByReadStatus() {
     Notification notification3 = new Notification(Type.RESULT, "ex", LocalDateTime.now());
     notification1.setRead(true);
     notification3.setRead(true);
 
     when(memberRepository.findById(member1.getId())).thenReturn(Optional.of(member1));
-
     when(notificationRepository.findByMemberIdAndRead(member1.getId(), true)).thenReturn(
         Arrays.asList(notification1, notification3));
 
@@ -144,15 +142,14 @@ class NotificationServiceTest {
   }
 
   @Test
-  void getNotificationReadStatusNull() {
+  void getNotificationsByReadStatusMemberNotFound() {
     long unknownId = 9L;
 
     when(memberRepository.findById(unknownId)).thenReturn(Optional.empty());
 
-    Iterable<Notification> result = notificationService.getNotificationsByReadStatus(unknownId,
-        true);
+    assertThrows(NoSuchElementException.class,
+        () -> notificationService.getNotificationsByReadStatus(unknownId, true));
 
-    assertNull(result);
     verify(notificationRepository, never()).findByMemberIdAndRead(anyLong(), anyBoolean());
   }
 }

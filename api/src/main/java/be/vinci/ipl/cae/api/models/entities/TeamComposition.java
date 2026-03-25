@@ -23,19 +23,21 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class TeamComposition {
-
   @EmbeddedId
   private TeamCompositionId id;
+
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @MapsId("memberId")
   @JoinColumn(name = "member_id", nullable = false)
   @JsonBackReference("member-teamComposition")
   private Member member;
+
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @MapsId("teamId")
   @JoinColumn(name = "team_id", nullable = false)
   @JsonBackReference("team-teamCompositions")
   private Team team;
+
   @Column(name = "date_entry", nullable = false)
   private LocalDateTime dateEntry;
 

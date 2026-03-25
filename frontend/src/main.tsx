@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
 
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
@@ -16,9 +15,10 @@ import '@fontsource/roboto/700.css';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './themes.ts';
-import { ProfilePage } from './components/pages/ProfilePage.tsx';
-import TeamPage from './components/pages/TeamPage.tsx';
-import AdminPage from './components/pages/AdminPage.tsx';
+import { ProfilePage } from './components/pages/MemberProfilePage/ProfilePage.tsx';
+import TeamPage from './components/pages/TeamPages/TeamPage.tsx';
+import AdminPage from './components/pages/AdminPages/AdminPage.tsx';
+import CreateTournamentPage from './components/pages/AdminPages/CreateTournamentPage.tsx';
 
 const router = createBrowserRouter([
   {
@@ -52,6 +52,10 @@ const router = createBrowserRouter([
       {
         path: 'admin',
         element: <AdminPage />,
+      },
+      {
+        path: 'tournament/create',
+        element: <CreateTournamentPage />,
       },
     ],
   },

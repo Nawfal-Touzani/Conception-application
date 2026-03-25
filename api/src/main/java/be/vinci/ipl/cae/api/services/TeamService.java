@@ -17,9 +17,7 @@ import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 
 /**
@@ -55,17 +53,17 @@ public class TeamService {
   @Transactional
   public TeamResponseDto createTeam(Long memberId, CreateTeamRequest request) {
     if (request.isInvalid()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Team name is required");
+      throw new IllegalArgumentException("Team name is required");
     }
     if (teamCompositionRepository.existsByMemberId(memberId)) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "Member already belongs to a team");
+      throw new IllegalStateException("Member already belongs to a team");
     }
     if (teamRepository.existsByName(request.getName())) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "Team name already exists");
+      throw new IllegalStateException("Team name already exists");
     }
 
     Member member = memberRepository.findById(memberId).orElseThrow(
-        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Member not found"));
+        () -> new IllegalArgumentException("Member not found"));
 
     Team team = new Team();
     team.setName(request.getName());
@@ -84,15 +82,11 @@ public class TeamService {
    * Creates a membership request for a member to join a team.
    */
   public MembershipRequest createRequest(long memberId, long teamId) {
-    Member member = memberRepository.findById(memberId).orElse(null);
-    if (member == null) {
-      return null;
-    }
+    Member member = memberRepository.findById(memberId)
+        .orElseThrow(() -> new IllegalArgumentException("Member not found"));
 
-    Team team = teamRepository.findById(teamId).orElse(null);
-    if (team == null) {
-      return null;
-    }
+    Team team = teamRepository.findById(teamId)
+        .orElseThrow(() -> new IllegalArgumentException("Team not found"));
 
     MembershipRequest request = new MembershipRequest(State.PENDING, null, null);
     request.setMember(member);
@@ -117,9 +111,9 @@ public class TeamService {
    * Get members of the connected member's team.
    */
   @Transactional
-  public List<TeamMemberDto> getMembersOfMyTeam(Long memberId) {
+  public Iterable<TeamMemberDto> getMembersOfMyTeam(Long memberId) {
     TeamComposition composition = teamCompositionRepository.findByMemberId(memberId)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Member has no team"));
+        .orElseThrow(() -> new IllegalStateException("Member has no team"));
 
     Long teamId = composition.getTeam().getId();
     List<TeamComposition> compositions = teamCompositionRepository.findAllByTeamId(teamId);
@@ -152,8 +146,8 @@ public class TeamService {
    * endpoint.
    */
   @Transactional
-  public List<TeamResponseDto> getAllTeamDtos() {
-    return teamRepository.findAll().stream()
+  public Iterable<TeamResponseDto> getAllTeamDtos() {
+    return teamRepository.findByIsActiveTrue().stream()
         .map(this::toDto)
         .toList();
   }
@@ -164,10 +158,10 @@ public class TeamService {
   @Transactional
   public void leaveTeam(String email) {
     Member member = memberRepository.findByEmail(email)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        .orElseThrow(() -> new IllegalArgumentException("Member not found"));
 
     TeamComposition tc = teamCompositionRepository.findFirstByMemberId(member.getId())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Not in a team"));
+        .orElseThrow(() -> new IllegalStateException("Not in a team"));
 
     Team team = tc.getTeam();
 
@@ -179,31 +173,25 @@ public class TeamService {
     int teamSize = teamCompositionRepository.findAllByTeamId(team.getId()).size();
 
     if (teamSize == 1) {
-      // Dernier membre → supprimer l'équipe entière
+      team.setIsActive(false);
+      team.setResponsible(null);
+      team.setSecondResponsible(null);
+      teamRepository.save(team);
       teamCompositionRepository.delete(tc);
-      teamCompositionRepository.flush();
-      teamRepository.delete(team);
-      teamRepository.flush();
       return;
     }
 
     if (isResponsible) {
       if (team.getSecondResponsible() == null) {
-        throw new ResponseStatusException(HttpStatus.CONFLICT,
-            "Vous êtes le seul responsable. Désignez un second responsable avant de quitter.");
-      } else {
-        team.setResponsible(team.getSecondResponsible());
-        team.setSecondResponsible(null);
+        throw new IllegalStateException("Désignez un second responsable avant de quitter.");
       }
+      team.setResponsible(team.getSecondResponsible());
+      team.setSecondResponsible(null);
     } else if (isSecondResponsible) {
       team.setSecondResponsible(null);
     }
 
-    teamRepository.save(team);
-    teamRepository.flush();
-
     teamCompositionRepository.delete(tc);
-    teamCompositionRepository.flush();
   }
 
   /**
@@ -212,8 +200,8 @@ public class TeamService {
   @Transactional
   public TeamResponseDto getTeamOfMemberAsDto(Long memberId) {
     TeamComposition composition = teamCompositionRepository.findByMemberId(memberId)
-        .orElseThrow(() -> new ResponseStatusException(
-            HttpStatus.NOT_FOUND, "Member has no team"));
+        .orElseThrow(() -> new IllegalStateException(
+            "Member has no team"));
     return toDto(composition.getTeam());
   }
 

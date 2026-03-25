@@ -7,6 +7,7 @@ import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.services.NotificationService;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -46,25 +47,21 @@ public class NotificationController {
       @RequestParam(required = false) Boolean read,
       @AuthenticationPrincipal Member currentMember) {
 
-    Iterable<Notification> notifications;
-
     if (currentMember.getId() != id) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN);
     }
 
-    if (read == null) {
-      notifications = notificationService.getAllNotificationByMember(id);
-    } else {
-      notifications = notificationService.getNotificationsByReadStatus(id, read);
-    }
+    try {
+      Iterable<Notification> notifications = read == null
+          ? notificationService.getAllNotificationByMember(id)
+          : notificationService.getNotificationsByReadStatus(id, read);
 
-    if (notifications == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+      return ((List<Notification>) notifications).stream()
+          .map(this::toDto)
+          .toList();
+    } catch (NoSuchElementException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
-    return ((List<Notification>) notifications)
-        .stream()
-        .map(this::toDto)
-        .toList();
 
   }
 
@@ -79,13 +76,11 @@ public class NotificationController {
 
     Notification notification = new Notification(dto.type(), dto.message(), dto.sendDate());
 
-    Notification result = notificationService.send(id, notification);
-
-    if (result == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    try {
+      return toDto(notificationService.send(id, notification));
+    } catch (NoSuchElementException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
-
-    return toDto(result);
   }
 
   /**
@@ -96,17 +91,16 @@ public class NotificationController {
   @PreAuthorize("isAuthenticated()")
   public NotificationResponseDto markNotificationAsRead(@PathVariable long idMember,
       @PathVariable long idNotification, @AuthenticationPrincipal Member currentMember) {
+
     if (currentMember.getId() != idMember) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN);
     }
 
-    Notification result = notificationService.markNotificationRead(idNotification);
-
-    if (result == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    try {
+      return toDto(notificationService.markNotificationRead(idNotification));
+    } catch (NoSuchElementException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
-
-    return toDto(result);
   }
 
   // conversion of nototification into NotificationResponseDto
