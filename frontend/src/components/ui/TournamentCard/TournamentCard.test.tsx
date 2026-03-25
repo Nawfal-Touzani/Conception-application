@@ -37,8 +37,8 @@ describe('TournamentCard', () => {
     expect(screen.getByText('8')).toBeTruthy();
   });
 
-  test('does not render TEAMS when maxParticipants is not provided', () => {
-    const withoutMax = { ...mockTournament, maxParticipants: undefined };
+  test('does not render TEAMS when maxParticipant is not provided', () => {
+    const withoutMax = { ...mockTournament, maxParticipant: undefined };
     render(<TournamentCard tournament={withoutMax} />);
     expect(screen.queryByText('TEAMS')).toBeNull();
   });
