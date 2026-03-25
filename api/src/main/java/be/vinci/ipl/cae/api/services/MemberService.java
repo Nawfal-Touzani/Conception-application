@@ -56,29 +56,7 @@ public class MemberService {
       return null;
     }
 
-    LocalDate today = LocalDate.now();
-    boolean isUnavailable = unavailabilityRepository
-        .existsByMemberAndStartDateBeforeAndEndDateAfter(
-            member,
-            today.plusDays(1),
-            today.minusDays(1)
-        );
-
-    String teamName = teamCompositionRepository.findByMemberId(member.getId())
-        .map(compo -> compo.getTeam().getName())
-        .orElse(null);
-
-    return new MemberProfileResponseDto(
-        member.getId(),
-        member.getEmail(),
-        member.getTag(),
-        member.getSpeciality().getName(),
-        teamName,
-        member.getImage().getUrl(),
-        member.getProfileCreationDate(),
-        member.getIsAdmin(),
-        !isUnavailable
-    );
+    return mapToProfileDto(member);
   }
 
   /**
@@ -95,16 +73,7 @@ public class MemberService {
       return null;
     }
 
-    if (payload.speciality() != null) {
-      specialityRepository.findByName(payload.speciality())
-          .ifPresent(member::setSpeciality);
-    }
-
-    if (payload.profileImage() != null) {
-      imageRepository.findByUrl(payload.profileImage())
-          .ifPresent(member::setImage);
-    }
-
+    performProfileUpdates(member, payload);
     memberRepository.save(member);
     return getProfile(email);
   }
@@ -117,22 +86,13 @@ public class MemberService {
    * @return true if the password was changed, false if member not found or old password incorrect
    */
   public boolean changePassword(String email, ChangePasswordDto dto) {
-    if (dto == null || dto.newPassword() == null
-        || dto.newPassword().equals(dto.oldPassword())) {
-      return false;
-    }
-
-    if (!dto.newPassword().equals(dto.confirmPassword())) {
+    if (isInvalidPasswordRequest(dto)) {
       return false;
     }
 
     Member member = memberRepository.findByEmail(email).orElse(null);
 
-    if (member == null) {
-      return false;
-    }
-
-    if (!passwordEncoder.matches(dto.oldPassword(), member.getPassword())) {
+    if (member == null || !passwordEncoder.matches(dto.oldPassword(), member.getPassword())) {
       return false;
     }
 
@@ -198,4 +158,54 @@ public class MemberService {
         .map(m -> getProfile(m.getEmail()))
         .toList();
   }
+
+  private MemberProfileResponseDto mapToProfileDto(Member member) {
+    return new MemberProfileResponseDto(
+        member.getId(),
+        member.getEmail(),
+        member.getTag(),
+        member.getSpeciality().getName(),
+        getMemberTeamName(member.getId()),
+        member.getImage().getUrl(),
+        member.getProfileCreationDate(),
+        member.getIsAdmin(),
+        isMemberAvailable(member)
+    );
+  }
+
+  private String getMemberTeamName(Long memberId) {
+    return teamCompositionRepository.findByMemberId(memberId)
+        .map(compo -> compo.getTeam().getName())
+        .orElse(null);
+  }
+
+  private boolean isMemberAvailable(Member member) {
+    LocalDate today = LocalDate.now();
+    boolean isUnavailable = unavailabilityRepository
+        .existsByMemberAndStartDateBeforeAndEndDateAfter(
+            member,
+            today.plusDays(1),
+            today.minusDays(1)
+        );
+    return !isUnavailable;
+  }
+
+  private void performProfileUpdates(Member member, UpdateMemberProfileDto payload) {
+    if (payload.speciality() != null) {
+      specialityRepository.findByName(payload.speciality())
+          .ifPresent(member::setSpeciality);
+    }
+
+    if (payload.profileImage() != null) {
+      imageRepository.findByUrl(payload.profileImage())
+          .ifPresent(member::setImage);
+    }
+  }
+
+  private boolean isInvalidPasswordRequest(ChangePasswordDto dto) {
+    return dto == null || dto.newPassword() == null
+        || dto.newPassword().equals(dto.oldPassword())
+        || !dto.newPassword().equals(dto.confirmPassword());
+  }
+
 }

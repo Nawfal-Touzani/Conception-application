@@ -1,9 +1,8 @@
 import { Box, Button, Dialog, DialogTitle, IconButton } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import { useEffect, useState } from 'react';
-import * as imageService from '../../services/image/image.service';
-import { ProfileImage } from '../../types/image.types';
+import { useAvatars } from './useAvatars';
+import { AvatarItem } from './AvatarItem';
 
 interface AvatarModalProps {
   open: boolean;
@@ -18,16 +17,10 @@ export const AvatarModal = ({
   onConfirm,
   currentImage,
 }: AvatarModalProps) => {
-  const [images, setImages] = useState<ProfileImage[]>([]);
-  const [selectedImage, setSelectedImage] = useState(currentImage);
-
-  const BASE_URL = 'http://localhost:3000';
-
-  useEffect(() => {
-    if (open) {
-      imageService.getAll().then(setImages).catch(console.error);
-    }
-  }, [open]);
+  const { images, selectedImage, setSelectedImage, BASE_URL } = useAvatars(
+    open,
+    currentImage,
+  );
 
   return (
     <Dialog
@@ -53,7 +46,8 @@ export const AvatarModal = ({
         }}
       >
         <IconButton>
-          <ArrowBackIosIcon />
+          {' '}
+          <ArrowBackIosIcon />{' '}
         </IconButton>
 
         <Box
@@ -64,38 +58,20 @@ export const AvatarModal = ({
             justifyContent: 'center',
           }}
         >
-          {images.map((img) => {
-            const fullUrl = `${BASE_URL}${img.url}`;
-
-            return (
-              <Box
-                key={img.id}
-                component="img"
-                src={fullUrl}
-                alt={`Avatar ${img.id}`}
-                onClick={() => setSelectedImage(fullUrl)}
-                sx={{
-                  width: 80,
-                  height: 80,
-                  cursor: 'pointer',
-                  borderRadius: '8px',
-                  objectFit: 'contain',
-                  border:
-                    selectedImage === fullUrl
-                      ? '3px solid #d32f2f'
-                      : '1px solid black',
-                  transition: 'all 0.1s ease-in-out',
-                  '&:hover': {
-                    transform: 'scale(1.2)',
-                  },
-                }}
-              />
-            );
-          })}
+          {images.map((img) => (
+            <AvatarItem
+              key={img.id}
+              url={`${BASE_URL}${img.url}`}
+              altText={`Avatar ${img.id}`}
+              isSelected={selectedImage === `${BASE_URL}${img.url}`}
+              onClick={() => setSelectedImage(`${BASE_URL}${img.url}`)}
+            />
+          ))}
         </Box>
 
         <IconButton>
-          <ArrowForwardIosIcon />
+          {' '}
+          <ArrowForwardIosIcon />{' '}
         </IconButton>
       </Box>
 
