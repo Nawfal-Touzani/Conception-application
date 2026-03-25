@@ -9,8 +9,11 @@ import {
 } from '@mui/material';
 import TextFieldStyle from '../../ui/TextFieldStyle/TextFieldStyle'; // Reusable styled TextField
 import { useLoginForm } from '../../../hooks/useLoginForm/useLoginForm'; // hook
+import { useAuth } from '../../../contexts/useAuth';
 
 const LoginPage: React.FC = () => {
+  const { bannedError } = useAuth();
+
   const {
     email,
     setEmail,
@@ -54,10 +57,17 @@ const LoginPage: React.FC = () => {
             Se connecter
           </Typography>
 
-          {/* Display potential errors */}
+          {/* Forms errors */}
           {error && (
             <Alert severity="error" sx={{ mb: 2, borderRadius: '10px' }}>
               {error}
+            </Alert>
+          )}
+
+          {/* Banned account error */}
+          {bannedError && (
+            <Alert severity="error" sx={{ mb: 2, borderRadius: '10px' }}>
+              {bannedError}
             </Alert>
           )}
 
