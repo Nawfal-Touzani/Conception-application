@@ -1,11 +1,11 @@
 import { Box } from '@mui/material';
 import { useState } from 'react';
-import { useAuth } from '../../contexts/useAuth';
-import { MemberProfile } from '../../types/member';
-import * as memberService from '../../services/memberService';
+import { useAuth } from '../../../contexts/useAuth';
+import { MemberProfile } from '../../../types/member';
+import * as memberService from '../../../services/memberService';
 import { ProfileInputField } from './ProfileInputField';
-import { PasswordModal } from '../Password/PassordModal';
-import { SpecialityMenu } from '../Speciality/SpecialityMenu';
+import { PasswordModal } from '../../Password/PassordModal';
+import { SpecialityMenu } from '../../Speciality/SpecialityMenu';
 
 export const MemberInfoForm = ({ profile }: { profile: MemberProfile }) => {
   const { user } = useAuth();
