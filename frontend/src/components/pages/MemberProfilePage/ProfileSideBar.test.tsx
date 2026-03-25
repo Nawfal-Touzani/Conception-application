@@ -41,7 +41,7 @@ describe('ProfileSidebar', () => {
   });
 
   test('should handle successful avatar change and reload page', async () => {
-    vi.mocked(memberService.updateMyProfile).mockResolvedValue({} as any);
+    vi.spyOn(memberService, 'updateMyProfile').mockResolvedValue({} as any);
 
     render(
       <AuthContext.Provider value={{ user: { token: 'tok' } } as any}>
@@ -63,7 +63,7 @@ describe('ProfileSidebar', () => {
 
   test('should display an alert when the service fails', async () => {
     const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-    vi.mocked(memberService.updateMyProfile).mockRejectedValue(
+    vi.spyOn(memberService, 'updateMyProfile').mockRejectedValue(
       new Error('API Error'),
     );
 

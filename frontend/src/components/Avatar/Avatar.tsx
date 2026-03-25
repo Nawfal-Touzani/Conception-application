@@ -58,17 +58,15 @@ export const AvatarModal = ({
             justifyContent: 'center',
           }}
         >
-          {images.map((img) => {
-            const fullUrl = `${BASE_URL}${img.url}`;
-            return (
-              <AvatarItem
-                key={img.id}
-                url={fullUrl}
-                isSelected={selectedImage === fullUrl}
-                onClick={() => setSelectedImage(fullUrl)}
-              />
-            );
-          })}
+          {images.map((img) => (
+            <AvatarItem
+              key={img.id}
+              url={`${BASE_URL}${img.url}`}
+              altText={`Avatar ${img.id}`}
+              isSelected={selectedImage === `${BASE_URL}${img.url}`}
+              onClick={() => setSelectedImage(`${BASE_URL}${img.url}`)}
+            />
+          ))}
         </Box>
 
         <IconButton>
