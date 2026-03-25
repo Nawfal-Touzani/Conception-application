@@ -21,7 +21,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The type Team manager service test.
@@ -86,7 +85,7 @@ class TeamManagerServiceTest {
   void assignSecondaryManager_shouldFail_whenTeamNotFound() {
     when(teamRepository.findById(10L)).thenReturn(Optional.empty());
 
-    assertThrows(ResponseStatusException.class,
+    assertThrows(IllegalArgumentException.class,
         () -> teamManagerService.assignSecondaryManager(10L, 2L, 1L));
 
     verify(teamRepository, never()).save(any());
@@ -99,7 +98,7 @@ class TeamManagerServiceTest {
   void assignSecondaryManager_shouldFail_whenNotResponsible() {
     when(teamRepository.findById(10L)).thenReturn(Optional.of(team));
 
-    assertThrows(ResponseStatusException.class,
+    assertThrows(SecurityException.class,
         () -> teamManagerService.assignSecondaryManager(10L, 2L, 99L));
 
     verify(teamRepository, never()).save(any());
@@ -113,7 +112,7 @@ class TeamManagerServiceTest {
     when(teamRepository.findById(10L)).thenReturn(Optional.of(team));
     when(memberRepository.findById(2L)).thenReturn(Optional.empty());
 
-    assertThrows(ResponseStatusException.class,
+    assertThrows(IllegalArgumentException.class,
         () -> teamManagerService.assignSecondaryManager(10L, 2L, 1L));
 
     verify(teamRepository, never()).save(any());
@@ -128,7 +127,7 @@ class TeamManagerServiceTest {
     when(memberRepository.findById(2L)).thenReturn(Optional.of(newSecondary));
     when(teamCompositionRepository.findByMemberId(2L)).thenReturn(Optional.empty());
 
-    assertThrows(ResponseStatusException.class,
+    assertThrows(IllegalStateException.class,
         () -> teamManagerService.assignSecondaryManager(10L, 2L, 1L));
 
     verify(teamRepository, never()).save(any());
@@ -146,7 +145,7 @@ class TeamManagerServiceTest {
     composition.setId(compositionId);
     when(teamCompositionRepository.findByMemberId(1L)).thenReturn(Optional.of(composition));
 
-    assertThrows(ResponseStatusException.class,
+    assertThrows(IllegalStateException.class,
         () -> teamManagerService.assignSecondaryManager(10L, 1L, 1L));
 
     verify(teamRepository, never()).save(any());
