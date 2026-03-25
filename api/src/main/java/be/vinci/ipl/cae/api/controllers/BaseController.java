@@ -36,4 +36,20 @@ public abstract class BaseController {
     }
     return (Member) principal;
   }
+  /**
+   * Execute or throw.
+   *
+   * @param action the action
+   */
+  protected void executeOrThrow(Runnable action) {
+    try {
+      action.run();
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    } catch (SecurityException e) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+    } catch (IllegalStateException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
+    }
+  }
 }

@@ -7,7 +7,6 @@ import be.vinci.ipl.cae.api.models.entities.MembershipRequest;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.services.MembershipRequestService;
 import be.vinci.ipl.cae.api.services.TeamService;
-import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -75,7 +74,7 @@ public class TeamController extends BaseController {
    * GET /teams/members — Get members of the connected member's team.
    */
   @GetMapping("/members")
-  public List<TeamMemberDto> getTeamMembers() {
+  public Iterable<TeamMemberDto> getTeamMembers() {
     try {
       return teamService.getMembersOfMyTeam(getConnectedMember().getId());
     } catch (IllegalStateException e) {
@@ -87,7 +86,7 @@ public class TeamController extends BaseController {
    * GET /teams — Get all teams.
    */
   @GetMapping
-  public List<TeamResponseDto> getAllTeams() {
+  public Iterable<TeamResponseDto> getAllTeams() {
     //  Also returns DTOs to avoid circular serialization on the list
     return teamService.getAllTeamDtos();
   }

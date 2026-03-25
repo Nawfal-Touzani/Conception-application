@@ -1,5 +1,4 @@
 package be.vinci.ipl.cae.api.services;
-
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -7,7 +6,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.MembershipRequest;
 import be.vinci.ipl.cae.api.models.entities.MembershipRequest.State;
@@ -16,7 +14,6 @@ import be.vinci.ipl.cae.api.models.entities.Team;
 import be.vinci.ipl.cae.api.models.entities.TeamComposition;
 import be.vinci.ipl.cae.api.repositories.MembershipRequestRepository;
 import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
-import be.vinci.ipl.cae.api.services.MembershipRequestService;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +21,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The type Membership request service test.
@@ -91,7 +87,7 @@ class MembershipRequestServiceTest {
   void approveRequest_shouldFail_whenRequestNotFound() {
     when(membershipRequestRepository.findById(100L)).thenReturn(Optional.empty());
 
-    assertThrows(ResponseStatusException.class,
+    assertThrows(IllegalArgumentException.class,
         () -> membershipRequestService.approveRequest(100L, 1L));
 
     verify(membershipRequestRepository, never()).save(any());
@@ -105,7 +101,7 @@ class MembershipRequestServiceTest {
   void approveRequest_shouldFail_whenMemberIsNotResponsible() {
     when(membershipRequestRepository.findById(100L)).thenReturn(Optional.of(pendingRequest));
 
-    assertThrows(ResponseStatusException.class,
+    assertThrows(IllegalStateException.class,
         () -> membershipRequestService.approveRequest(100L, 99L));
 
     verify(membershipRequestRepository, never()).save(any());
@@ -120,7 +116,7 @@ class MembershipRequestServiceTest {
     pendingRequest.setState(State.ACCEPTED);
     when(membershipRequestRepository.findById(100L)).thenReturn(Optional.of(pendingRequest));
 
-    assertThrows(ResponseStatusException.class,
+    assertThrows(IllegalStateException.class,
         () -> membershipRequestService.approveRequest(100L, 1L));
 
     verify(membershipRequestRepository, never()).save(any());
@@ -148,7 +144,7 @@ class MembershipRequestServiceTest {
   void refuseRequest_shouldFail_whenRequestNotFound() {
     when(membershipRequestRepository.findById(100L)).thenReturn(Optional.empty());
 
-    assertThrows(ResponseStatusException.class,
+    assertThrows(IllegalArgumentException.class,
         () -> membershipRequestService.refuseRequest(100L, 1L, "reason"));
 
     verify(membershipRequestRepository, never()).save(any());
@@ -161,7 +157,7 @@ class MembershipRequestServiceTest {
   void refuseRequest_shouldFail_whenMemberIsNotResponsible() {
     when(membershipRequestRepository.findById(100L)).thenReturn(Optional.of(pendingRequest));
 
-    assertThrows(ResponseStatusException.class,
+    assertThrows(IllegalStateException.class,
         () -> membershipRequestService.refuseRequest(100L, 99L, "reason"));
 
     verify(membershipRequestRepository, never()).save(any());
@@ -175,7 +171,7 @@ class MembershipRequestServiceTest {
     pendingRequest.setState(State.REFUSED);
     when(membershipRequestRepository.findById(100L)).thenReturn(Optional.of(pendingRequest));
 
-    assertThrows(ResponseStatusException.class,
+    assertThrows(IllegalStateException.class,
         () -> membershipRequestService.refuseRequest(100L, 1L, "reason"));
 
     verify(membershipRequestRepository, never()).save(any());

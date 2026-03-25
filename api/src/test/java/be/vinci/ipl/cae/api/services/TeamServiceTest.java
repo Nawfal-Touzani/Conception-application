@@ -11,6 +11,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import java.util.stream.StreamSupport;
 
 import be.vinci.ipl.cae.api.models.dtos.CreateTeamRequest;
 import be.vinci.ipl.cae.api.models.dtos.TeamMemberDto;
@@ -170,11 +171,13 @@ class TeamServiceTest {
     when(teamCompositionRepository.findByMemberId(1L)).thenReturn(Optional.of(composition));
     when(teamCompositionRepository.findAllByTeamId(10L)).thenReturn(List.of(composition));
 
-    List<TeamMemberDto> result = teamService.getMembersOfMyTeam(1L);
+    Iterable<TeamMemberDto> result = teamService.getMembersOfMyTeam(1L);
+    List<TeamMemberDto> list = StreamSupport.stream(result.spliterator(), false).toList();
 
     assertNotNull(result);
-    assertEquals(1, result.size());
-    assertEquals("TestTag", result.get(0).gameTag());
+    assertEquals(1, list.size());
+    assertEquals("TestTag", list.get(0).gameTag());
+
   }
 
   @Test
@@ -187,10 +190,11 @@ class TeamServiceTest {
     when(teamCompositionRepository.findByMemberId(1L)).thenReturn(Optional.of(composition));
     when(teamCompositionRepository.findAllByTeamId(10L)).thenReturn(List.of(composition));
 
-    List<TeamMemberDto> result = teamService.getMembersOfMyTeam(1L);
+    Iterable<TeamMemberDto> result = teamService.getMembersOfMyTeam(1L);
+    List<TeamMemberDto> list = StreamSupport.stream(result.spliterator(), false).toList();
 
     assertNotNull(result);
-    assertFalse(result.get(0).isAvailable());
+    assertFalse(list.get(0).isAvailable());
   }
 
   @Test
@@ -223,11 +227,12 @@ class TeamServiceTest {
   void getAllTeamDtos_shouldReturnOnlyActiveTeams() {
     when(teamRepository.findByIsActiveTrue()).thenReturn(List.of(team));
 
-    List<TeamResponseDto> result = teamService.getAllTeamDtos();
+    Iterable<TeamResponseDto> result = teamService.getAllTeamDtos();
+    List<TeamResponseDto> list = StreamSupport.stream(result.spliterator(), false).toList();
 
     assertNotNull(result);
-    assertEquals(1, result.size());
-    assertEquals("TestTeam", result.get(0).getName());
+    assertEquals(1, list.size());
+    assertEquals("TestTeam", list.get(0).getName());
   }
 
   // ─── leaveTeam ────────────────────────────────────────────────

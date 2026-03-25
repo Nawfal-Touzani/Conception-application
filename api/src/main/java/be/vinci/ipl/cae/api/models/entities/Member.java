@@ -61,15 +61,19 @@ public class Member {
   @JsonManagedReference("member-unavailabilities")
   private List<Unavailability> unavailabilities = new ArrayList<>();
 
+  @OneToMany(mappedBy = "organizer")
+  @JsonManagedReference("member-tournaments")
+  private List<Tournament> tournaments = new ArrayList<>();
+
   /**
    * Constructs a Member with the given details.
    *
-   * @param email the email address of the member
-   * @param password the password of the member
-   * @param tag the display tag of the member
-   * @param isAdmin whether the member has admin privileges
-   * @param image the profile image of the member
-   * @param speciality the speciality of the member
+   * @param email               the email address of the member
+   * @param password            the password of the member
+   * @param tag                 the display tag of the member
+   * @param isAdmin             whether the member has admin privileges
+   * @param image               the profile image of the member
+   * @param speciality          the speciality of the member
    * @param profileCreationDate creation date of the member
    */
   public Member(String email, String password, String tag, Boolean isAdmin,

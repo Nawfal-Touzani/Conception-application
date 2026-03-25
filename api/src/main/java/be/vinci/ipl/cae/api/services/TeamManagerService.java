@@ -5,9 +5,7 @@ import be.vinci.ipl.cae.api.models.entities.Team;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
 import be.vinci.ipl.cae.api.repositories.TeamRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The type Team manager service.
@@ -42,25 +40,20 @@ public class TeamManagerService {
    */
   public void assignSecondaryManager(Long teamId, Long memberId, Long responsibleId) {
     Team team = teamRepository.findById(teamId)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-            "Team not found"));
+        .orElseThrow(() -> new IllegalArgumentException("Team not found"));
 
     if (!team.getResponsible().getId().equals(responsibleId)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          "Only the team responsible can assign a secondary manager");
+      throw new SecurityException("Only the team responsible can assign a secondary manager");
     }
 
     Member member = memberRepository.findById(memberId)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-            "Member not found"));
+        .orElseThrow(() -> new IllegalArgumentException("Member not found"));
 
     teamCompositionRepository.findByMemberId(memberId)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            "Member is not in this team"));
+        .orElseThrow(() -> new IllegalStateException("Member is not in this team"));
 
     if (team.getResponsible().getId().equals(memberId)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Member is already the team responsible");
+      throw new IllegalStateException("Member is already the team responsible");
     }
     team.setSecondResponsible(member);
     teamRepository.save(team);
