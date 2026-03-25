@@ -18,6 +18,9 @@ interface PasswordModalProps {
   token: string;
 }
 
+const PASSWORD_REGEX =
+  /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
+
 const fieldStyle = {
   '& .MuiOutlinedInput-root': {
     color: 'white',
@@ -55,6 +58,22 @@ export const PasswordModal = ({ open, onClose, token }: PasswordModalProps) => {
   const handleSubmit = async () => {
     setError(null);
     setSuccess(false);
+
+    if (
+      !passwordData.oldPassword ||
+      !passwordData.newPassword ||
+      !passwordData.confirmPassword
+    ) {
+      setError('Veuillez compléter tous les champs.');
+      return;
+    }
+
+    if (!PASSWORD_REGEX.test(passwordData.newPassword)) {
+      setError(
+        'Le mot de passe doit contenir moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.',
+      );
+      return;
+    }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       setError('Les nouveaux mots de passe ne correspondent pas.');

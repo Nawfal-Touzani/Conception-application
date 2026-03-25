@@ -1,5 +1,7 @@
 @baseUrl = http://localhost:3000
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibGVhQG1haWwuY29tIiwiaWF0IjoxNzczMzM0MDY3LCJleHAiOjE3NzM0MjA0Njd9.d9T21ZaX6oc7pT7TUkJVE0gi6Vb5mzm0fMMwk9AJGzw
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibHVmZnlAdmluY2kuYmUiLCJpYXQiOjE3NzQ0NjYyNjMsImV4cCI6MTc3NDU1MjY2M30.AziiEJ1uP-Cphx0z6itSuUIq-ZmkcCq5IhoOluzHHSM
+
+
 ### Get my profile
 GET {{baseUrl}}/members/me
 Authorization: Bearer {{token}}
@@ -12,17 +14,6 @@ Content-Type: application/json
 {
   "speciality": "tacticien",
   "profileImage": "img3.png"
-}
-
-### Change password (OK)
-PATCH {{baseUrl}}/members/password
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-  "oldPassword": "new",
-  "newPassword": "newPswd2026",
-  "confirmPassword": "newPswd2026"
 }
 
 ### Change password (KO - Wrong old password)
@@ -56,4 +47,59 @@ Content-Type: application/json
   "oldPassword": "new",
   "newPassword": "new",
   "confirmPassword": "new"
+}
+
+### Change password (KO - Too short)
+PATCH {{baseUrl}}/members/password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "oldPassword": "luffy",
+  "newPassword": "Abc1!",
+  "confirmPassword": "Abc1!"
+}
+
+### Change password (KO - Missing uppercase)
+PATCH {{baseUrl}}/members/password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "oldPassword": "luffy",
+  "newPassword": "vinci123!",
+  "confirmPassword": "vinci123!"
+}
+
+### Change password (KO - Missing number)
+PATCH {{baseUrl}}/members/password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "oldPassword": "luffy",
+  "newPassword": "LeoVinci!",
+  "confirmPassword": "LeoVinci!"
+}
+
+### Change password (KO - Missing special character)
+PATCH {{baseUrl}}/members/password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "oldPassword": "new",
+  "newPassword": "LeoVinci12",
+  "confirmPassword": "LeoVinci12"
+}
+
+### Change password (OK)
+PATCH {{baseUrl}}/members/password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "oldPassword": "luffy",
+  "newPassword": "LeoVinci123!",
+  "confirmPassword": "LeoVinci123!"
 }

@@ -30,7 +30,7 @@ describe('AvatarModal', () => {
       />,
     );
 
-    const images = await screen.findAllByAltText(/avatar option/i);
+    const images = await screen.findAllByAltText(/avatar \d+/i);
     expect(images).toHaveLength(2);
 
     fireEvent.click(images[1]);
