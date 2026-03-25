@@ -1,6 +1,7 @@
 package be.vinci.ipl.cae.api.models.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -15,7 +16,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -53,16 +54,22 @@ public class Tournament {
   @Column(nullable = false)
   private String name;
 
+  @Column(nullable = false)
   private String description;
 
   @Column(nullable = false)
-  private LocalDateTime startDate;
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  private LocalDate startDate;
 
   @Column(nullable = false)
-  private LocalDateTime endDate;
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  private LocalDate endDate;
 
-  private LocalDateTime registrationDeadline;
+  @Column(nullable = false)
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  private LocalDate registrationDeadline;
 
+  @Column(nullable = false)
   private Integer maxParticipants;
 
   @Column(nullable = false)
@@ -97,9 +104,9 @@ public class Tournament {
   public Tournament(Status status,
       String name,
       String description,
-      LocalDateTime startDate,
-      LocalDateTime endDate,
-      LocalDateTime registrationDeadline,
+      LocalDate startDate,
+      LocalDate endDate,
+      LocalDate registrationDeadline,
       Integer maxParticipants,
       Member organizer) {
 
