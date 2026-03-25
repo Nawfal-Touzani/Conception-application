@@ -121,7 +121,7 @@ public class MemberController {
     try {
       unavailabilityService.addUnavailability(principal.getEmail(), dto);
     } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 
