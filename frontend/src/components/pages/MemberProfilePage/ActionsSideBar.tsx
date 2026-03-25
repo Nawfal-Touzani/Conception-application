@@ -1,5 +1,5 @@
 import { Paper, Typography, Divider, Box, Button } from '@mui/material';
-import { MemberProfile } from '../../types/member';
+import { MemberProfile } from '../../../types/member';
 import { useNavigate } from 'react-router-dom';
 
 export const ActionSidebar = ({ profile }: { profile: MemberProfile }) => {

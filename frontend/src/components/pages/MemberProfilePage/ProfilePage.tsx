@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '../../contexts/useAuth';
-import { MemberProfile } from '../../types/member';
-import * as memberService from '../../services/memberService';
+import { useAuth } from '../../../contexts/useAuth';
+import { MemberProfile } from '../../../types/member';
+import * as memberService from '../../../services/memberService';
 import { Container, Divider, Grid2, Paper, Typography } from '@mui/material';
 import { ProfileSidebar } from './ProfileSidebar';
 import { MemberInfoForm } from './MemberInfoForm';
 import { ActionSidebar } from './ActionsSideBar';
-import { UnavailabilitySection } from '../Unavailability/UnavailabilitySection';
+import { UnavailabilitySection } from '../../Unavailability/UnavailabilitySection';
 
 export const ProfilePage = () => {
   const { user } = useAuth();
