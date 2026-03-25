@@ -12,5 +12,5 @@ export interface Tournament {
   startDate: string;
   endDate: string;
   registrationDeadline?: string;
-  maxParticipants?: number;
+  maxParticipant?: number;
 }

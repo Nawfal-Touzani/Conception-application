@@ -6,7 +6,7 @@ import be.vinci.ipl.cae.api.models.entities.Tournament;
 import be.vinci.ipl.cae.api.models.entities.Tournament.Status;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.TournamentRepository;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +32,7 @@ public class TournamentService {
    * Create a tournament.
    */
   public Tournament createTournament(Long organizerId, TournamentDto dto) {
+
     final Member organizer = memberRepository.findById(organizerId)
         .orElseThrow(() -> new NoSuchElementException("Organizer not found"));
 
@@ -41,8 +42,8 @@ public class TournamentService {
     }
 
     // Dates must be in the future
-    if (dto.startDate().isBefore(LocalDateTime.now())
-        || dto.endDate().isBefore(LocalDateTime.now())) {
+    if (dto.startDate().isBefore(LocalDate.now())
+        || dto.endDate().isBefore(LocalDate.now())) {
       throw new IllegalArgumentException("Dates must be in the future");
     }
 
@@ -52,7 +53,7 @@ public class TournamentService {
     }
 
     // Registration deadline must not be in the past
-    if (dto.registrationDeadline().isBefore(LocalDateTime.now())) {
+    if (dto.registrationDeadline().isBefore(LocalDate.now())) {
       throw new IllegalArgumentException("Registration deadline must be in the future");
     }
 
@@ -73,6 +74,8 @@ public class TournamentService {
     tournament.setOrganizer(organizer);
 
     return tournamentRepository.save(tournament);
+
+
   }
 
   private boolean isPowerOfTwo(int n) {

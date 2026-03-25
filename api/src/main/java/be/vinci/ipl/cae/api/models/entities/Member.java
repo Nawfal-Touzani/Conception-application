@@ -46,6 +46,9 @@ public class Member {
   @Column(nullable = false)
   private Boolean isAdmin = false;
 
+  @Column(nullable = false)
+  private Boolean isBan = false;
+
   @Column(nullable = false, updatable = false)
   private LocalDate profileCreationDate;
 
