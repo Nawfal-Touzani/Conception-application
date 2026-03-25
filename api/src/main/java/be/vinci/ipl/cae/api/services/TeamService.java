@@ -111,7 +111,7 @@ public class TeamService {
    * Get members of the connected member's team.
    */
   @Transactional
-  public List<TeamMemberDto> getMembersOfMyTeam(Long memberId) {
+  public Iterable<TeamMemberDto> getMembersOfMyTeam(Long memberId) {
     TeamComposition composition = teamCompositionRepository.findByMemberId(memberId)
         .orElseThrow(() -> new IllegalStateException("Member has no team"));
 
@@ -146,7 +146,7 @@ public class TeamService {
    * endpoint.
    */
   @Transactional
-  public List<TeamResponseDto> getAllTeamDtos() {
+  public Iterable<TeamResponseDto> getAllTeamDtos() {
     return teamRepository.findByIsActiveTrue().stream()
         .map(this::toDto)
         .toList();
