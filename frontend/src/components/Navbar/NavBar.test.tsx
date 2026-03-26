@@ -40,6 +40,7 @@ describe('NavBar', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: logoutMock,
+      bannedError: null,
     };
 
     render(
@@ -65,6 +66,7 @@ describe('NavBar', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: logoutMock,
+      bannedError: null,
     };
 
     // Mock 2 notifications sended
@@ -108,6 +110,7 @@ describe('NavBar', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: logoutMock,
+      bannedError: null,
     };
 
     render(
@@ -138,6 +141,7 @@ describe('NavBar', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: logoutMock,
+      bannedError: null,
     };
 
     render(

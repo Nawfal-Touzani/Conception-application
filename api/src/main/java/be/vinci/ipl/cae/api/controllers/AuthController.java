@@ -58,24 +58,44 @@ public class AuthController {
    * @param loginCredentials the credentials of the user to log in
    * @return the authenticated member with a JWT token
    * @throws ResponseStatusException 401 if the credentials are invalid
+   * @throws ResponseStatusException 403 if the member is banned
    */
   @PostMapping("/login")
   public AuthenticatedMember login(@Valid @RequestBody LoginCredentials loginCredentials) {
-    AuthenticatedMember authMember = authService.login(loginCredentials);
-    if (authMember == null) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-          "Email ou mot de passe incorrect.");
+    try {
+      AuthenticatedMember authMember = authService.login(loginCredentials);
+
+      // Unknown user or bad password
+      if (authMember == null) {
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+            "Email ou mot de passe incorrect.");
+      }
+
+      return authMember;
+
+    } catch (IllegalStateException e) {
+      // Member is banned
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
     }
-    return authMember;
   }
 
   /**
    * Automatic authentification if in a session case scenario. New 24h token + infos sent.
+   *
+   * @throws ResponseStatusException 403 if the member is banned
    */
   @GetMapping("/me")
   @PreAuthorize("isAuthenticated()")
   public AuthenticatedMember autoLogin(Authentication authentication) {
     Member currentMember = (Member) authentication.getPrincipal();
+
+    // If the member is banned, we block the re-authentication
+    // That's a double layer security
+    // JWT filter already does this
+    if (currentMember.isBan()) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Votre compte a été banni.");
+    }
+
     return authService.createJwtToken(currentMember);
   }
 }

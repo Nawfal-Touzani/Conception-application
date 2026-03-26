@@ -87,6 +87,7 @@ describe('NotificationsPage', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn(),
+      bannedError: null,
     });
 
     vi.mocked(notificationService.getNotifications).mockResolvedValue([]);
@@ -111,6 +112,7 @@ describe('NotificationsPage', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn(),
+      bannedError: null,
     });
 
     vi.mocked(notificationService.getNotifications).mockResolvedValue(
@@ -146,6 +148,7 @@ describe('NotificationsPage', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn(),
+      bannedError: null,
     });
 
     vi.mocked(notificationService.getNotifications).mockResolvedValue([
@@ -178,6 +181,7 @@ describe('NotificationsPage', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn(),
+      bannedError: null,
     });
 
     vi.mocked(notificationService.getNotifications).mockResolvedValue([
@@ -219,6 +223,7 @@ describe('NotificationsPage', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn(),
+      bannedError: null,
     });
 
     render(
@@ -241,6 +246,7 @@ describe('NotificationsPage', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn(),
+      bannedError: null,
     });
 
     vi.mocked(notificationService.getNotifications).mockResolvedValue([
@@ -274,6 +280,7 @@ describe('NotificationsPage', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn(),
+      bannedError: null,
     });
 
     render(
@@ -296,6 +303,7 @@ describe('NotificationsPage', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn(),
+      bannedError: null,
     });
 
     vi.mocked(notificationService.getNotifications).mockResolvedValue([
@@ -332,6 +340,7 @@ describe('NotificationsPage', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn(),
+      bannedError: null,
     });
 
     vi.mocked(notificationService.getNotifications).mockResolvedValue([
@@ -359,6 +368,7 @@ describe('NotificationsPage', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn(),
+      bannedError: null,
     });
 
     vi.mocked(notificationService.getNotifications).mockResolvedValue([
@@ -397,6 +407,7 @@ describe('NotificationsPage', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn(),
+      bannedError: null,
     });
 
     vi.mocked(notificationService.getNotifications).mockResolvedValue([
@@ -429,6 +440,7 @@ describe('NotificationsPage', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn(),
+      bannedError: null,
     });
 
     vi.mocked(notificationService.getNotifications).mockResolvedValue([
@@ -478,6 +490,7 @@ describe('NotificationsPage', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn(),
+      bannedError: null,
     });
 
     vi.mocked(notificationService.getNotifications).mockResolvedValue([

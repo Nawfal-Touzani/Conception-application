@@ -70,6 +70,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       return;
     }
 
+    // If the member is banned, we block the request immediately
+    if (member.isBan()) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN, "Votre compte a été banni.");
+      return;
+    }
+
     // Valid token, the request can continue.
     // The authentication object contains the user's identity and roles,
     // and is stored in the SecurityContext to be accessible throughout the application.

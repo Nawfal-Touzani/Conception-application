@@ -85,9 +85,15 @@ public class AuthService {
    */
   public AuthenticatedMember login(LoginCredentials loginCredentials) {
     Member member = memberRepository.findByEmail(loginCredentials.email()).orElse(null);
+
     if (member == null || !passwordEncoder.matches(loginCredentials.password(),
         member.getPassword())) {
       return null; // unknown user or bad password
+    }
+
+    // If banned, can't login
+    if (member.isBan()) {
+      throw new IllegalStateException("Votre compte a été banni.");
     }
 
     return createJwtToken(member);
