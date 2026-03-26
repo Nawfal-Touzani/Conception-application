@@ -1,5 +1,3 @@
-import { useState } from 'react';
-import { useAuth } from '../../../contexts/useAuth';
 import {
   Box,
   Typography,
@@ -8,74 +6,63 @@ import {
   Alert,
   Paper,
 } from '@mui/material';
+import { useAuth } from '../../../contexts/useAuth';
 import * as tournamentService from '../../../services/tournament/tournament.service';
+import { useTournamentForm } from '../../../hooks/useTournamentForm/useTournamentForm';
 
 const CreateTournamentPage = () => {
   const { user } = useAuth();
   const token = user?.token ?? '';
-
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [registrationDeadline, setRegistrationDeadline] = useState('');
-  const [maxParticipants, setMaxParticipants] = useState<number | ''>('');
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const handleReset = () => {
-    setName('');
-    setDescription('');
-    setStartDate('');
-    setEndDate('');
-    setRegistrationDeadline('');
-    setMaxParticipants('');
-    setError(null);
-    setSuccess(null);
-  };
+  const {
+    name,
+    setName,
+    description,
+    setDescription,
+    startDate,
+    setStartDate,
+    endDate,
+    setEndDate,
+    registrationDeadline,
+    setRegistrationDeadline,
+    maxParticipants,
+    setMaxParticipants,
+    errors,
+    setErrors,
+    success,
+    setSuccess,
+    reset,
+    validate,
+  } = useTournamentForm();
 
   const handleSubmit = async () => {
-    setError(null);
+    setErrors([]);
     setSuccess(null);
 
-    if (
-      !name ||
-      !description ||
-      !startDate ||
-      !endDate ||
-      !registrationDeadline ||
-      maxParticipants === ''
-    ) {
-      setError('Veuillez remplir tous les champs obligatoires.');
-      return;
-    }
+    if (!validate()) return;
 
-    setLoading(true);
-    console.log({
-      startDate,
-      endDate,
-      registrationDeadline,
-    });
     try {
       await tournamentService.createTournament(
         user!.id,
         {
           name,
           description,
-          startDate: startDate,
-          endDate: endDate,
-          registrationDeadline: registrationDeadline,
+          startDate,
+          endDate,
+          registrationDeadline,
           maxParticipant: Number(maxParticipants),
         },
         token,
       );
-      setSuccess('Tournoi créé avec succès !');
-      handleReset();
+      setSuccess(`Le tournoi "${name}" a été créé avec succès !`);
+
+      setName('');
+      setDescription('');
+      setStartDate('');
+      setEndDate('');
+      setRegistrationDeadline('');
+      setMaxParticipants('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur inconnue');
-    } finally {
-      setLoading(false);
+      setErrors([err instanceof Error ? err.message : 'Erreur inconnue']);
     }
   };
 
@@ -85,7 +72,6 @@ const CreateTournamentPage = () => {
       borderRadius: '6px',
     },
   };
-
   const Label = ({ text }: { text: string }) => (
     <Typography
       sx={{ color: '#c8d8e8', fontSize: '0.85rem', fontWeight: 600, mb: 0.5 }}
@@ -122,14 +108,19 @@ const CreateTournamentPage = () => {
           Créer un tournoi
         </Typography>
 
-        {error && (
+        {errors.length > 0 && (
           <Alert
-            onClose={() => setError(null)}
+            onClose={() => setErrors([])}
             sx={{ mb: 3, backgroundColor: '#fdecea', color: '#c62828' }}
           >
-            {error}
+            <ul style={{ margin: 0, paddingLeft: '20px' }}>
+              {errors.map((err, i) => (
+                <li key={i}>{err}</li>
+              ))}
+            </ul>
           </Alert>
         )}
+
         {success && (
           <Alert
             onClose={() => setSuccess(null)}
@@ -142,12 +133,7 @@ const CreateTournamentPage = () => {
         <Box sx={{ display: 'flex', gap: 3 }}>
           {/* Colonne gauche */}
           <Box
-            sx={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2.5,
-            }}
+            sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2.5 }}
           >
             <Box>
               <Label text="Nom du tournoi :" />
@@ -159,7 +145,6 @@ const CreateTournamentPage = () => {
                 sx={inputSx}
               />
             </Box>
-
             <Box>
               <Label text="Description :" />
               <TextField
@@ -172,7 +157,6 @@ const CreateTournamentPage = () => {
                 sx={inputSx}
               />
             </Box>
-
             <Box>
               <Label text="Date de début :" />
               <TextField
@@ -187,12 +171,7 @@ const CreateTournamentPage = () => {
 
           {/* Colonne droite */}
           <Box
-            sx={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2.5,
-            }}
+            sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2.5 }}
           >
             <Box>
               <Label text="Date de fin :" />
@@ -204,7 +183,6 @@ const CreateTournamentPage = () => {
                 sx={inputSx}
               />
             </Box>
-
             <Box>
               <Label text="Date limite d'inscription :" />
               <TextField
@@ -215,7 +193,6 @@ const CreateTournamentPage = () => {
                 sx={inputSx}
               />
             </Box>
-
             <Box>
               <Label text="Nombre maximum d'équipes :" />
               <TextField
@@ -238,7 +215,7 @@ const CreateTournamentPage = () => {
           sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 4 }}
         >
           <Button
-            onClick={handleReset}
+            onClick={reset}
             variant="contained"
             sx={{
               backgroundColor: '#c0392b',
@@ -250,9 +227,8 @@ const CreateTournamentPage = () => {
             Annuler
           </Button>
           <Button
-            variant="contained"
             onClick={handleSubmit}
-            disabled={loading}
+            variant="contained"
             sx={{
               backgroundColor: '#27ae60',
               textTransform: 'none',
@@ -260,7 +236,7 @@ const CreateTournamentPage = () => {
               '&:hover': { backgroundColor: '#1e8449' },
             }}
           >
-            {loading ? 'Création...' : 'Créer le tournoi'}
+            Créer le tournoi
           </Button>
         </Box>
       </Paper>

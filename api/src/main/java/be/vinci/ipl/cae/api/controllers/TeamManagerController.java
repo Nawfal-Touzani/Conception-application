@@ -41,7 +41,8 @@ public class TeamManagerController extends BaseController {
   @PutMapping("/{teamId}/secondary-manager/{memberId}")
   public ResponseEntity<Void> assignSecondaryManager(@PathVariable Long teamId,
       @PathVariable Long memberId) {
-    executeOrThrow(() -> teamManagerService.assignSecondaryManager(teamId, memberId, getConnectedMember().getId()));
+    executeOrThrow(() -> teamManagerService.assignSecondaryManager(teamId, memberId,
+        getConnectedMember().getId()));
     return ResponseEntity.noContent().build();
   }
 }
