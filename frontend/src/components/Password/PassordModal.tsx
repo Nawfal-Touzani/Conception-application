@@ -70,7 +70,7 @@ export const PasswordModal = ({ open, onClose, token }: PasswordModalProps) => {
 
     if (!PASSWORD_REGEX.test(passwordData.newPassword)) {
       setError(
-        'Le mot de passe doit contenir moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.',
+        'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.',
       );
       return;
     }

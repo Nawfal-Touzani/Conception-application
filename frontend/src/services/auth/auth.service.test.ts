@@ -19,7 +19,7 @@ describe('auth.service', () => {
   describe('register()', () => {
     const credentials = {
       email: 'test@mail.com',
-      password: 'test',
+      password: 'Valid1@Password',
       tag: 'Test',
       imageId: 1,
       specialityId: 1,

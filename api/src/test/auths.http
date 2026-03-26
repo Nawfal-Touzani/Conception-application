@@ -20,6 +20,65 @@ Content-Type: application/json
 }
 
 ### REGISTER ERRORS
+### 1. Password too short (< 8 chars) (400)
+POST {{baseUrl}}/auths/register
+Content-Type: application/json
+
+{
+  "email": "short@vinci.be",
+  "password": "A1@abcd",
+  "tag": "shorty",
+  "imageId": 1,
+  "specialityId": 1
+}
+
+### 2. Password missing Uppercase (400)
+POST {{baseUrl}}/auths/register
+Content-Type: application/json
+
+{
+  "email": "noupper@vinci.be",
+  "password": "nouppercase1@",
+  "tag": "noupper",
+  "imageId": 1,
+  "specialityId": 1
+}
+
+### 3. Password missing Lowercase (400)
+POST {{baseUrl}}/auths/register
+Content-Type: application/json
+
+{
+  "email": "nolower@vinci.be",
+  "password": "NOLOWERCASE1@",
+  "tag": "nolower",
+  "imageId": 1,
+  "specialityId": 1
+}
+
+### 4. Password missing Number (400)
+POST {{baseUrl}}/auths/register
+Content-Type: application/json
+
+{
+  "email": "nonumber@vinci.be",
+  "password": "NoNumberHere@",
+  "tag": "nonumber",
+  "imageId": 1,
+  "specialityId": 1
+}
+
+### 5. Password missing Special Character (400)
+POST {{baseUrl}}/auths/register
+Content-Type: application/json
+
+{
+  "email": "nospecial@vinci.be",
+  "password": "NoSpecialChar123",
+  "tag": "nospecial",
+  "imageId": 1,
+  "specialityId": 1
+}
 
 ### LOGIN (200)
 POST {{baseUrl}}/auths/login

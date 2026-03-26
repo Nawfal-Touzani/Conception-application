@@ -78,7 +78,7 @@ describe('useRegisterForm', () => {
     // Fill all fields
     act(() => {
       result.current.setEmail('test@mail.com');
-      result.current.setPassword('test');
+      result.current.setPassword('Valid1@Password');
       result.current.setTag('Test');
       result.current.setSpecialityId(1);
       result.current.setImageId(1);
@@ -92,7 +92,7 @@ describe('useRegisterForm', () => {
 
     expect(registerMock).toHaveBeenCalledWith({
       email: 'test@mail.com',
-      password: 'test',
+      password: 'Valid1@Password',
       tag: 'Test',
       imageId: 1,
       specialityId: 1,
@@ -108,7 +108,7 @@ describe('useRegisterForm', () => {
 
     act(() => {
       result.current.setEmail('test@mail.com');
-      result.current.setPassword('test');
+      result.current.setPassword('Valid1@Password');
       result.current.setTag('Test');
       result.current.setSpecialityId(1);
       result.current.setImageId(1);
@@ -131,7 +131,7 @@ describe('useRegisterForm', () => {
 
     act(() => {
       result.current.setEmail('test@mail.com');
-      result.current.setPassword('test');
+      result.current.setPassword('Valid1@Password');
       result.current.setTag('Test');
       result.current.setSpecialityId(1);
       result.current.setImageId(1);
@@ -144,5 +144,30 @@ describe('useRegisterForm', () => {
     });
 
     expect(result.current.error).toBe("Une erreur inattendue s'est produite.");
+  });
+
+  test('sets an error if the password does not meet the security policy', async () => {
+    const { result } = renderHook(() => useRegisterForm());
+
+    act(() => {
+      result.current.setEmail('test@mail.com');
+      result.current.setPassword('weak'); // Too weak to pass the regex
+      result.current.setTag('Test');
+      result.current.setSpecialityId(1);
+      result.current.setImageId(1);
+    });
+
+    await act(async () => {
+      await result.current.handleSubmit({
+        preventDefault: vi.fn(),
+      } as unknown as React.FormEvent);
+    });
+
+    // Local validation should catch the weak password and set the appropriate error message
+    expect(result.current.error).toBe(
+      'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.',
+    );
+    // Doesnt call register if local validation fails
+    expect(registerMock).not.toHaveBeenCalled();
   });
 });
