@@ -196,6 +196,20 @@ public class BcryptConfiguration {
         memberRepository.save(member);
       }
 
+      if (!memberRepository.existsByEmail("banni@vinci.be")) {
+        Member member = new Member();
+        member.setEmail("banni@vinci.be");
+        member.setPassword(passwordEncoder.encode("banni"));
+        member.setTag("Banni");
+        member.setIsAdmin(false);
+        member.setBan(true);
+        member.setImage(defaultImage);
+        member.setSpeciality(defaultSpeciality);
+        member.setProfileCreationDate(LocalDate.now());
+
+        memberRepository.save(member);
+      }
+
       // Teams
       Member lea = memberRepository.findByEmail("lea@mail.com").orElseThrow();
       Member tibo = memberRepository.findByEmail("tibo@mail.com").orElseThrow();
