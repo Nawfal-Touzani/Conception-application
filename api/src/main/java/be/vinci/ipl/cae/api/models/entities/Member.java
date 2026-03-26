@@ -27,7 +27,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-
 public class Member {
 
   @Id
@@ -47,7 +46,7 @@ public class Member {
   private Boolean isAdmin = false;
 
   @Column(nullable = false)
-  private Boolean isBan = false;
+  private boolean isBan = false;
 
   @Column(nullable = false, updatable = false)
   private LocalDate profileCreationDate;
@@ -69,7 +68,7 @@ public class Member {
   private List<Tournament> tournaments = new ArrayList<>();
 
   /**
-   * Constructs a Member with the given details.
+   * Constructs a Member with default attributes and with the given details.
    *
    * @param email               the email address of the member
    * @param password            the password of the member

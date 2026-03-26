@@ -34,6 +34,7 @@ const mockContextValue = {
   login: vi.fn(),
   register: vi.fn(),
   logout: vi.fn(),
+  bannedError: null,
 };
 
 const onTeamCreated = vi.fn();

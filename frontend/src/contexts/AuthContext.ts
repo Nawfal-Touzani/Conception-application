@@ -10,6 +10,7 @@ interface AuthContextType {
   login: (credentials: LoginCredentials, rememberMe: boolean) => Promise<void>;
   register: (credentials: RegisterCredentials) => Promise<void>;
   logout: () => void;
+  bannedError: string | null;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
