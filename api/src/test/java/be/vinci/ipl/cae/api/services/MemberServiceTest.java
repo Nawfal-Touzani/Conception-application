@@ -214,11 +214,11 @@ public class MemberServiceTest {
   @Test
   @DisplayName("Should change password when old password matches")
   void changePassword1() {
-    ChangePasswordDto dto = new ChangePasswordDto("oldPswd", "newPswd", "newPswd");
+    ChangePasswordDto dto = new ChangePasswordDto("Old1@Pswd", "New1@Pswd", "New1@Pswd");
 
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
-    when(passwordEncoder.matches("oldPswd", member.getPassword())).thenReturn(true);
-    when(passwordEncoder.encode("newPswd")).thenReturn("hashedNewPswd");
+    when(passwordEncoder.matches("Old1@Pswd", member.getPassword())).thenReturn(true);
+    when(passwordEncoder.encode("New1@Pswd")).thenReturn("hashedNewPswd");
 
     boolean result = memberService.changePassword(email, dto);
 
@@ -230,10 +230,10 @@ public class MemberServiceTest {
   @Test
   @DisplayName("Should return false when old password doesn't matches")
   void changePassword2() {
-    ChangePasswordDto dto = new ChangePasswordDto("wrongPswd", "newPswd", "newPswd");
+    ChangePasswordDto dto = new ChangePasswordDto("Wrong1@Pswd", "New1@Pswd", "New1@Pswd");
 
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
-    when(passwordEncoder.matches("wrongPswd", member.getPassword())).thenReturn(false);
+    when(passwordEncoder.matches("Wrong1@Pswd", member.getPassword())).thenReturn(false);
 
     boolean result = memberService.changePassword(email, dto);
 
@@ -244,7 +244,7 @@ public class MemberServiceTest {
   @Test
   @DisplayName("Should return false when member not found")
   void changePassword3() {
-    ChangePasswordDto dto = new ChangePasswordDto("oldPswd", "newPswd", "newPswd");
+    ChangePasswordDto dto = new ChangePasswordDto("Old1@Pswd", "New1@Pswd", "New1@Pswd");
 
     when(memberRepository.findByEmail(email)).thenReturn(Optional.empty());
 
@@ -256,7 +256,7 @@ public class MemberServiceTest {
   @Test
   @DisplayName("Should return false when new password and confirmation do not match")
   void changePassword4() {
-    ChangePasswordDto dto = new ChangePasswordDto("oldPswd", "newPswd", "Pswd");
+    ChangePasswordDto dto = new ChangePasswordDto("Old1@Pswd", "New1@Pswd", "Pswd1@Other");
 
     boolean result = memberService.changePassword(email, dto);
 
@@ -267,7 +267,7 @@ public class MemberServiceTest {
   @Test
   @DisplayName("Should return false when new password is the same as old password")
   void changePassword5() {
-    ChangePasswordDto dto = new ChangePasswordDto("PswdVinci", "PswdVinci", "PswdVinci");
+    ChangePasswordDto dto = new ChangePasswordDto("Pswd1@Vinci", "Pswd1@Vinci", "Pswd1@Vinci");
 
     boolean result = memberService.changePassword(email, dto);
 
@@ -278,7 +278,7 @@ public class MemberServiceTest {
   @Test
   @DisplayName("Should return false when new password is null")
   void changePassword6() {
-    ChangePasswordDto dto = new ChangePasswordDto("old", null, null);
+    ChangePasswordDto dto = new ChangePasswordDto("Old1@Pswd", null, null);
     assertFalse(memberService.changePassword(email, dto));
   }
 
@@ -292,7 +292,7 @@ public class MemberServiceTest {
   @Test
   @DisplayName("Should return false when old password is null in DTO")
   void changePassword8() {
-    ChangePasswordDto dto = new ChangePasswordDto(null, "newPswd", "newPswd");
+    ChangePasswordDto dto = new ChangePasswordDto(null, "New1@Pswd", "New1@Pswd");
 
     boolean result = memberService.changePassword(email, dto);
     assertFalse(result);
@@ -302,7 +302,7 @@ public class MemberServiceTest {
   @DisplayName("Should return false when confirm password is null")
   void changePassword9() {
 
-    ChangePasswordDto dto = new ChangePasswordDto("old", "new", null);
+    ChangePasswordDto dto = new ChangePasswordDto("Old1@Pswd", "New1@Pswd", null);
 
     boolean result = memberService.changePassword(email, dto);
 
