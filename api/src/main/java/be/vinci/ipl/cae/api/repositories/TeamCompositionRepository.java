@@ -11,7 +11,8 @@ import org.springframework.stereotype.Repository;
  * The interface Team composition repository.
  */
 @Repository
-public interface TeamCompositionRepository extends CrudRepository<TeamComposition, TeamCompositionId> {
+public interface TeamCompositionRepository extends
+    CrudRepository<TeamComposition, TeamCompositionId> {
 
   /**
    * Exists by member id boolean.

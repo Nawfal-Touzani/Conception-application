@@ -83,7 +83,7 @@ class TournamentServiceTest {
   }
 
   @Test
-  void createTournamentOrganizerNull(){
+  void createTournamentOrganizerNull() {
     long unknownId = 23L;
 
     when(memberRepository.findById(unknownId)).thenReturn(Optional.empty());
@@ -95,7 +95,7 @@ class TournamentServiceTest {
   }
 
   @Test
-  void createTournamentStartDateAfterEndDate(){
+  void createTournamentStartDateAfterEndDate() {
     when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
 
     TournamentDto invalid = new TournamentDto(
@@ -114,7 +114,7 @@ class TournamentServiceTest {
   }
 
   @Test
-  void createTournamentDateInPast(){
+  void createTournamentDateInPast() {
     when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
 
     TournamentDto invalid = new TournamentDto(
@@ -153,7 +153,7 @@ class TournamentServiceTest {
   }
 
   @Test
-  void createTournamentMaxParticipantsNotPowerOfTwo(){
+  void createTournamentMaxParticipantsNotPowerOfTwo() {
     when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
 
     assertThrows(IllegalArgumentException.class,
