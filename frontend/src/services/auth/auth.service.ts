@@ -58,6 +58,10 @@ export const login = async (
     if (response.status === 401) {
       throw new Error('Email ou mot de passe incorrect.');
     }
+    // 403 Forbidden account banned
+    if (response.status === 403) {
+      throw new Error('Votre compte a été banni.');
+    }
     // Base error message for other cases
     throw new Error('Une erreur est survenue lors de la connexion.');
   }
@@ -76,6 +80,9 @@ export const getMe = async (token: string): Promise<AuthenticatedMember> => {
   });
 
   if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error('Votre compte a été banni.');
+    }
     throw new Error('Jeton invalide ou expiré.');
   }
 

@@ -6,6 +6,10 @@ import { ProfileImage } from '../../types/image.types';
 import * as specialityService from '../../services/speciality/speciality.service';
 import * as imageService from '../../services/image/image.service';
 
+// Regex constants for validation
+const PASSWORD_REGEX =
+  /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
+
 // Logic for RegisterPage
 // RegisterPage becomes pure JSX
 export const useRegisterForm = () => {
@@ -48,6 +52,13 @@ export const useRegisterForm = () => {
     // Frontend validation
     if (!email || !tag || !password || specialityId === '' || imageId === '') {
       return setError('Veuillez remplir tous les champs et choisir un avatar.');
+    }
+
+    // Password validation
+    if (!PASSWORD_REGEX.test(password)) {
+      return setError(
+        'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.',
+      );
     }
 
     try {

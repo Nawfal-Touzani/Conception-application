@@ -58,8 +58,8 @@ class AuthServiceTest {
   void setUp() {
     ReflectionTestUtils.setField(authService, "jwtSecret", "real-secret");
 
-    registerDto = new RegisterCredentials("test@vinci.be", "test", "Gamer", 1L, 1L);
-    loginDto = new LoginCredentials("test@vinci.be", "test");
+    registerDto = new RegisterCredentials("test@vinci.be", "Valid1@Password", "Gamer", 1L, 1L);
+    loginDto = new LoginCredentials("test@vinci.be", "Valid1@Password");
     mockImage = new Image("http://image.url");
     mockSpeciality = new Speciality("Architecte");
     mockMember = new Member("test@vinci.be", "hashedPassword", "Gamer", false, LocalDate.now(),
@@ -156,10 +156,10 @@ class AuthServiceTest {
   void loginWrongPassword() {
     // Arrange
     when(memberRepository.findByEmail(loginDto.email())).thenReturn(Optional.of(mockMember));
-    when(passwordEncoder.matches("wrongPassword", mockMember.getPassword())).thenReturn(false);
+    when(passwordEncoder.matches("Wrong1@Password", mockMember.getPassword())).thenReturn(false);
 
     // Act
-    LoginCredentials badLogin = new LoginCredentials("test@vinci.be", "wrongPassword");
+    LoginCredentials badLogin = new LoginCredentials("test@vinci.be", "Wrong1@Password");
     AuthenticatedMember result = authService.login(badLogin);
 
     // Assert

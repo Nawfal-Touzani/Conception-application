@@ -19,7 +19,7 @@ describe('auth.service', () => {
   describe('register()', () => {
     const credentials = {
       email: 'test@mail.com',
-      password: 'test',
+      password: 'Valid1@Password',
       tag: 'Test',
       imageId: 1,
       specialityId: 1,
@@ -120,6 +120,13 @@ describe('auth.service', () => {
         'Une erreur est survenue lors de la connexion.',
       );
     });
+
+    test('throws on 403 when account is banned', async () => {
+      mockFetch(403);
+      await expect(login(credentials)).rejects.toThrow(
+        'Votre compte a été banni.',
+      );
+    });
   });
 
   // getMe tests
@@ -156,6 +163,11 @@ describe('auth.service', () => {
     test('throws when the token is expired or invalid (backend returns 401)', async () => {
       mockFetch(401);
       await expect(getMe(token)).rejects.toThrow('Jeton invalide ou expiré.');
+    });
+
+    test('throws when backend returns 403 for a banned user', async () => {
+      mockFetch(403);
+      await expect(getMe(token)).rejects.toThrow('Votre compte a été banni.');
     });
   });
 });
