@@ -42,7 +42,8 @@ public class MembershipRequestController extends BaseController {
   @PatchMapping("/{requestId}/approve")
   @PreAuthorize("isAuthenticated()")
   public ResponseEntity<Void> approveRequest(@PathVariable Long requestId) {
-    executeOrThrow(() -> membershipRequestService.approveRequest(requestId, getConnectedMember().getId()));
+    executeOrThrow(
+        () -> membershipRequestService.approveRequest(requestId, getConnectedMember().getId()));
     return ResponseEntity.noContent().build();
   }
 
@@ -57,7 +58,9 @@ public class MembershipRequestController extends BaseController {
   @PreAuthorize("isAuthenticated()")
   public ResponseEntity<Void> refuseRequest(@PathVariable Long requestId,
       @RequestBody RefuseRequestDto body) {
-    executeOrThrow(() -> membershipRequestService.refuseRequest(requestId, getConnectedMember().getId(), body.getReason()));
+    executeOrThrow(
+        () -> membershipRequestService.refuseRequest(requestId, getConnectedMember().getId(),
+            body.getReason()));
     return ResponseEntity.noContent().build();
   }
 }
