@@ -43,33 +43,27 @@ public class TournamentService {
     final Member organizer = memberRepository.findById(organizerId)
         .orElseThrow(() -> new NoSuchElementException("Organizer not found"));
 
-    // Start date before end date
     if (dto.startDate().isAfter(dto.endDate())) {
       throw new IllegalArgumentException("Start date must be before end date");
     }
 
-    // Dates must be in the future
     if (dto.startDate().isBefore(LocalDate.now())
         || dto.endDate().isBefore(LocalDate.now())) {
       throw new IllegalArgumentException("Dates must be in the future");
     }
 
-    // Registration deadline before start
     if (dto.registrationDeadline().isAfter(dto.startDate())) {
       throw new IllegalArgumentException("Registration deadline must be before start date");
     }
 
-    // Registration deadline must not be in the past
     if (dto.registrationDeadline().isBefore(LocalDate.now())) {
       throw new IllegalArgumentException("Registration deadline must be in the future");
     }
 
-    // Max participants must be a power of two
     if (!isPowerOfTwo(dto.maxParticipant())) {
       throw new IllegalArgumentException("Max participants must be a power of two");
     }
 
-    // Create tournament entity
     Tournament tournament = new Tournament();
     tournament.setName(dto.name());
     tournament.setDescription(dto.description());
@@ -81,14 +75,27 @@ public class TournamentService {
     tournament.setOrganizer(organizer);
 
     return tournamentRepository.save(tournament);
-
-
   }
 
   private boolean isPowerOfTwo(int n) {
     return n > 0 && (n & (n - 1)) == 0;
   }
 
+  private TournamentResponseDto toResponseDto(Tournament t) {
+    return new TournamentResponseDto(
+        t.getId(),
+        t.getName(),
+        t.getDescription(),
+        t.getStartDate(),
+        t.getEndDate(),
+        t.getRegistrationDeadline(),
+        t.getMaxParticipants(),
+        registrationRepository.countByTournamentId(t.getId()),
+        t.getStatus(),
+        t.getOrganizer().getTag(),
+        t.isPublic()
+    );
+  }
 
   /**
    * Get all tournaments.
@@ -107,7 +114,6 @@ public class TournamentService {
     List<Tournament> tournaments;
 
     if (teamName != null && !teamName.isBlank()) {
-      // Filter by team name via inscriptions_tournois
       List<Long> ids = registrationRepository
           .findByTeamNameContainingIgnoreCase(teamName)
           .stream()
@@ -117,16 +123,14 @@ public class TournamentService {
       tournaments = tournamentRepository.findByIdIn(ids);
 
     } else if (memberTag != null && !memberTag.isBlank()) {
-      // Filter by member tag — get all tournaments then filter in Java
-      // via inscriptions_tournois -> team -> teamCompositions -> member.tag
-      // utilisation de locale pour dire a java ds quelle language faire le lowercase
       String tagLower = memberTag.toLowerCase(Locale.ROOT);
       tournaments = tournamentRepository.findAll().stream()
           .filter(t -> registrationRepository.findByTournamentId(t.getId())
               .stream()
               .anyMatch(r -> r.getTeam().getTeamCompositions()
                   .stream()
-                  .anyMatch(tc -> tc.getMember().getTag().toLowerCase(Locale.ROOT).contains(tagLower))))
+                  .anyMatch(tc -> tc.getMember().getTag()
+                      .toLowerCase(Locale.ROOT).contains(tagLower))))
           .toList();
 
     } else {
@@ -134,23 +138,8 @@ public class TournamentService {
     }
 
     return tournaments.stream()
-        .filter(t -> {
-          System.out.println("isAdmin: " + isAdmin + ", isPublic: " + t.isPublic());
-          return isAdmin || t.isPublic();
-        })
-        .map(t -> new TournamentResponseDto(
-            t.getId(),
-            t.getName(),
-            t.getDescription(),
-            t.getStartDate(),
-            t.getEndDate(),
-            t.getRegistrationDeadline(),
-            t.getMaxParticipants(),
-            registrationRepository.countByTournamentId(t.getId()),
-            t.getStatus(),
-            t.getOrganizer().getTag(),
-            t.isPublic()
-        ))
+        .filter(t -> isAdmin || t.isPublic())
+        .map(this::toResponseDto)
         .toList();
   }
 
@@ -163,18 +152,6 @@ public class TournamentService {
   public TournamentResponseDto getTournamentById(Long id) {
     Tournament t = tournamentRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
-    return new TournamentResponseDto(
-        t.getId(),
-        t.getName(),
-        t.getDescription(),
-        t.getStartDate(),
-        t.getEndDate(),
-        t.getRegistrationDeadline(),
-        t.getMaxParticipants(),
-        registrationRepository.countByTournamentId(t.getId()),
-        t.getStatus(),
-        t.getOrganizer().getTag(),
-        t.isPublic()
-    );
+    return toResponseDto(t);
   }
 }
