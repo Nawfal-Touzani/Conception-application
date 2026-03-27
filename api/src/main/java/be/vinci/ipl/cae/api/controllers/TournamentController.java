@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -60,10 +61,15 @@ public class TournamentController {
 
   /**
    * GET /tournaments — Get all tournaments.
+   * Optional filters: teamName (team registered in the tournament),
+   * memberTag (member tag in a registered team).
    */
   @GetMapping
-  public List<TournamentResponseDto> getAllTournaments() {
-    return tournamentService.getAllTournaments();
+  public List<TournamentResponseDto> getAllTournaments(
+      @RequestParam(required = false) String teamName,
+      @RequestParam(required = false) String memberTag
+  ) {
+    return tournamentService.getAllTournaments(teamName,memberTag);
   }
 
   /**

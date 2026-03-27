@@ -1,5 +1,11 @@
 import { Tournament, TournamentDetails } from '../../types/tournament.types';
 
+export interface TournamentFilters {
+  tournamentName?: string;
+  teamName?: string;
+  memberTag?: string;
+}
+
 const API_URL = '/api/tournaments';
 
 // Post create a tournament
@@ -27,8 +33,18 @@ export const createTournament = async (
 // GET /api/tournaments — récupère tous les tournois
 export const getTournaments = async (
   token: string,
+  filters?: TournamentFilters,
 ): Promise<TournamentDetails[]> => {
-  const response = await fetch('/api/tournaments', {
+  const params = new URLSearchParams();
+  if (filters?.tournamentName)
+    params.append('tournamentName', filters.tournamentName);
+  if (filters?.teamName) params.append('teamName', filters.teamName);
+  if (filters?.memberTag) params.append('memberTag', filters.memberTag);
+
+  const query = params.toString();
+  const url = query ? `/api/tournaments?${query}` : '/api/tournaments';
+
+  const response = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!response.ok) throw new Error('Erreur lors du chargement des tournois.');

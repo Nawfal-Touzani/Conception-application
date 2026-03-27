@@ -13,15 +13,7 @@ public interface TournamentRegistrationRepository
     extends CrudRepository<TournamentRegistration, Long> {
 
   /**
-   * Find all registrations for a given tournament.
-   *
-   * @param tournamentId the tournament id
-   * @return list of registrations
-   */
-  List<TournamentRegistration> findByTournamentId(Long tournamentId);
-
-  /**
-   * Count the number of teams registered for a given tournament.
+   * Count registrations for a given tournament.
    *
    * @param tournamentId the tournament id
    * @return number of registered teams
@@ -29,12 +21,22 @@ public interface TournamentRegistrationRepository
   int countByTournamentId(Long tournamentId);
 
   /**
-   * Check if a team is already registered for a given tournament.
+   * Find all registrations where the team name matches (partial, case-insensitive).
+   * Used to filter tournaments by team name.
    *
-   * @param teamId       the team id
-   * @param tournamentId the tournament id
-   * @return true if already registered
+   * @param teamName partial team name
+   * @return list of registrations
    */
-  boolean existsByTeamIdAndTournamentId(Long teamId, Long tournamentId);
+  List<TournamentRegistration> findByTeamNameContainingIgnoreCase(String teamName);
+
+  /**
+   * Find all registrations where a team member tag matches (partial, case-insensitive).
+   * Traverses: inscriptions_tournois -> team -> teamCompositions -> member.tag
+   *
+   * @param tag partial member tag
+   * @return list of registrations
+   */
+  List<TournamentRegistration> findByTeamTeamCompositionsMemberTagContainingIgnoreCase(
+      String tag);
 
 }

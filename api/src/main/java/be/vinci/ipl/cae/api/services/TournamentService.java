@@ -90,11 +90,42 @@ public class TournamentService {
 
   /**
    * Get all tournaments.
+   * If teamName is provided, returns only tournaments where that team is registered.
+   * If memberTag is provided, returns only tournaments where a member with that tag
+   * is part of a registered team.
+   * If neither is provided, returns all tournaments.
    *
+   * @param teamName  optional partial team name filter
+   * @param memberTag optional partial member tag filter
    * @return list of tournament response DTOs
    */
-  public List<TournamentResponseDto> getAllTournaments() {
-    return tournamentRepository.findAll().stream()
+  public List<TournamentResponseDto> getAllTournaments(String teamName, String memberTag) {
+
+    List<Tournament> tournaments;
+
+    if (teamName != null && !teamName.isBlank()) {
+      List<Long> ids = registrationRepository
+          .findByTeamNameContainingIgnoreCase(teamName)
+          .stream()
+          .map(r -> r.getTournament().getId())
+          .distinct()
+          .toList();
+      tournaments = tournamentRepository.findByIdIn(ids);
+
+    } else if (memberTag != null && !memberTag.isBlank()) {
+      List<Long> ids = registrationRepository
+          .findByTeamTeamCompositionsMemberTagContainingIgnoreCase(memberTag)
+          .stream()
+          .map(r -> r.getTournament().getId())
+          .distinct()
+          .toList();
+      tournaments = tournamentRepository.findByIdIn(ids);
+
+    } else {
+      tournaments = tournamentRepository.findAll();
+    }
+
+    return tournaments.stream()
         .map(t -> new TournamentResponseDto(
             t.getId(),
             t.getName(),
