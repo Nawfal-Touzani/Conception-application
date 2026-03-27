@@ -7,7 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import be.vinci.ipl.cae.api.models.dtos.TournamentDto;
+import be.vinci.ipl.cae.api.models.dtos.TournamentResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Tournament;
 import be.vinci.ipl.cae.api.models.entities.Tournament.Status;
@@ -29,8 +29,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class TournamentServiceTest {
 
-  TournamentDto dto1;
-  TournamentDto dto2;
+  TournamentResponseDto dto1;
+  TournamentResponseDto dto2;
   Member member;
 
   @Mock
@@ -49,7 +49,7 @@ class TournamentServiceTest {
 
     LocalDate now = LocalDate.now();
 
-    dto1 = new TournamentDto(
+    dto1 = new TournamentResponseDto(
         "tournoi-test",
         "description test",
         now.plusDays(5),
@@ -58,7 +58,7 @@ class TournamentServiceTest {
         4
     );
 
-    dto2 = new TournamentDto(
+    dto2 = new TournamentResponseDto(
         "tournoi-test",
         "description test",
         now.plusDays(2),
@@ -98,7 +98,7 @@ class TournamentServiceTest {
   void createTournamentStartDateAfterEndDate() {
     when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
 
-    TournamentDto invalid = new TournamentDto(
+    TournamentResponseDto invalid = new TournamentResponseDto(
         "test",
         "desc",
         LocalDate.now().plusDays(5),
@@ -117,7 +117,7 @@ class TournamentServiceTest {
   void createTournamentDateInPast() {
     when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
 
-    TournamentDto invalid = new TournamentDto(
+    TournamentResponseDto invalid = new TournamentResponseDto(
         "test",
         "desc",
         LocalDate.now().minusDays(5),
@@ -138,7 +138,7 @@ class TournamentServiceTest {
     when(tournamentRepository.save(Mockito.any(Tournament.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
-    TournamentDto valid = new TournamentDto(
+    TournamentResponseDto valid = new TournamentResponseDto(
         "test",
         "desc",
         LocalDate.now().plusDays(1),
@@ -166,7 +166,7 @@ class TournamentServiceTest {
   void createTournamentRegistrationDeadlineAfterStartDate() {
     when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
 
-    TournamentDto invalid = new TournamentDto(
+    TournamentResponseDto invalid = new TournamentResponseDto(
         "test",
         "desc",
         LocalDate.now().plusDays(2),
@@ -185,7 +185,7 @@ class TournamentServiceTest {
   void createTournamentRegistrationDeadlineInPast() {
     when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
 
-    TournamentDto invalid = new TournamentDto(
+    TournamentResponseDto invalid = new TournamentResponseDto(
         "test",
         "desc",
         LocalDate.now().plusDays(2),

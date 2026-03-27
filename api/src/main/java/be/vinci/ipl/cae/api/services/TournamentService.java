@@ -1,12 +1,15 @@
 package be.vinci.ipl.cae.api.services;
 
 import be.vinci.ipl.cae.api.models.dtos.TournamentDto;
+import be.vinci.ipl.cae.api.models.dtos.TournamentResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Tournament;
 import be.vinci.ipl.cae.api.models.entities.Tournament.Status;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
+import be.vinci.ipl.cae.api.repositories.TournamentRegistrationRepository;
 import be.vinci.ipl.cae.api.repositories.TournamentRepository;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 
@@ -18,13 +21,16 @@ public class TournamentService {
 
   private final TournamentRepository tournamentRepository;
   private final MemberRepository memberRepository;
+  private final TournamentRegistrationRepository registrationRepository;
 
   /**
    * Service constructor.
    */
   public TournamentService(TournamentRepository tournamentRepository,
-      MemberRepository memberRepository) {
+                           TournamentRegistrationRepository registrationRepository,
+                           MemberRepository memberRepository) {
     this.tournamentRepository = tournamentRepository;
+    this.registrationRepository = registrationRepository;
     this.memberRepository = memberRepository;
   }
 
@@ -80,5 +86,50 @@ public class TournamentService {
 
   private boolean isPowerOfTwo(int n) {
     return n > 0 && (n & (n - 1)) == 0;
+  }
+
+  /**
+   * Get all tournaments.
+   *
+   * @return list of tournament response DTOs
+   */
+  public List<TournamentResponseDto> getAllTournaments() {
+    return tournamentRepository.findAll().stream()
+        .map(t -> new TournamentResponseDto(
+            t.getId(),
+            t.getName(),
+            t.getDescription(),
+            t.getStartDate(),
+            t.getEndDate(),
+            t.getRegistrationDeadline(),
+            t.getMaxParticipants(),
+            registrationRepository.countByTournamentId(t.getId()),
+            t.getStatus(),
+            t.getOrganizer().getTag()
+        ))
+        .toList();
+  }
+
+  /**
+   * Get a tournament by id.
+   *
+   * @param id the tournament id
+   * @return the tournament response DTO
+   */
+  public TournamentResponseDto getTournamentById(Long id) {
+    Tournament t = tournamentRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
+    return new TournamentResponseDto(
+        t.getId(),
+        t.getName(),
+        t.getDescription(),
+        t.getStartDate(),
+        t.getEndDate(),
+        t.getRegistrationDeadline(),
+        t.getMaxParticipants(),
+        registrationRepository.countByTournamentId(t.getId()),
+        t.getStatus(),
+        t.getOrganizer().getTag()
+    );
   }
 }

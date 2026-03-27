@@ -19,6 +19,7 @@ import { ProfilePage } from './components/pages/MemberProfilePage/ProfilePage.ts
 import TeamPage from './components/pages/TeamPages/TeamPage.tsx';
 import AdminPage from './components/pages/AdminPages/AdminPage.tsx';
 import CreateTournamentPage from './components/pages/AdminPages/CreateTournamentPage.tsx';
+import TournamentsPage from './components/pages/TournamentPages/TournamentPage.tsx';
 
 const router = createBrowserRouter([
   {
@@ -56,6 +57,10 @@ const router = createBrowserRouter([
       {
         path: 'tournament/create',
         element: <CreateTournamentPage />,
+      },
+      {
+        path: 'tournaments',
+        element: <TournamentsPage />,
       },
     ],
   },

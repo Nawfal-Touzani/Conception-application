@@ -14,3 +14,17 @@ export interface Tournament {
   registrationDeadline?: string;
   maxParticipant?: number;
 }
+
+export interface TournamentDetails {
+  id: number;
+  name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  registrationDeadline: string;
+  maxParticipants: number;
+  currentParticipants: number;
+  status: TournamentStatus;
+  organizerTag: string;
+  isPublic: boolean;
+}

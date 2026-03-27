@@ -1,18 +1,23 @@
 package be.vinci.ipl.cae.api.models.dtos;
 
+import be.vinci.ipl.cae.api.models.entities.Tournament.Status;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 
 /**
- * DTO used to create a tournament.
+ * DTO returned to the frontend for a tournament.
  */
-public record TournamentDto(
+public record TournamentResponseDto(
+    Long id,
     String name,
     String description,
     @JsonFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
     @JsonFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
     @JsonFormat(pattern = "yyyy-MM-dd") LocalDate registrationDeadline,
-    int maxParticipant
+    Integer maxParticipants,
+    int currentParticipants,
+    Status status,
+    String organizerTag
 ) {
 
 }
