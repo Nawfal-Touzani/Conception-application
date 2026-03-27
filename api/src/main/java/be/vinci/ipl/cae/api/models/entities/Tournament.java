@@ -89,6 +89,15 @@ public class Tournament {
   @JsonManagedReference("tournament-matches")
   private List<Match> matches = new ArrayList<>();
 
+  @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonManagedReference("tournament-registrations")
+  private List<Registration> registrations = new ArrayList<>();
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "winner_team_id", nullable = true)
+  @JsonManagedReference("team-winner")
+  private Team winnerTeam;
+
   /**
    * Constructor for Tournament.
    *
