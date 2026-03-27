@@ -19,12 +19,12 @@ public interface TournamentRepository extends CrudRepository<Tournament, Long> {
   List<Tournament> findAll();
 
   /**
-   * Find tournaments whose name contains the given string (partial, case-insensitive).
+   * Find a tournament by name.
    *
    * @param name partial tournament name
-   * @return matching tournaments
+   * @return true if exists
    */
-  List<Tournament> findByNameContainingIgnoreCase(String name);
+  boolean existsByName(String name);
 
   /**
    * Find tournaments by list of ids.

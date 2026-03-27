@@ -40,7 +40,12 @@ const formatDateFull = (dateStr: string) =>
     year: 'numeric',
   });
 
-// Statut affiché basé sur isPublic + status
+// Statut affiché :
+// PREPARATION + isPublic = true  → Inscriptions ouvertes
+// PREPARATION + isPublic = false → En préparation (admin seulement)
+// IN_PROGRESS → En cours
+// FINISHED    → Terminé
+// CANCELLED   → Annulé
 function getStateLabel(tournament: TournamentDetails): string {
   if (tournament.status === 'PREPARATION') {
     return tournament.isPublic ? 'Inscriptions ouvertes' : 'En préparation';
@@ -50,27 +55,22 @@ function getStateLabel(tournament: TournamentDetails): string {
   return 'Annulé';
 }
 
-// Inscriptions ouvertes = PREPARATION + isPublic
-function isRegistrationOpen(tournament: TournamentDetails): boolean {
-  return tournament.isPublic && tournament.status === 'PREPARATION';
-}
-
 const TournamentsPage = () => {
   const { user } = useAuth();
   const token = user?.token ?? '';
   const isAdmin = user?.role === 'ADMIN';
 
-  // Liste reçue du backend (déjà filtrée par team/tag si params envoyés)
+  // Liste reçue du backend
   const [tournaments, setTournaments] = useState<TournamentDetails[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedTournament, setSelectedTournament] =
     useState<TournamentDetails | null>(null);
 
-  // Filtres backend (team et tag → appel API)
+  // Filtres backend — appel API avec debounce
   const [teamSearch, setTeamSearch] = useState('');
   const [tagSearch, setTagSearch] = useState('');
 
-  // Filtres frontend (nom, statut, visibilité → filtre local)
+  // Filtres frontend — filtre local sur la liste reçue
   const [nameSearch, setNameSearch] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -81,27 +81,24 @@ const TournamentsPage = () => {
     'public' | 'private' | ''
   >('');
 
-  // Appelle le backend avec les filtres team/tag
+  // Charge les tournois avec les filtres team/tag
   const loadTournaments = useCallback(
     (teamName?: string, memberTag?: string) => {
       setError(null);
       tournamentService
-        .getTournaments(token, {
-          teamName: teamName || undefined,
-          memberTag: memberTag || undefined,
-        })
+        .getTournaments(token, teamName, memberTag)
         .then((data) => setTournaments(data))
         .catch(() => setError('Erreur lors du chargement des tournois.'));
     },
     [token],
   );
 
-  // Charge au montage
+  // Chargement initial
   useEffect(() => {
     if (token) loadTournaments();
   }, [token, loadTournaments]);
 
-  // Debounce 400ms sur team et tag pour éviter un appel par touche
+  // Debounce 400ms sur team et tag — relance l'appel backend
   useEffect(() => {
     if (!token) return;
     const timer = setTimeout(() => {
@@ -113,7 +110,7 @@ const TournamentsPage = () => {
     return () => clearTimeout(timer);
   }, [teamSearch, tagSearch, token, loadTournaments]);
 
-  // Filtres locaux (nom, dates, statut, visibilité)
+  // Filtres locaux appliqués sur la liste reçue
   const filtered = useMemo(() => {
     return tournaments.filter((t) => {
       if (
@@ -123,9 +120,17 @@ const TournamentsPage = () => {
         return false;
       if (startDate && t.startDate < startDate) return false;
       if (endDate && t.endDate > endDate) return false;
-      if (statusFilter === 'OPEN') {
-        if (!isRegistrationOpen(t)) return false;
-      } else if (statusFilter && t.status !== statusFilter) return false;
+      if (
+        statusFilter === 'OPEN' &&
+        !(t.isPublic && t.status === 'PREPARATION')
+      )
+        return false;
+      else if (
+        statusFilter &&
+        statusFilter !== 'OPEN' &&
+        t.status !== statusFilter
+      )
+        return false;
       if (visibilityFilter === 'public' && !t.isPublic) return false;
       if (visibilityFilter === 'private' && t.isPublic) return false;
       return true;
@@ -210,7 +215,7 @@ const TournamentsPage = () => {
           FILTRES
         </Typography>
 
-        {/* Filtre nom du tournoi — frontend */}
+        {/* Nom — filtre frontend */}
         <Box>
           <Typography
             sx={{
@@ -239,7 +244,7 @@ const TournamentsPage = () => {
           />
         </Box>
 
-        {/* Filtre team — backend via inscriptions_tournois */}
+        {/* Team — filtre backend */}
         <Box>
           <Typography
             sx={{
@@ -268,7 +273,7 @@ const TournamentsPage = () => {
           />
         </Box>
 
-        {/* Filtre tag joueur — backend via inscriptions_tournois -> team -> compositions */}
+        {/* Tag — filtre backend */}
         <Box>
           <Typography
             sx={{
@@ -554,6 +559,7 @@ const TournamentsPage = () => {
                         alignItems: 'center',
                       }}
                     >
+                      {/* Dates du tournoi */}
                       <Typography
                         variant="caption"
                         display="block"
@@ -564,6 +570,7 @@ const TournamentsPage = () => {
                         {formatDate(tournament.endDate)}
                       </Typography>
 
+                      {/* Statut */}
                       <Typography
                         variant="body1"
                         fontWeight="bold"
@@ -573,19 +580,19 @@ const TournamentsPage = () => {
                         {getStateLabel(tournament)}
                       </Typography>
 
-                      {isRegistrationOpen(tournament) && (
-                        <Typography
-                          variant="caption"
-                          display="block"
-                          mb={1}
-                          fontSize="0.8rem"
-                          sx={{ color: 'rgba(255,255,255,0.7)' }}
-                        >
-                          Clôture le{' '}
-                          {formatDateFull(tournament.registrationDeadline)}
-                        </Typography>
-                      )}
+                      {/* Date de clôture des inscriptions — toujours affichée */}
+                      <Typography
+                        variant="caption"
+                        display="block"
+                        mb={1}
+                        fontSize="0.8rem"
+                        sx={{ color: 'rgba(255,255,255,0.7)' }}
+                      >
+                        Clôture le{' '}
+                        {formatDateFull(tournament.registrationDeadline)}
+                      </Typography>
 
+                      {/* Description */}
                       {tournament.description && (
                         <Typography
                           variant="caption"

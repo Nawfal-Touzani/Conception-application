@@ -13,17 +13,16 @@ function formatDate(dateStr: string) {
   });
 }
 
-function formatStatus(status: TournamentDetails['status']) {
-  const labels: Record<TournamentDetails['status'], string> = {
-    PREPARATION: 'En préparation',
-    IN_PROGRESS: 'En cours',
-    FINISHED: 'Terminé',
-    CANCELLED: 'Annulé',
-  };
-  return labels[status];
+// Cohérent avec TournamentsPage : isPublic + status
+function formatStatus(tournament: TournamentDetails): string {
+  if (tournament.status === 'PREPARATION') {
+    return tournament.isPublic ? 'Inscriptions ouvertes' : 'En préparation';
+  }
+  if (tournament.status === 'IN_PROGRESS') return 'En cours';
+  if (tournament.status === 'FINISHED') return 'Terminé';
+  return 'Annulé';
 }
 
-// Une ligne d'équipe dans le bracket
 function MatchTeam({
   name,
   score,
@@ -57,7 +56,6 @@ function MatchTeam({
   );
 }
 
-// Paire de deux équipes
 function MatchPair({
   top,
   bottom,
@@ -73,9 +71,8 @@ function MatchPair({
   );
 }
 
-// Hauteur d'un match (2 équipes + gap interne)
-const MATCH_H = 68; // px : 2 * (ligne ~28px) + gap 6px + padding
-const ROUND_GAP = 32; // gap entre les matchs d'un même round
+const MATCH_H = 68;
+const ROUND_GAP = 32;
 
 const TournamentDetail = ({ tournament }: Props) => {
   const quartsData = [
@@ -113,10 +110,7 @@ const TournamentDetail = ({ tournament }: Props) => {
     bottom: { name: 'Nom équipe', score: 'score' },
   };
 
-  // Offset vertical pour centrer les demis entre les paires de quarts
-  // Un demi est centré entre 2 quarts : offset = MATCH_H/2 + ROUND_GAP/2
   const demiOffset = MATCH_H / 2 + ROUND_GAP / 2;
-  // Un finale est centré entre les 2 demis
   const finaleOffset = MATCH_H / 2 + ROUND_GAP / 2 + demiOffset;
 
   return (
@@ -147,7 +141,7 @@ const TournamentDetail = ({ tournament }: Props) => {
         {/* ── Bracket ── */}
         <Box sx={{ flex: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0 }}>
-            {/* ── Quarts ── */}
+            {/* Quarts */}
             <Box>
               <Typography
                 sx={{
@@ -184,7 +178,6 @@ const TournamentDetail = ({ tournament }: Props) => {
             >
               {[0, 1].map((i) => (
                 <Box key={i} sx={{ display: 'flex', flexDirection: 'column' }}>
-                  {/* Ligne du haut */}
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Box
                       sx={{ width: 30, height: '2px', backgroundColor: '#fff' }}
@@ -197,7 +190,6 @@ const TournamentDetail = ({ tournament }: Props) => {
                       }}
                     />
                   </Box>
-                  {/* Ligne du bas */}
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Box
                       sx={{ width: 30, height: '2px', backgroundColor: '#fff' }}
@@ -210,7 +202,7 @@ const TournamentDetail = ({ tournament }: Props) => {
               ))}
             </Box>
 
-            {/* ── Demis ── */}
+            {/* Demis */}
             <Box>
               <Typography
                 sx={{
@@ -264,7 +256,7 @@ const TournamentDetail = ({ tournament }: Props) => {
               </Box>
             </Box>
 
-            {/* ── Finale ── */}
+            {/* Finale */}
             <Box>
               <Typography
                 sx={{
@@ -358,7 +350,7 @@ const TournamentDetail = ({ tournament }: Props) => {
                   textAlign: 'right',
                 }}
               >
-                {formatStatus(tournament.status)}
+                {formatStatus(tournament)}
               </Typography>
             </Box>
           </Paper>
@@ -424,7 +416,7 @@ const TournamentDetail = ({ tournament }: Props) => {
             <Typography
               sx={{ fontWeight: 800, color: '#1a2744', fontSize: '1.6rem' }}
             >
-              {formatStatus(tournament.status)}
+              {formatStatus(tournament)}
             </Typography>
           </Paper>
         </Box>

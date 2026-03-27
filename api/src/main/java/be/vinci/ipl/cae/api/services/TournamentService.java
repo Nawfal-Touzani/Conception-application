@@ -88,6 +88,7 @@ public class TournamentService {
     return n > 0 && (n & (n - 1)) == 0;
   }
 
+
   /**
    * Get all tournaments.
    * If teamName is provided, returns only tournaments where that team is registered.
@@ -99,11 +100,13 @@ public class TournamentService {
    * @param memberTag optional partial member tag filter
    * @return list of tournament response DTOs
    */
-  public List<TournamentResponseDto> getAllTournaments(String teamName, String memberTag) {
+  public List<TournamentResponseDto> getAllTournaments(String teamName, String memberTag,
+                                                       boolean isAdmin) {
 
     List<Tournament> tournaments;
 
     if (teamName != null && !teamName.isBlank()) {
+      // Filter by team name via inscriptions_tournois
       List<Long> ids = registrationRepository
           .findByTeamNameContainingIgnoreCase(teamName)
           .stream()
@@ -113,19 +116,26 @@ public class TournamentService {
       tournaments = tournamentRepository.findByIdIn(ids);
 
     } else if (memberTag != null && !memberTag.isBlank()) {
-      List<Long> ids = registrationRepository
-          .findByTeamTeamCompositionsMemberTagContainingIgnoreCase(memberTag)
-          .stream()
-          .map(r -> r.getTournament().getId())
-          .distinct()
+      // Filter by member tag — get all tournaments then filter in Java
+      // via inscriptions_tournois -> team -> teamCompositions -> member.tag
+      String tagLower = memberTag.toLowerCase();
+      tournaments = tournamentRepository.findAll().stream()
+          .filter(t -> registrationRepository.findByTournamentId(t.getId())
+              .stream()
+              .anyMatch(r -> r.getTeam().getTeamCompositions()
+                  .stream()
+                  .anyMatch(tc -> tc.getMember().getTag().toLowerCase().contains(tagLower))))
           .toList();
-      tournaments = tournamentRepository.findByIdIn(ids);
 
     } else {
       tournaments = tournamentRepository.findAll();
     }
 
     return tournaments.stream()
+        .filter(t -> {
+          System.out.println("isAdmin: " + isAdmin + ", isPublic: " + t.isPublic());
+          return isAdmin || t.isPublic();
+        })
         .map(t -> new TournamentResponseDto(
             t.getId(),
             t.getName(),
@@ -136,7 +146,8 @@ public class TournamentService {
             t.getMaxParticipants(),
             registrationRepository.countByTournamentId(t.getId()),
             t.getStatus(),
-            t.getOrganizer().getTag()
+            t.getOrganizer().getTag(),
+            t.isPublic()
         ))
         .toList();
   }
@@ -160,7 +171,8 @@ public class TournamentService {
         t.getMaxParticipants(),
         registrationRepository.countByTournamentId(t.getId()),
         t.getStatus(),
-        t.getOrganizer().getTag()
+        t.getOrganizer().getTag(),
+        t.isPublic()
     );
   }
 }

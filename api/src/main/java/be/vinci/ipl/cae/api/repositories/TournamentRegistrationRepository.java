@@ -22,7 +22,6 @@ public interface TournamentRegistrationRepository
 
   /**
    * Find all registrations where the team name matches (partial, case-insensitive).
-   * Used to filter tournaments by team name.
    *
    * @param teamName partial team name
    * @return list of registrations
@@ -30,13 +29,11 @@ public interface TournamentRegistrationRepository
   List<TournamentRegistration> findByTeamNameContainingIgnoreCase(String teamName);
 
   /**
-   * Find all registrations where a team member tag matches (partial, case-insensitive).
-   * Traverses: inscriptions_tournois -> team -> teamCompositions -> member.tag
+   * Find all registrations for a given tournament.
    *
-   * @param tag partial member tag
+   * @param tournamentId the tournament id
    * @return list of registrations
    */
-  List<TournamentRegistration> findByTeamTeamCompositionsMemberTagContainingIgnoreCase(
-      String tag);
+  List<TournamentRegistration> findByTournamentId(Long tournamentId);
 
 }

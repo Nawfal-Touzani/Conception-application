@@ -66,10 +66,12 @@ public class TournamentController {
    */
   @GetMapping
   public List<TournamentResponseDto> getAllTournaments(
+      @AuthenticationPrincipal Member currentMember,
       @RequestParam(required = false) String teamName,
       @RequestParam(required = false) String memberTag
   ) {
-    return tournamentService.getAllTournaments(teamName,memberTag);
+    boolean isAdmin = currentMember.getIsAdmin();
+    return tournamentService.getAllTournaments(teamName, memberTag, isAdmin);
   }
 
   /**

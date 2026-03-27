@@ -2,6 +2,7 @@ package be.vinci.ipl.cae.api.models.dtos;
 
 import be.vinci.ipl.cae.api.models.entities.Tournament.Status;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
 
 /**
@@ -17,7 +18,8 @@ public record TournamentResponseDto(
     Integer maxParticipants,
     int currentParticipants,
     Status status,
-    String organizerTag
+    String organizerTag,
+    @JsonProperty("isPublic") boolean isPublic
 ) {
 
 }

@@ -1,11 +1,5 @@
 import { Tournament, TournamentDetails } from '../../types/tournament.types';
 
-export interface TournamentFilters {
-  tournamentName?: string;
-  teamName?: string;
-  memberTag?: string;
-}
-
 const API_URL = '/api/tournaments';
 
 // Post create a tournament
@@ -33,13 +27,12 @@ export const createTournament = async (
 // GET /api/tournaments — récupère tous les tournois
 export const getTournaments = async (
   token: string,
-  filters?: TournamentFilters,
+  teamName?: string,
+  memberTag?: string,
 ): Promise<TournamentDetails[]> => {
   const params = new URLSearchParams();
-  if (filters?.tournamentName)
-    params.append('tournamentName', filters.tournamentName);
-  if (filters?.teamName) params.append('teamName', filters.teamName);
-  if (filters?.memberTag) params.append('memberTag', filters.memberTag);
+  if (teamName) params.append('teamName', teamName);
+  if (memberTag) params.append('memberTag', memberTag);
 
   const query = params.toString();
   const url = query ? `/api/tournaments?${query}` : '/api/tournaments';
