@@ -10,6 +10,7 @@ import be.vinci.ipl.cae.api.repositories.TournamentRegistrationRepository;
 import be.vinci.ipl.cae.api.repositories.TournamentRepository;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 
@@ -118,13 +119,14 @@ public class TournamentService {
     } else if (memberTag != null && !memberTag.isBlank()) {
       // Filter by member tag — get all tournaments then filter in Java
       // via inscriptions_tournois -> team -> teamCompositions -> member.tag
-      String tagLower = memberTag.toLowerCase();
+      // utilisation de locale pour dire a java ds quelle language faire le lowercase
+      String tagLower = memberTag.toLowerCase(Locale.ROOT);
       tournaments = tournamentRepository.findAll().stream()
           .filter(t -> registrationRepository.findByTournamentId(t.getId())
               .stream()
               .anyMatch(r -> r.getTeam().getTeamCompositions()
                   .stream()
-                  .anyMatch(tc -> tc.getMember().getTag().toLowerCase().contains(tagLower))))
+                  .anyMatch(tc -> tc.getMember().getTag().toLowerCase(Locale.ROOT).contains(tagLower))))
           .toList();
 
     } else {

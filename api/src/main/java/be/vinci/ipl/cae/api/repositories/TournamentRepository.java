@@ -16,6 +16,7 @@ public interface TournamentRepository extends CrudRepository<Tournament, Long> {
    *
    * @return all tournaments
    */
+  @Override
   List<Tournament> findAll();
 
   /**
