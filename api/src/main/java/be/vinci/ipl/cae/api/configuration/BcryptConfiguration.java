@@ -38,6 +38,22 @@ public class BcryptConfiguration {
     return new BCryptPasswordEncoder();
   }
 
+  private Tournament buildTournament(String name, String description,
+                                     LocalDate startDate, LocalDate endDate, LocalDate deadline,
+                                     int maxParticipants, Status status, boolean isPublic, Member organizer) {
+    Tournament t = new Tournament();
+    t.setName(name);
+    t.setDescription(description);
+    t.setStartDate(startDate);
+    t.setEndDate(endDate);
+    t.setRegistrationDeadline(deadline);
+    t.setMaxParticipants(maxParticipants);
+    t.setStatus(status);
+    t.setPublic(isPublic);
+    t.setOrganizer(organizer);
+    return t;
+  }
+
   /**
    * Bean for initializing default users in the database.
    */
@@ -239,103 +255,61 @@ public class BcryptConfiguration {
 
       // Tournois passés (FINISHED + isPublic = true)
       if (!tournamentRepository.existsByName("Spring Arena Cup 2025")) {
-        Tournament t = new Tournament();
-        t.setName("Spring Arena Cup 2025");
-        t.setDescription("Compétition printanière ouverte aux nouvelles teams émergentes");
-        t.setStartDate(LocalDate.of(2025, 4, 15));
-        t.setEndDate(LocalDate.of(2025, 4, 25));
-        t.setRegistrationDeadline(LocalDate.of(2025, 4, 10));
-        t.setMaxParticipants(8);
-        t.setStatus(Status.FINISHED);
-        t.setPublic(true);
-        t.setOrganizer(admin);
-        tournamentRepository.save(t);
+        tournamentRepository.save(buildTournament(
+            "Spring Arena Cup 2025",
+            "Compétition printanière ouverte aux nouvelles teams émergentes",
+            LocalDate.of(2025, 4, 15), LocalDate.of(2025, 4, 25),
+            LocalDate.of(2025, 4, 10), 8, Status.FINISHED, true, admin));
       }
 
       if (!tournamentRepository.existsByName("Elite Championship 2025")) {
-        Tournament t = new Tournament();
-        t.setName("Elite Championship 2025");
-        t.setDescription("Compétition élite réservée aux meilleures teams");
-        t.setStartDate(LocalDate.of(2025, 5, 15));
-        t.setEndDate(LocalDate.of(2025, 5, 30));
-        t.setRegistrationDeadline(LocalDate.of(2025, 5, 11));
-        t.setMaxParticipants(8);
-        t.setStatus(Status.FINISHED);
-        t.setPublic(true);
-        t.setOrganizer(admin);
-        tournamentRepository.save(t);
+        tournamentRepository.save(buildTournament(
+            "Elite Championship 2025",
+            "Compétition élite réservée aux meilleures teams",
+            LocalDate.of(2025, 5, 15), LocalDate.of(2025, 5, 30),
+            LocalDate.of(2025, 5, 11), 8, Status.FINISHED, true, admin));
       }
 
       if (!tournamentRepository.existsByName("Summer Pro League 2025")) {
-        Tournament t = new Tournament();
-        t.setName("Summer Pro League 2025");
-        t.setDescription("Tournoi estival de haut niveau avec les meilleures teams");
-        t.setStartDate(LocalDate.of(2025, 7, 1));
-        t.setEndDate(LocalDate.of(2025, 7, 15));
-        t.setRegistrationDeadline(LocalDate.of(2025, 6, 25));
-        t.setMaxParticipants(16);
-        t.setStatus(Status.FINISHED);
-        t.setPublic(true);
-        t.setOrganizer(admin);
-        tournamentRepository.save(t);
+        tournamentRepository.save(buildTournament(
+            "Summer Pro League 2025",
+            "Tournoi estival de haut niveau avec les meilleures teams",
+            LocalDate.of(2025, 7, 1), LocalDate.of(2025, 7, 15),
+            LocalDate.of(2025, 6, 25), 16, Status.FINISHED, true, admin));
       }
 
       if (!tournamentRepository.existsByName("Vinci Winter Clash 2026")) {
-        Tournament t = new Tournament();
-        t.setName("Vinci Winter Clash 2026");
-        t.setDescription("Tournoi hivernal réunissant des équipes semi-professionnelles");
-        t.setStartDate(LocalDate.of(2026, 1, 10));
-        t.setEndDate(LocalDate.of(2026, 1, 20));
-        t.setRegistrationDeadline(LocalDate.of(2026, 1, 5));
-        t.setMaxParticipants(12);
-        t.setStatus(Status.FINISHED);
-        t.setPublic(true);
-        t.setOrganizer(admin);
-        tournamentRepository.save(t);
+        tournamentRepository.save(buildTournament(
+            "Vinci Winter Clash 2026",
+            "Tournoi hivernal réunissant des équipes semi-professionnelles",
+            LocalDate.of(2026, 1, 10), LocalDate.of(2026, 1, 20),
+            LocalDate.of(2026, 1, 5), 12, Status.FINISHED, true, admin));
       }
 
       // Tournoi en cours (IN_PROGRESS + isPublic = true)
       if (!tournamentRepository.existsByName("Spring Battle Series 2026")) {
-        Tournament t = new Tournament();
-        t.setName("Spring Battle Series 2026");
-        t.setDescription("Série printanière avec élimination directe et forte participation");
-        t.setStartDate(LocalDate.of(2026, 4, 4));
-        t.setEndDate(LocalDate.of(2026, 4, 11));
-        t.setRegistrationDeadline(LocalDate.of(2026, 4, 1));
-        t.setMaxParticipants(8);
-        t.setStatus(Status.IN_PROGRESS);
-        t.setPublic(true);
-        t.setOrganizer(admin);
-        tournamentRepository.save(t);
+        tournamentRepository.save(buildTournament(
+            "Spring Battle Series 2026",
+            "Série printanière avec élimination directe et forte participation",
+            LocalDate.of(2026, 4, 4), LocalDate.of(2026, 4, 11),
+            LocalDate.of(2026, 4, 1), 8, Status.IN_PROGRESS, true, admin));
       }
 
       // Tournois futurs (PREPARATION + isPublic = true → inscriptions ouvertes)
       if (!tournamentRepository.existsByName("Vinci Easter Cup 2026")) {
-        Tournament t = new Tournament();
-        t.setName("Vinci Easter Cup 2026");
-        t.setDescription("Tournoi de Pâques ouvert à toutes les teams actives");
-        t.setStartDate(LocalDate.of(2026, 4, 15));
-        t.setEndDate(LocalDate.of(2026, 4, 25));
-        t.setRegistrationDeadline(LocalDate.of(2026, 4, 8));
-        t.setMaxParticipants(8);
-        t.setStatus(Status.PREPARATION);
-        t.setPublic(true);
-        t.setOrganizer(admin);
-        tournamentRepository.save(t);
+        tournamentRepository.save(buildTournament(
+            "Vinci Easter Cup 2026",
+            "Tournoi de Pâques ouvert à toutes les teams actives",
+            LocalDate.of(2026, 4, 15), LocalDate.of(2026, 4, 25),
+            LocalDate.of(2026, 4, 8), 8, Status.PREPARATION, true, admin));
       }
 
       if (!tournamentRepository.existsByName("Elite Championship 2026")) {
-        Tournament t = new Tournament();
-        t.setName("Elite Championship 2026");
-        t.setDescription("Compétition élite réservée aux meilleures teams");
-        t.setStartDate(LocalDate.of(2026, 5, 15));
-        t.setEndDate(LocalDate.of(2026, 5, 30));
-        t.setRegistrationDeadline(LocalDate.of(2026, 5, 11));
-        t.setMaxParticipants(16);
-        t.setStatus(Status.PREPARATION);
-        t.setPublic(true);
-        t.setOrganizer(admin);
-        tournamentRepository.save(t);
+        tournamentRepository.save(buildTournament(
+            "Elite Championship 2026",
+            "Compétition élite réservée aux meilleures teams",
+            LocalDate.of(2026, 5, 15), LocalDate.of(2026, 5, 30),
+            LocalDate.of(2026, 5, 11), 16, Status.PREPARATION, true, admin));
       }
 
     };
