@@ -3,14 +3,14 @@ package be.vinci.ipl.cae.api.repositories;
 import be.vinci.ipl.cae.api.models.entities.Banishment;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 /**
  * Repository for Banishment entity, providing basic CRUD operations.
  */
 @Repository
-public interface BanishmentRepository extends JpaRepository<Banishment, Long> {
+public interface BanishmentRepository extends CrudRepository<Banishment, Long> {
 
   /**
    * Checks whether a member is already banned.
