@@ -33,7 +33,7 @@ public class BanishmentService {
     Member memberToBan = findMember(memberId);
     Member admin = findMember(adminId);
 
-    validateBanishmen(memberId);
+    validateBanishmen(memberToBan);
     applyBanishment(memberToBan);
 
     Banishment banishment = new Banishment(memberToBan, admin, LocalDate.now(), reason);
@@ -45,8 +45,8 @@ public class BanishmentService {
         .orElseThrow(() -> new NoSuchElementException("Membre introuvable"));
   }
 
-  private void validateBanishmen(Long memberId) {
-    if (banishmentRepository.existsByBannedMemberId(memberId)) {
+  private void validateBanishmen(Member member) {
+    if (member.isBan() || banishmentRepository.existsByBannedMemberId(member.getId())) {
       throw new IllegalArgumentException("Ce membre est déja banni");
     }
   }
