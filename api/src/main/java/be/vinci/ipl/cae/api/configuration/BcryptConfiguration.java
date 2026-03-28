@@ -5,11 +5,14 @@ import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Speciality;
 import be.vinci.ipl.cae.api.models.entities.Team;
 import be.vinci.ipl.cae.api.models.entities.TeamComposition;
+import be.vinci.ipl.cae.api.models.entities.Tournament;
+import be.vinci.ipl.cae.api.models.entities.Tournament.Status;
 import be.vinci.ipl.cae.api.repositories.ImageRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
 import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
 import be.vinci.ipl.cae.api.repositories.TeamRepository;
+import be.vinci.ipl.cae.api.repositories.TournamentRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,16 +38,24 @@ public class BcryptConfiguration {
     return new BCryptPasswordEncoder();
   }
 
+  private Tournament buildTournament(String name, String description,
+                                     LocalDate startDate, LocalDate endDate, LocalDate deadline,
+                                     int maxParticipants, Status status, boolean isPublic, Member organizer) {
+    Tournament t = new Tournament();
+    t.setName(name);
+    t.setDescription(description);
+    t.setStartDate(startDate);
+    t.setEndDate(endDate);
+    t.setRegistrationDeadline(deadline);
+    t.setMaxParticipants(maxParticipants);
+    t.setStatus(status);
+    t.setPublic(isPublic);
+    t.setOrganizer(organizer);
+    return t;
+  }
+
   /**
    * Bean for initializing default users in the database.
-   * Creates a default admin and a default user if they do not already exist,
-   * along with a default image and a default speciality if none are present.
-   *
-   * @param memberRepository     the repository for managing members
-   * @param imageRepository      the repository for managing images
-   * @param specialityRepository the repository for managing specialities
-   * @param passwordEncoder      the BCryptPasswordEncoder for encoding passwords
-   * @return a CommandLineRunner that initializes the default users
    */
   @Bean
   public CommandLineRunner initUsers(MemberRepository memberRepository,
@@ -52,9 +63,9 @@ public class BcryptConfiguration {
                                      SpecialityRepository specialityRepository,
                                      TeamRepository teamRepository,
                                      TeamCompositionRepository teamCompositionRepository,
+                                     TournamentRepository tournamentRepository,
                                      BCryptPasswordEncoder passwordEncoder) {
     return args -> {
-
 
       // 20 Images in DB
       List<String> imageUrls = List.of(
@@ -117,7 +128,6 @@ public class BcryptConfiguration {
         lea.setImage(imageRepository.findAll().getFirst());
         lea.setSpeciality(tacticien);
         lea.setProfileCreationDate(LocalDate.of(2025, 11, 12));
-
         memberRepository.save(lea);
       }
 
@@ -132,7 +142,6 @@ public class BcryptConfiguration {
         tom.setImage(imageRepository.findAll().get(3));
         tom.setSpeciality(executeur);
         tom.setProfileCreationDate(LocalDate.of(2025, 12, 3));
-
         memberRepository.save(tom);
       }
 
@@ -147,7 +156,6 @@ public class BcryptConfiguration {
         ines.setImage(imageRepository.findAll().get(15));
         ines.setSpeciality(guerisseur);
         ines.setProfileCreationDate(LocalDate.of(2026, 1, 18));
-
         memberRepository.save(ines);
       }
 
@@ -162,7 +170,6 @@ public class BcryptConfiguration {
         tibo.setImage(imageRepository.findAll().get(19));
         tibo.setSpeciality(gardien);
         tibo.setProfileCreationDate(LocalDate.of(2025, 10, 27));
-
         memberRepository.save(tibo);
       }
 
@@ -179,7 +186,6 @@ public class BcryptConfiguration {
         admin.setImage(defaultImage);
         admin.setSpeciality(defaultSpeciality);
         admin.setProfileCreationDate(LocalDate.now());
-
         memberRepository.save(admin);
       }
 
@@ -192,7 +198,6 @@ public class BcryptConfiguration {
         member.setImage(defaultImage);
         member.setSpeciality(defaultSpeciality);
         member.setProfileCreationDate(LocalDate.now());
-
         memberRepository.save(member);
       }
 
@@ -206,7 +211,6 @@ public class BcryptConfiguration {
         member.setImage(defaultImage);
         member.setSpeciality(defaultSpeciality);
         member.setProfileCreationDate(LocalDate.now());
-
         memberRepository.save(member);
       }
 
@@ -245,6 +249,69 @@ public class BcryptConfiguration {
       if (!teamCompositionRepository.existsByMemberId(tibo.getId())) {
         teamCompositionRepository.save(new TeamComposition(tibo, teamOmega, LocalDateTime.now()));
       }
+
+      // Organizer for tournaments
+      Member admin = memberRepository.findByEmail("admin@vinci.be").orElseThrow();
+
+      // Tournois passés (FINISHED + isPublic = true)
+      if (!tournamentRepository.existsByName("Spring Arena Cup 2025")) {
+        tournamentRepository.save(buildTournament(
+            "Spring Arena Cup 2025",
+            "Compétition printanière ouverte aux nouvelles teams émergentes",
+            LocalDate.of(2025, 4, 15), LocalDate.of(2025, 4, 25),
+            LocalDate.of(2025, 4, 10), 8, Status.FINISHED, true, admin));
+      }
+
+      if (!tournamentRepository.existsByName("Elite Championship 2025")) {
+        tournamentRepository.save(buildTournament(
+            "Elite Championship 2025",
+            "Compétition élite réservée aux meilleures teams",
+            LocalDate.of(2025, 5, 15), LocalDate.of(2025, 5, 30),
+            LocalDate.of(2025, 5, 11), 8, Status.FINISHED, true, admin));
+      }
+
+      if (!tournamentRepository.existsByName("Summer Pro League 2025")) {
+        tournamentRepository.save(buildTournament(
+            "Summer Pro League 2025",
+            "Tournoi estival de haut niveau avec les meilleures teams",
+            LocalDate.of(2025, 7, 1), LocalDate.of(2025, 7, 15),
+            LocalDate.of(2025, 6, 25), 16, Status.FINISHED, true, admin));
+      }
+
+      if (!tournamentRepository.existsByName("Vinci Winter Clash 2026")) {
+        tournamentRepository.save(buildTournament(
+            "Vinci Winter Clash 2026",
+            "Tournoi hivernal réunissant des équipes semi-professionnelles",
+            LocalDate.of(2026, 1, 10), LocalDate.of(2026, 1, 20),
+            LocalDate.of(2026, 1, 5), 12, Status.FINISHED, true, admin));
+      }
+
+      // Tournoi en cours (IN_PROGRESS + isPublic = true)
+      if (!tournamentRepository.existsByName("Spring Battle Series 2026")) {
+        tournamentRepository.save(buildTournament(
+            "Spring Battle Series 2026",
+            "Série printanière avec élimination directe et forte participation",
+            LocalDate.of(2026, 4, 4), LocalDate.of(2026, 4, 11),
+            LocalDate.of(2026, 4, 1), 8, Status.IN_PROGRESS, true, admin));
+      }
+
+      // Tournois futurs (PREPARATION + isPublic = true → inscriptions ouvertes)
+      if (!tournamentRepository.existsByName("Vinci Easter Cup 2026")) {
+        tournamentRepository.save(buildTournament(
+            "Vinci Easter Cup 2026",
+            "Tournoi de Pâques ouvert à toutes les teams actives",
+            LocalDate.of(2026, 4, 15), LocalDate.of(2026, 4, 25),
+            LocalDate.of(2026, 4, 8), 8, Status.PREPARATION, true, admin));
+      }
+
+      if (!tournamentRepository.existsByName("Elite Championship 2026")) {
+        tournamentRepository.save(buildTournament(
+            "Elite Championship 2026",
+            "Compétition élite réservée aux meilleures teams",
+            LocalDate.of(2026, 5, 15), LocalDate.of(2026, 5, 30),
+            LocalDate.of(2026, 5, 11), 16, Status.PREPARATION, true, admin));
+      }
+
     };
   }
 }

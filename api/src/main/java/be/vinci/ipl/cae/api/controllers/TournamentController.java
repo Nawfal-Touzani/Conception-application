@@ -1,17 +1,21 @@
 package be.vinci.ipl.cae.api.controllers;
 
 import be.vinci.ipl.cae.api.models.dtos.TournamentDto;
+import be.vinci.ipl.cae.api.models.dtos.TournamentResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Tournament;
 import be.vinci.ipl.cae.api.services.TournamentService;
+import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -52,6 +56,33 @@ public class TournamentController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     } catch (IllegalArgumentException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * GET /tournaments — Get all tournaments.
+   * Optional filters: teamName (team registered in the tournament),
+   * memberTag (member tag in a registered team).
+   */
+  @GetMapping
+  public List<TournamentResponseDto> getAllTournaments(
+      @AuthenticationPrincipal Member currentMember,
+      @RequestParam(required = false) String teamName,
+      @RequestParam(required = false) String memberTag
+  ) {
+    boolean isAdmin = currentMember.getIsAdmin();
+    return tournamentService.getAllTournaments(teamName, memberTag, isAdmin);
+  }
+
+  /**
+   * GET /tournaments/{id} — Get a single tournament by id.
+   */
+  @GetMapping("/{id}")
+  public TournamentResponseDto getTournamentById(@PathVariable long id) {
+    try {
+      return tournamentService.getTournamentById(id);
+    } catch (NoSuchElementException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
 
