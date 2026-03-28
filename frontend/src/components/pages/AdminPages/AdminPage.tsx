@@ -11,12 +11,12 @@ import {
   DialogContent,
   DialogActions,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { useAuth } from '../../../contexts/useAuth';
 import { useNavigate } from 'react-router-dom';
 import * as adminService from '../../../services/admin.service';
 import { MemberDto } from '../../../types/admin.types';
+import { MemberRow } from './MemberRow';
 
 const PAGE_SIZE = 4;
 
@@ -115,35 +115,27 @@ const AdminPage = () => {
       }}
     >
       <Box sx={{ width: '100%', maxWidth: 760 }}>
-        {/* Titre + bouton + */}
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mb: 3,
-          }}
-        >
-          <Box sx={{ flex: 1 }} />
+        <Box sx={{ width: '100%', maxWidth: 760 }}>
           <Typography
-            variant="h5"
+            variant="h4"
             sx={{
               color: '#fff',
               fontWeight: 800,
-              flex: 2,
               textAlign: 'center',
+              mb: 4,
+              mt: 2,
             }}
           >
             Gestion des administrateurs
           </Typography>
-          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
+
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 4 }}>
             <Button
               onClick={() => setPromoteOpen(true)}
               sx={{
-                minWidth: 36,
-                width: 36,
-                height: 36,
-                borderRadius: '8px',
+                width: 40,
+                height: 40,
+                borderRadius: '6px',
                 backgroundColor: '#27ae60',
                 color: '#fff',
                 fontWeight: 800,
@@ -175,64 +167,12 @@ const AdminPage = () => {
         {/* Liste des admins */}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           {paginated.map((member) => (
-            <Box
+            <MemberRow
               key={member.email}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                backgroundColor: '#fff',
-                borderRadius: '10px',
-                px: 2,
-                py: 1.2,
-                gap: 2,
-              }}
-            >
-              <Avatar
-                src={
-                  member.profileImage
-                    ? `http://localhost:3000${member.profileImage}`
-                    : undefined
-                }
-                alt={member.tag}
-                sx={{ width: 40, height: 40 }}
-              />
-
-              <Typography
-                sx={{ fontWeight: 700, color: '#1a2744', minWidth: 130 }}
-              >
-                {member.tag}
-              </Typography>
-
-              <Typography sx={{ color: '#555', fontSize: '0.9rem', flex: 1 }}>
-                {member.speciality}
-              </Typography>
-
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-                <Box
-                  sx={{
-                    width: 10,
-                    height: 10,
-                    borderRadius: '50%',
-                    backgroundColor: member.isAvailable ? '#27ae60' : '#e74c3c',
-                  }}
-                />
-                <Typography sx={{ fontSize: '0.85rem', color: '#333' }}>
-                  {member.isAvailable ? 'Disponible' : 'Indisponible'}
-                </Typography>
-              </Box>
-
-              {member.tag !== user?.tag && (
-                <IconButton
-                  onClick={() => setDemoteTarget(member)}
-                  sx={{
-                    color: '#e74c3c',
-                    '&:hover': { backgroundColor: 'rgba(231,76,60,0.1)' },
-                  }}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              )}
-            </Box>
+              member={member}
+              isCurrentUser={member.tag === user?.tag}
+              onDelete={setDemoteTarget}
+            />
           ))}
         </Box>
 
@@ -245,6 +185,7 @@ const AdminPage = () => {
             mt: 3,
             gap: 2,
             flexWrap: 'wrap',
+            ml: 12,
           }}
         >
           <Button
@@ -292,7 +233,7 @@ const AdminPage = () => {
           </Button>
 
           <Button
-            onClick={() => setPage(0)}
+            onClick={() => navigate('/admin/members')}
             variant="outlined"
             sx={{
               borderColor: '#d8a46b',
