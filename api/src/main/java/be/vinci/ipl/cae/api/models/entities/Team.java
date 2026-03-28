@@ -64,7 +64,7 @@ public class Team {
 
   @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonIgnore
-  private List<Registration> registrations = new ArrayList<>();
+  private List<TournamentRegistration> tournamentRegistrations = new ArrayList<>();
 
   @OneToMany(mappedBy = "winnerTeam")
   @JsonBackReference("team-winner")
