@@ -8,7 +8,7 @@ import {
   Badge,
 } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/useAuth'; // hook
+import { useAuth } from '../../contexts/useAuth';
 import logo from '../../assets/images/logo.png';
 import member from '../../assets/images/member.png';
 import { useState, useEffect } from 'react';
@@ -18,7 +18,7 @@ import notifLogo from '../../assets/images/notif-logo.png';
 const NavBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth(); // Get user info and logout function from context
+  const { user, logout } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
 
   // Fetch unread notifications count when user is logged in
@@ -35,6 +35,7 @@ const NavBar = () => {
     fetchUnreadCount();
   }, [user, location]);
 
+  const isTournamentsPage = location.pathname === '/tournaments';
   const isTeamPage = location.pathname === '/team';
   const isAdminPage = location.pathname === '/admin';
   const isProfilePage = location.pathname === '/members/me';
@@ -53,23 +54,23 @@ const NavBar = () => {
             onClick={() => navigate('/')}
           />
 
-          {/* "Tournois" Button (Commented for now) */}
-          {/*
+          {/* Tournois */}
           <Button
-            onClick={() => navigate('/tournaments')} // Adjust route later
+            onClick={() => navigate('/tournaments')}
             sx={{
-              backgroundColor: '#1e2a44',
+              backgroundColor: isTournamentsPage ? '#d8a46b' : '#1e2a44',
               color: 'white',
               borderRadius: '10px',
-              textTransform: 'none', // Prevents default uppercase text
+              textTransform: 'none',
               fontWeight: 'bold',
               px: 5,
-              '&:hover': { backgroundColor: '#151e32' },
+              '&:hover': {
+                backgroundColor: isTournamentsPage ? '#c38d54' : '#151e32',
+              },
             }}
           >
             Tournois
           </Button>
-          */}
 
           {/* Mon équipe (visible only if logged in) */}
           {user && (
@@ -131,7 +132,6 @@ const NavBar = () => {
 
         {/* Auth buttons or User info */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {/* If user is logged in : Only show the tag + image */}
           {user ? (
             <>
               {/* Notifications logo + counter */}
@@ -209,14 +209,13 @@ const NavBar = () => {
             </>
           ) : (
             <>
-              {/* If user is NOT logged in */}
               {/* Login */}
               <Button
                 onClick={() => navigate('/login')}
                 sx={{
                   backgroundColor: 'white',
                   color: '#1e2a44',
-                  border: '1px solid #1e2a44', // Dark blue border for white button
+                  border: '1px solid #1e2a44',
                   borderRadius: '10px',
                   textTransform: 'none',
                   fontWeight: 'bold',
