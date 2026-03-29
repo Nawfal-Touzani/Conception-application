@@ -1,5 +1,6 @@
 @baseUrl = http://localhost:3000
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoiYWRtaW5AdmluY2kuYmUiLCJpYXQiOjE3NzQ4MDQzMTgsImV4cCI6MTc3NDg5MDcxOH0.rzHwO44LoESe_OXVzwieX3goW1oQuaQgbFrk2DNpavc
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoiYWRtaW5AdmluY2kuYmUiLCJpYXQiOjE3NzQ4MDUzMTQsImV4cCI6MTc3NDg5MTcxNH0.gOJBJiJud7OoHR65WDDpgF8HKAwZrRFnmEM3SJ_9fGY
+
 
 ### Get my profile
 GET {{baseUrl}}/members/me
@@ -107,7 +108,7 @@ Content-Type: application/json
 GET {{baseUrl}}/members/1
 Authorization: Bearer {{token}}
 
-### Get a member public profile (KO - Non-existing ID)
+### Get a member public profile (KO - 404 Not found)
 GET {{baseUrl}}/members/9999999
 
 ### Get a member public profile (OK - (without Token))
