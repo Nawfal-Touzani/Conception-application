@@ -13,8 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,7 +27,6 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * Tournament controller.
  */
-
 @RestController
 @RequestMapping("/tournaments")
 public class TournamentController {
@@ -50,17 +51,39 @@ public class TournamentController {
   @ResponseStatus(HttpStatus.CREATED)
   public Tournament createTournament(@PathVariable long organizerId,
       @AuthenticationPrincipal Member currentMember, @RequestBody TournamentDto dto) {
-
     if (currentMember.getId() != organizerId) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN);
     }
-
     try {
       return tournamentService.createTournament(organizerId, dto);
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-    } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    } catch (NoSuchElementException | IllegalArgumentException e) {
+      throw UtilsController.handleException(e);
+    }
+  }
+
+  /**
+   * Update a tournament (only if PREPARATION).
+   */
+  @PutMapping("/{id}")
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  public Tournament updateTournament(@PathVariable long id, @RequestBody TournamentDto dto) {
+    try {
+      return tournamentService.updateTournament(id, dto);
+    } catch (NoSuchElementException | IllegalStateException | IllegalArgumentException e) {
+      throw UtilsController.handleException(e);
+    }
+  }
+
+  /**
+   * Publish a tournament (make it public).
+   */
+  @PatchMapping("/{id}/publish")
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  public Tournament publishTournament(@PathVariable long id) {
+    try {
+      return tournamentService.publishTournament(id);
+    } catch (NoSuchElementException | IllegalStateException e) {
+      throw UtilsController.handleException(e);
     }
   }
 
@@ -72,8 +95,7 @@ public class TournamentController {
   public List<TournamentResponseDto> getAllTournaments(
       @AuthenticationPrincipal Member currentMember,
       @RequestParam(required = false) String teamName,
-      @RequestParam(required = false) String memberTag
-  ) {
+      @RequestParam(required = false) String memberTag) {
     boolean isAdmin = currentMember.getIsAdmin();
     return tournamentService.getAllTournaments(teamName, memberTag, isAdmin);
   }
@@ -86,7 +108,7 @@ public class TournamentController {
     try {
       return tournamentService.getTournamentById(id);
     } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      throw UtilsController.handleException(e);
     }
   }
 

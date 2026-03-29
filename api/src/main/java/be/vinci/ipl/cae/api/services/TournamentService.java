@@ -28,8 +28,8 @@ public class TournamentService {
    * Service constructor.
    */
   public TournamentService(TournamentRepository tournamentRepository,
-                           TournamentRegistrationRepository registrationRepository,
-                           MemberRepository memberRepository) {
+      TournamentRegistrationRepository registrationRepository,
+      MemberRepository memberRepository) {
     this.tournamentRepository = tournamentRepository;
     this.registrationRepository = registrationRepository;
     this.memberRepository = memberRepository;
@@ -39,78 +39,57 @@ public class TournamentService {
    * Create a tournament.
    */
   public Tournament createTournament(Long organizerId, TournamentDto dto) {
-
     final Member organizer = memberRepository.findById(organizerId)
         .orElseThrow(() -> new NoSuchElementException("Organizer not found"));
-
-    if (dto.startDate().isAfter(dto.endDate())) {
-      throw new IllegalArgumentException("Start date must be before end date");
-    }
 
     if (dto.startDate().isBefore(LocalDate.now())
         || dto.endDate().isBefore(LocalDate.now())) {
       throw new IllegalArgumentException("Dates must be in the future");
     }
 
-    if (dto.registrationDeadline().isAfter(dto.startDate())) {
-      throw new IllegalArgumentException("Registration deadline must be before start date");
-    }
-
     if (dto.registrationDeadline().isBefore(LocalDate.now())) {
       throw new IllegalArgumentException("Registration deadline must be in the future");
     }
 
-    if (!isPowerOfTwo(dto.maxParticipant())) {
-      throw new IllegalArgumentException("Max participants must be a power of two");
-    }
+    validateTournamentDto(dto);
 
     Tournament tournament = new Tournament();
-    tournament.setName(dto.name());
-    tournament.setDescription(dto.description());
-    tournament.setStartDate(dto.startDate());
-    tournament.setEndDate(dto.endDate());
-    tournament.setRegistrationDeadline(dto.registrationDeadline());
-    tournament.setMaxParticipants(dto.maxParticipant());
+    applyDtoToTournament(tournament, dto);
     tournament.setStatus(Status.PREPARATION);
     tournament.setOrganizer(organizer);
 
     return tournamentRepository.save(tournament);
   }
 
-  private boolean isPowerOfTwo(int n) {
-    return n > 0 && (n & (n - 1)) == 0;
+  /**
+   * Update a tournament (only allowed in PREPARATION status).
+   */
+  public Tournament updateTournament(Long id, TournamentDto dto) {
+    Tournament tournament = getTournamentInPreparation(id);
+    validateTournamentDto(dto);
+    applyDtoToTournament(tournament, dto);
+    return tournamentRepository.save(tournament);
   }
 
-  private TournamentResponseDto toResponseDto(Tournament t) {
-    return new TournamentResponseDto(
-        t.getId(),
-        t.getName(),
-        t.getDescription(),
-        t.getStartDate(),
-        t.getEndDate(),
-        t.getRegistrationDeadline(),
-        t.getMaxParticipants(),
-        registrationRepository.countByTournamentId(t.getId()),
-        t.getStatus(),
-        t.getOrganizer().getTag(),
-        t.isPublic()
-    );
+  /**
+   * Publish a tournament (make it public).
+   */
+  public Tournament publishTournament(Long id) {
+    Tournament tournament = getTournamentInPreparation(id);
+    tournament.setPublic(true);
+    return tournamentRepository.save(tournament);
   }
 
   /**
    * Get all tournaments.
-   * If teamName is provided, returns only tournaments where that team is registered.
-   * If memberTag is provided, returns only tournaments where a member with that tag
-   * is part of a registered team.
-   * If neither is provided, returns all tournaments.
    *
    * @param teamName  optional partial team name filter
    * @param memberTag optional partial member tag filter
+   * @param isAdmin   whether the requester is admin
    * @return list of tournament response DTOs
    */
   public List<TournamentResponseDto> getAllTournaments(String teamName, String memberTag,
-                                                       boolean isAdmin) {
-
+      boolean isAdmin) {
     List<Tournament> tournaments;
 
     if (teamName != null && !teamName.isBlank()) {
@@ -153,5 +132,64 @@ public class TournamentService {
     Tournament t = tournamentRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
     return toResponseDto(t);
+  }
+
+  /**
+   * Retrieve a tournament in PREPARATION status or throw.
+   */
+  private Tournament getTournamentInPreparation(Long id) {
+    Tournament tournament = tournamentRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
+    if (tournament.getStatus() != Status.PREPARATION) {
+      throw new IllegalStateException("Tournament must be in PREPARATION status");
+    }
+    return tournament;
+  }
+
+  /**
+   * Validate tournament dates and max participants.
+   */
+  private void validateTournamentDto(TournamentDto dto) {
+    if (dto.startDate().isAfter(dto.endDate())) {
+      throw new IllegalArgumentException("Start date must be before end date");
+    }
+    if (dto.registrationDeadline().isAfter(dto.startDate())) {
+      throw new IllegalArgumentException("Registration deadline must be before start date");
+    }
+    if (!isPowerOfTwo(dto.maxParticipant())) {
+      throw new IllegalArgumentException("Max participants must be a power of two");
+    }
+  }
+
+  /**
+   * Apply DTO fields to a tournament entity.
+   */
+  private void applyDtoToTournament(Tournament tournament, TournamentDto dto) {
+    tournament.setName(dto.name());
+    tournament.setDescription(dto.description());
+    tournament.setStartDate(dto.startDate());
+    tournament.setEndDate(dto.endDate());
+    tournament.setRegistrationDeadline(dto.registrationDeadline());
+    tournament.setMaxParticipants(dto.maxParticipant());
+  }
+
+  private boolean isPowerOfTwo(int n) {
+    return n > 0 && (n & (n - 1)) == 0;
+  }
+
+  private TournamentResponseDto toResponseDto(Tournament t) {
+    return new TournamentResponseDto(
+        t.getId(),
+        t.getName(),
+        t.getDescription(),
+        t.getStartDate(),
+        t.getEndDate(),
+        t.getRegistrationDeadline(),
+        t.getMaxParticipants(),
+        registrationRepository.countByTournamentId(t.getId()),
+        t.getStatus(),
+        t.getOrganizer().getTag(),
+        t.isPublic()
+    );
   }
 }
