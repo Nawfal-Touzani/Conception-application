@@ -1,4 +1,5 @@
 import { MemberProfile } from '../types/member';
+import { PublicMember } from '../types/publicMember';
 
 const API_URL = 'http://localhost:3000/members';
 
@@ -86,5 +87,13 @@ export const getMyUnavailabilities = async (
     },
   });
   if (!response.ok) throw new Error('Failed to fetch unavailabilities');
+  return response.json();
+};
+
+export const getPublicMemberById = async (
+  id: string,
+): Promise<PublicMember> => {
+  const response = await fetch(`${API_URL}/${id}`);
+  if (!response.ok) throw new Error('Member not found');
   return response.json();
 };
