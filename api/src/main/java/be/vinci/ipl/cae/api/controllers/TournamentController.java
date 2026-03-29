@@ -4,6 +4,8 @@ import be.vinci.ipl.cae.api.models.dtos.TournamentDto;
 import be.vinci.ipl.cae.api.models.dtos.TournamentResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Tournament;
+import be.vinci.ipl.cae.api.models.entities.TournamentRegistration;
+import be.vinci.ipl.cae.api.services.TournamentRegistrationService;
 import be.vinci.ipl.cae.api.services.TournamentService;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -29,12 +31,15 @@ import org.springframework.web.server.ResponseStatusException;
 public class TournamentController {
 
   private final TournamentService tournamentService;
+  private final TournamentRegistrationService tournamentRegistrationService;
 
   /**
    * Creates a new TournamentController.
    */
-  public TournamentController(TournamentService tournamentService) {
+  public TournamentController(TournamentService tournamentService,
+      TournamentRegistrationService tournamentRegistrationService) {
     this.tournamentService = tournamentService;
+    this.tournamentRegistrationService = tournamentRegistrationService;
   }
 
   /**
@@ -60,9 +65,8 @@ public class TournamentController {
   }
 
   /**
-   * GET /tournaments — Get all tournaments.
-   * Optional filters: teamName (team registered in the tournament),
-   * memberTag (member tag in a registered team).
+   * GET /tournaments — Get all tournaments. Optional filters: teamName (team registered in the
+   * tournament), memberTag (member tag in a registered team).
    */
   @GetMapping
   public List<TournamentResponseDto> getAllTournaments(
@@ -83,6 +87,24 @@ public class TournamentController {
       return tournamentService.getTournamentById(id);
     } catch (NoSuchElementException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Register a team to a tournament.
+   */
+  @PostMapping("/{idTournament}/teams/{idTeam}")
+  @ResponseStatus(HttpStatus.CREATED)
+  @PreAuthorize("isAuthenticated()")
+  public TournamentRegistration registerTeam(@PathVariable Long idTournament,
+      @PathVariable Long idTeam, @AuthenticationPrincipal Member currentMember) {
+    try {
+      return tournamentRegistrationService.createRegistration(idTournament, idTeam,
+          currentMember.getId());
+    } catch (NoSuchElementException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    } catch (IllegalArgumentException | IllegalStateException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 
