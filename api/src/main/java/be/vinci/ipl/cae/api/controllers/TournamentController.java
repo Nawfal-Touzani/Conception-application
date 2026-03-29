@@ -9,7 +9,6 @@ import be.vinci.ipl.cae.api.models.entities.TournamentRegistration;
 import be.vinci.ipl.cae.api.services.TournamentRegistrationService;
 import be.vinci.ipl.cae.api.services.TournamentService;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,9 +24,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-/**
- * Tournament controller.
- */
 @RestController
 @RequestMapping("/tournaments")
 public class TournamentController {
@@ -35,18 +31,12 @@ public class TournamentController {
   private final TournamentService tournamentService;
   private final TournamentRegistrationService tournamentRegistrationService;
 
-  /**
-   * Creates a new TournamentController.
-   */
   public TournamentController(TournamentService tournamentService,
       TournamentRegistrationService tournamentRegistrationService) {
     this.tournamentService = tournamentService;
     this.tournamentRegistrationService = tournamentRegistrationService;
   }
 
-  /**
-   * Create a tournament.
-   */
   @PostMapping("/{organizerId}")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @ResponseStatus(HttpStatus.CREATED)
@@ -57,59 +47,31 @@ public class TournamentController {
     }
     try {
       return tournamentService.createTournament(organizerId, dto);
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          "Tournament create error: " + e.getMessage(), e);
-    } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Tournament create error: " + e.getMessage(), e);
-    } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT,
-          "Tournament create error: " + e.getMessage(), e);
+    } catch (RuntimeException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 
-  /**
-   * Update a tournament (only if PREPARATION).
-   */
   @PutMapping("/{id}")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   public Tournament updateTournament(@PathVariable long id, @RequestBody TournamentDto dto) {
     try {
       return tournamentService.updateTournament(id, dto);
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          "Tournament update error: " + e.getMessage(), e);
-    } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Tournament update error: " + e.getMessage(), e);
-    } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT,
-          "Tournament update error: " + e.getMessage(), e);
+    } catch (RuntimeException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 
-  /**
-   * Publish a tournament (make it public).
-   */
   @PatchMapping("/{id}/publish")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   public Tournament publishTournament(@PathVariable long id) {
     try {
       return tournamentService.publishTournament(id);
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          "Tournament publish error: " + e.getMessage(), e);
-    } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT,
-          "Tournament publish error: " + e.getMessage(), e);
+    } catch (RuntimeException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 
-  /**
-   * GET /tournaments — Get all tournaments. Optional filters: teamName (team registered in the
-   * tournament), memberTag (member tag in a registered team).
-   */
   @GetMapping
   public List<TournamentResponseDto> getAllTournaments(
       @AuthenticationPrincipal Member currentMember,
@@ -119,33 +81,20 @@ public class TournamentController {
     return tournamentService.getAllTournaments(teamName, memberTag, isAdmin);
   }
 
-  /**
-   * Get the three homepage tournaments.
-   */
   @GetMapping("/homepage")
   public HomepageTournamentsDto getHomepageTournaments() {
     return tournamentService.getHomepageTournaments();
   }
 
-  /*
-   * GET /tournaments/{id}
-   * Get a single tournament by id.
-   * TODO: add visibility check before re-enabling.
-   *
-   * @GetMapping("/{id}")
-   * public TournamentResponseDto getTournamentById(@PathVariable long id) {
-   *   try {
-   *     return tournamentService.getTournamentById(id);
-   *   } catch (NoSuchElementException e) {
-   *     throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-   *         "Tournament get error: " + e.getMessage(), e);
-   *   }
-   * }
-   */
+  @GetMapping("/{id}")
+  public TournamentResponseDto getTournamentById(@PathVariable long id) {
+    try {
+      return tournamentService.getTournamentById(id);
+    } catch (RuntimeException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    }
+  }
 
-  /**
-   * Register a team to a tournament.
-   */
   @PostMapping("/{idTournament}/teams/{idTeam}")
   @ResponseStatus(HttpStatus.CREATED)
   @PreAuthorize("isAuthenticated()")
@@ -154,9 +103,7 @@ public class TournamentController {
     try {
       return tournamentRegistrationService.createRegistration(idTournament, idTeam,
           currentMember.getId());
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-    } catch (IllegalArgumentException | IllegalStateException e) {
+    } catch (RuntimeException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }

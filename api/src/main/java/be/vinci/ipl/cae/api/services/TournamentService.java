@@ -124,14 +124,13 @@ public class TournamentService {
    *
    * @param id the tournament id
    * @return the tournament response DTO
-   * TODO: add visibility check before re-enabling.
-   *
+   */
     public TournamentResponseDto getTournamentById(Long id) {
       Tournament t = tournamentRepository.findById(id)
           .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
       return toResponseDto(t);
     }
-  */
+
 
   /**
    * Get the three tournaments displayed on the homepage.
