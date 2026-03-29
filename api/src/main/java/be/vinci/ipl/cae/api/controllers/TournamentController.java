@@ -56,8 +56,8 @@ public class TournamentController {
     }
     try {
       return tournamentService.createTournament(organizerId, dto);
-    } catch (NoSuchElementException | IllegalArgumentException e) {
-      throw UtilsController.handleException(e);
+    } catch (RuntimeException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 
@@ -69,8 +69,8 @@ public class TournamentController {
   public Tournament updateTournament(@PathVariable long id, @RequestBody TournamentDto dto) {
     try {
       return tournamentService.updateTournament(id, dto);
-    } catch (NoSuchElementException | IllegalStateException | IllegalArgumentException e) {
-      throw UtilsController.handleException(e);
+    } catch (RuntimeException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 
@@ -82,8 +82,8 @@ public class TournamentController {
   public Tournament publishTournament(@PathVariable long id) {
     try {
       return tournamentService.publishTournament(id);
-    } catch (NoSuchElementException | IllegalStateException e) {
-      throw UtilsController.handleException(e);
+    } catch (RuntimeException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 
@@ -108,8 +108,8 @@ public class TournamentController {
   public TournamentResponseDto getTournamentById(@PathVariable long id) {
     try {
       return tournamentService.getTournamentById(id);
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    } catch (RuntimeException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 
