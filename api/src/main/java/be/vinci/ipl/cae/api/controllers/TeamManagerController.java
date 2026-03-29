@@ -45,8 +45,11 @@ public class TeamManagerController {
       @AuthenticationPrincipal Member currentMember) {
     try {
       teamManagerService.assignSecondaryManager(teamId, memberId, currentMember.getId());
-    } catch (RuntimeException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Team manager error: " + e.getMessage(), e);
+    } catch (IllegalStateException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
           "Team manager error: " + e.getMessage(), e);
     }
     return ResponseEntity.noContent().build();

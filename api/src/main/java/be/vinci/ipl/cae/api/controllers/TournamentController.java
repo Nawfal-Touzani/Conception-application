@@ -8,6 +8,7 @@ import be.vinci.ipl.cae.api.models.entities.TournamentRegistration;
 import be.vinci.ipl.cae.api.services.TournamentRegistrationService;
 import be.vinci.ipl.cae.api.services.TournamentService;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -55,8 +56,12 @@ public class TournamentController {
     }
     try {
       return tournamentService.createTournament(organizerId, dto);
-    } catch (RuntimeException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    } catch (NoSuchElementException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Tournament create error: " + e.getMessage(), e);
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Tournament create error: " + e.getMessage(), e);
     }
   }
 
@@ -68,8 +73,15 @@ public class TournamentController {
   public Tournament updateTournament(@PathVariable long id, @RequestBody TournamentDto dto) {
     try {
       return tournamentService.updateTournament(id, dto);
-    } catch (RuntimeException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    } catch (NoSuchElementException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Tournament update error: " + e.getMessage(), e);
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Tournament update error: " + e.getMessage(), e);
+    } catch (IllegalStateException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
+          "Tournament update error: " + e.getMessage(), e);
     }
   }
 
@@ -81,14 +93,17 @@ public class TournamentController {
   public Tournament publishTournament(@PathVariable long id) {
     try {
       return tournamentService.publishTournament(id);
-    } catch (RuntimeException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    } catch (NoSuchElementException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Tournament publish error: " + e.getMessage(), e);
+    } catch (IllegalStateException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
+          "Tournament publish error: " + e.getMessage(), e);
     }
   }
 
   /**
-   * GET /tournaments — Get all tournaments. Optional filters: teamName (team registered in the
-   * tournament), memberTag (member tag in a registered team).
+   * GET /tournaments — Get all tournaments.
    */
   @GetMapping
   public List<TournamentResponseDto> getAllTournaments(
@@ -106,8 +121,9 @@ public class TournamentController {
   public TournamentResponseDto getTournamentById(@PathVariable long id) {
     try {
       return tournamentService.getTournamentById(id);
-    } catch (RuntimeException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    } catch (NoSuchElementException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Tournament get error: " + e.getMessage(), e);
     }
   }
 
@@ -128,5 +144,4 @@ public class TournamentController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
-
 }
