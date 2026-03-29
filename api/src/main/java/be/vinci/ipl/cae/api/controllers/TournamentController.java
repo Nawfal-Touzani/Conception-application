@@ -88,7 +88,8 @@ public class TournamentController {
   }
 
   /**
-   * GET /tournaments — Get all tournaments. Optional filters: teamName (team registered in the
+   * GET /tournaments — Get all tournaments.
+   * Optional filters: teamName (team registered in the
    * tournament), memberTag (member tag in a registered team).
    */
   @GetMapping
@@ -108,7 +109,7 @@ public class TournamentController {
     try {
       return tournamentService.getTournamentById(id);
     } catch (NoSuchElementException e) {
-      throw UtilsController.handleException(e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
 
