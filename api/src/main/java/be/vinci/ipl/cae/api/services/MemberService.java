@@ -161,6 +161,20 @@ public class MemberService {
         .toList();
   }
 
+  /**
+   * Retrieves the public profile of a member by their ID.
+   *
+   * @param id the ID of the member
+   * @return the public profile of the member
+   * @throws NoSuchElementException if the member is not found
+   */
+  public PublicMemberDto getPublicProfile(Long id) {
+    Member member = memberRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("Membre introuvable"));
+
+    return mapToPublicProfileDto(member);
+  }
+
   private MemberProfileResponseDto mapToProfileDto(Member member) {
     return new MemberProfileResponseDto(
         member.getId(),
@@ -208,6 +222,21 @@ public class MemberService {
     return dto == null || dto.newPassword() == null
         || dto.newPassword().equals(dto.oldPassword())
         || !dto.newPassword().equals(dto.confirmPassword());
+  }
+
+  private PublicMemberDto mapToPublicProfileDto(Member member) {
+    String image = member.getImage().getUrl();
+    String speciality = member.getSpeciality().getName();
+    String teamName = getMemberTeamName(member.getId());
+
+    return new PublicMemberDto(
+        member.getId(),
+        member.getTag(),
+        image,
+        speciality,
+        teamName,
+        member.getProfileCreationDate()
+    );
   }
 
 }
