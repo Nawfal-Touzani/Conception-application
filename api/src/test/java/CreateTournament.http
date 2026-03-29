@@ -1,6 +1,6 @@
 
 @baseUrl = http://localhost:3000
-@tokenAdmin =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoiYWRtaW5AdmluY2kuYmUiLCJpYXQiOjE3NzQ1MjkwOTksImV4cCI6MTc3NDYxNTQ5OX0.3sAd8a2aPiU3VRFt2VwywkbPa9lAUtkLnrW2VkNVQto
+@tokenAdmin =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoiYWRtaW5AdmluY2kuYmUiLCJpYXQiOjE3NzQ4MDEyMjksImV4cCI6MTc3NDg4NzYyOX0.hyl7grzLN-2vbEGF4i3fbaZD_rmUNnEQMyERJhnu3aU
 
 @tokenUser = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibGVhQG1haWwuY29tIiwiaWF0IjoxNzc0NDUzNzM4LCJleHAiOjE3NzQ1NDAxMzh9.BTn227u9U9eOOTOC6o3m-MLgQ97xtQbUy-hRfqzb7TU
 
@@ -161,7 +161,7 @@ Authorization: Bearer {{tokenUser}}
 ### -------------------------------------------
 
 ### 9) Update tournament success 200
-PUT {{baseUrl}}/tournaments/1
+PUT {{baseUrl}}/tournaments/8
 Content-Type: application/json
 Authorization: Bearer {{tokenAdmin}}
 
@@ -203,7 +203,7 @@ Authorization: Bearer {{tokenAdmin}}
 }
 
 ### 12) Update tournament FAILED - invalid dates 400
-PUT {{baseUrl}}/tournaments/1
+PUT {{baseUrl}}/tournaments/8
 Content-Type: application/json
 Authorization: Bearer {{tokenAdmin}}
 
@@ -217,7 +217,7 @@ Authorization: Bearer {{tokenAdmin}}
 }
 
 ### 13) Update tournament FAILED - not admin 403
-PUT {{baseUrl}}/tournaments/1
+PUT {{baseUrl}}/tournaments/8
 Content-Type: application/json
 Authorization: Bearer {{tokenUser}}
 
@@ -235,7 +235,7 @@ Authorization: Bearer {{tokenUser}}
 ### -------------------------------------------
 
 ### 14) Publish tournament success 200
-PATCH {{baseUrl}}/tournaments/1/publish
+PATCH {{baseUrl}}/tournaments/8/publish
 Authorization: Bearer {{tokenAdmin}}
 
 ### 15) Publish tournament FAILED - not found 404
