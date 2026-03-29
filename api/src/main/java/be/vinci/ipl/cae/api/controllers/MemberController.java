@@ -191,20 +191,4 @@ public class MemberController {
   public List<MemberProfileResponseDto> getAllMembers() {
     return memberService.getAllMembers();
   }
-
-  /**
-   * Retrieves the public profile of a member by their ID.
-   *
-   * @param id the ID of the member
-   * @return the public profile of the member
-   * @throws ResponseStatusException NOT_FOUND if the member does not exist
-   */
-  @GetMapping("/{id}")
-  public PublicMemberDto getMemberPublicProfile(@PathVariable Long id) {
-    try {
-      return memberService.getPublicProfile(id);
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-    }
-  }
 }
