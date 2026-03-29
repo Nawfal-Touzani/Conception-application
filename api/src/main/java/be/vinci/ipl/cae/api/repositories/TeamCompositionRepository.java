@@ -45,4 +45,12 @@ public interface TeamCompositionRepository extends
    * @return team composition
    */
   Optional<TeamComposition> findFirstByMemberId(Long memberId);
+
+  /**
+   * Count member of team.
+   *
+   * @param idTeam the given team id.
+   * @return the count of member.
+   */
+  int countByTeamId(Long idTeam);
 }

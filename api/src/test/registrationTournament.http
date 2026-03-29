@@ -1,0 +1,138 @@
+@baseUrl = http://localhost:3000
+@tokenAdmin =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoiYWRtaW5AdmluY2kuYmUiLCJpYXQiOjE3NzQ4MDkzMDMsImV4cCI6MTc3NDg5NTcwM30.wO5whSHRMnfE39YIe3wKOtsmvYcsNS3MPKQCiSeEkzg
+@tokenResponsible =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibGVhQG1haWwuY29tIiwiaWF0IjoxNzc0ODA5MzE2LCJleHAiOjE3NzQ4OTU3MTZ9.J1mGWl-ihODTPl7Y8Y3NEYO-YWFgebxFvFv6pXvZb98
+@tokenSecondResponsible =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoidG9tQG1haWwuY29tIiwiaWF0IjoxNzc0ODA5MzMxLCJleHAiOjE3NzQ4OTU3MzF9.0uddK7dG-IuHL-4pOhrnMlW4Yy7Tcb3HVJEUE8vQjv0
+
+### LOGIN ADMIN
+### -------------------------------------------
+POST {{baseUrl}}/auths/login
+Content-Type: application/json
+
+{
+  "email": "admin@vinci.be",
+  "password": "admin"
+}
+
+
+
+### LOGIN USER (responsable de team)
+POST {{baseUrl}}/auths/login
+Content-Type: application/json
+
+{
+  "email": "lea@mail.com",
+  "password": "lea"
+}
+
+### LOGIN USER (pas resposable de team)
+POST {{baseUrl}}/auths/login
+Content-Type: application/json
+
+{
+  "email": "tom@mail.com",
+  "password": "tom"
+}
+
+
+### SETUP : Créer les tournois nécessaires
+### ===========================================
+
+### Créer tournoi valide (pour test succès et déjà inscrit)
+POST {{baseUrl}}/tournaments/5
+Content-Type: application/json
+Authorization: Bearer {{tokenAdmin}}
+
+{
+  "name": "Tournoi Valid",
+  "description": "Tournoi pour test inscription",
+  "startDate": "2026-06-10",
+  "endDate": "2026-06-12",
+  "registrationDeadline": "2026-06-05",
+  "maxParticipant": 8
+}
+
+### Créer tournoi IN_PROGRESS (pour test statut invalide)
+POST {{baseUrl}}/tournaments/5
+Content-Type: application/json
+Authorization: Bearer {{tokenAdmin}}
+
+{
+  "name": "Tournoi En Cours",
+  "description": "Tournoi déjà commencé",
+  "startDate": "2026-06-10",
+  "endDate": "2026-06-12",
+  "registrationDeadline": "2026-06-05",
+  "maxParticipant": 8
+}
+
+### Créer tournoi avec deadline qui expire aujourd'hui (pour test deadline)
+POST {{baseUrl}}/tournaments/5
+Content-Type: application/json
+Authorization: Bearer {{tokenAdmin}}
+
+{
+  "name": "Tournoi Deadline Test",
+  "description": "Tournoi pour tester deadline",
+  "startDate": "2026-04-01",
+  "endDate": "2026-04-02",
+  "registrationDeadline": "2026-03-30",
+  "maxParticipant": 8
+}
+
+### Créer tournoi plein (maxParticipant = 1 pour faciliter le test)
+POST {{baseUrl}}/tournaments/5
+Content-Type: application/json
+Authorization: Bearer {{tokenAdmin}}
+
+{
+  "name": "Tournoi Plein",
+  "description": "Tournoi avec 1 seule place",
+  "startDate": "2026-06-10",
+  "endDate": "2026-06-12",
+  "registrationDeadline": "2026-06-05",
+  "maxParticipant": 1
+}
+
+### ===========================================
+### TESTS INSCRIPTION
+### ===========================================
+
+### 1) Inscription réussie - responsable inscrit sa team (should return 201)
+POST {{baseUrl}}/tournaments/8/teams/1
+Authorization: Bearer {{tokenResponsible}}
+
+### 2) Team déjà inscrite (should return 400)
+POST {{baseUrl}}/tournaments/1/teams/1
+Authorization: Bearer {{tokenResponsible}}
+
+### 3) Tournoi inexistant (should return 404)
+POST {{baseUrl}}/tournaments/999/teams/1
+Authorization: Bearer {{tokenResponsible}}
+
+### 4) Team inexistante (should return 404)
+POST {{baseUrl}}/tournaments/1/teams/999
+Authorization: Bearer {{tokenResponsible}}
+
+### 5) Tournoi pas en PREPARATION - changer le statut manuellement en DB d'abord (should return 400)
+POST {{baseUrl}}/tournaments/2/teams/1
+Authorization: Bearer {{tokenResponsible}}
+
+### 6) Deadline dépassée (should return 400)
+POST {{baseUrl}}/tournaments/10/teams/1
+Authorization: Bearer {{tokenResponsible}}
+
+### 7) Tournoi plein (should return 400)
+POST {{baseUrl}}/tournaments/9/teams/2
+Authorization: Bearer {{tokenResponsible}}
+
+### 8) Team avec moins de 4 membres (should return 400)
+### (utilise une team qui a moins de 4 membres en DB)
+POST {{baseUrl}}/tournaments/8/teams/1
+Authorization: Bearer {{tokenResponsible}}
+
+### 9) Membre second responsable de la team 201
+POST {{baseUrl}}/tournaments/8/teams/1
+Authorization: Bearer {{tokenSecondResponsible}}
+
+### 10) Sans token - non authentifié (should return 401)
+POST {{baseUrl}}/tournaments/1/teams/1
