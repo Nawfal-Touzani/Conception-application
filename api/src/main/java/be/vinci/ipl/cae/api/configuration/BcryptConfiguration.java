@@ -39,8 +39,8 @@ public class BcryptConfiguration {
   }
 
   private Tournament buildTournament(String name, String description,
-                                     LocalDate startDate, LocalDate endDate, LocalDate deadline,
-                                     int maxParticipants, Status status, boolean isPublic, Member organizer) {
+      LocalDate startDate, LocalDate endDate, LocalDate deadline,
+      int maxParticipants, Status status, boolean isPublic, Member organizer) {
     Tournament t = new Tournament();
     t.setName(name);
     t.setDescription(description);
@@ -59,12 +59,12 @@ public class BcryptConfiguration {
    */
   @Bean
   public CommandLineRunner initUsers(MemberRepository memberRepository,
-                                     ImageRepository imageRepository,
-                                     SpecialityRepository specialityRepository,
-                                     TeamRepository teamRepository,
-                                     TeamCompositionRepository teamCompositionRepository,
-                                     TournamentRepository tournamentRepository,
-                                     BCryptPasswordEncoder passwordEncoder) {
+      ImageRepository imageRepository,
+      SpecialityRepository specialityRepository,
+      TeamRepository teamRepository,
+      TeamCompositionRepository teamCompositionRepository,
+      TournamentRepository tournamentRepository,
+      BCryptPasswordEncoder passwordEncoder) {
     return args -> {
 
       // 20 Images in DB

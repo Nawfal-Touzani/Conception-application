@@ -91,7 +91,7 @@ public class Tournament {
 
   @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonManagedReference("tournament-registrations")
-  private List<Registration> registrations = new ArrayList<>();
+  private List<TournamentRegistration> registrations = new ArrayList<>();
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "winner_team_id", nullable = true)
