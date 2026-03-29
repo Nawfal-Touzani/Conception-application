@@ -320,7 +320,7 @@ describe('AdminPage', () => {
     expect(await screen.findByText('Page 1 sur 2')).toBeTruthy();
     fireEvent.click(screen.getByText('Suivant'));
     expect(screen.getByText('Page 2 sur 2')).toBeTruthy();
-    fireEvent.click(screen.getByText('Tous les membres'));
+    fireEvent.click(screen.getByText('Précédent'));
     expect(screen.getByText('Page 1 sur 2')).toBeTruthy();
   });
 });
