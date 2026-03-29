@@ -6,7 +6,6 @@ import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Tournament;
 import be.vinci.ipl.cae.api.services.TournamentService;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -51,8 +50,8 @@ public class TournamentController {
     }
     try {
       return tournamentService.createTournament(organizerId, dto);
-    } catch (NoSuchElementException | IllegalArgumentException e) {
-      throw UtilsController.handleException(e);
+    } catch (RuntimeException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 
@@ -64,8 +63,8 @@ public class TournamentController {
   public Tournament updateTournament(@PathVariable long id, @RequestBody TournamentDto dto) {
     try {
       return tournamentService.updateTournament(id, dto);
-    } catch (NoSuchElementException | IllegalStateException | IllegalArgumentException e) {
-      throw UtilsController.handleException(e);
+    } catch (RuntimeException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 
@@ -77,8 +76,8 @@ public class TournamentController {
   public Tournament publishTournament(@PathVariable long id) {
     try {
       return tournamentService.publishTournament(id);
-    } catch (NoSuchElementException | IllegalStateException e) {
-      throw UtilsController.handleException(e);
+    } catch (RuntimeException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 
@@ -101,8 +100,8 @@ public class TournamentController {
   public TournamentResponseDto getTournamentById(@PathVariable long id) {
     try {
       return tournamentService.getTournamentById(id);
-    } catch (NoSuchElementException e) {
-      throw UtilsController.handleException(e);
+    } catch (RuntimeException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 }
