@@ -1,0 +1,116 @@
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Box, Typography, Avatar } from '@mui/material';
+import { getPublicMemberById } from '../../../services/memberService';
+import { PublicMember } from '../../../types/publicMember';
+
+const PublicProfilePage = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [member, setMember] = useState<PublicMember | null>(null);
+
+  useEffect(() => {
+    if (id) {
+      getPublicMemberById(id)
+        .then(setMember)
+        .catch(() => navigate('/'));
+    }
+  }, [id, navigate]);
+
+  if (!member) return null;
+
+  const profileInfos = [
+    { label: 'Membre de :', value: member.teamName || ' / ' },
+    {
+      label: 'Spécialité :',
+      value:
+        member.speciality.charAt(0).toUpperCase() + member.speciality.slice(1),
+    },
+    {
+      label: 'Depuis le :',
+      value: new Date(member.profileCreationDate).toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      }),
+    },
+  ];
+
+  return (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        backgroundColor: '#1a2744',
+        color: '#fff',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        pt: 3,
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          mt: 10,
+          border: '2px solid #fff',
+          borderRadius: '30px',
+          p: 8,
+          maxWidth: '600px',
+        }}
+      >
+        <Avatar
+          src={
+            member.profileImage
+              ? `http://localhost:3000${member.profileImage}`
+              : undefined
+          }
+          sx={{
+            width: 180,
+            height: 180,
+            mb: 4,
+            border: '2px solid rgba(255, 255, 255, 0.87)',
+          }}
+        />
+
+        <Typography variant="h2" sx={{ mb: 1 }}>
+          {member.tag}
+        </Typography>
+
+        <Box
+          sx={{ width: 350, height: '2px', backgroundColor: '#fff', mb: 6 }}
+        />
+
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 3,
+            width: '100%',
+          }}
+        >
+          {profileInfos.map((info) => (
+            <Box
+              key={info.label}
+              sx={{ display: 'flex', alignItems: 'center', fontSize: '1.5rem' }}
+            >
+              <Typography
+                sx={{
+                  fontWeight: 'bold',
+                  minWidth: '160px',
+                  fontSize: 'inherit',
+                }}
+              >
+                {info.label}
+              </Typography>
+              <Typography sx={{ fontSize: 'inherit' }}>{info.value}</Typography>
+            </Box>
+          ))}
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+export default PublicProfilePage;
