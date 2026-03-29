@@ -60,7 +60,18 @@ const MembersListPage = () => {
 
         <Button
           onClick={() => navigate('/admin')}
-          sx={{ color: '#d8a46b', mb: 2, fontWeight: 700 }}
+          variant="outlined"
+          sx={{
+            borderColor: '#d8a46b',
+            color: '#d8a46b',
+            fontWeight: 700,
+            textTransform: 'none',
+            borderRadius: '8px',
+            mb: 2,
+            '&:hover': {
+              backgroundColor: 'rgba(216,164,107,0.1)',
+            },
+          }}
         >
           ←
         </Button>
