@@ -51,7 +51,7 @@ public class Tournament {
   @Column(nullable = false)
   private Status status;
 
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true)
   private String name;
 
   @Column(nullable = false)
