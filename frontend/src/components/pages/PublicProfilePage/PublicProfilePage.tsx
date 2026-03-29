@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Avatar } from '@mui/material';
+import { Box, Typography, Avatar, Button } from '@mui/material';
 import { getPublicMemberById } from '../../../services/memberService';
 import { PublicMember } from '../../../types/publicMember';
 
@@ -48,6 +48,25 @@ const PublicProfilePage = () => {
         pt: 3,
       }}
     >
+      <Button
+        onClick={() => navigate(-1)}
+        variant="outlined"
+        sx={{
+          alignSelf: 'flex-start',
+          borderColor: '#d8a46b',
+          color: '#d8a46b',
+          fontWeight: 700,
+          textTransform: 'none',
+          borderRadius: '8px',
+          ml: 7,
+          '&:hover': {
+            backgroundColor: 'rgba(216,164,107,0.1)',
+          },
+        }}
+      >
+        ←
+      </Button>
+
       <Box
         sx={{
           display: 'flex',
