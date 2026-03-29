@@ -36,6 +36,7 @@ public abstract class BaseController {
     }
     return (Member) principal;
   }
+
   /**
    * Execute or throw.
    *
