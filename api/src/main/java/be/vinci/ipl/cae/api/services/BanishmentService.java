@@ -56,3 +56,4 @@ public class BanishmentService {
     memberRepository.save(member);
   }
 }
+
