@@ -71,7 +71,12 @@ const MembersListPage = () => {
           />
         ) : (
           members.map((m) => (
-            <MemberRow key={m.id} member={m} onBan={() => setBanTarget(m)} />
+            <MemberRow
+              key={m.id}
+              member={m}
+              isCurrentUser={m.tag === user?.tag}
+              onBan={() => setBanTarget(m)}
+            />
           ))
         )}
         <BanModal
