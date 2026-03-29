@@ -73,8 +73,8 @@ export const MemberRow = ({
               onClick={() => onBan(member)}
               disabled={isCurrentUser}
               sx={{
-                color: '#524a49',
-                '&.Mui-disabled': { color: 'rgba(231, 76, 60, 0.3)' },
+                color: '#ae210f',
+                '&.Mui-disabled': { color: 'rgba(103, 94, 93, 0.3)' },
               }}
             >
               <BlockIcon />
