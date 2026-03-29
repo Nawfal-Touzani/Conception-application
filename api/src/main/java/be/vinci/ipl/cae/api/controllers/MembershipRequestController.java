@@ -45,8 +45,11 @@ public class MembershipRequestController {
       @AuthenticationPrincipal Member currentMember) {
     try {
       membershipRequestService.approveRequest(requestId, currentMember.getId());
-    } catch (RuntimeException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Membership request approve error: " + e.getMessage(), e);
+    } catch (IllegalStateException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
           "Membership request approve error: " + e.getMessage(), e);
     }
     return ResponseEntity.noContent().build();
@@ -66,8 +69,11 @@ public class MembershipRequestController {
       @AuthenticationPrincipal Member currentMember) {
     try {
       membershipRequestService.refuseRequest(requestId, currentMember.getId(), body.getReason());
-    } catch (RuntimeException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Membership request refuse error: " + e.getMessage(), e);
+    } catch (IllegalStateException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
           "Membership request refuse error: " + e.getMessage(), e);
     }
     return ResponseEntity.noContent().build();
