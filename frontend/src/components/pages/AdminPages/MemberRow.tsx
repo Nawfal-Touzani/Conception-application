@@ -1,5 +1,6 @@
-import { Box, Avatar, Typography, IconButton } from '@mui/material';
+import { Box, Avatar, Typography, IconButton, Tooltip } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import BlockIcon from '@mui/icons-material/Block';
 import { MemberDto } from '../../../types/admin.types';
 
 interface MemberRowProps {
@@ -7,12 +8,14 @@ interface MemberRowProps {
   isCurrentUser?: boolean;
   onDelete?: (member: MemberDto) => void;
   showStatus?: boolean;
+  onBan?: (member: MemberDto) => void;
 }
 
 export const MemberRow = ({
   member,
   isCurrentUser,
   onDelete,
+  onBan,
 }: MemberRowProps) => (
   <Box
     sx={{
@@ -55,15 +58,53 @@ export const MemberRow = ({
       {member.isAvailable ? 'Disponible' : 'Indisponible'}
     </Typography>
 
-    {onDelete && !isCurrentUser && (
-      <IconButton
-        onClick={() => onDelete(member)}
-        sx={{
-          color: '#e74c3c',
-        }}
-      >
-        <DeleteIcon />
-      </IconButton>
-    )}
+    <Box sx={{ display: 'flex', gap: 1 }}>
+      {onBan && (
+        <Tooltip
+          title={
+            isCurrentUser
+              ? 'Vous ne pouvez pas vous bannir'
+              : 'Bannir le membre'
+          }
+        >
+          <span>
+            {' '}
+            <IconButton
+              onClick={() => onBan(member)}
+              disabled={isCurrentUser}
+              sx={{
+                color: '#524a49',
+                '&.Mui-disabled': { color: 'rgba(231, 76, 60, 0.3)' },
+              }}
+            >
+              <BlockIcon />
+            </IconButton>
+          </span>
+        </Tooltip>
+      )}
+
+      {onDelete && (
+        <Tooltip
+          title={
+            isCurrentUser
+              ? 'Vous ne pouvez pas vous révoquer'
+              : 'Révoquer Admin'
+          }
+        >
+          <span>
+            <IconButton
+              onClick={() => onDelete(member)}
+              disabled={isCurrentUser}
+              sx={{
+                color: '#f31212',
+                '&.Mui-disabled': { color: 'rgba(104, 96, 96, 0.43)' },
+              }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </span>
+        </Tooltip>
+      )}
+    </Box>
   </Box>
 );
