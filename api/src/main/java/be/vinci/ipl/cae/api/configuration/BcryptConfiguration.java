@@ -77,9 +77,8 @@ public class BcryptConfiguration {
                                    TeamRepository teamRepository,
                                    BCryptPasswordEncoder passwordEncoder) {
     if (!memberRepository.existsByEmail(email)) {
-      Member member = buildMember(email, password, tag, false,
-          image, speciality, creationDate, passwordEncoder);
-      memberRepository.save(member);
+      memberRepository.save(buildMember(email, password, tag, false,
+          image, speciality, creationDate, passwordEncoder));
     }
     if (!teamRepository.existsByName(teamName)) {
       Member responsible = memberRepository.findByEmail(email).orElseThrow();
@@ -99,6 +98,22 @@ public class BcryptConfiguration {
       registration.setTeam(team);
       registration.setRegistrationDate(LocalDate.now());
       registrationRepository.save(registration);
+    }
+  }
+
+  private void setupTournament(String tournamentName, Team winner,
+                               List<Team> teams, TournamentRepository tournamentRepository,
+                               TournamentRegistrationRepository registrationRepository) {
+    if (!tournamentRepository.existsByName(tournamentName)) {
+      return;
+    }
+    Tournament t = tournamentRepository.findByName(tournamentName).orElseThrow();
+    if (winner != null && t.getWinnerTeam() == null) {
+      t.setWinnerTeam(winner);
+      tournamentRepository.save(t);
+    }
+    for (Team team : teams) {
+      registerTeam(registrationRepository, t, team);
     }
   }
 
@@ -129,8 +144,7 @@ public class BcryptConfiguration {
 
       for (String url : imageUrls) {
         if (imageRepository.findByUrl(url).isEmpty()) {
-          Image i = new Image(url);
-          imageRepository.save(i);
+          imageRepository.save(new Image(url));
         }
       }
 
@@ -142,22 +156,20 @@ public class BcryptConfiguration {
 
       for (String name : specialityNames) {
         if (specialityRepository.findByName(name).isEmpty()) {
-          Speciality s = new Speciality(name);
-          specialityRepository.save(s);
+          specialityRepository.save(new Speciality(name));
         }
       }
 
       // Specialities
-      final Speciality tacticien    = specialityRepository.findByName("tacticien").orElseThrow();
-      final Speciality executeur    = specialityRepository.findByName("exécuteur").orElseThrow();
-      final Speciality guerisseur   = specialityRepository.findByName("guérisseur").orElseThrow();
-      final Speciality gardien      = specialityRepository.findByName("gardien").orElseThrow();
-      final Speciality architecte   = specialityRepository.findByName("architecte").orElseThrow();
-      final Speciality catalyseur   = specialityRepository.findByName("catalyseur").orElseThrow();
-      final Speciality perturbateur = specialityRepository.findByName("perturbateur").orElseThrow();
+      final Speciality tacticien = specialityRepository.findByName("tacticien").orElseThrow();
+      final Speciality executeur = specialityRepository.findByName("exécuteur").orElseThrow();
+      final Speciality guerisseur = specialityRepository.findByName("guérisseur").orElseThrow();
+      final Speciality gardien = specialityRepository.findByName("gardien").orElseThrow();
+      final Speciality architecte = specialityRepository.findByName("architecte").orElseThrow();
+      final Speciality catalyseur = specialityRepository.findByName("catalyseur").orElseThrow();
+      final Speciality perturbateur =
+          specialityRepository.findByName("perturbateur").orElseThrow();
       final Speciality defaultSpeciality = specialityRepository.findAll().getFirst();
-
-      // Images
       final Image defaultImage = imageRepository.findAll().get(11);
 
       // Members & Admins in DB
@@ -203,7 +215,7 @@ public class BcryptConfiguration {
       }
 
       // Teams
-      Member lea  = memberRepository.findByEmail("lea@mail.com").orElseThrow();
+      Member lea = memberRepository.findByEmail("lea@mail.com").orElseThrow();
       Member tibo = memberRepository.findByEmail("tibo@mail.com").orElseThrow();
 
       if (!teamRepository.existsByName("TEAM_ALPHA")) {
@@ -215,7 +227,7 @@ public class BcryptConfiguration {
       }
 
       // Affectations
-      Member tom  = memberRepository.findByEmail("tom@mail.com").orElseThrow();
+      Member tom = memberRepository.findByEmail("tom@mail.com").orElseThrow();
       Member ines = memberRepository.findByEmail("ines@mail.com").orElseThrow();
 
       Team teamAlpha = teamRepository.findByName("TEAM_ALPHA").orElseThrow();
@@ -281,7 +293,7 @@ public class BcryptConfiguration {
             LocalDate.of(2026, 4, 1), 8, Status.IN_PROGRESS, true, admin));
       }
 
-      // Tournois futurs (PREPARATION + isPublic = true → inscriptions ouvertes)
+      // Tournois futurs (PREPARATION + isPublic = true)
       if (!tournamentRepository.existsByName("Vinci Easter Cup 2026")) {
         tournamentRepository.save(buildTournament(
             "Vinci Easter Cup 2026",
@@ -298,7 +310,7 @@ public class BcryptConfiguration {
             LocalDate.of(2026, 5, 11), 16, Status.PREPARATION, true, admin));
       }
 
-      // ── Membres et teams supplémentaires via createMemberAndTeam ──
+      // ── Membres et teams supplémentaires ──
       createMemberAndTeam("zara@mail.com", "zara", "Viper", architecte,
           imageRepository.findAll().get(1), LocalDate.of(2025, 9, 5),
           "TEAM_NOVA", memberRepository, teamRepository, passwordEncoder);
@@ -361,87 +373,39 @@ public class BcryptConfiguration {
       Team teamTitan  = teamRepository.findByName("TEAM_TITAN").orElseThrow();
       Team teamVenom  = teamRepository.findByName("TEAM_VENOM").orElseThrow();
 
-      // Spring Arena Cup 2025 — 7 inscrits, gagnant TEAM_OMEGA
-      if (tournamentRepository.existsByName("Spring Arena Cup 2025")) {
-        Tournament t = tournamentRepository.findByName("Spring Arena Cup 2025").orElseThrow();
-        if (t.getWinnerTeam() == null) {
-          t.setWinnerTeam(teamOmega);
-          tournamentRepository.save(t);
-        }
-        for (Team team : List.of(teamAlpha, teamOmega, teamNova, teamVoid,
-            teamStorm, teamBlaze, teamFrost)) {
-          registerTeam(registrationRepository, t, team);
-        }
-      }
+      setupTournament("Spring Arena Cup 2025", teamOmega,
+          List.of(teamAlpha, teamOmega, teamNova, teamVoid, teamStorm, teamBlaze, teamFrost),
+          tournamentRepository, registrationRepository);
 
-      // Elite Championship 2025 — 6 inscrits, gagnant TEAM_NOVA
-      if (tournamentRepository.existsByName("Elite Championship 2025")) {
-        Tournament t = tournamentRepository.findByName("Elite Championship 2025").orElseThrow();
-        if (t.getWinnerTeam() == null) {
-          t.setWinnerTeam(teamNova);
-          tournamentRepository.save(t);
-        }
-        for (Team team : List.of(teamAlpha, teamOmega, teamNova,
-            teamVoid, teamStorm, teamBlaze)) {
-          registerTeam(registrationRepository, t, team);
-        }
-      }
+      setupTournament("Elite Championship 2025", teamNova,
+          List.of(teamAlpha, teamOmega, teamNova, teamVoid, teamStorm, teamBlaze),
+          tournamentRepository, registrationRepository);
 
-      // Summer Pro League 2025 — 14 inscrits, gagnant TEAM_NOVA
-      if (tournamentRepository.existsByName("Summer Pro League 2025")) {
-        Tournament t = tournamentRepository.findByName("Summer Pro League 2025").orElseThrow();
-        if (t.getWinnerTeam() == null) {
-          t.setWinnerTeam(teamNova);
-          tournamentRepository.save(t);
-        }
-        for (Team team : List.of(teamAlpha, teamOmega, teamNova, teamVoid,
-            teamStorm, teamBlaze, teamFrost, teamEmber, teamSurge, teamCrypt,
-            teamApex, teamWraith, teamTitan, teamVenom)) {
-          registerTeam(registrationRepository, t, team);
-        }
-      }
+      setupTournament("Summer Pro League 2025", teamNova,
+          List.of(teamAlpha, teamOmega, teamNova, teamVoid, teamStorm, teamBlaze,
+              teamFrost, teamEmber, teamSurge, teamCrypt, teamApex, teamWraith,
+              teamTitan, teamVenom),
+          tournamentRepository, registrationRepository);
 
-      // Vinci Winter Clash 2026 — 12 inscrits, gagnant TEAM_ALPHA
-      if (tournamentRepository.existsByName("Vinci Winter Clash 2026")) {
-        Tournament t = tournamentRepository.findByName("Vinci Winter Clash 2026").orElseThrow();
-        if (t.getWinnerTeam() == null) {
-          t.setWinnerTeam(teamAlpha);
-          tournamentRepository.save(t);
-        }
-        for (Team team : List.of(teamAlpha, teamOmega, teamNova, teamVoid,
-            teamStorm, teamBlaze, teamFrost, teamEmber, teamSurge, teamCrypt,
-            teamApex, teamWraith)) {
-          registerTeam(registrationRepository, t, team);
-        }
-      }
+      setupTournament("Vinci Winter Clash 2026", teamAlpha,
+          List.of(teamAlpha, teamOmega, teamNova, teamVoid, teamStorm, teamBlaze,
+              teamFrost, teamEmber, teamSurge, teamCrypt, teamApex, teamWraith),
+          tournamentRepository, registrationRepository);
 
-      // Spring Battle Series 2026 — 8 inscrits, pas de gagnant
-      if (tournamentRepository.existsByName("Spring Battle Series 2026")) {
-        Tournament t = tournamentRepository.findByName("Spring Battle Series 2026").orElseThrow();
-        for (Team team : List.of(teamAlpha, teamOmega, teamNova, teamVoid,
-            teamStorm, teamBlaze, teamFrost, teamEmber)) {
-          registerTeam(registrationRepository, t, team);
-        }
-      }
+      setupTournament("Spring Battle Series 2026", null,
+          List.of(teamAlpha, teamOmega, teamNova, teamVoid, teamStorm, teamBlaze,
+              teamFrost, teamEmber),
+          tournamentRepository, registrationRepository);
 
-      // Vinci Easter Cup 2026 — 7 inscrits
-      if (tournamentRepository.existsByName("Vinci Easter Cup 2026")) {
-        Tournament t = tournamentRepository.findByName("Vinci Easter Cup 2026").orElseThrow();
-        for (Team team : List.of(teamAlpha, teamOmega, teamNova, teamVoid,
-            teamStorm, teamBlaze, teamFrost)) {
-          registerTeam(registrationRepository, t, team);
-        }
-      }
+      setupTournament("Vinci Easter Cup 2026", null,
+          List.of(teamAlpha, teamOmega, teamNova, teamVoid, teamStorm, teamBlaze, teamFrost),
+          tournamentRepository, registrationRepository);
 
-      // Elite Championship 2026 — 14 inscrits
-      if (tournamentRepository.existsByName("Elite Championship 2026")) {
-        Tournament t = tournamentRepository.findByName("Elite Championship 2026").orElseThrow();
-        for (Team team : List.of(teamAlpha, teamOmega, teamNova, teamVoid,
-            teamStorm, teamBlaze, teamFrost, teamEmber, teamSurge, teamCrypt,
-            teamApex, teamWraith, teamTitan, teamVenom)) {
-          registerTeam(registrationRepository, t, team);
-        }
-      }
+      setupTournament("Elite Championship 2026", null,
+          List.of(teamAlpha, teamOmega, teamNova, teamVoid, teamStorm, teamBlaze,
+              teamFrost, teamEmber, teamSurge, teamCrypt, teamApex, teamWraith,
+              teamTitan, teamVenom),
+          tournamentRepository, registrationRepository);
 
     };
   }
