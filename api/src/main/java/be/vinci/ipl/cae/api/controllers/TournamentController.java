@@ -112,7 +112,7 @@ public class TournamentController {
       @AuthenticationPrincipal Member currentMember,
       @RequestParam(required = false) String teamName,
       @RequestParam(required = false) String memberTag) {
-    boolean isAdmin = currentMember.getIsAdmin();
+    boolean isAdmin = currentMember != null && currentMember.getIsAdmin();
     return tournamentService.getAllTournaments(teamName, memberTag, isAdmin);
   }
 

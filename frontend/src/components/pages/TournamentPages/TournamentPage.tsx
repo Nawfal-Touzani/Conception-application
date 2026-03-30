@@ -40,12 +40,6 @@ const formatDateFull = (dateStr: string) =>
     year: 'numeric',
   });
 
-// Statut affiché :
-// PREPARATION + isPublic = true  → Inscriptions ouvertes
-// PREPARATION + isPublic = false → En préparation (admin seulement)
-// IN_PROGRESS → En cours
-// FINISHED    → Terminé
-// CANCELLED   → Annulé
 function getStateLabel(tournament: TournamentDetails): string {
   if (tournament.status === 'PREPARATION') {
     return tournament.isPublic ? 'Inscriptions ouvertes' : 'En préparation';
@@ -60,17 +54,13 @@ const TournamentsPage = () => {
   const token = user?.token ?? '';
   const isAdmin = user?.role === 'ADMIN';
 
-  // Liste reçue du backend
   const [tournaments, setTournaments] = useState<TournamentDetails[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedTournament, setSelectedTournament] =
     useState<TournamentDetails | null>(null);
 
-  // Filtres backend — appel API avec debounce
   const [teamSearch, setTeamSearch] = useState('');
   const [tagSearch, setTagSearch] = useState('');
-
-  // Filtres frontend — filtre local sur la liste reçue
   const [nameSearch, setNameSearch] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -81,7 +71,7 @@ const TournamentsPage = () => {
     'public' | 'private' | ''
   >('');
 
-  // Charge les tournois avec les filtres team/tag
+  // Charge les tournois — fonctionne avec ou sans token (visiteur non connecté)
   const loadTournaments = useCallback(
     (teamName?: string, memberTag?: string) => {
       setError(null);
@@ -93,14 +83,13 @@ const TournamentsPage = () => {
     [token],
   );
 
-  // Chargement initial
+  // Chargement initial — pas de condition sur token
   useEffect(() => {
-    if (token) loadTournaments();
-  }, [token, loadTournaments]);
+    loadTournaments();
+  }, [loadTournaments]);
 
-  // Debounce 400ms sur team et tag — relance l'appel backend
+  // Debounce 400ms sur team et tag
   useEffect(() => {
-    if (!token) return;
     const timer = setTimeout(() => {
       loadTournaments(
         teamSearch.trim() || undefined,
@@ -108,9 +97,8 @@ const TournamentsPage = () => {
       );
     }, 400);
     return () => clearTimeout(timer);
-  }, [teamSearch, tagSearch, token, loadTournaments]);
+  }, [teamSearch, tagSearch, loadTournaments]);
 
-  // Filtres locaux appliqués sur la liste reçue
   const filtered = useMemo(() => {
     return tournaments.filter((t) => {
       if (
@@ -215,7 +203,6 @@ const TournamentsPage = () => {
           FILTRES
         </Typography>
 
-        {/* Nom — filtre frontend */}
         <Box>
           <Typography
             sx={{
@@ -244,7 +231,6 @@ const TournamentsPage = () => {
           />
         </Box>
 
-        {/* Team — filtre backend */}
         <Box>
           <Typography
             sx={{
@@ -273,7 +259,6 @@ const TournamentsPage = () => {
           />
         </Box>
 
-        {/* Tag — filtre backend */}
         <Box>
           <Typography
             sx={{
@@ -529,7 +514,6 @@ const TournamentsPage = () => {
                       gap: 1,
                     }}
                   >
-                    {/* Header — nom du tournoi */}
                     <Box
                       sx={{
                         backgroundColor: '#1e2a44',
@@ -545,7 +529,6 @@ const TournamentsPage = () => {
                       </Typography>
                     </Box>
 
-                    {/* Contenu */}
                     <Box
                       sx={{
                         backgroundColor: '#1e2a44',
@@ -559,7 +542,6 @@ const TournamentsPage = () => {
                         alignItems: 'center',
                       }}
                     >
-                      {/* Dates du tournoi */}
                       <Typography
                         variant="caption"
                         display="block"
@@ -570,7 +552,6 @@ const TournamentsPage = () => {
                         {formatDate(tournament.endDate)}
                       </Typography>
 
-                      {/* Statut */}
                       <Typography
                         variant="body1"
                         fontWeight="bold"
@@ -580,7 +561,6 @@ const TournamentsPage = () => {
                         {getStateLabel(tournament)}
                       </Typography>
 
-                      {/* Date de clôture des inscriptions — toujours affichée */}
                       <Typography
                         variant="caption"
                         display="block"
@@ -592,7 +572,6 @@ const TournamentsPage = () => {
                         {formatDateFull(tournament.registrationDeadline)}
                       </Typography>
 
-                      {/* Description */}
                       {tournament.description && (
                         <Typography
                           variant="caption"
@@ -642,6 +621,7 @@ const TournamentsPage = () => {
                 ))}
               </Box>
 
+              {/* Bouton Administrer — grisé uniquement si FINISHED ou CANCELLED */}
               {isAdmin && (
                 <Box
                   sx={{
@@ -656,7 +636,6 @@ const TournamentsPage = () => {
                       key={tournament.id}
                       variant="contained"
                       disabled={
-                        tournament.isPublic ||
                         tournament.status === 'FINISHED' ||
                         tournament.status === 'CANCELLED'
                       }
