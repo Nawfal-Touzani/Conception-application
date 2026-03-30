@@ -189,7 +189,8 @@ public class TournamentService {
         registrationRepository.countByTournamentId(t.getId()),
         t.getStatus(),
         t.getOrganizer().getTag(),
-        t.isPublic()
+        t.isPublic(),
+        t.getWinnerTeam() != null ? t.getWinnerTeam().getName() : null
     );
   }
 }
