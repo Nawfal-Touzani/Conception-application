@@ -1,5 +1,101 @@
-### GET request to example server
-GET https://examples.http-client.intellij.net/get
-    ?generated-in=IntelliJ IDEA
+@baseUrl = http://localhost:8080
+@adminToken = djkdjfj
+@userToken = ejcnjenjce
+
+### Login admin (copie le token dans @adminToken)
+POST {{baseUrl}}/auths/login
+Content-Type: application/json
+
+{
+  "email": "admin@vinci.be",
+  "password": "admin"
+}
+
+###
+
+### Login non-admin (copie le token dans @userToken)
+POST {{baseUrl}}/auths/login
+Content-Type: application/json
+
+{
+  "email": "lea@mail.com",
+  "password": "lea"
+}
+
+###
+
+# ── GET /tournaments ──
+
+### GET tous les tournois en tant qu'admin (doit voir publics ET privés, 200)
+GET {{baseUrl}}/tournaments
+Authorization: Bearer {{adminToken}}
+
+###
+
+### GET tous les tournois en tant que non-admin (doit voir uniquement les publics, 200)
+GET {{baseUrl}}/tournaments
+Authorization: Bearer {{userToken}}
+
+###
+
+### GET tous les tournois sans token (visiteur non connecté, doit voir uniquement les publics, 200)
+GET {{baseUrl}}/tournaments
+
+###
+
+### GET tournois filtrés par nom de team (doit retourner les tournois où TEAM_ALPHA est inscrite)
+GET {{baseUrl}}/tournaments?teamName=TEAM_ALPHA
+Authorization: Bearer {{userToken}}
+
+###
+
+### GET tournois filtrés par tag de membre (doit retourner les tournois où Lynx a joué)
+GET {{baseUrl}}/tournaments?memberTag=Lynx
+Authorization: Bearer {{userToken}}
+
+###
+
+### GET tournois avec une team inexistante (doit retourner une liste vide)
+GET {{baseUrl}}/tournaments?teamName=TEAM_INEXISTANTE
+Authorization: Bearer {{userToken}}
+
+###
+
+# ── GET /tournaments/{id} ──
+
+### GET tournoi par id existant (doit retourner 200 avec les détails)
+GET {{baseUrl}}/tournaments/1
+Authorization: Bearer {{userToken}}
+
+###
+
+### GET tournoi par id existant sans token (visiteur, doit retourner 200)
+GET {{baseUrl}}/tournaments/1
+
+###
+
+### GET tournoi par id inexistant (doit retourner 404)
+GET {{baseUrl}}/tournaments/9999
+Authorization: Bearer {{userToken}}
+
+###
+
+# ── PATCH /tournaments/{id}/publish ──
+
+### Publier un tournoi en préparation en tant qu'admin (doit retourner 200)
+PATCH {{baseUrl}}/tournaments/1/publish
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Publier un tournoi déjà en cours (doit retourner 409)
+PATCH {{baseUrl}}/tournaments/5/publish
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Publier un tournoi sans être admin (doit retourner 403)
+PATCH {{baseUrl}}/tournaments/1/publish
+Authorization: Bearer {{userToken}}
 
 ###
