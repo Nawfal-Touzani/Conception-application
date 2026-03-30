@@ -42,7 +42,8 @@ public class BcryptConfiguration {
 
   private Tournament buildTournament(String name, String description,
                                      LocalDate startDate, LocalDate endDate, LocalDate deadline,
-                                     int maxParticipants, Status status, boolean isPublic, Member organizer) {
+                                     int maxParticipants, Status status, boolean isPublic,
+                                     Member organizer) {
     Tournament t = new Tournament();
     t.setName(name);
     t.setDescription(description);
@@ -73,7 +74,8 @@ public class BcryptConfiguration {
   private void createMemberAndTeam(String email, String password, String tag,
                                    Speciality speciality, Image image, LocalDate creationDate,
                                    String teamName, MemberRepository memberRepository,
-                                   TeamRepository teamRepository, BCryptPasswordEncoder passwordEncoder) {
+                                   TeamRepository teamRepository,
+                                   BCryptPasswordEncoder passwordEncoder) {
     if (!memberRepository.existsByEmail(email)) {
       Member member = buildMember(email, password, tag, false,
           image, speciality, creationDate, passwordEncoder);
@@ -146,17 +148,17 @@ public class BcryptConfiguration {
       }
 
       // Specialities
-      Speciality tacticien    = specialityRepository.findByName("tacticien").orElseThrow();
-      Speciality executeur    = specialityRepository.findByName("exécuteur").orElseThrow();
-      Speciality guerisseur   = specialityRepository.findByName("guérisseur").orElseThrow();
-      Speciality gardien      = specialityRepository.findByName("gardien").orElseThrow();
-      Speciality architecte   = specialityRepository.findByName("architecte").orElseThrow();
-      Speciality catalyseur   = specialityRepository.findByName("catalyseur").orElseThrow();
-      Speciality perturbateur = specialityRepository.findByName("perturbateur").orElseThrow();
-      Speciality defaultSpeciality = specialityRepository.findAll().getFirst();
+      final Speciality tacticien    = specialityRepository.findByName("tacticien").orElseThrow();
+      final Speciality executeur    = specialityRepository.findByName("exécuteur").orElseThrow();
+      final Speciality guerisseur   = specialityRepository.findByName("guérisseur").orElseThrow();
+      final Speciality gardien      = specialityRepository.findByName("gardien").orElseThrow();
+      final Speciality architecte   = specialityRepository.findByName("architecte").orElseThrow();
+      final Speciality catalyseur   = specialityRepository.findByName("catalyseur").orElseThrow();
+      final Speciality perturbateur = specialityRepository.findByName("perturbateur").orElseThrow();
+      final Speciality defaultSpeciality = specialityRepository.findAll().getFirst();
 
       // Images
-      Image defaultImage = imageRepository.findAll().get(11);
+      final Image defaultImage = imageRepository.findAll().get(11);
 
       // Members & Admins in DB
       if (!memberRepository.existsByEmail("lea@mail.com")) {

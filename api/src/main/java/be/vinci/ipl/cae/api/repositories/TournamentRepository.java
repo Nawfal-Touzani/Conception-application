@@ -37,8 +37,9 @@ public interface TournamentRepository extends CrudRepository<Tournament, Long> {
   List<Tournament> findByIdIn(List<Long> ids);
 
   /**
-   * Find a tournament by its name
-   * @param name
+   * Find a tournament by its name.
+   *
+   * @param name Tournament name
    * @return tounament
    */
   Optional<Tournament> findByName(String name);
