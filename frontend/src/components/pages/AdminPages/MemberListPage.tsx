@@ -21,6 +21,9 @@ const MembersListPage = () => {
       .finally(() => setLoading(false));
   }, [user]);
 
+  const activeMembers = members.filter((m) => !m.isBan);
+  const bannedMembers = members.filter((m) => m.isBan);
+
   const handleConfirmBan = async (reason: string) => {
     if (!banTarget) return;
 
@@ -50,12 +53,12 @@ const MembersListPage = () => {
         alignItems: 'center',
       }}
     >
-      <Box sx={{ width: '100%', maxWidth: 760 }}>
+      <Box sx={{ width: '100%', maxWidth: 1200 }}>
         <Typography
           variant="h4"
           sx={{ color: '#fff', fontWeight: 800, mb: 4, textAlign: 'center' }}
         >
-          Tous les Membres
+          Gestion des membres
         </Typography>
 
         <Button
@@ -65,15 +68,11 @@ const MembersListPage = () => {
             borderColor: '#d8a46b',
             color: '#d8a46b',
             fontWeight: 700,
-            textTransform: 'none',
-            borderRadius: '8px',
-            mb: 2,
-            '&:hover': {
-              backgroundColor: 'rgba(216,164,107,0.1)',
-            },
+            mb: 4,
+            '&:hover': { backgroundColor: 'rgba(216,164,107,0.1)' },
           }}
         >
-          ←
+          ← Retour
         </Button>
 
         {loading ? (
@@ -81,15 +80,76 @@ const MembersListPage = () => {
             sx={{ color: '#fff', display: 'block', mx: 'auto' }}
           />
         ) : (
-          members.map((m) => (
-            <MemberRow
-              key={m.id}
-              member={m}
-              isCurrentUser={m.tag === user?.tag}
-              onBan={() => setBanTarget(m)}
-            />
-          ))
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 4,
+              alignItems: 'flex-start',
+            }}
+          >
+            <Box sx={{ flex: 1, width: '100%' }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  color: '#fff',
+                  mb: 2,
+                  borderBottom: '2px solid #11981a',
+                  pb: 1,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <span>Membres Actifs</span>
+                <span>{activeMembers.length}</span>
+              </Typography>
+
+              {activeMembers.map((m) => (
+                <MemberRow
+                  key={m.id}
+                  member={m}
+                  isCurrentUser={m.tag === user?.tag}
+                  onBan={() => setBanTarget(m)}
+                />
+              ))}
+            </Box>
+
+            <Box sx={{ flex: 1, width: '100%' }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  color: '#fff',
+                  mb: 2,
+                  borderBottom: '2px solid #b40f0f',
+                  pb: 1,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <span>Membres Bannis</span>
+                <span>{bannedMembers.length}</span>
+              </Typography>
+
+              {bannedMembers.length === 0 ? (
+                <Typography
+                  sx={{
+                    color: 'rgba(255,255,255,0.4)',
+                    textAlign: 'center',
+                    mt: 4,
+                  }}
+                >
+                  Aucun membre banni
+                </Typography>
+              ) : (
+                <Box sx={{ opacity: 0.5 }}>
+                  {bannedMembers.map((m) => (
+                    <MemberRow key={m.id} member={m} isCurrentUser={false} />
+                  ))}
+                </Box>
+              )}
+            </Box>
+          </Box>
         )}
+
         <BanModal
           open={!!banTarget}
           member={banTarget}

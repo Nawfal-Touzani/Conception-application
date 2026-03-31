@@ -185,7 +185,8 @@ public class MemberService {
         member.getImage().getUrl(),
         member.getProfileCreationDate(),
         member.getIsAdmin(),
-        isMemberAvailable(member)
+        isMemberAvailable(member),
+        member.isBan()
     );
   }
 

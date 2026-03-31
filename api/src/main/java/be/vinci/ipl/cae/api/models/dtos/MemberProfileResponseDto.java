@@ -14,5 +14,6 @@ public record MemberProfileResponseDto(
     String profileImage,
     LocalDate creationDate,
     boolean isAdmin,
-    boolean isAvailable
+    boolean isAvailable,
+    boolean isBan
 ) {}
