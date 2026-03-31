@@ -1,5 +1,5 @@
 @baseUrl = http://localhost:3000
-@tokenAdmin =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoiYWRtaW5AdmluY2kuYmUiLCJpYXQiOjE3NzQ4MDkzMDMsImV4cCI6MTc3NDg5NTcwM30.wO5whSHRMnfE39YIe3wKOtsmvYcsNS3MPKQCiSeEkzg
+@tokenAdmin =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoiYWRtaW5AdmluY2kuYmUiLCJpYXQiOjE3NzQ5MzkwOTQsImV4cCI6MTc3NTAyNTQ5NH0.PUB5vK8IcMvQfqcdw1zntzoJQ9xF3ctFR1d7wVk7zOk
 @tokenResponsible =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibGVhQG1haWwuY29tIiwiaWF0IjoxNzc0ODA5MzE2LCJleHAiOjE3NzQ4OTU3MTZ9.J1mGWl-ihODTPl7Y8Y3NEYO-YWFgebxFvFv6pXvZb98
 @tokenSecondResponsible =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoidG9tQG1haWwuY29tIiwiaWF0IjoxNzc0ODA5MzMxLCJleHAiOjE3NzQ4OTU3MzF9.0uddK7dG-IuHL-4pOhrnMlW4Yy7Tcb3HVJEUE8vQjv0
 
@@ -57,7 +57,7 @@ Content-Type: application/json
 Authorization: Bearer {{tokenAdmin}}
 
 {
-  "name": "Tournoi En Cours",
+  "name": "Tournoi Valid",
   "description": "Tournoi déjà commencé",
   "startDate": "2026-06-10",
   "endDate": "2026-06-12",
@@ -127,7 +127,7 @@ Authorization: Bearer {{tokenResponsible}}
 
 ### 8) Team avec moins de 4 membres (should return 400)
 ### (utilise une team qui a moins de 4 membres en DB)
-POST {{baseUrl}}/tournaments/8/teams/1
+POST {{baseUrl}}/tournaments/7/teams/2
 Authorization: Bearer {{tokenResponsible}}
 
 ### 9) Membre second responsable de la team 201

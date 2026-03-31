@@ -63,6 +63,10 @@ public class TournamentController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "Tournament create error: " + e.getMessage(), e);
     }
+    catch (IllegalStateException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
+          "Tournament create error: " + e.getMessage(), e);
+    }
   }
 
   /**

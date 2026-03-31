@@ -42,6 +42,10 @@ public class TournamentService {
     final Member organizer = memberRepository.findById(organizerId)
         .orElseThrow(() -> new NoSuchElementException("Organizer not found"));
 
+    if (tournamentRepository.existsByName(dto.name())) {
+      throw new IllegalStateException("The name of that tournament is already exist");
+    }
+
     if (dto.startDate().isBefore(LocalDate.now())
         || dto.endDate().isBefore(LocalDate.now())) {
       throw new IllegalArgumentException("Dates must be in the future");
