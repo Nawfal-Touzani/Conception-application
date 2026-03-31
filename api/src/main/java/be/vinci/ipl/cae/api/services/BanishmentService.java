@@ -9,12 +9,21 @@ import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 
+/**
+ * The type Banishment service.
+ */
 @Service
 public class BanishmentService {
 
   private final BanishmentRepository banishmentRepository;
   private final MemberRepository memberRepository;
 
+  /**
+   * Instantiates a new Banishment service.
+   *
+   * @param banishmentRepository the banishment repository
+   * @param memberRepository     the member repository
+   */
   public BanishmentService(BanishmentRepository banishmentRepository,
       MemberRepository memberRepository) {
     this.banishmentRepository = banishmentRepository;
@@ -56,3 +65,4 @@ public class BanishmentService {
     memberRepository.save(member);
   }
 }
+

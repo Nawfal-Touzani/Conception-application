@@ -1,6 +1,6 @@
 
 @baseUrl = http://localhost:3000
-@tokenAdmin =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoiYWRtaW5AdmluY2kuYmUiLCJpYXQiOjE3NzQ1MjkwOTksImV4cCI6MTc3NDYxNTQ5OX0.3sAd8a2aPiU3VRFt2VwywkbPa9lAUtkLnrW2VkNVQto
+@tokenAdmin =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoiYWRtaW5AdmluY2kuYmUiLCJpYXQiOjE3NzQ4MDEyMjksImV4cCI6MTc3NDg4NzYyOX0.hyl7grzLN-2vbEGF4i3fbaZD_rmUNnEQMyERJhnu3aU
 
 @tokenUser = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibGVhQG1haWwuY29tIiwiaWF0IjoxNzc0NDUzNzM4LCJleHAiOjE3NzQ1NDAxMzh9.BTn227u9U9eOOTOC6o3m-MLgQ97xtQbUy-hRfqzb7TU
 
@@ -154,3 +154,98 @@ Authorization: Bearer {{tokenUser}}
   "registrationDeadline": "2026-05-30",
   "maxParticipant": 8
 }
+
+
+### -------------------------------------------
+### UPDATE TOURNAMENT
+### -------------------------------------------
+
+### 9) Update tournament success 200
+PUT {{baseUrl}}/tournaments/8
+Content-Type: application/json
+Authorization: Bearer {{tokenAdmin}}
+
+{
+  "name": "Tournoi Modifié",
+  "description": "Description modifiée",
+  "startDate": "2026-07-01",
+  "endDate": "2026-07-10",
+  "registrationDeadline": "2026-06-25",
+  "maxParticipant": 8
+}
+
+### 10) Update tournament FAILED - not found 404
+PUT {{baseUrl}}/tournaments/999
+Content-Type: application/json
+Authorization: Bearer {{tokenAdmin}}
+
+{
+  "name": "Tournoi inexistant",
+  "description": "desc",
+  "startDate": "2026-07-01",
+  "endDate": "2026-07-10",
+  "registrationDeadline": "2026-06-25",
+  "maxParticipant": 8
+}
+
+### 11) Update tournament FAILED - not in PREPARATION 409
+PUT {{baseUrl}}/tournaments/2
+Content-Type: application/json
+Authorization: Bearer {{tokenAdmin}}
+
+{
+  "name": "Tournoi en cours",
+  "description": "desc",
+  "startDate": "2026-07-01",
+  "endDate": "2026-07-10",
+  "registrationDeadline": "2026-06-25",
+  "maxParticipant": 8
+}
+
+### 12) Update tournament FAILED - invalid dates 400
+PUT {{baseUrl}}/tournaments/8
+Content-Type: application/json
+Authorization: Bearer {{tokenAdmin}}
+
+{
+  "name": "Tournoi invalide",
+  "description": "desc",
+  "startDate": "2026-07-10",
+  "endDate": "2026-07-01",
+  "registrationDeadline": "2026-06-25",
+  "maxParticipant": 8
+}
+
+### 13) Update tournament FAILED - not admin 403
+PUT {{baseUrl}}/tournaments/8
+Content-Type: application/json
+Authorization: Bearer {{tokenUser}}
+
+{
+  "name": "Tournoi interdit",
+  "description": "desc",
+  "startDate": "2026-07-01",
+  "endDate": "2026-07-10",
+  "registrationDeadline": "2026-06-25",
+  "maxParticipant": 8
+}
+
+### -------------------------------------------
+### PUBLISH TOURNAMENT
+### -------------------------------------------
+
+### 14) Publish tournament success 200
+PATCH {{baseUrl}}/tournaments/8/publish
+Authorization: Bearer {{tokenAdmin}}
+
+### 15) Publish tournament FAILED - not found 404
+PATCH {{baseUrl}}/tournaments/999/publish
+Authorization: Bearer {{tokenAdmin}}
+
+### 16) Publish tournament FAILED - not in PREPARATION 409
+PATCH {{baseUrl}}/tournaments/2/publish
+Authorization: Bearer {{tokenAdmin}}
+
+### 17) Publish tournament FAILED - not admin 403
+PATCH {{baseUrl}}/tournaments/1/publish
+Authorization: Bearer {{tokenUser}}

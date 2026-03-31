@@ -36,3 +36,18 @@ export const revokeAdmin = async (
     headers: { Authorization: `Bearer ${token}` },
   });
 };
+
+export const banMember = async (
+  token: string,
+  memberId: number,
+  reason: string,
+) => {
+  return fetch(`/api/admin/banishments/${memberId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ reason }),
+  });
+};

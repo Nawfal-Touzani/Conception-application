@@ -2,6 +2,7 @@ package be.vinci.ipl.cae.api.repositories;
 
 import be.vinci.ipl.cae.api.models.entities.Tournament;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -35,4 +36,11 @@ public interface TournamentRepository extends CrudRepository<Tournament, Long> {
    */
   List<Tournament> findByIdIn(List<Long> ids);
 
+  /**
+   * Find a tournament by its name.
+   *
+   * @param name Tournament name
+   * @return tounament
+   */
+  Optional<Tournament> findByName(String name);
 }

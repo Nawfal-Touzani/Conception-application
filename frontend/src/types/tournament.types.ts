@@ -27,4 +27,5 @@ export interface TournamentDetails {
   status: TournamentStatus;
   organizerTag: string;
   isPublic: boolean;
+  winnerTeamName?: string | null;
 }

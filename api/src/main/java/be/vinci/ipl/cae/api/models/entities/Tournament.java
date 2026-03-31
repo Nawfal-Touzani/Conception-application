@@ -51,7 +51,7 @@ public class Tournament {
   @Column(nullable = false)
   private Status status;
 
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true)
   private String name;
 
   @Column(nullable = false)
@@ -90,8 +90,8 @@ public class Tournament {
   private List<Match> matches = new ArrayList<>();
 
   @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)
-  @JsonManagedReference("tournament-tournamentRegistrations")
-  private List<TournamentRegistration> tournamentRegistrations = new ArrayList<>();
+  @JsonManagedReference("tournament-registrations")
+  private List<TournamentRegistration> registrations = new ArrayList<>();
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "winner_team_id", nullable = true)
