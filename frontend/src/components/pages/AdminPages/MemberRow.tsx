@@ -51,7 +51,6 @@ export const MemberRow = ({
         cursor: 'pointer',
         '&:hover': {
           textDecoration: 'underline',
-          color: '#2a3b5f',
         },
       }}
     >

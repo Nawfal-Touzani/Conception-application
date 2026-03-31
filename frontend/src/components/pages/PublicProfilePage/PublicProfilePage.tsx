@@ -45,7 +45,7 @@ const PublicProfilePage = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        pt: 3,
+        pt: 2,
       }}
     >
       <Button
@@ -72,11 +72,11 @@ const PublicProfilePage = () => {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          mt: 10,
+          mt: 1,
           border: '2px solid #fff',
           borderRadius: '30px',
           p: 8,
-          maxWidth: '600px',
+          maxWidth: '500px',
         }}
       >
         <Avatar
@@ -86,9 +86,9 @@ const PublicProfilePage = () => {
               : undefined
           }
           sx={{
-            width: 180,
-            height: 180,
-            mb: 4,
+            width: 160,
+            height: 160,
+            mb: 2.5,
             border: '2px solid rgba(255, 255, 255, 0.87)',
           }}
         />
@@ -98,14 +98,19 @@ const PublicProfilePage = () => {
         </Typography>
 
         <Box
-          sx={{ width: 350, height: '2px', backgroundColor: '#fff', mb: 6 }}
+          sx={{
+            width: 350,
+            height: '2px',
+            backgroundColor: '#fff',
+            mb: 2.5,
+          }}
         />
 
         <Box
           sx={{
             display: 'flex',
             flexDirection: 'column',
-            gap: 3,
+            gap: 2,
             width: '100%',
           }}
         >
