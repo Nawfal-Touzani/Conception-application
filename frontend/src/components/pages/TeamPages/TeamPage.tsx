@@ -300,9 +300,6 @@ const TeamPage = () => {
                     gap: 2,
                     textDecoration: 'none',
                     cursor: 'pointer',
-                    '&:hover': {
-                      textDecoration: 'underline',
-                    },
                   }}
                 >
                   <ListItemAvatar sx={{ minWidth: 60 }}>
@@ -332,6 +329,11 @@ const TeamPage = () => {
                       fontSize: '1.2rem',
                       fontWeight: 500,
                       color: '#1a2744',
+                      sx: {
+                        '.MuiListItem-root:hover &': {
+                          textDecoration: 'underline',
+                        },
+                      },
                     }}
                   />
 
