@@ -3,12 +3,14 @@ package be.vinci.ipl.cae.api.services;
 import be.vinci.ipl.cae.api.models.dtos.TournamentDto;
 import be.vinci.ipl.cae.api.models.dtos.TournamentResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
+import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.models.entities.Tournament;
 import be.vinci.ipl.cae.api.models.entities.Tournament.Status;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.TournamentRegistrationRepository;
 import be.vinci.ipl.cae.api.repositories.TournamentRepository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
@@ -23,16 +25,19 @@ public class TournamentService {
   private final TournamentRepository tournamentRepository;
   private final MemberRepository memberRepository;
   private final TournamentRegistrationRepository registrationRepository;
+  private final NotificationService notificationService;
 
   /**
    * Service constructor.
    */
   public TournamentService(TournamentRepository tournamentRepository,
       TournamentRegistrationRepository registrationRepository,
-      MemberRepository memberRepository) {
+      MemberRepository memberRepository,
+      NotificationService notificationService) {
     this.tournamentRepository = tournamentRepository;
     this.registrationRepository = registrationRepository;
     this.memberRepository = memberRepository;
+    this.notificationService = notificationService;
   }
 
   /**
@@ -66,6 +71,16 @@ public class TournamentService {
    */
   public Tournament updateTournament(Long id, TournamentDto dto) {
     Tournament tournament = getTournamentInPreparation(id);
+
+    if (dto.startDate().isBefore(LocalDate.now())
+        || dto.endDate().isBefore(LocalDate.now())) {
+      throw new IllegalArgumentException("Dates must be in the future not in past");
+    }
+
+    if (dto.registrationDeadline().isBefore(LocalDate.now())) {
+      throw new IllegalArgumentException("Registration deadline must be in the future");
+    }
+
     validateTournamentDto(dto);
     applyDtoToTournament(tournament, dto);
     return tournamentRepository.save(tournament);
@@ -77,7 +92,20 @@ public class TournamentService {
   public Tournament publishTournament(Long id) {
     Tournament tournament = getTournamentInPreparation(id);
     tournament.setPublic(true);
-    return tournamentRepository.save(tournament);
+    Tournament saved = tournamentRepository.save(tournament);
+
+    List<Member> allMembers = memberRepository.findAll();
+    for (Member member : allMembers) {
+      Notification notif = new Notification(
+          Notification.Type.TOURNAMENT,
+          "Le tournoi \"" + saved.getName() + "\" est maintenant disponible !",
+          LocalDateTime.now()
+      );
+      notif.setTournament(saved);
+      notificationService.send(member.getId(), notif);
+    }
+
+    return saved;
   }
 
   /**
@@ -189,7 +217,8 @@ public class TournamentService {
         registrationRepository.countByTournamentId(t.getId()),
         t.getStatus(),
         t.getOrganizer().getTag(),
-        t.isPublic()
+        t.isPublic(),
+        t.getWinnerTeam() != null ? t.getWinnerTeam().getName() : null
     );
   }
 }

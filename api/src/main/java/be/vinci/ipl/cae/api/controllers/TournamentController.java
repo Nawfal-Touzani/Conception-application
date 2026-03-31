@@ -104,13 +104,15 @@ public class TournamentController {
 
   /**
    * GET /tournaments — Get all tournaments.
+   * Optional filters: teamName (team registered in the
+   * tournament), memberTag (member tag in a registered team).
    */
   @GetMapping
   public List<TournamentResponseDto> getAllTournaments(
       @AuthenticationPrincipal Member currentMember,
       @RequestParam(required = false) String teamName,
       @RequestParam(required = false) String memberTag) {
-    boolean isAdmin = currentMember.getIsAdmin();
+    boolean isAdmin = currentMember != null && currentMember.getIsAdmin();
     return tournamentService.getAllTournaments(teamName, memberTag, isAdmin);
   }
 

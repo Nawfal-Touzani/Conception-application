@@ -125,7 +125,6 @@ describe('TournamentsPage', () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
     ).mockResolvedValue([tournamentOpen]);
-
     renderAsUser();
     expect(await screen.findByText('Tournois')).toBeTruthy();
   });
@@ -138,9 +137,7 @@ describe('TournamentsPage', () => {
       tournamentInProgress,
       tournamentFinished,
     ]);
-
     renderAsUser();
-
     expect(await screen.findByText('Vinci Easter Cup 2026')).toBeTruthy();
     expect(await screen.findByText('Spring Battle Series 2026')).toBeTruthy();
     expect(await screen.findByText('Spring Arena Cup 2025')).toBeTruthy();
@@ -150,7 +147,6 @@ describe('TournamentsPage', () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
     ).mockResolvedValue([tournamentOpen]);
-
     renderAsUser();
     expect(await screen.findByText('Inscriptions ouvertes')).toBeTruthy();
   });
@@ -159,7 +155,6 @@ describe('TournamentsPage', () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
     ).mockResolvedValue([tournamentInProgress]);
-
     renderAsUser();
     expect(await screen.findByText('En cours')).toBeTruthy();
   });
@@ -168,7 +163,6 @@ describe('TournamentsPage', () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
     ).mockResolvedValue([tournamentFinished]);
-
     renderAsUser();
     expect(await screen.findByText('Terminé')).toBeTruthy();
   });
@@ -177,7 +171,6 @@ describe('TournamentsPage', () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
     ).mockResolvedValue([tournamentPrivate]);
-
     renderAsAdmin();
     expect(await screen.findByText('En préparation')).toBeTruthy();
   });
@@ -186,7 +179,6 @@ describe('TournamentsPage', () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
     ).mockResolvedValue([]);
-
     renderAsUser();
     expect(await screen.findByText('Aucun tournoi trouvé.')).toBeTruthy();
   });
@@ -195,7 +187,6 @@ describe('TournamentsPage', () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
     ).mockRejectedValue(new Error('Erreur réseau'));
-
     renderAsUser();
     expect(
       await screen.findByText('Erreur lors du chargement des tournois.'),
@@ -206,7 +197,6 @@ describe('TournamentsPage', () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
     ).mockResolvedValue([tournamentOpen, tournamentInProgress]);
-
     renderAsUser();
     await screen.findByText('Vinci Easter Cup 2026');
 
@@ -224,7 +214,6 @@ describe('TournamentsPage', () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
     ).mockResolvedValue([tournamentOpen, tournamentInProgress]);
-
     renderAsUser();
     await screen.findByText('Vinci Easter Cup 2026');
 
@@ -240,7 +229,6 @@ describe('TournamentsPage', () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
     ).mockResolvedValue([tournamentOpen, tournamentInProgress]);
-
     renderAsUser();
     await screen.findByText('Spring Battle Series 2026');
 
@@ -256,7 +244,6 @@ describe('TournamentsPage', () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
     ).mockResolvedValue([tournamentOpen, tournamentInProgress]);
-
     renderAsUser();
     await screen.findByText('Vinci Easter Cup 2026');
 
@@ -279,7 +266,6 @@ describe('TournamentsPage', () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
     ).mockResolvedValue([tournamentOpen]);
-
     renderAsAdmin();
     expect(await screen.findByText('Administrer')).toBeTruthy();
   });
@@ -288,7 +274,6 @@ describe('TournamentsPage', () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
     ).mockResolvedValue([tournamentOpen]);
-
     renderAsUser();
     await screen.findByText('Vinci Easter Cup 2026');
     expect(screen.queryByText('Administrer')).toBeFalsy();
@@ -298,7 +283,6 @@ describe('TournamentsPage', () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
     ).mockResolvedValue([tournamentFinished]);
-
     renderAsAdmin();
     const btn = await screen.findByText('Administrer');
     const button = btn.closest('button');
@@ -310,7 +294,6 @@ describe('TournamentsPage', () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
     ).mockResolvedValue([tournamentOpen]);
-
     renderAsAdmin();
     await screen.findByText('Vinci Easter Cup 2026');
     expect(screen.queryByLabelText('Annulés')).toBeTruthy();
@@ -321,7 +304,6 @@ describe('TournamentsPage', () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
     ).mockResolvedValue([tournamentOpen]);
-
     renderAsUser();
     await screen.findByText('Vinci Easter Cup 2026');
     expect(screen.queryByLabelText('Annulés')).toBeFalsy();
@@ -332,7 +314,6 @@ describe('TournamentsPage', () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
     ).mockResolvedValue([tournamentOpen]);
-
     renderAsUser();
     await screen.findByText('Vinci Easter Cup 2026');
 
