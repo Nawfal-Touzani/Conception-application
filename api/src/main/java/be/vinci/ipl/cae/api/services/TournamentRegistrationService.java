@@ -82,6 +82,7 @@ public class TournamentRegistrationService {
       throw new IllegalStateException("the maximum of participant is complete");
     }
 
+    // Check if the team has 4 member minimum.
     int sizeTeam = teamCompositionRepository.countByTeamId(idTeam);
     if (sizeTeam < 4) {
       throw new IllegalArgumentException("the must have at least 4 member");
