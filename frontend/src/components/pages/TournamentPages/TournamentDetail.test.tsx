@@ -1,6 +1,45 @@
-import { render, screen } from '@testing-library/react';
-import { describe, test, expect } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import { describe, test, expect, vi, beforeEach } from 'vitest';
 import TournamentDetail from './TournamentDetailPage';
+import { AuthContext } from '../../../contexts/AuthContext';
+
+vi.mock('../../../services/team.service', () => ({
+  getMyTeam: vi.fn(),
+}));
+
+import * as teamService from '../../../services/team.service';
+
+const mockUser = {
+  id: 1,
+  email: 'lea@mail.com',
+  tag: 'Lynx',
+  role: 'USER',
+  token: 'fake-token',
+};
+
+const mockContextUser = {
+  user: mockUser,
+  login: vi.fn(),
+  register: vi.fn(),
+  logout: vi.fn(),
+  bannedError: null,
+};
+
+const myTeamResponsible = {
+  id: 1,
+  name: 'TEAM_ALPHA',
+  responsibleTag: 'Lynx',
+  secondResponsibleTag: null,
+  creationDate: null,
+};
+
+const myTeamNotResponsible = {
+  id: 1,
+  name: 'TEAM_ALPHA',
+  responsibleTag: 'Rogue',
+  secondResponsibleTag: null,
+  creationDate: null,
+};
 
 const baseTournament = {
   id: 1,
@@ -14,9 +53,23 @@ const baseTournament = {
   organizerTag: 'Admin',
 };
 
+const renderWithContext = (component: React.ReactElement) =>
+  render(
+    <AuthContext.Provider value={mockContextUser}>
+      {component}
+    </AuthContext.Provider>,
+  );
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  (teamService.getMyTeam as ReturnType<typeof vi.fn>).mockRejectedValue(
+    new Error('no team'),
+  );
+});
+
 describe('TournamentDetail', () => {
   test('affiche le nom du tournoi', () => {
-    render(
+    renderWithContext(
       <TournamentDetail
         tournament={{
           ...baseTournament,
@@ -29,7 +82,7 @@ describe('TournamentDetail', () => {
   });
 
   test('affiche "Inscriptions ouvertes" pour PREPARATION + isPublic true', () => {
-    render(
+    renderWithContext(
       <TournamentDetail
         tournament={{
           ...baseTournament,
@@ -38,12 +91,11 @@ describe('TournamentDetail', () => {
         }}
       />,
     );
-    const elements = screen.getAllByText('Inscriptions ouvertes');
-    expect(elements.length).toBeGreaterThan(0);
+    expect(screen.getByText('Ouvert')).toBeTruthy();
   });
 
   test('affiche "En préparation" pour PREPARATION + isPublic false', () => {
-    render(
+    renderWithContext(
       <TournamentDetail
         tournament={{
           ...baseTournament,
@@ -52,12 +104,11 @@ describe('TournamentDetail', () => {
         }}
       />,
     );
-    const elements = screen.getAllByText('En préparation');
-    expect(elements.length).toBeGreaterThan(0);
+    expect(screen.getAllByText('En préparation').length).toBeGreaterThan(0);
   });
 
   test('affiche "En cours" pour IN_PROGRESS', () => {
-    render(
+    renderWithContext(
       <TournamentDetail
         tournament={{
           ...baseTournament,
@@ -66,32 +117,29 @@ describe('TournamentDetail', () => {
         }}
       />,
     );
-    const elements = screen.getAllByText('En cours');
-    expect(elements.length).toBeGreaterThan(0);
+    expect(screen.getAllByText('En cours').length).toBeGreaterThan(0);
   });
 
   test('affiche "Terminé" pour FINISHED', () => {
-    render(
+    renderWithContext(
       <TournamentDetail
         tournament={{ ...baseTournament, status: 'FINISHED', isPublic: true }}
       />,
     );
-    const elements = screen.getAllByText('Terminé');
-    expect(elements.length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Terminé').length).toBeGreaterThan(0);
   });
 
   test('affiche "Annulé" pour CANCELLED', () => {
-    render(
+    renderWithContext(
       <TournamentDetail
         tournament={{ ...baseTournament, status: 'CANCELLED', isPublic: false }}
       />,
     );
-    const elements = screen.getAllByText('Annulé');
-    expect(elements.length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Annulé').length).toBeGreaterThan(0);
   });
 
   test('affiche la date de début', () => {
-    render(
+    renderWithContext(
       <TournamentDetail
         tournament={{
           ...baseTournament,
@@ -104,7 +152,7 @@ describe('TournamentDetail', () => {
   });
 
   test('affiche la date limite des inscriptions', () => {
-    render(
+    renderWithContext(
       <TournamentDetail
         tournament={{
           ...baseTournament,
@@ -117,7 +165,7 @@ describe('TournamentDetail', () => {
   });
 
   test('affiche le nombre de teams max', () => {
-    render(
+    renderWithContext(
       <TournamentDetail
         tournament={{
           ...baseTournament,
@@ -130,7 +178,7 @@ describe('TournamentDetail', () => {
   });
 
   test('affiche "Aucune équipe inscrite" si currentParticipants = 0', () => {
-    render(
+    renderWithContext(
       <TournamentDetail
         tournament={{
           ...baseTournament,
@@ -146,7 +194,7 @@ describe('TournamentDetail', () => {
   });
 
   test("affiche le nombre d'équipes inscrites si > 0", () => {
-    render(
+    renderWithContext(
       <TournamentDetail
         tournament={{
           ...baseTournament,
@@ -160,7 +208,7 @@ describe('TournamentDetail', () => {
   });
 
   test('affiche les sections du bracket', () => {
-    render(
+    renderWithContext(
       <TournamentDetail
         tournament={{
           ...baseTournament,
@@ -175,7 +223,7 @@ describe('TournamentDetail', () => {
   });
 
   test('affiche le panneau "Teams participantes"', () => {
-    render(
+    renderWithContext(
       <TournamentDetail
         tournament={{
           ...baseTournament,
@@ -186,5 +234,83 @@ describe('TournamentDetail', () => {
     );
     expect(screen.getByText('Teams participantes')).toBeTruthy();
     expect(screen.getByText('3 sur 8')).toBeTruthy();
+  });
+
+  test('affiche le gagnant si FINISHED et winnerTeamName présent', () => {
+    renderWithContext(
+      <TournamentDetail
+        tournament={{
+          ...baseTournament,
+          status: 'FINISHED',
+          isPublic: true,
+          winnerTeamName: 'TEAM_NOVA',
+        }}
+      />,
+    );
+    expect(screen.getByText('🏆 Gagnant')).toBeTruthy();
+    expect(screen.getByText('TEAM_NOVA')).toBeTruthy();
+  });
+
+  test("n'affiche pas le gagnant si FINISHED mais winnerTeamName absent", () => {
+    renderWithContext(
+      <TournamentDetail
+        tournament={{ ...baseTournament, status: 'FINISHED', isPublic: true }}
+      />,
+    );
+    expect(screen.queryByText('🏆 Gagnant')).toBeFalsy();
+  });
+
+  test("n'affiche pas le bouton S'inscrire si l'utilisateur n'est pas responsable", async () => {
+    (teamService.getMyTeam as ReturnType<typeof vi.fn>).mockResolvedValue(
+      myTeamNotResponsible,
+    );
+    renderWithContext(
+      <TournamentDetail
+        tournament={{
+          ...baseTournament,
+          status: 'PREPARATION',
+          isPublic: true,
+        }}
+      />,
+    );
+    await waitFor(() => {
+      expect(screen.queryByText("S'inscrire")).toBeFalsy();
+    });
+  });
+
+  test("affiche le bouton S'inscrire si l'utilisateur est responsable et inscriptions ouvertes", async () => {
+    (teamService.getMyTeam as ReturnType<typeof vi.fn>).mockResolvedValue(
+      myTeamResponsible,
+    );
+    renderWithContext(
+      <TournamentDetail
+        tournament={{
+          ...baseTournament,
+          status: 'PREPARATION',
+          isPublic: true,
+        }}
+      />,
+    );
+    await waitFor(() => {
+      expect(screen.queryByText("S'inscrire")).toBeTruthy();
+    });
+  });
+
+  test("n'affiche pas le bouton S'inscrire si le tournoi n'est pas en inscriptions ouvertes", async () => {
+    (teamService.getMyTeam as ReturnType<typeof vi.fn>).mockResolvedValue(
+      myTeamResponsible,
+    );
+    renderWithContext(
+      <TournamentDetail
+        tournament={{
+          ...baseTournament,
+          status: 'IN_PROGRESS',
+          isPublic: true,
+        }}
+      />,
+    );
+    await waitFor(() => {
+      expect(screen.queryByText("S'inscrire")).toBeFalsy();
+    });
   });
 });

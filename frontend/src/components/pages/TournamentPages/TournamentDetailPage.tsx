@@ -1,5 +1,9 @@
-import { Box, Divider, Paper, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Box, Button, Divider, Paper, Typography } from '@mui/material';
 import { TournamentDetails } from '../../../types/tournament.types';
+import { TeamDto } from '../../../types/team.types';
+import { useAuth } from '../../../contexts/useAuth';
+import * as teamService from '../../../services/team.service';
 
 type Props = {
   tournament: TournamentDetails;
@@ -13,7 +17,6 @@ function formatDate(dateStr: string) {
   });
 }
 
-// Cohérent avec TournamentsPage : isPublic + status
 function formatStatus(tournament: TournamentDetails): string {
   if (tournament.status === 'PREPARATION') {
     return tournament.isPublic ? 'Inscriptions ouvertes' : 'En préparation';
@@ -23,95 +26,237 @@ function formatStatus(tournament: TournamentDetails): string {
   return 'Annulé';
 }
 
-function MatchTeam({
-  name,
-  score,
-  winner,
+// ── Bracket SVG ──
+// Dimensions
+const TEAM_W = 180;
+const TEAM_H = 28;
+const TEAM_GAP = 6; // gap entre les deux équipes d'un match
+const MATCH_H = TEAM_H * 2 + TEAM_GAP; // hauteur totale d'un match
+const COL_GAP = 60; // espace horizontal entre les rounds
+const ROW_GAP = 32; // espace vertical entre les matchs d'un round
+
+// Positions Y du centre de chaque match dans les quarts (4 matchs)
+function quartsY(): number[] {
+  return [0, 1, 2, 3].map((i) => i * (MATCH_H + ROW_GAP) + MATCH_H / 2);
+}
+
+// Position Y du centre de chaque match dans les demis (2 matchs)
+function demisY(): number[] {
+  const q = quartsY();
+  return [(q[0] + q[1]) / 2, (q[2] + q[3]) / 2];
+}
+
+// Position Y du centre de la finale
+function finaleY(): number {
+  const d = demisY();
+  return (d[0] + d[1]) / 2;
+}
+
+// Hauteur totale du SVG
+const svgH = 4 * MATCH_H + 3 * ROW_GAP;
+const col0X = 0; // quarts X
+const col1X = col0X + TEAM_W + COL_GAP; // demis X
+const col2X = col1X + TEAM_W + COL_GAP; // finale X
+const svgW = col2X + TEAM_W;
+
+function MatchBox({
+  x,
+  y,
+  topWinner,
 }: {
-  name: string;
-  score: string;
-  winner?: boolean;
+  x: number;
+  y: number;
+  topWinner?: boolean;
+  label?: string;
 }) {
+  const topColor = topWinner ? '#27ae60' : '#e74c3c';
+  const botColor = topWinner ? '#e74c3c' : '#27ae60';
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        border: `2px solid ${winner ? '#27ae60' : '#e74c3c'}`,
-        borderRadius: '3px',
-        px: 1.5,
-        py: 0.6,
-        width: 200,
-        backgroundColor: '#1a2744',
-      }}
-    >
-      <Typography sx={{ color: '#fff', fontSize: '0.85rem' }}>
-        {name}
-      </Typography>
-      <Typography sx={{ color: '#fff', fontSize: '0.85rem', ml: 1 }}>
-        {score}
-      </Typography>
-    </Box>
+    <g>
+      {/* Équipe top */}
+      <rect
+        x={x}
+        y={y}
+        width={TEAM_W}
+        height={TEAM_H}
+        fill="#1a2744"
+        stroke={topColor}
+        strokeWidth={2}
+        rx={3}
+      />
+      <text x={x + 8} y={y + TEAM_H / 2 + 5} fill="#fff" fontSize={12}>
+        Nom équipe
+      </text>
+      <text
+        x={x + TEAM_W - 8}
+        y={y + TEAM_H / 2 + 5}
+        fill="#fff"
+        fontSize={12}
+        textAnchor="end"
+      >
+        score
+      </text>
+      {/* Équipe bottom */}
+      <rect
+        x={x}
+        y={y + TEAM_H + TEAM_GAP}
+        width={TEAM_W}
+        height={TEAM_H}
+        fill="#1a2744"
+        stroke={botColor}
+        strokeWidth={2}
+        rx={3}
+      />
+      <text
+        x={x + 8}
+        y={y + TEAM_H + TEAM_GAP + TEAM_H / 2 + 5}
+        fill="#fff"
+        fontSize={12}
+      >
+        Nom équipe
+      </text>
+      <text
+        x={x + TEAM_W - 8}
+        y={y + TEAM_H + TEAM_GAP + TEAM_H / 2 + 5}
+        fill="#fff"
+        fontSize={12}
+        textAnchor="end"
+      >
+        score
+      </text>
+    </g>
   );
 }
 
-function MatchPair({
-  top,
-  bottom,
-}: {
-  top: { name: string; score: string; winner?: boolean };
-  bottom: { name: string; score: string; winner?: boolean };
-}) {
+function BracketSVG() {
+  const qY = quartsY();
+  const dY = demisY();
+  const fY = finaleY();
+
+  // Y du centre de chaque match
+  const qCY = qY; // déjà les centres
+  const dCY = dY;
+  const fCY = fY;
+
+  // Y du bord gauche de la boîte (top de la boîte = centre - MATCH_H/2)
+  const qBoxY = qCY.map((cy) => cy - MATCH_H / 2);
+  const dBoxY = dCY.map((cy) => cy - MATCH_H / 2);
+  const fBoxY = fCY - MATCH_H / 2;
+
+  // Connecteur quarts → demis
+  // Ligne droite sortant du milieu droit de chaque match de quarts
+  // puis ligne verticale reliant les deux, puis ligne droite vers le demi
+  const connectorQD = [
+    { q0: 0, q1: 1, d: 0 },
+    { q0: 2, q1: 3, d: 1 },
+  ];
+
+  // Connecteur demis → finale
+  const connectorDF = [{ d0: 0, d1: 1 }];
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-      <MatchTeam {...top} />
-      <MatchTeam {...bottom} />
-    </Box>
+    <svg width={svgW} height={svgH} style={{ overflow: 'visible' }}>
+      {/* ── Quarts ── */}
+      {qBoxY.map((y, i) => (
+        <MatchBox key={i} x={col0X} y={y} topWinner={true} />
+      ))}
+
+      {/* ── Connecteurs quarts → demis ── */}
+      {connectorQD.map(({ q0, q1, d }) => {
+        const midX = col0X + TEAM_W + COL_GAP / 2;
+        const y0 = qCY[q0]; // centre match quart haut
+        const y1 = qCY[q1]; // centre match quart bas
+        const yd = dCY[d]; // centre match demi
+        return (
+          <g key={d} stroke="#fff" strokeWidth={2} fill="none">
+            {/* Ligne horizontale sortant du match quart haut */}
+            <line x1={col0X + TEAM_W} y1={y0} x2={midX} y2={y0} />
+            {/* Ligne horizontale sortant du match quart bas */}
+            <line x1={col0X + TEAM_W} y1={y1} x2={midX} y2={y1} />
+            {/* Ligne verticale reliant les deux */}
+            <line x1={midX} y1={y0} x2={midX} y2={y1} />
+            {/* Ligne horizontale vers le demi */}
+            <line x1={midX} y1={yd} x2={col1X} y2={yd} />
+          </g>
+        );
+      })}
+
+      {/* ── Demis ── */}
+      {dBoxY.map((y, i) => (
+        <MatchBox key={i} x={col1X} y={y} topWinner={true} />
+      ))}
+
+      {/* ── Connecteurs demis → finale ── */}
+      {connectorDF.map(({ d0, d1 }) => {
+        const midX = col1X + TEAM_W + COL_GAP / 2;
+        const y0 = dCY[d0];
+        const y1 = dCY[d1];
+        return (
+          <g key="df" stroke="#fff" strokeWidth={2} fill="none">
+            <line x1={col1X + TEAM_W} y1={y0} x2={midX} y2={y0} />
+            <line x1={col1X + TEAM_W} y1={y1} x2={midX} y2={y1} />
+            <line x1={midX} y1={y0} x2={midX} y2={y1} />
+            <line x1={midX} y1={fCY} x2={col2X} y2={fCY} />
+          </g>
+        );
+      })}
+
+      {/* ── Finale ── */}
+      <MatchBox x={col2X} y={fBoxY} topWinner={true} />
+    </svg>
   );
 }
-
-const MATCH_H = 68;
-const ROUND_GAP = 32;
 
 const TournamentDetail = ({ tournament }: Props) => {
-  const quartsData = [
-    {
-      top: { name: 'Nom équipe', score: 'score', winner: true },
-      bottom: { name: 'Nom équipe', score: 'score' },
-    },
-    {
-      top: { name: 'Nom équipe', score: 'score', winner: true },
-      bottom: { name: 'Nom équipe', score: 'score' },
-    },
-    {
-      top: { name: 'Nom équipe', score: 'score', winner: true },
-      bottom: { name: 'Nom équipe', score: 'score' },
-    },
-    {
-      top: { name: 'Nom équipe', score: 'score', winner: true },
-      bottom: { name: 'Nom équipe', score: 'score' },
-    },
-  ];
+  const { user } = useAuth();
+  const token = user?.token ?? '';
 
-  const demisData = [
-    {
-      top: { name: 'Nom équipe', score: 'score', winner: true },
-      bottom: { name: 'Nom équipe', score: 'score' },
-    },
-    {
-      top: { name: 'Nom équipe', score: 'score', winner: true },
-      bottom: { name: 'Nom équipe', score: 'score' },
-    },
-  ];
+  const [myTeam, setMyTeam] = useState<TeamDto | null>(null);
+  const [registerSuccess, setRegisterSuccess] = useState(false);
+  const [registerError, setRegisterError] = useState<string | null>(null);
 
-  const finaleData = {
-    top: { name: 'Nom équipe', score: 'score', winner: true },
-    bottom: { name: 'Nom équipe', score: 'score' },
+  useEffect(() => {
+    if (!token) return;
+    teamService
+      .getMyTeam(token)
+      .then((team) => setMyTeam(team))
+      .catch(() => setMyTeam(null));
+  }, [token]);
+
+  const isResponsible =
+    myTeam !== null &&
+    (myTeam.responsibleTag === user?.tag ||
+      myTeam.secondResponsibleTag === user?.tag);
+
+  const registrationOpen =
+    tournament.status === 'PREPARATION' && tournament.isPublic;
+
+  const handleRegister = async () => {
+    if (!myTeam) return;
+    setRegisterError(null);
+    try {
+      const response = await fetch(
+        `/api/tournaments/${tournament.id}/teams/${myTeam.id}`,
+        {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      if (!response.ok) {
+        const text = await response.text();
+        try {
+          const json = JSON.parse(text);
+          setRegisterError(json.message || "Erreur lors de l'inscription.");
+        } catch {
+          setRegisterError(text || "Erreur lors de l'inscription.");
+        }
+      } else {
+        setRegisterSuccess(true);
+      }
+    } catch {
+      setRegisterError("Erreur lors de l'inscription.");
+    }
   };
-
-  const demiOffset = MATCH_H / 2 + ROUND_GAP / 2;
-  const finaleOffset = MATCH_H / 2 + ROUND_GAP / 2 + demiOffset;
 
   return (
     <Box
@@ -139,141 +284,46 @@ const TournamentDetail = ({ tournament }: Props) => {
         }}
       >
         {/* ── Bracket ── */}
-        <Box sx={{ flex: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0 }}>
-            {/* Quarts */}
-            <Box>
-              <Typography
-                sx={{
-                  color: '#fff',
-                  fontWeight: 800,
-                  fontSize: '1.2rem',
-                  mb: 2,
-                  textAlign: 'center',
-                }}
-              >
-                Quarts
-              </Typography>
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: `${ROUND_GAP}px`,
-                }}
-              >
-                {quartsData.map((m, i) => (
-                  <MatchPair key={i} {...m} />
-                ))}
-              </Box>
-            </Box>
-
-            {/* Connecteurs quarts → demis */}
-            <Box
+        <Box sx={{ flex: 1, overflowX: 'auto' }}>
+          {/* Labels des rounds */}
+          <Box sx={{ display: 'flex', mb: 2, pl: `${col0X}px` }}>
+            <Typography
               sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                mt: `${36 + MATCH_H / 2}px`,
-                gap: `${MATCH_H + ROUND_GAP}px`,
+                color: '#fff',
+                fontWeight: 800,
+                fontSize: '1.2rem',
+                width: TEAM_W,
+                textAlign: 'center',
               }}
             >
-              {[0, 1].map((i) => (
-                <Box key={i} sx={{ display: 'flex', flexDirection: 'column' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Box
-                      sx={{ width: 30, height: '2px', backgroundColor: '#fff' }}
-                    />
-                    <Box
-                      sx={{
-                        width: '2px',
-                        height: `${MATCH_H / 2 + ROUND_GAP / 2}px`,
-                        backgroundColor: '#fff',
-                      }}
-                    />
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Box
-                      sx={{ width: 30, height: '2px', backgroundColor: '#fff' }}
-                    />
-                    <Box
-                      sx={{ width: 30, height: '2px', backgroundColor: '#fff' }}
-                    />
-                  </Box>
-                </Box>
-              ))}
-            </Box>
-
-            {/* Demis */}
-            <Box>
-              <Typography
-                sx={{
-                  color: '#fff',
-                  fontWeight: 800,
-                  fontSize: '1.2rem',
-                  mb: 2,
-                  textAlign: 'center',
-                }}
-              >
-                Demi
-              </Typography>
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: `${MATCH_H + ROUND_GAP * 2}px`,
-                  mt: `${demiOffset}px`,
-                }}
-              >
-                {demisData.map((m, i) => (
-                  <MatchPair key={i} {...m} />
-                ))}
-              </Box>
-            </Box>
-
-            {/* Connecteurs demis → finale */}
-            <Box
+              Quarts
+            </Typography>
+            <Box sx={{ width: COL_GAP }} />
+            <Typography
               sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                mt: `${36 + demiOffset + MATCH_H / 2}px`,
+                color: '#fff',
+                fontWeight: 800,
+                fontSize: '1.2rem',
+                width: TEAM_W,
+                textAlign: 'center',
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Box
-                  sx={{ width: 30, height: '2px', backgroundColor: '#fff' }}
-                />
-                <Box
-                  sx={{
-                    width: '2px',
-                    height: `${MATCH_H / 2 + ROUND_GAP}px`,
-                    backgroundColor: '#fff',
-                  }}
-                />
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Box
-                  sx={{ width: 30, height: '2px', backgroundColor: '#fff' }}
-                />
-              </Box>
-            </Box>
-
-            {/* Finale */}
-            <Box>
-              <Typography
-                sx={{
-                  color: '#fff',
-                  fontWeight: 800,
-                  fontSize: '1.2rem',
-                  mb: 2,
-                  textAlign: 'center',
-                }}
-              >
-                Finale
-              </Typography>
-              <Box sx={{ mt: `${finaleOffset}px` }}>
-                <MatchPair {...finaleData} />
-              </Box>
-            </Box>
+              Demi
+            </Typography>
+            <Box sx={{ width: COL_GAP }} />
+            <Typography
+              sx={{
+                color: '#fff',
+                fontWeight: 800,
+                fontSize: '1.2rem',
+                width: TEAM_W,
+                textAlign: 'center',
+              }}
+            >
+              Finale
+            </Typography>
           </Box>
+          <BracketSVG />
         </Box>
 
         {/* ── Panneau droit ── */}
@@ -394,6 +444,31 @@ const TournamentDetail = ({ tournament }: Props) => {
             )}
           </Paper>
 
+          {/* Gagnant */}
+          {tournament.status === 'FINISHED' && tournament.winnerTeamName && (
+            <Paper
+              elevation={0}
+              sx={{ borderRadius: '12px', p: 3, backgroundColor: '#fff' }}
+            >
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  color: '#1a2744',
+                  fontSize: '1.1rem',
+                  mb: 0.5,
+                }}
+              >
+                🏆 Gagnant
+              </Typography>
+              <Divider sx={{ mb: 1.5 }} />
+              <Typography
+                sx={{ fontWeight: 800, color: '#1a2744', fontSize: '1.4rem' }}
+              >
+                {tournament.winnerTeamName}
+              </Typography>
+            </Paper>
+          )}
+
           {/* Inscriptions */}
           <Paper
             elevation={0}
@@ -414,10 +489,46 @@ const TournamentDetail = ({ tournament }: Props) => {
             </Typography>
             <Divider sx={{ mb: 1.5 }} />
             <Typography
-              sx={{ fontWeight: 800, color: '#1a2744', fontSize: '1.6rem' }}
+              sx={{
+                fontWeight: 800,
+                color: '#1a2744',
+                fontSize: '1.6rem',
+                mb: registrationOpen && isResponsible ? 2 : 0,
+              }}
             >
-              {formatStatus(tournament)}
+              {registrationOpen ? 'Ouvert' : formatStatus(tournament)}
             </Typography>
+
+            {registrationOpen && isResponsible && !registerSuccess && (
+              <Button
+                variant="contained"
+                onClick={handleRegister}
+                fullWidth
+                sx={{
+                  backgroundColor: '#1a2744',
+                  color: '#fff',
+                  textTransform: 'none',
+                  fontWeight: 700,
+                  fontSize: '1rem',
+                  borderRadius: '8px',
+                  '&:hover': { backgroundColor: '#243560' },
+                }}
+              >
+                S'inscrire
+              </Button>
+            )}
+
+            {registerSuccess && (
+              <Typography sx={{ color: 'green', fontSize: '0.9rem', mt: 1 }}>
+                Inscription réussie !
+              </Typography>
+            )}
+
+            {registerError && (
+              <Typography sx={{ color: '#e74c3c', fontSize: '0.9rem', mt: 1 }}>
+                {registerError}
+              </Typography>
+            )}
           </Paper>
         </Box>
       </Box>

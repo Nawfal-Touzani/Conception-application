@@ -36,4 +36,13 @@ public interface TournamentRegistrationRepository
    */
   List<TournamentRegistration> findByTournamentId(Long tournamentId);
 
+  /**
+   * Verify if the team is on a tournament.
+   *
+   * @param idTeam       the given team id.
+   * @param idTournament the given tournament id.
+   * @return true if the team is registered in the tournament, false otherwise
+   */
+  boolean existsByTeamIdAndTournamentId(Long idTeam, Long idTournament);
+
 }
