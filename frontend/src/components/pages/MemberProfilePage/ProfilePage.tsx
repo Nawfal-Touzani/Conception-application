@@ -33,16 +33,16 @@ export const ProfilePage = () => {
 
       <Grid2 container spacing={3}>
         <Grid2 size={{ xs: 12, lg: 6 }}>
-          <Paper sx={{ p: 3, borderRadius: 3, minHeight: '550px' }}>
+          <Paper sx={{ p: 3, borderRadius: 3, minHeight: '600px' }}>
             <Typography
               variant="h4"
               align="center"
-              sx={{ mb: 2, fontWeight: 'bold', color: '#1e2a44' }}
+              sx={{ mb: 1, fontWeight: 'bold', color: '#1e2a44' }}
             >
               Informations personnelles
             </Typography>
             <Divider
-              sx={{ mb: 3, borderBottomWidth: 2, backgroundColor: '#1e2a44' }}
+              sx={{ mb: 2, borderBottomWidth: 2, backgroundColor: '#1e2a44' }}
             />
             <MemberInfoForm profile={profile} />
 

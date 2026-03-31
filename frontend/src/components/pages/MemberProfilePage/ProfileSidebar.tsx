@@ -41,7 +41,7 @@ export const ProfileSidebar = ({ profile }: { profile: MemberProfile }) => {
             ? `${BASE_URL}${profile.profileImage}`
             : profile.profileImage
         }
-        sx={{ width: 150, height: 150, mb: 5, border: '4px solid white' }}
+        sx={{ width: 140, height: 140, mb: 5, border: '4px solid white' }}
       />
 
       <Button
@@ -69,7 +69,7 @@ export const ProfileSidebar = ({ profile }: { profile: MemberProfile }) => {
         sx={{
           width: '80%',
           bgcolor: '#ffffff',
-          mb: 3,
+          mb: 1,
           opacity: 1,
           height: '1px',
         }}
@@ -79,10 +79,10 @@ export const ProfileSidebar = ({ profile }: { profile: MemberProfile }) => {
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          gap: 3,
+          gap: 1.5,
           width: '100%',
           px: 6,
-          mt: 6,
+          mt: 3,
         }}
       >
         {[

@@ -45,16 +45,16 @@ export const SpecialityMenu = ({
         ml: 2,
       }}
     >
-      <Typography sx={{ fontWeight: 'bold', minWidth: '160px' }}>
+      <Typography sx={{ fontWeight: 'bold', minWidth: '218px' }}>
         Spécialité :
       </Typography>
 
-      <FormControl variant="outlined" sx={{ ml: 8 }}>
+      <FormControl variant="outlined">
         <Select
           value={selectedId}
           onChange={(e) => handleChange(e.target.value as number)}
           sx={{
-            width: '430px',
+            width: '372px',
             height: '40px',
             backgroundColor: '#1e2a44',
             borderRadius: '4px',

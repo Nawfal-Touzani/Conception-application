@@ -22,7 +22,7 @@ export const MemberInfoForm = ({ profile }: { profile: MemberProfile }) => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <ProfileInputField label="Adresse email :" value={profile.email} />
 
       <ProfileInputField
