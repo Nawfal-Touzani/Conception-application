@@ -213,4 +213,6 @@ class TournamentRegistrationServiceTest {
     assertEquals(team, result.getTeam());
     assertEquals(tournament, result.getTournament());
   }
+
+
 }
