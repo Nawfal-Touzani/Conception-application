@@ -62,6 +62,9 @@ public class TournamentController {
     } catch (IllegalArgumentException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "Tournament create error: " + e.getMessage(), e);
+    } catch (IllegalStateException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
+          "Tournament create error: " + e.getMessage(), e);
     }
   }
 
@@ -103,8 +106,7 @@ public class TournamentController {
   }
 
   /**
-   * GET /tournaments — Get all tournaments.
-   * Optional filters: teamName (team registered in the
+   * GET /tournaments — Get all tournaments. Optional filters: teamName (team registered in the
    * tournament), memberTag (member tag in a registered team).
    */
   @GetMapping

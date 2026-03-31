@@ -314,4 +314,16 @@ class TournamentServiceTest {
         () -> tournamentService.publishTournament(1L));
   }
 
+
+  @Test
+  void createTournamentNameAlreadyExists() {
+    when(memberRepository.findById(organizer.getId())).thenReturn(Optional.of(organizer));
+    when(tournamentRepository.existsByName(validDto.name())).thenReturn(true);
+
+    assertThrows(IllegalStateException.class,
+        () -> tournamentService.createTournament(organizer.getId(), validDto));
+
+    verify(tournamentRepository, never()).save(Mockito.any());
+  }
+
 }
