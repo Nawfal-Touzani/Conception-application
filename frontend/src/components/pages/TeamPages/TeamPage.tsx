@@ -341,7 +341,7 @@ const TeamPage = () => {
                       size="small"
                       variant="outlined"
                       onClick={(e) => {
-                        e.stopPropagation; // pour pas rediriger quand on clique sur nommer
+                        e.stopPropagation(); // pour pas rediriger quand on clique sur nommer
                         handleNominate(member.memberId);
                       }}
                       sx={{
