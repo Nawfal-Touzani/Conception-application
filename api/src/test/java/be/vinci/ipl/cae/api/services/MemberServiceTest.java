@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import be.vinci.ipl.cae.api.models.dtos.ChangePasswordDto;
 import be.vinci.ipl.cae.api.models.dtos.MemberProfileResponseDto;
+import be.vinci.ipl.cae.api.models.dtos.PublicMemberDto;
 import be.vinci.ipl.cae.api.models.dtos.UpdateMemberProfileDto;
 import be.vinci.ipl.cae.api.models.entities.Image;
 import be.vinci.ipl.cae.api.models.entities.Member;
@@ -26,6 +27,7 @@ import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
 import be.vinci.ipl.cae.api.repositories.UnavailabilityRepository;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -421,4 +423,34 @@ public class MemberServiceTest {
     verify(memberRepository).findByIsAdminTrue();
   }
 
+  @Test
+  @DisplayName("Should return profile public if member exists")
+  void getPublicProfile1() {
+    Long memberId = 1L;
+    member.setId(memberId);
+
+    when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+    when(teamCompositionRepository.findByMemberId(memberId)).thenReturn(Optional.empty());
+
+    PublicMemberDto result = memberService.getPublicProfile(memberId);
+
+    assertNotNull(result);
+    assertEquals("PlayerOne", result.tag());
+    assertEquals("Architect", result.speciality());
+    assertEquals("img1.png", result.profileImage());
+    assertNull(result.teamName());
+    verify(memberRepository).findById(memberId);
+  }
+
+  @Test
+  @DisplayName("Doit lancer une NoSuchElementException si le membre n'existe pas")
+  void getPublicProfile2() {
+    Long memberId = 109383L;
+    when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
+
+    assertThrows(NoSuchElementException.class, () -> {
+      memberService.getPublicProfile(memberId);
+    });
+
+  }
 }
