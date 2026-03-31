@@ -20,6 +20,7 @@ import JoinOrCreateTeam from './JoinOrCreateTeam';
 import { useAuth } from '../../../contexts/useAuth';
 import * as teamService from '../../../services/team.service';
 import { TeamDto, TeamMember } from '../../../types/team.types';
+import { useNavigate } from 'react-router-dom';
 
 function formatDate(dateStr?: string | null) {
   if (!dateStr) return '—';
@@ -66,6 +67,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 const TeamPage = () => {
   const { user } = useAuth(); // on recup le user connecté depuis le contexte globale
+  const navigate = useNavigate();
   const token = user?.token ?? ''; // extrait le token en string pour eviter les boucles useEffects
 
   const [team, setTeam] = useState<TeamDto | null>(null);
@@ -289,6 +291,7 @@ const TeamPage = () => {
               return (
                 <ListItem
                   key={member.gameTag}
+                  onClick={() => navigate(`/members/${member.memberId}`)}
                   sx={{
                     backgroundColor: '#fff',
                     borderRadius: '8px',
@@ -297,6 +300,11 @@ const TeamPage = () => {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1,
+                    textDecoration: 'none',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                    },
                   }}
                 >
                   <ListItemAvatar sx={{ minWidth: 48 }}>
@@ -334,7 +342,10 @@ const TeamPage = () => {
                     <Button
                       size="small"
                       variant="outlined"
-                      onClick={() => handleNominate(member.memberId)}
+                      onClick={(e) => {
+                        e.stopPropagation; // pour pas rediriger quand on clique sur nommer
+                        handleNominate(member.memberId);
+                      }}
                       sx={{
                         ml: 'auto',
                         flexShrink: 0,
