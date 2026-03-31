@@ -2,6 +2,7 @@ import { Box, Avatar, Typography, IconButton, Tooltip } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import BlockIcon from '@mui/icons-material/Block';
 import { MemberDto } from '../../../types/admin.types';
+import { Link } from 'react-router-dom';
 
 interface MemberRowProps {
   member: MemberDto;
@@ -39,7 +40,20 @@ export const MemberRow = ({
       sx={{ width: 60, height: 60 }}
     />
 
-    <Typography sx={{ color: '#1a2744', minWidth: 120, fontSize: '1.4rem' }}>
+    <Typography
+      component={Link}
+      to={`/members/${member.id}`}
+      sx={{
+        color: '#1a2744',
+        minWidth: 120,
+        fontSize: '1.4rem',
+        textDecoration: 'none',
+        cursor: 'pointer',
+        '&:hover': {
+          textDecoration: 'underline',
+        },
+      }}
+    >
       {member.tag}
     </Typography>
 
