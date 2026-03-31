@@ -2,7 +2,6 @@ package be.vinci.ipl.cae.api.controllers;
 
 import be.vinci.ipl.cae.api.models.dtos.ChangePasswordDto;
 import be.vinci.ipl.cae.api.models.dtos.MemberProfileResponseDto;
-import be.vinci.ipl.cae.api.models.dtos.PublicMemberDto;
 import be.vinci.ipl.cae.api.models.dtos.UnavailabilityDto;
 import be.vinci.ipl.cae.api.models.dtos.UpdateMemberProfileDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
@@ -10,7 +9,6 @@ import be.vinci.ipl.cae.api.services.MemberService;
 import be.vinci.ipl.cae.api.services.UnavailabilityService;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
