@@ -1,5 +1,6 @@
 import { List } from '@mui/material';
-import { Notification } from '../../types/notifications.types';
+
+import { Notification } from '../../../../types/notifications.types';
 import NotificationItem from './NotificationItem';
 
 interface NotificationListProps {
