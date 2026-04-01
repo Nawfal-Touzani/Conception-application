@@ -21,7 +21,7 @@ import AdminPage from './components/layout/pages/AdminPages/AdminPage.tsx';
 import CreateTournamentPage from './components/layout/pages/AdminPages/CreateTournamentPage.tsx';
 import TournamentsPage from './components/layout/pages/TournamentPages/TournamentPage.tsx';
 import MembersListPage from './components/layout/pages/AdminPages/MemberListPage.tsx';
-import PublicProfilePage from './components/pages/PublicProfilePage/PublicProfilePage.tsx';
+import PublicProfilePage from './components/layout/pages/PublicProfilePage/PublicProfilePage.tsx';
 
 const router = createBrowserRouter([
   {

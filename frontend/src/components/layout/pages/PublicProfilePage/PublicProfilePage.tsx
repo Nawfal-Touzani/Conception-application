@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, Avatar, Button } from '@mui/material';
-import { getPublicMemberById } from '../../../services/memberService';
-import { PublicMember } from '../../../types/publicMember';
+import { getPublicMemberById } from '../../../../services/memberService';
+import { PublicMember } from '../../../../types/publicMember';
 
 const PublicProfilePage = () => {
   const { id } = useParams<{ id: string }>();
