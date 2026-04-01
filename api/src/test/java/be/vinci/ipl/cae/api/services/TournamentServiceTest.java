@@ -189,6 +189,17 @@ class TournamentServiceTest {
     verify(tournamentRepository, never()).save(Mockito.any());
   }
 
+  @Test
+  void createTournamentNameAlreadyExists() {
+    when(memberRepository.findById(organizer.getId())).thenReturn(Optional.of(organizer));
+    when(tournamentRepository.existsByName(validDto.name())).thenReturn(true);
+
+    assertThrows(IllegalStateException.class,
+        () -> tournamentService.createTournament(organizer.getId(), validDto));
+
+    verify(tournamentRepository, never()).save(Mockito.any());
+  }
+
   // ── updateTournament ──
 
   @Test
@@ -382,29 +393,6 @@ class TournamentServiceTest {
     assertEquals(2, result.size());
   }
 
-
-  /*
-  // ── getTournamentById ──
-  @Test
-  void getTournamentByIdSuccess() {
-    when(tournamentRepository.findById(1L)).thenReturn(Optional.of(savedTournament));
-    when(registrationRepository.countByTournamentId(1L)).thenReturn(0);
-
-    TournamentResponseDto result = tournamentService.getTournamentById(1L);
-
-    assertEquals("Tournoi Test", result.name());
-    assertEquals(Status.PREPARATION, result.status());
-  }
-
-  @Test
-  void getTournamentByIdNotFound() {
-    when(tournamentRepository.findById(99L)).thenReturn(Optional.empty());
-
-    assertThrows(NoSuchElementException.class,
-        () -> tournamentService.getTournamentById(99L));
-  }
-  */
-
   // ── publishTournament ──
 
   @Test
@@ -415,24 +403,15 @@ class TournamentServiceTest {
     member2.setId(11L);
 
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(savedTournament));
-<<<<<<< HEAD
     when(tournamentRepository.save(Mockito.any(Tournament.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
     when(memberRepository.findAll()).thenReturn(List.of(member1, member2));
 
     Tournament result = tournamentService.publishTournament(1L);
 
-    assertEquals(true, result.isPublic());
+    assertTrue(result.isPublic());
     verify(notificationService, Mockito.times(2)).send(Mockito.anyLong(),
         Mockito.any(Notification.class));
-=======
-    when(tournamentRepository.save(Mockito.any(Tournament.class))).thenAnswer(
-        invocation -> invocation.getArgument(0));
-
-    Tournament result = tournamentService.publishTournament(1L);
-
-    assertTrue(result.isPublic());
->>>>>>> develop
   }
 
   @Test
@@ -440,29 +419,14 @@ class TournamentServiceTest {
     savedTournament.setStatus(Status.IN_PROGRESS);
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(savedTournament));
 
-<<<<<<< HEAD
     assertThrows(IllegalStateException.class,
         () -> tournamentService.publishTournament(1L));
 
     verify(notificationService, never()).send(Mockito.anyLong(), Mockito.any());
   }
-}
-=======
-    assertThrows(IllegalStateException.class, () -> tournamentService.publishTournament(1L));
-  }
 
-  @Test
-  void createTournamentNameAlreadyExists() {
-    when(memberRepository.findById(organizer.getId())).thenReturn(Optional.of(organizer));
-    when(tournamentRepository.existsByName(validDto.name())).thenReturn(true);
+  // ── getHomepageTournaments ──
 
-    assertThrows(IllegalStateException.class,
-        () -> tournamentService.createTournament(organizer.getId(), validDto));
-
-    verify(tournamentRepository, never()).save(Mockito.any());
-  }
-
-  // HomePage
   @Test
   void getHomepageTournamentsAllFound() {
     LocalDate now = LocalDate.now();
@@ -489,12 +453,12 @@ class TournamentServiceTest {
     inProgress.setStatus(Status.IN_PROGRESS);
     inProgress.setOrganizer(organizer);
 
-    when(tournamentRepository.findTopByStatusOrderByEndDateDesc(Status.FINISHED)).thenReturn(
-        Optional.of(finished));
-    when(tournamentRepository.findFirstByStatus(Status.IN_PROGRESS)).thenReturn(
-        Optional.of(inProgress));
-    when(tournamentRepository.findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(
-        Status.PREPARATION)).thenReturn(Optional.of(savedTournament));
+    when(tournamentRepository.findTopByStatusOrderByEndDateDesc(Status.FINISHED))
+        .thenReturn(Optional.of(finished));
+    when(tournamentRepository.findFirstByStatus(Status.IN_PROGRESS))
+        .thenReturn(Optional.of(inProgress));
+    when(tournamentRepository.findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(Status.PREPARATION))
+        .thenReturn(Optional.of(savedTournament));
     when(registrationRepository.countByTournamentId(Mockito.anyLong())).thenReturn(0);
 
     HomepageTournamentsDto result = tournamentService.getHomepageTournaments();
@@ -506,11 +470,12 @@ class TournamentServiceTest {
 
   @Test
   void getHomepageTournamentsAllNull() {
-    when(tournamentRepository.findTopByStatusOrderByEndDateDesc(Status.FINISHED)).thenReturn(
-        Optional.empty());
-    when(tournamentRepository.findFirstByStatus(Status.IN_PROGRESS)).thenReturn(Optional.empty());
-    when(tournamentRepository.findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(
-        Status.PREPARATION)).thenReturn(Optional.empty());
+    when(tournamentRepository.findTopByStatusOrderByEndDateDesc(Status.FINISHED))
+        .thenReturn(Optional.empty());
+    when(tournamentRepository.findFirstByStatus(Status.IN_PROGRESS))
+        .thenReturn(Optional.empty());
+    when(tournamentRepository.findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(Status.PREPARATION))
+        .thenReturn(Optional.empty());
 
     HomepageTournamentsDto result = tournamentService.getHomepageTournaments();
 
@@ -519,4 +484,3 @@ class TournamentServiceTest {
     assertNull(result.nextUpcoming());
   }
 }
->>>>>>> develop
