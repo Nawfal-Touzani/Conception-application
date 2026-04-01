@@ -3,7 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useHomePage } from './useHomePage';
 import * as tournamentService from '../../../../../services/tournament/tournament.service';
 
-vi.mock('../../../services/tournament/tournament.service', () => ({
+vi.mock('../../../../../services/tournament/tournament.service', () => ({
   getHomepageTournaments: vi.fn(),
 }));
 

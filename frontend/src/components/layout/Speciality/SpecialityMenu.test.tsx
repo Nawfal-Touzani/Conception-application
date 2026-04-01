@@ -3,7 +3,7 @@ import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { SpecialityMenu } from './SpecialityMenu';
 import * as specialityService from '../../../services/speciality/speciality.service';
 
-vi.mock('../../services/speciality/speciality.service');
+vi.mock('../../../services/speciality/speciality.service');
 
 describe('SpecialityMenu', () => {
   const mockSpecs = [

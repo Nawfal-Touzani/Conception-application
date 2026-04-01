@@ -17,7 +17,7 @@ vi.mock('react-router-dom', async () => {
 });
 
 // Mock notifications service
-vi.mock('../../services/notifications.service');
+vi.mock('../../../services/notifications.service');
 
 describe('NavBar', () => {
   const mockUser = {

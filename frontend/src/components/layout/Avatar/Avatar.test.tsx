@@ -3,7 +3,7 @@ import { AvatarModal } from './Avatar';
 import * as imageService from '../../../services/image/image.service';
 import { describe, expect, test, vi, beforeEach } from 'vitest';
 
-vi.mock('../../services/image/image.service');
+vi.mock('../../../services/image/image.service');
 
 const mockImages = [
   { id: 1, url: '/img1.png' },

@@ -16,8 +16,8 @@ vi.mock('react-router-dom', async () => {
 });
 
 // Mock useAuth
-vi.mock('../../contexts/useAuth', async () => {
-  const actual = await vi.importActual('../../contexts/useAuth');
+vi.mock('../../../contexts/useAuth', async () => {
+  const actual = await vi.importActual('../../../contexts/useAuth');
   return {
     ...actual,
     useAuth: vi.fn(),
@@ -25,13 +25,13 @@ vi.mock('../../contexts/useAuth', async () => {
 });
 
 // Mock notification service
-vi.mock('../../services/notifications.service', () => ({
+vi.mock('../../../services/notifications.service', () => ({
   getNotifications: vi.fn(),
   markAsRead: vi.fn(),
 }));
 
 // Mock membership request service
-vi.mock('../../services/membership-request.service', () => ({
+vi.mock('../../../services/membership-request.service', () => ({
   approveRequest: vi.fn(),
   refuseRequest: vi.fn(),
 }));

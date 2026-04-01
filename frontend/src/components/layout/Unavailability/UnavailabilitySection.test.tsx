@@ -6,7 +6,7 @@ import * as memberService from '../../../services/memberService';
 import { AuthContext } from '../../../contexts/AuthContext';
 import { act } from 'react';
 
-vi.mock('../../services/memberService');
+vi.mock('../../../services/memberService');
 
 const mockAuth = {
   user: { token: 'fake-token' },

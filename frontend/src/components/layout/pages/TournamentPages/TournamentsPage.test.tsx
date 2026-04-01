@@ -4,7 +4,7 @@ import { describe, test, expect, vi, beforeEach } from 'vitest';
 import TournamentsPage from './TournamentPage';
 import { AuthContext } from '../../../../contexts/AuthContext';
 
-vi.mock('../../../services/tournament/tournament.service', () => ({
+vi.mock('../../../../services/tournament/tournament.service', () => ({
   getTournaments: vi.fn(),
 }));
 
