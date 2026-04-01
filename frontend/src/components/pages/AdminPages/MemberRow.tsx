@@ -7,7 +7,6 @@ import InfoIcon from '@mui/icons-material/Info';
 
 interface MemberRowProps {
   member: MemberDto;
-  isCurrentUser?: boolean;
   onDelete?: (member: MemberDto) => void;
   showStatus?: boolean;
   onBan?: (member: MemberDto) => void;
@@ -16,7 +15,6 @@ interface MemberRowProps {
 
 export const MemberRow = ({
   member,
-  isCurrentUser,
   onDelete,
   onBan,
   onShowBanInfo,
@@ -88,50 +86,15 @@ export const MemberRow = ({
       )}
 
       {onBan && (
-        <Tooltip
-          title={
-            isCurrentUser
-              ? 'Vous ne pouvez pas vous bannir'
-              : 'Bannir le membre'
-          }
-        >
-          <span>
-            {' '}
-            <IconButton
-              onClick={() => onBan(member)}
-              disabled={isCurrentUser}
-              sx={{
-                color: '#ae210f',
-                '&.Mui-disabled': { color: 'rgba(103, 94, 93, 0.3)' },
-              }}
-            >
-              <BlockIcon />
-            </IconButton>
-          </span>
-        </Tooltip>
+        <IconButton onClick={() => onBan(member)} sx={{ color: '#ae210f' }}>
+          <BlockIcon />
+        </IconButton>
       )}
 
       {onDelete && (
-        <Tooltip
-          title={
-            isCurrentUser
-              ? 'Vous ne pouvez pas vous révoquer'
-              : 'Révoquer Admin'
-          }
-        >
-          <span>
-            <IconButton
-              onClick={() => onDelete(member)}
-              disabled={isCurrentUser}
-              sx={{
-                color: '#f31212',
-                '&.Mui-disabled': { color: 'rgba(104, 96, 96, 0.43)' },
-              }}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </span>
-        </Tooltip>
+        <IconButton onClick={() => onDelete(member)} sx={{ color: '#f31212' }}>
+          <DeleteIcon />
+        </IconButton>
       )}
     </Box>
   </Box>

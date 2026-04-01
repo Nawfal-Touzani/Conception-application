@@ -23,8 +23,8 @@ const MembersListPage = () => {
       .finally(() => setLoading(false));
   }, [user]);
 
-  const activeMembers = members.filter((m) => !m.isBan);
-  const bannedMembers = members.filter((m) => m.isBan);
+  const activeMembers = members.filter((m) => !m.isBan && m.tag !== user?.tag);
+  const bannedMembers = members.filter((m) => m.isBan && m.tag !== user?.tag);
 
   const handleConfirmBan = async (reason: string) => {
     if (!banTarget) return;
@@ -109,7 +109,6 @@ const MembersListPage = () => {
                 <MemberRow
                   key={m.id}
                   member={m}
-                  isCurrentUser={m.tag === user?.tag}
                   onBan={() => setBanTarget(m)}
                 />
               ))}
