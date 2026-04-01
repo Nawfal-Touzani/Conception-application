@@ -420,7 +420,7 @@ class TournamentServiceTest {
     privateTournament.setOrganizer(organizer);
 
     when(tournamentRepository.findAll()).thenReturn(List.of(publicTournament, privateTournament));
-    when(registrationRepository.countByTournamentId(Mockito.anyLong())).thenReturn(0);
+    when(registrationRepository.findByTournamentId(Mockito.anyLong())).thenReturn(List.of());
 
     List<TournamentResponseDto> result = tournamentService.getAllTournaments(null, null, false);
 
@@ -458,7 +458,7 @@ class TournamentServiceTest {
     privateTournament.setOrganizer(organizer);
 
     when(tournamentRepository.findAll()).thenReturn(List.of(publicTournament, privateTournament));
-    when(registrationRepository.countByTournamentId(Mockito.anyLong())).thenReturn(0);
+    when(registrationRepository.findByTournamentId(Mockito.anyLong())).thenReturn(List.of());
 
     List<TournamentResponseDto> result = tournamentService.getAllTournaments(null, null, true);
 
@@ -540,7 +540,7 @@ class TournamentServiceTest {
         .thenReturn(Optional.of(inProgress));
     when(tournamentRepository.findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(Status.PREPARATION))
         .thenReturn(Optional.of(savedTournament));
-    when(registrationRepository.countByTournamentId(Mockito.anyLong())).thenReturn(0);
+    when(registrationRepository.findByTournamentId(Mockito.anyLong())).thenReturn(List.of()); // ← corrigé
 
     HomepageTournamentsDto result = tournamentService.getHomepageTournaments();
 
