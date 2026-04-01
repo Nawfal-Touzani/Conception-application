@@ -1,11 +1,14 @@
 package be.vinci.ipl.cae.api.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import be.vinci.ipl.cae.api.models.dtos.HomepageTournamentsDto;
 import be.vinci.ipl.cae.api.models.dtos.TournamentDto;
 import be.vinci.ipl.cae.api.models.dtos.TournamentResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
@@ -55,14 +58,8 @@ class TournamentServiceTest {
 
     LocalDate now = LocalDate.now();
 
-    validDto = new TournamentDto(
-        "Tournoi Test",
-        "Description test",
-        now.plusDays(5),
-        now.plusDays(10),
-        now.plusDays(3),
-        8
-    );
+    validDto = new TournamentDto("Tournoi Test", "Description test", now.plusDays(5),
+        now.plusDays(10), now.plusDays(3), 8);
 
     savedTournament = new Tournament();
     savedTournament.setId(1L);
@@ -81,8 +78,8 @@ class TournamentServiceTest {
   @Test
   void createTournamentSuccess() {
     when(memberRepository.findById(organizer.getId())).thenReturn(Optional.of(organizer));
-    when(tournamentRepository.save(Mockito.any(Tournament.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+    when(tournamentRepository.save(Mockito.any(Tournament.class))).thenAnswer(
+        invocation -> invocation.getArgument(0));
 
     Tournament result = tournamentService.createTournament(organizer.getId(), validDto);
 
@@ -108,10 +105,8 @@ class TournamentServiceTest {
     when(memberRepository.findById(organizer.getId())).thenReturn(Optional.of(organizer));
 
     LocalDate now = LocalDate.now();
-    TournamentDto invalid = new TournamentDto(
-        "Test", "desc",
-        now.plusDays(10), now.plusDays(5), now.plusDays(3), 8
-    );
+    TournamentDto invalid = new TournamentDto("Test", "desc", now.plusDays(10), now.plusDays(5),
+        now.plusDays(3), 8);
 
     assertThrows(IllegalArgumentException.class,
         () -> tournamentService.createTournament(organizer.getId(), invalid));
@@ -124,10 +119,8 @@ class TournamentServiceTest {
     when(memberRepository.findById(organizer.getId())).thenReturn(Optional.of(organizer));
 
     LocalDate now = LocalDate.now();
-    TournamentDto invalid = new TournamentDto(
-        "Test", "desc",
-        now.minusDays(3), now.plusDays(5), now.minusDays(5), 8
-    );
+    TournamentDto invalid = new TournamentDto("Test", "desc", now.minusDays(3), now.plusDays(5),
+        now.minusDays(5), 8);
 
     assertThrows(IllegalArgumentException.class,
         () -> tournamentService.createTournament(organizer.getId(), invalid));
@@ -140,10 +133,8 @@ class TournamentServiceTest {
     when(memberRepository.findById(organizer.getId())).thenReturn(Optional.of(organizer));
 
     LocalDate now = LocalDate.now();
-    TournamentDto invalid = new TournamentDto(
-        "Test", "desc",
-        now.plusDays(3), now.plusDays(10), now.plusDays(5), 8
-    );
+    TournamentDto invalid = new TournamentDto("Test", "desc", now.plusDays(3), now.plusDays(10),
+        now.plusDays(5), 8);
 
     assertThrows(IllegalArgumentException.class,
         () -> tournamentService.createTournament(organizer.getId(), invalid));
@@ -156,10 +147,8 @@ class TournamentServiceTest {
     when(memberRepository.findById(organizer.getId())).thenReturn(Optional.of(organizer));
 
     LocalDate now = LocalDate.now();
-    TournamentDto invalid = new TournamentDto(
-        "Test", "desc",
-        now.plusDays(5), now.plusDays(10), now.minusDays(1), 8
-    );
+    TournamentDto invalid = new TournamentDto("Test", "desc", now.plusDays(5), now.plusDays(10),
+        now.minusDays(1), 8);
 
     assertThrows(IllegalArgumentException.class,
         () -> tournamentService.createTournament(organizer.getId(), invalid));
@@ -170,14 +159,12 @@ class TournamentServiceTest {
   @Test
   void createTournamentMaxParticipantsPowerOfTwo() {
     when(memberRepository.findById(organizer.getId())).thenReturn(Optional.of(organizer));
-    when(tournamentRepository.save(Mockito.any(Tournament.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+    when(tournamentRepository.save(Mockito.any(Tournament.class))).thenAnswer(
+        invocation -> invocation.getArgument(0));
 
     LocalDate now = LocalDate.now();
-    TournamentDto valid = new TournamentDto(
-        "Test", "desc",
-        now.plusDays(5), now.plusDays(10), now.plusDays(3), 16
-    );
+    TournamentDto valid = new TournamentDto("Test", "desc", now.plusDays(5), now.plusDays(10),
+        now.plusDays(3), 16);
 
     Tournament result = tournamentService.createTournament(organizer.getId(), valid);
 
@@ -189,10 +176,8 @@ class TournamentServiceTest {
     when(memberRepository.findById(organizer.getId())).thenReturn(Optional.of(organizer));
 
     LocalDate now = LocalDate.now();
-    TournamentDto invalid = new TournamentDto(
-        "Test", "desc",
-        now.plusDays(5), now.plusDays(10), now.plusDays(3), 7
-    );
+    TournamentDto invalid = new TournamentDto("Test", "desc", now.plusDays(5), now.plusDays(10),
+        now.plusDays(3), 7);
 
     assertThrows(IllegalArgumentException.class,
         () -> tournamentService.createTournament(organizer.getId(), invalid));
@@ -234,7 +219,7 @@ class TournamentServiceTest {
     List<TournamentResponseDto> result = tournamentService.getAllTournaments(null, null, false);
 
     assertEquals(1, result.size());
-    assertEquals("Public", result.get(0).name());
+    assertEquals("Public", result.getFirst().name());
   }
 
   @Test
@@ -271,8 +256,9 @@ class TournamentServiceTest {
     assertEquals(2, result.size());
   }
 
-  // ── getTournamentById ──
 
+  /*
+  // ── getTournamentById ──
   @Test
   void getTournamentByIdSuccess() {
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(savedTournament));
@@ -291,18 +277,19 @@ class TournamentServiceTest {
     assertThrows(NoSuchElementException.class,
         () -> tournamentService.getTournamentById(99L));
   }
+  */
 
   // ── publishTournament ──
 
   @Test
   void publishTournamentSuccess() {
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(savedTournament));
-    when(tournamentRepository.save(Mockito.any(Tournament.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+    when(tournamentRepository.save(Mockito.any(Tournament.class))).thenAnswer(
+        invocation -> invocation.getArgument(0));
 
     Tournament result = tournamentService.publishTournament(1L);
 
-    assertEquals(true, result.isPublic());
+    assertTrue(result.isPublic());
   }
 
   @Test
@@ -310,10 +297,8 @@ class TournamentServiceTest {
     savedTournament.setStatus(Status.IN_PROGRESS);
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(savedTournament));
 
-    assertThrows(IllegalStateException.class,
-        () -> tournamentService.publishTournament(1L));
+    assertThrows(IllegalStateException.class, () -> tournamentService.publishTournament(1L));
   }
-
 
   @Test
   void createTournamentNameAlreadyExists() {
@@ -326,4 +311,60 @@ class TournamentServiceTest {
     verify(tournamentRepository, never()).save(Mockito.any());
   }
 
+  // HomePage
+  @Test
+  void getHomepageTournamentsAllFound() {
+    LocalDate now = LocalDate.now();
+
+    Tournament finished = new Tournament();
+    finished.setId(2L);
+    finished.setName("Finished");
+    finished.setDescription("Description");
+    finished.setStartDate(now.minusDays(10));
+    finished.setEndDate(now.minusDays(1));
+    finished.setRegistrationDeadline(now.minusDays(12));
+    finished.setMaxParticipants(8);
+    finished.setStatus(Status.FINISHED);
+    finished.setOrganizer(organizer);
+
+    Tournament inProgress = new Tournament();
+    inProgress.setId(3L);
+    inProgress.setName("In Progress");
+    inProgress.setDescription("Description");
+    inProgress.setStartDate(now.minusDays(2));
+    inProgress.setEndDate(now.plusDays(5));
+    inProgress.setRegistrationDeadline(now.minusDays(4));
+    inProgress.setMaxParticipants(8);
+    inProgress.setStatus(Status.IN_PROGRESS);
+    inProgress.setOrganizer(organizer);
+
+    when(tournamentRepository.findTopByStatusOrderByEndDateDesc(Status.FINISHED)).thenReturn(
+        Optional.of(finished));
+    when(tournamentRepository.findFirstByStatus(Status.IN_PROGRESS)).thenReturn(
+        Optional.of(inProgress));
+    when(tournamentRepository.findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(
+        Status.PREPARATION)).thenReturn(Optional.of(savedTournament));
+    when(registrationRepository.countByTournamentId(Mockito.anyLong())).thenReturn(0);
+
+    HomepageTournamentsDto result = tournamentService.getHomepageTournaments();
+
+    assertEquals("Finished", result.lastFinished().name());
+    assertEquals("In Progress", result.inProgress().name());
+    assertEquals("Tournoi Test", result.nextUpcoming().name());
+  }
+
+  @Test
+  void getHomepageTournamentsAllNull() {
+    when(tournamentRepository.findTopByStatusOrderByEndDateDesc(Status.FINISHED)).thenReturn(
+        Optional.empty());
+    when(tournamentRepository.findFirstByStatus(Status.IN_PROGRESS)).thenReturn(Optional.empty());
+    when(tournamentRepository.findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(
+        Status.PREPARATION)).thenReturn(Optional.empty());
+
+    HomepageTournamentsDto result = tournamentService.getHomepageTournaments();
+
+    assertNull(result.lastFinished());
+    assertNull(result.inProgress());
+    assertNull(result.nextUpcoming());
+  }
 }

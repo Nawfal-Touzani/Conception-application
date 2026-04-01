@@ -1,5 +1,6 @@
 package be.vinci.ipl.cae.api.services;
 
+import be.vinci.ipl.cae.api.models.dtos.HomepageTournamentsDto;
 import be.vinci.ipl.cae.api.models.dtos.TournamentDto;
 import be.vinci.ipl.cae.api.models.dtos.TournamentResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
@@ -28,12 +29,14 @@ public class TournamentService {
    * Service constructor.
    */
   public TournamentService(TournamentRepository tournamentRepository,
-      TournamentRegistrationRepository registrationRepository,
-      MemberRepository memberRepository) {
+      TournamentRegistrationRepository registrationRepository, MemberRepository memberRepository) {
     this.tournamentRepository = tournamentRepository;
     this.registrationRepository = registrationRepository;
     this.memberRepository = memberRepository;
   }
+
+  // @Transactional ?
+  // Rollback en cas d'erreur SQL surtout pour les Create
 
   /**
    * Create a tournament.
@@ -46,8 +49,7 @@ public class TournamentService {
       throw new IllegalStateException("The name of that tournament is already exist");
     }
 
-    if (dto.startDate().isBefore(LocalDate.now())
-        || dto.endDate().isBefore(LocalDate.now())) {
+    if (dto.startDate().isBefore(LocalDate.now()) || dto.endDate().isBefore(LocalDate.now())) {
       throw new IllegalArgumentException("Dates must be in the future");
     }
 
@@ -97,45 +99,58 @@ public class TournamentService {
     List<Tournament> tournaments;
 
     if (teamName != null && !teamName.isBlank()) {
-      List<Long> ids = registrationRepository
-          .findByTeamNameContainingIgnoreCase(teamName)
-          .stream()
-          .map(r -> r.getTournament().getId())
-          .distinct()
-          .toList();
+      List<Long> ids = registrationRepository.findByTeamNameContainingIgnoreCase(teamName).stream()
+          .map(r -> r.getTournament().getId()).distinct().toList();
       tournaments = tournamentRepository.findByIdIn(ids);
 
     } else if (memberTag != null && !memberTag.isBlank()) {
       String tagLower = memberTag.toLowerCase(Locale.ROOT);
-      tournaments = tournamentRepository.findAll().stream()
-          .filter(t -> registrationRepository.findByTournamentId(t.getId())
-              .stream()
-              .anyMatch(r -> r.getTeam().getTeamCompositions()
-                  .stream()
-                  .anyMatch(tc -> tc.getMember().getTag()
-                      .toLowerCase(Locale.ROOT).contains(tagLower))))
+      tournaments = tournamentRepository.findAll().stream().filter(
+              t -> registrationRepository.findByTournamentId(t.getId()).stream().anyMatch(
+                  r -> r.getTeam().getTeamCompositions().stream().anyMatch(
+                      tc -> tc.getMember().getTag().toLowerCase(Locale.ROOT).contains(tagLower))))
           .toList();
 
     } else {
       tournaments = tournamentRepository.findAll();
     }
 
-    return tournaments.stream()
-        .filter(t -> isAdmin || t.isPublic())
-        .map(this::toResponseDto)
+    return tournaments.stream().filter(t -> isAdmin || t.isPublic()).map(this::toResponseDto)
         .toList();
   }
 
-  /**
+  /*
    * Get a tournament by id.
    *
    * @param id the tournament id
    * @return the tournament response DTO
+   * TODO: add visibility check before re-enabling.
+   *
+    public TournamentResponseDto getTournamentById(Long id) {
+      Tournament t = tournamentRepository.findById(id)
+          .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
+      return toResponseDto(t);
+    }
+  */
+
+  /**
+   * Get the three tournaments displayed on the homepage.
+   *
+   * @return homepage tournaments DTO
    */
-  public TournamentResponseDto getTournamentById(Long id) {
-    Tournament t = tournamentRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
-    return toResponseDto(t);
+  public HomepageTournamentsDto getHomepageTournaments() {
+    TournamentResponseDto lastFinished = tournamentRepository.findTopByStatusOrderByEndDateDesc(
+        Status.FINISHED).map(this::toResponseDto).orElse(null);
+
+    TournamentResponseDto inProgress = tournamentRepository.findFirstByStatus(Status.IN_PROGRESS)
+        .map(this::toResponseDto).orElse(null);
+
+    TournamentResponseDto nextUpcoming = tournamentRepository
+            .findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(Status.PREPARATION)
+            .map(this::toResponseDto)
+            .orElse(null);
+
+    return new HomepageTournamentsDto(lastFinished, inProgress, nextUpcoming);
   }
 
   /**
@@ -182,19 +197,10 @@ public class TournamentService {
   }
 
   private TournamentResponseDto toResponseDto(Tournament t) {
-    return new TournamentResponseDto(
-        t.getId(),
-        t.getName(),
-        t.getDescription(),
-        t.getStartDate(),
-        t.getEndDate(),
-        t.getRegistrationDeadline(),
-        t.getMaxParticipants(),
-        registrationRepository.countByTournamentId(t.getId()),
-        t.getStatus(),
-        t.getOrganizer().getTag(),
-        t.isPublic(),
-        t.getWinnerTeam() != null ? t.getWinnerTeam().getName() : null
-    );
+    return new TournamentResponseDto(t.getId(), t.getName(), t.getDescription(), t.getStartDate(),
+        t.getEndDate(), t.getRegistrationDeadline(), t.getMaxParticipants(),
+        registrationRepository.countByTournamentId(t.getId()), t.getStatus(),
+        t.getOrganizer().getTag(), t.isPublic(),
+        t.getWinnerTeam() != null ? t.getWinnerTeam().getName() : null);
   }
 }
