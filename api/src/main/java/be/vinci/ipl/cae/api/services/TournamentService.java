@@ -197,10 +197,19 @@ public class TournamentService {
   }
 
   private TournamentResponseDto toResponseDto(Tournament t) {
-    return new TournamentResponseDto(t.getId(), t.getName(), t.getDescription(), t.getStartDate(),
-        t.getEndDate(), t.getRegistrationDeadline(), t.getMaxParticipants(),
-        registrationRepository.countByTournamentId(t.getId()), t.getStatus(),
-        t.getOrganizer().getTag(), t.isPublic(),
-        t.getWinnerTeam() != null ? t.getWinnerTeam().getName() : null);
+    List<String> teamNames = registrationRepository.findByTournamentId(t.getId())
+        .stream()
+        .map(r -> r.getTeam().getName())
+        .toList();
+
+    return new TournamentResponseDto(
+        t.getId(), t.getName(), t.getDescription(),
+        t.getStartDate(), t.getEndDate(), t.getRegistrationDeadline(),
+        t.getMaxParticipants(),
+        teamNames.size(), //
+        t.getStatus(), t.getOrganizer().getTag(), t.isPublic(),
+        t.getWinnerTeam() != null ? t.getWinnerTeam().getName() : null,
+        teamNames
+    );
   }
 }
