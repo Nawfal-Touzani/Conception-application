@@ -83,7 +83,7 @@ const TournamentCard = ({ tournament }: TournamentCardProps) => (
     sx={{
       p: 1,
       borderRadius: '10px',
-      width: 200,
+      width: 280,
       display: 'flex',
       flexDirection: 'column',
       gap: 1,
