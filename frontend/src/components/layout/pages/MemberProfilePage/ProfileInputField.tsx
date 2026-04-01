@@ -15,11 +15,11 @@ export const ProfileInputField = ({
   onEditClick,
 }: ProfileInputFieldProps) => {
   return (
-    <Grid2 container alignItems="center" spacing={2} sx={{ px: 2, mb: 2 }}>
+    <Grid2 container alignItems="center" spacing={1} sx={{ px: 2, mb: 1 }}>
       <Grid2 size={4}>
         <Typography sx={{ fontWeight: 'bold' }}>{label}</Typography>
       </Grid2>
-      <Grid2 size={8}>
+      <Grid2 size={7}>
         <TextField
           fullWidth
           size="small"

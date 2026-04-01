@@ -19,7 +19,7 @@ export const ActionSidebar = ({ profile }: { profile: MemberProfile }) => {
       sx={{
         p: 3,
         borderRadius: 3,
-        minHeight: '687px',
+        minHeight: '600px',
         display: 'flex',
         flexDirection: 'column',
       }}
@@ -39,7 +39,7 @@ export const ActionSidebar = ({ profile }: { profile: MemberProfile }) => {
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          gap: 10,
+          gap: 4,
           flexGrow: 1,
           justifyContent: 'center',
         }}
@@ -52,12 +52,12 @@ export const ActionSidebar = ({ profile }: { profile: MemberProfile }) => {
             onClick={() => action.path !== '#' && navigate(action.path)}
             sx={{
               bgcolor: '#1e2a44',
-              py: 1.8,
+              py: 1.4,
               px: 2,
               textTransform: 'none',
               borderRadius: 2,
               fontWeight: 'bold',
-              fontSize: '1.4rem',
+              fontSize: '1.3rem',
               lineHeight: 1.2,
               whiteSpace: 'normal',
               textAlign: 'center',

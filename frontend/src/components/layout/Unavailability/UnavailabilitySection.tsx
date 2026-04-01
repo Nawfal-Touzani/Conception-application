@@ -82,7 +82,7 @@ export const UnavailabilitySection = () => {
   };
 
   return (
-    <Box sx={{ mt: 4, mb: 2, p: 2, borderTop: '2px solid #1e2a44' }}>
+    <Box sx={{ mt: 2, mb: 1, p: 2, borderTop: '2px solid #1e2a44' }}>
       <Typography variant="body1" sx={{ fontWeight: 'bold', mb: 2 }}>
         Définir une indisponibilité :
       </Typography>
@@ -100,7 +100,7 @@ export const UnavailabilitySection = () => {
         )}
       </Collapse>
 
-      <Grid container spacing={2} alignItems="center">
+      <Grid container spacing={1} alignItems="center">
         <Grid item xs={3} display="flex" justifyContent="center">
           <CalendarMonthIcon sx={{ fontSize: 60, color: '#333' }} />
         </Grid>
