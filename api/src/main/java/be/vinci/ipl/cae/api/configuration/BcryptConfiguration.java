@@ -42,8 +42,7 @@ public class BcryptConfiguration {
 
   private Tournament buildTournament(String name, String description,
                                      LocalDate startDate, LocalDate endDate, LocalDate deadline,
-                                     int maxParticipants, Status status, boolean isPublic,
-                                     Member organizer) {
+                                     int maxParticipants, Status status, boolean isPublic, Member organizer) {
     Tournament t = new Tournament();
     t.setName(name);
     t.setDescription(description);
@@ -75,6 +74,7 @@ public class BcryptConfiguration {
                                    Speciality speciality, Image image, LocalDate creationDate,
                                    String teamName, MemberRepository memberRepository,
                                    TeamRepository teamRepository,
+                                   TeamCompositionRepository teamCompositionRepository,
                                    BCryptPasswordEncoder passwordEncoder) {
     if (!memberRepository.existsByEmail(email)) {
       memberRepository.save(buildMember(email, password, tag, false,
@@ -83,6 +83,11 @@ public class BcryptConfiguration {
     if (!teamRepository.existsByName(teamName)) {
       Member responsible = memberRepository.findByEmail(email).orElseThrow();
       teamRepository.save(new Team(teamName, true, LocalDateTime.now(), responsible, null));
+    }
+    Member responsible = memberRepository.findByEmail(email).orElseThrow();
+    if (!teamCompositionRepository.existsByMemberId(responsible.getId())) {
+      Team team = teamRepository.findByName(teamName).orElseThrow();
+      teamCompositionRepository.save(new TeamComposition(responsible, team, LocalDateTime.now()));
     }
   }
 
@@ -224,9 +229,36 @@ public class BcryptConfiguration {
         memberRepository.save(banni);
       }
 
+      // ── TEAM_IOTA members (lisa=responsible, noa=second responsible, tim, zoe) ──
+      if (!memberRepository.existsByEmail("lisa@mail.com")) {
+        memberRepository.save(buildMember("lisa@mail.com", "lisa", "Storm", false,
+            imageRepository.findAll().get(2), executeur,
+            LocalDate.of(2026, 1, 10), passwordEncoder));
+      }
+
+      if (!memberRepository.existsByEmail("noa@mail.com")) {
+        memberRepository.save(buildMember("noa@mail.com", "noa", "Flash", false,
+            imageRepository.findAll().get(4), architecte,
+            LocalDate.of(2026, 2, 2), passwordEncoder));
+      }
+
+      if (!memberRepository.existsByEmail("tim@mail.com")) {
+        memberRepository.save(buildMember("tim@mail.com", "tim", "Titi", false,
+            imageRepository.findAll().get(5), gardien,
+            LocalDate.of(2026, 2, 3), passwordEncoder));
+      }
+
+      if (!memberRepository.existsByEmail("zoe@mail.com")) {
+        memberRepository.save(buildMember("zoe@mail.com", "zoe", "Vector", false,
+            imageRepository.findAll().get(6), catalyseur,
+            LocalDate.of(2026, 2, 4), passwordEncoder));
+      }
+
       // Teams
       Member lea = memberRepository.findByEmail("lea@mail.com").orElseThrow();
       Member tibo = memberRepository.findByEmail("tibo@mail.com").orElseThrow();
+      Member lisa = memberRepository.findByEmail("lisa@mail.com").orElseThrow();
+      Member noa = memberRepository.findByEmail("noa@mail.com").orElseThrow();
 
       if (!teamRepository.existsByName("TEAM_ALPHA")) {
         teamRepository.save(new Team("TEAM_ALPHA", true, LocalDateTime.now(), lea, null));
@@ -236,9 +268,15 @@ public class BcryptConfiguration {
         teamRepository.save(new Team("TEAM_OMEGA", true, LocalDateTime.now(), tibo, null));
       }
 
-      // Affectations
+      if (!teamRepository.existsByName("TEAM_IOTA")) {
+        teamRepository.save(new Team("TEAM_IOTA", true, LocalDateTime.now(), lisa, noa));
+      }
+
+      // Affectations TEAM_ALPHA
       Member tom = memberRepository.findByEmail("tom@mail.com").orElseThrow();
       Member ines = memberRepository.findByEmail("ines@mail.com").orElseThrow();
+      Member tim = memberRepository.findByEmail("tim@mail.com").orElseThrow();
+      Member zoe = memberRepository.findByEmail("zoe@mail.com").orElseThrow();
 
       Team teamAlpha = teamRepository.findByName("TEAM_ALPHA").orElseThrow();
 
@@ -256,6 +294,22 @@ public class BcryptConfiguration {
 
       if (!teamCompositionRepository.existsByMemberId(tibo.getId())) {
         teamCompositionRepository.save(new TeamComposition(tibo, teamOmega, LocalDateTime.now()));
+      }
+
+      // Affectations TEAM_IOTA
+      Team teamIota = teamRepository.findByName("TEAM_IOTA").orElseThrow();
+
+      if (!teamCompositionRepository.existsByMemberId(lisa.getId())) {
+        teamCompositionRepository.save(new TeamComposition(lisa, teamIota, LocalDateTime.now()));
+      }
+      if (!teamCompositionRepository.existsByMemberId(noa.getId())) {
+        teamCompositionRepository.save(new TeamComposition(noa, teamIota, LocalDateTime.now()));
+      }
+      if (!teamCompositionRepository.existsByMemberId(tim.getId())) {
+        teamCompositionRepository.save(new TeamComposition(tim, teamIota, LocalDateTime.now()));
+      }
+      if (!teamCompositionRepository.existsByMemberId(zoe.getId())) {
+        teamCompositionRepository.save(new TeamComposition(zoe, teamIota, LocalDateTime.now()));
       }
 
       // Organizer for tournaments
@@ -320,54 +374,66 @@ public class BcryptConfiguration {
             LocalDate.of(2026, 5, 11), 16, Status.PREPARATION, true, admin));
       }
 
-      // ── Membres et teams supplémentaires ──
+      // ── Membres et teams supplémentaires (avec TeamComposition) ──
       createMemberAndTeam("zara@mail.com", "zara", "Viper", architecte,
           imageRepository.findAll().get(1), LocalDate.of(2025, 9, 5),
-          "TEAM_NOVA", memberRepository, teamRepository, passwordEncoder);
+          "TEAM_NOVA", memberRepository, teamRepository,
+          teamCompositionRepository, passwordEncoder);
 
       createMemberAndTeam("kael@mail.com", "kael", "Kael", catalyseur,
           imageRepository.findAll().get(2), LocalDate.of(2025, 8, 14),
-          "TEAM_VOID", memberRepository, teamRepository, passwordEncoder);
+          "TEAM_VOID", memberRepository, teamRepository,
+          teamCompositionRepository, passwordEncoder);
 
       createMemberAndTeam("sora@mail.com", "sora", "Sora", guerisseur,
           imageRepository.findAll().get(4), LocalDate.of(2025, 7, 22),
-          "TEAM_STORM", memberRepository, teamRepository, passwordEncoder);
+          "TEAM_STORM", memberRepository, teamRepository,
+          teamCompositionRepository, passwordEncoder);
 
       createMemberAndTeam("rex@mail.com", "rex", "Rex", gardien,
           imageRepository.findAll().get(5), LocalDate.of(2025, 6, 30),
-          "TEAM_BLAZE", memberRepository, teamRepository, passwordEncoder);
+          "TEAM_BLAZE", memberRepository, teamRepository,
+          teamCompositionRepository, passwordEncoder);
 
       createMemberAndTeam("nyx@mail.com", "nyx", "Nyx", perturbateur,
           imageRepository.findAll().get(6), LocalDate.of(2025, 5, 18),
-          "TEAM_FROST", memberRepository, teamRepository, passwordEncoder);
+          "TEAM_FROST", memberRepository, teamRepository,
+          teamCompositionRepository, passwordEncoder);
 
       createMemberAndTeam("drak@mail.com", "drak", "Drak", tacticien,
           imageRepository.findAll().get(7), LocalDate.of(2025, 4, 10),
-          "TEAM_EMBER", memberRepository, teamRepository, passwordEncoder);
+          "TEAM_EMBER", memberRepository, teamRepository,
+          teamCompositionRepository, passwordEncoder);
 
       createMemberAndTeam("lumi@mail.com", "lumi", "Lumi", executeur,
           imageRepository.findAll().get(8), LocalDate.of(2025, 3, 25),
-          "TEAM_SURGE", memberRepository, teamRepository, passwordEncoder);
+          "TEAM_SURGE", memberRepository, teamRepository,
+          teamCompositionRepository, passwordEncoder);
 
       createMemberAndTeam("fenn@mail.com", "fenn", "Fenn", architecte,
           imageRepository.findAll().get(9), LocalDate.of(2025, 2, 14),
-          "TEAM_CRYPT", memberRepository, teamRepository, passwordEncoder);
+          "TEAM_CRYPT", memberRepository, teamRepository,
+          teamCompositionRepository, passwordEncoder);
 
       createMemberAndTeam("vale@mail.com", "vale", "Vale", catalyseur,
           imageRepository.findAll().get(10), LocalDate.of(2025, 1, 8),
-          "TEAM_APEX", memberRepository, teamRepository, passwordEncoder);
+          "TEAM_APEX", memberRepository, teamRepository,
+          teamCompositionRepository, passwordEncoder);
 
       createMemberAndTeam("oryn@mail.com", "oryn", "Oryn", perturbateur,
           imageRepository.findAll().get(12), LocalDate.of(2024, 12, 3),
-          "TEAM_WRAITH", memberRepository, teamRepository, passwordEncoder);
+          "TEAM_WRAITH", memberRepository, teamRepository,
+          teamCompositionRepository, passwordEncoder);
 
       createMemberAndTeam("cael@mail.com", "cael", "Cael", gardien,
           imageRepository.findAll().get(13), LocalDate.of(2024, 11, 17),
-          "TEAM_TITAN", memberRepository, teamRepository, passwordEncoder);
+          "TEAM_TITAN", memberRepository, teamRepository,
+          teamCompositionRepository, passwordEncoder);
 
       createMemberAndTeam("pyra@mail.com", "pyra", "Pyra", tacticien,
           imageRepository.findAll().get(14), LocalDate.of(2024, 10, 29),
-          "TEAM_VENOM", memberRepository, teamRepository, passwordEncoder);
+          "TEAM_VENOM", memberRepository, teamRepository,
+          teamCompositionRepository, passwordEncoder);
 
       // ── Inscriptions et gagnants ──
       Team teamNova   = teamRepository.findByName("TEAM_NOVA").orElseThrow();
@@ -384,37 +450,37 @@ public class BcryptConfiguration {
       Team teamVenom  = teamRepository.findByName("TEAM_VENOM").orElseThrow();
 
       setupTournament("Spring Arena Cup 2025", teamOmega,
-          List.of(teamAlpha, teamOmega, teamNova, teamVoid, teamStorm, teamBlaze, teamFrost),
+          List.of(teamAlpha, teamOmega, teamIota, teamNova, teamVoid, teamStorm, teamBlaze),
           tournamentRepository, registrationRepository);
 
-      setupTournament("Elite Championship 2025", teamNova,
-          List.of(teamAlpha, teamOmega, teamNova, teamVoid, teamStorm, teamBlaze),
+      setupTournament("Elite Championship 2025", teamIota,
+          List.of(teamAlpha, teamOmega, teamIota, teamNova, teamVoid, teamStorm),
           tournamentRepository, registrationRepository);
 
-      setupTournament("Summer Pro League 2025", teamNova,
-          List.of(teamAlpha, teamOmega, teamNova, teamVoid, teamStorm, teamBlaze,
-              teamFrost, teamEmber, teamSurge, teamCrypt, teamApex, teamWraith,
-              teamTitan, teamVenom),
+      setupTournament("Summer Pro League 2025", teamIota,
+          List.of(teamAlpha, teamOmega, teamIota, teamNova, teamVoid, teamStorm,
+              teamBlaze, teamFrost, teamEmber, teamSurge, teamCrypt, teamApex,
+              teamWraith, teamTitan),
           tournamentRepository, registrationRepository);
 
       setupTournament("Vinci Winter Clash 2026", teamAlpha,
-          List.of(teamAlpha, teamOmega, teamNova, teamVoid, teamStorm, teamBlaze,
-              teamFrost, teamEmber, teamSurge, teamCrypt, teamApex, teamWraith),
+          List.of(teamAlpha, teamOmega, teamIota, teamNova, teamVoid, teamStorm,
+              teamBlaze, teamFrost, teamEmber, teamSurge, teamCrypt, teamApex),
           tournamentRepository, registrationRepository);
 
       setupTournament("Spring Battle Series 2026", null,
-          List.of(teamAlpha, teamOmega, teamNova, teamVoid, teamStorm, teamBlaze,
-              teamFrost, teamEmber),
+          List.of(teamAlpha, teamOmega, teamIota, teamNova, teamVoid, teamStorm,
+              teamBlaze, teamFrost),
           tournamentRepository, registrationRepository);
 
       setupTournament("Vinci Easter Cup 2026", null,
-          List.of(teamAlpha, teamOmega, teamNova, teamVoid, teamStorm, teamBlaze, teamFrost),
+          List.of(teamAlpha, teamOmega, teamIota, teamNova, teamVoid, teamStorm, teamBlaze),
           tournamentRepository, registrationRepository);
 
       setupTournament("Elite Championship 2026", null,
-          List.of(teamAlpha, teamOmega, teamNova, teamVoid, teamStorm, teamBlaze,
-              teamFrost, teamEmber, teamSurge, teamCrypt, teamApex, teamWraith,
-              teamTitan, teamVenom),
+          List.of(teamAlpha, teamOmega, teamIota, teamNova, teamVoid, teamStorm,
+              teamBlaze, teamFrost, teamEmber, teamSurge, teamCrypt, teamApex,
+              teamWraith, teamTitan, teamVenom),
           tournamentRepository, registrationRepository);
 
     };

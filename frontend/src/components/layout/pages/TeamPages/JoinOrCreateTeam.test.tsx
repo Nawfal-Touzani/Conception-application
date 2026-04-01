@@ -48,7 +48,6 @@ const renderPage = () =>
     </MemoryRouter>,
   );
 
-// Helper : dernier textbox = champ "Créer une team"
 const getCreateInput = () => {
   const inputs = screen.getAllByRole('textbox');
   return inputs[inputs.length - 1];
@@ -78,8 +77,10 @@ describe('JoinOrCreateTeam', () => {
     });
 
     renderPage();
+    await waitFor(() => {});
+    fireEvent.mouseDown(screen.getByRole('combobox'));
     expect(await screen.findByText('Team Alpha')).toBeTruthy();
-    expect(await screen.findByText('Team Beta')).toBeTruthy();
+    expect(screen.getByText('Team Beta')).toBeTruthy();
   });
 
   test('filtre les équipes par recherche', async () => {
@@ -89,9 +90,11 @@ describe('JoinOrCreateTeam', () => {
     });
 
     renderPage();
+    await waitFor(() => {});
+    fireEvent.mouseDown(screen.getByRole('combobox'));
     await screen.findByText('Team Alpha');
 
-    fireEvent.change(screen.getByPlaceholderText("Nom de l'équipe"), {
+    fireEvent.change(screen.getByPlaceholderText('Rechercher...'), {
       target: { value: 'Alpha' },
     });
 
@@ -106,9 +109,11 @@ describe('JoinOrCreateTeam', () => {
     });
 
     renderPage();
+    await waitFor(() => {});
+    fireEvent.mouseDown(screen.getByRole('combobox'));
     await screen.findByText('Team Alpha');
 
-    fireEvent.change(screen.getByPlaceholderText("Nom de l'équipe"), {
+    fireEvent.change(screen.getByPlaceholderText('Rechercher...'), {
       target: { value: 'zzz' },
     });
 
@@ -122,7 +127,7 @@ describe('JoinOrCreateTeam', () => {
     });
 
     renderPage();
-    await screen.findByText('Team Alpha');
+    await waitFor(() => {});
 
     expect(
       (screen.getByText('Envoyer demande') as HTMLButtonElement).disabled,
@@ -135,8 +140,9 @@ describe('JoinOrCreateTeam', () => {
       .mockResolvedValueOnce({ ok: true, status: 201 });
 
     renderPage();
-    await screen.findByText('Team Alpha');
-    fireEvent.click(screen.getByText('Team Alpha'));
+    await waitFor(() => {});
+    fireEvent.mouseDown(screen.getByRole('combobox'));
+    fireEvent.click(await screen.findByText('Team Alpha'));
 
     expect(
       (screen.getByText('Envoyer demande') as HTMLButtonElement).disabled,
@@ -154,8 +160,9 @@ describe('JoinOrCreateTeam', () => {
       .mockResolvedValueOnce({ ok: false, status: 500 });
 
     renderPage();
-    await screen.findByText('Team Alpha');
-    fireEvent.click(screen.getByText('Team Alpha'));
+    await waitFor(() => {});
+    fireEvent.mouseDown(screen.getByRole('combobox'));
+    fireEvent.click(await screen.findByText('Team Alpha'));
     fireEvent.click(screen.getByText('Envoyer demande'));
 
     expect(await screen.findByText("Erreur lors de l'envoi.")).toBeTruthy();
@@ -167,8 +174,9 @@ describe('JoinOrCreateTeam', () => {
       .mockRejectedValueOnce(new Error('network'));
 
     renderPage();
-    await screen.findByText('Team Alpha');
-    fireEvent.click(screen.getByText('Team Alpha'));
+    await waitFor(() => {});
+    fireEvent.mouseDown(screen.getByRole('combobox'));
+    fireEvent.click(await screen.findByText('Team Alpha'));
     fireEvent.click(screen.getByText('Envoyer demande'));
 
     expect(
