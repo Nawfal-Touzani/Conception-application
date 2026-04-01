@@ -33,12 +33,24 @@ import lombok.Setter;
 public class Match {
 
   /**
-   *Match state.
+   * Match state.
    */
   public enum MatchState {
+    /**
+     * Scheduled match state.
+     */
     SCHEDULED,
+    /**
+     * Played match state.
+     */
     PLAYED,
+    /**
+     * Canceled match state.
+     */
     CANCELED,
+    /**
+     * Forfeit match state.
+     */
     FORFEIT
   }
 
@@ -46,9 +58,21 @@ public class Match {
    * Result validation state.
    */
   public enum ResultStatus {
+    /**
+     * Not entered result status.
+     */
     NOT_ENTERED,
+    /**
+     * Pending result status.
+     */
     PENDING,
+    /**
+     * Validated result status.
+     */
     VALIDATED,
+    /**
+     * Refused result status.
+     */
     REFUSED
   }
 

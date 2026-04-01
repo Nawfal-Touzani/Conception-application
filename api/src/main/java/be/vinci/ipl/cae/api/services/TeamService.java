@@ -34,6 +34,12 @@ public class TeamService {
 
   /**
    * Instantiates a new Team service.
+   *
+   * @param teamRepository              the team repository
+   * @param teamCompositionRepository   the team composition repository
+   * @param memberRepository            the member repository
+   * @param membershipRequestRepository the membership request repository
+   * @param notificationService         the notification service
    */
   public TeamService(TeamRepository teamRepository,
       TeamCompositionRepository teamCompositionRepository,
@@ -49,6 +55,10 @@ public class TeamService {
 
   /**
    * Create team.
+   *
+   * @param memberId the member id
+   * @param request  the request
+   * @return the team response dto
    */
   @Transactional
   public TeamResponseDto createTeam(Long memberId, CreateTeamRequest request) {
@@ -80,6 +90,10 @@ public class TeamService {
 
   /**
    * Creates a membership request for a member to join a team.
+   *
+   * @param memberId the member id
+   * @param teamId   the team id
+   * @return the membership request
    */
   public MembershipRequest createRequest(long memberId, long teamId) {
     Member member = memberRepository.findById(memberId)
@@ -109,6 +123,9 @@ public class TeamService {
 
   /**
    * Get members of the connected member's team.
+   *
+   * @param memberId the member id
+   * @return the members of my team
    */
   @Transactional
   public Iterable<TeamMemberDto> getMembersOfMyTeam(Long memberId) {
@@ -136,6 +153,8 @@ public class TeamService {
 
   /**
    * Get all teams as entities (internal use).
+   *
+   * @return the all teams
    */
   public Iterable<Team> getAllTeams() {
     return teamRepository.findAll();
@@ -144,6 +163,8 @@ public class TeamService {
   /**
    * NEW — Get all teams as safe DTOs (avoids circular JSON serialization). Used by GET /teams
    * endpoint.
+   *
+   * @return the all team dtos
    */
   @Transactional
   public Iterable<TeamResponseDto> getAllTeamDtos() {
@@ -154,6 +175,8 @@ public class TeamService {
 
   /**
    * Leave the current team.
+   *
+   * @param email the email
    */
   @Transactional
   public void leaveTeam(String email) {
@@ -196,6 +219,9 @@ public class TeamService {
 
   /**
    * Get the team of the connected member.
+   *
+   * @param memberId the member id
+   * @return the team of member as dto
    */
   @Transactional
   public TeamResponseDto getTeamOfMemberAsDto(Long memberId) {
@@ -207,6 +233,9 @@ public class TeamService {
 
   /**
    * Helper: converts a Team entity to a safe DTO (avoids circular JSON serialization).
+   *
+   * @param team the team
+   * @return the team response dto
    */
   public TeamResponseDto toDto(Team team) {
     return new TeamResponseDto(

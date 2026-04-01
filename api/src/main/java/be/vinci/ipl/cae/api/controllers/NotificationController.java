@@ -33,6 +33,8 @@ public class NotificationController {
 
   /**
    * Creates a new NotificationController.
+   *
+   * @param notificationService the notification service
    */
   public NotificationController(NotificationService notificationService) {
     this.notificationService = notificationService;
@@ -40,6 +42,11 @@ public class NotificationController {
 
   /**
    * Gets all notifications of a member(optional filter by read status).
+   *
+   * @param id            the id
+   * @param read          the read
+   * @param currentMember the current member
+   * @return the notifications of member
    */
   @GetMapping("/{id}/notifications")
   @PreAuthorize("isAuthenticated()")
@@ -67,6 +74,10 @@ public class NotificationController {
 
   /**
    * Sends a notification to a member.
+   *
+   * @param id  the id
+   * @param dto the dto
+   * @return the notification response dto
    */
   @PostMapping("/{id}/notifications")
   @PreAuthorize("isAuthenticated()")
@@ -85,6 +96,11 @@ public class NotificationController {
 
   /**
    * Mark a notification as read.
+   *
+   * @param idMember       the id member
+   * @param idNotification the id notification
+   * @param currentMember  the current member
+   * @return the notification response dto
    */
   @PatchMapping("/{idMember}/notifications/{idNotification}")
   @ResponseStatus(HttpStatus.OK)

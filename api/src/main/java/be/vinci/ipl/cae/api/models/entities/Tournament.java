@@ -27,7 +27,6 @@ import lombok.Setter;
 /**
  * Tournament entity.
  */
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -40,7 +39,22 @@ public class Tournament {
    * Tournament status.
    */
   public enum Status {
-    PREPARATION, IN_PROGRESS, FINISHED, CANCELLED
+    /**
+     * Preparation status.
+     */
+    PREPARATION,
+    /**
+     * In progress status.
+     */
+    IN_PROGRESS,
+    /**
+     * Finished status.
+     */
+    FINISHED,
+    /**
+     * Cancelled status.
+     */
+    CANCELLED
   }
 
   @Id
