@@ -5,8 +5,8 @@ import * as adminService from '../../../../services/admin.service';
 import { MemberDto } from '../../../../types/admin.types';
 import { useAuth } from '../../../../contexts/useAuth';
 import { MemberRow } from './MemberRow';
-import { BanModal } from './Ban/BanModal';
-import { BanInfoModal } from './Ban/BanInfoModal';
+import { BanModal } from '../../../pages/AdminPages/Ban/BanModal';
+import { BanInfoModal } from '../../../pages/AdminPages/Ban/BanInfoModal';
 
 const MembersListPage = () => {
   const [members, setMembers] = useState<MemberDto[]>([]);
