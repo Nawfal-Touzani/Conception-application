@@ -5,7 +5,7 @@ interface TournamentCardProps {
   tournament: TournamentDetails;
 }
 
-// Maps the backend status enum to a human-readable French label
+// Enum to a readable label
 const statusLabel: Record<string, string> = {
   PREPARATION: 'Prochain',
   IN_PROGRESS: 'À la une',
@@ -13,13 +13,14 @@ const statusLabel: Record<string, string> = {
   CANCELLED: 'Annulé',
 };
 
-// Formats a LocalDateTime string from Spring into a readable date (ex: "5 janv.")
+// Date format
 const formatDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString('fr-BE', {
     day: 'numeric',
     month: 'short',
   });
 
+// Checks if registration is open
 const isRegistrationOpen = (tournament: TournamentDetails): boolean => {
   if (!tournament.isPublic) return false;
   const deadlinePassed = new Date(tournament.registrationDeadline) < new Date();
