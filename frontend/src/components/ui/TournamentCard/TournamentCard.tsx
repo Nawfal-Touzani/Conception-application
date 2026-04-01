@@ -20,6 +20,13 @@ const formatDate = (dateStr: string) =>
     month: 'short',
   });
 
+const isRegistrationOpen = (tournament: TournamentDetails): boolean => {
+  if (!tournament.isPublic) return false;
+  const deadlinePassed = new Date(tournament.registrationDeadline) < new Date();
+  const isFull = tournament.currentParticipants >= tournament.maxParticipants;
+  return !deadlinePassed && !isFull;
+};
+
 // Differents display possible for a tournament card
 const getInfoLabel = (tournament: TournamentDetails): string => {
   if (tournament.status === 'FINISHED') {
@@ -39,7 +46,7 @@ const getInfoLabel = (tournament: TournamentDetails): string => {
 
 const getStateLabel = (tournament: TournamentDetails): string => {
   if (tournament.status === 'PREPARATION') {
-    return tournament.isPublic ? 'Ouvert' : 'Fermé';
+    return 'À venir';
   }
 
   if (tournament.status === 'IN_PROGRESS') {
@@ -63,7 +70,7 @@ const getInfoValue = (tournament: TournamentDetails): string => {
   }
 
   if (tournament.status === 'PREPARATION') {
-    return tournament.isPublic ? 'Ouvertes' : 'Fermées';
+    return isRegistrationOpen(tournament) ? 'Ouvertes' : 'Fermées';
   }
 
   return 'Inconnue';
