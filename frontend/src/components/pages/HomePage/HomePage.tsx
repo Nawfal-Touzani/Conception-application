@@ -4,39 +4,12 @@ import { useAuth } from '../../../contexts/useAuth';
 import { useNavigate } from 'react-router-dom';
 import homeImage from '../../../assets/images/home_logo.png';
 import TournamentCard from '../../ui/TournamentCard/TournamentCard';
-import { Tournament } from '../../../types/tournament.types';
-
-// Static data matching the real Tournament type — will be replaced by backend fetch later
-const TOURNAMENTS_DATA: Tournament[] = [
-  {
-    id: 1,
-    status: 'FINISHED',
-    name: 'Winter Cup 2026',
-    startDate: '2026-01-05T00:00:00',
-    endDate: '2026-01-19T00:00:00',
-    maxParticipant: 16,
-  },
-  {
-    id: 2,
-    status: 'IN_PROGRESS',
-    name: 'Vinci Bounty 2026',
-    startDate: '2026-02-16T00:00:00',
-    endDate: '2026-02-23T00:00:00',
-    maxParticipant: 8,
-  },
-  {
-    id: 3,
-    status: 'PREPARATION',
-    name: 'Vinci Major 2026',
-    startDate: '2026-02-25T00:00:00',
-    endDate: '2026-03-01T00:00:00',
-    maxParticipant: 16,
-  },
-];
+import { useHomePage } from './useHomePage';
 
 const HomePage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { tournaments, error } = useHomePage();
 
   return (
     <Box
@@ -112,7 +85,13 @@ const HomePage: React.FC = () => {
         </Typography>
 
         <Box display="flex" gap={2} flexWrap="wrap" justifyContent="center">
-          {TOURNAMENTS_DATA.map((tournament) => (
+          {error && <Typography color="#e74c3c">{error}</Typography>}
+          {!error && tournaments.length === 0 && (
+            <Typography color="rgba(255,255,255,0.5)">
+              Aucun tournoi disponible.
+            </Typography>
+          )}
+          {tournaments.map((tournament) => (
             <TournamentCard key={tournament.id} tournament={tournament} />
           ))}
         </Box>
