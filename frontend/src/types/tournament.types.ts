@@ -29,3 +29,9 @@ export interface TournamentDetails {
   isPublic: boolean;
   winnerTeamName?: string | null;
 }
+
+export interface HomepageTournaments {
+  lastFinished: TournamentDetails | null;
+  inProgress: TournamentDetails | null;
+  nextUpcoming: TournamentDetails | null;
+}
