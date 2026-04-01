@@ -7,7 +7,7 @@ import App from './components/layout/App/index.tsx';
 import HomePage from './components/layout/pages/HomePage/HomePage.tsx';
 import RegisterPage from './components/layout/pages/RegisterPage/RegisterPage.tsx';
 import LoginPage from './components/layout/pages/LoginPage/LoginPage.tsx';
-import NotificationsPage from './components/layout/pages/NotificationsPage.tsx';
+import NotificationsPage from './components/layout/pages/NotificationPage/NotificationsPage.tsx';
 
 import { AuthProvider } from './contexts/AuthProvider.tsx';
 

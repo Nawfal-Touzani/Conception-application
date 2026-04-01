@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '../../../contexts/useAuth';
+import { useAuth } from '../../../../contexts/useAuth';
 import {
   getNotifications,
   markAsRead,
-} from '../../../services/notifications.service';
+} from '../../../../services/notifications.service';
 import {
   approveRequest,
   refuseRequest,
-} from '../../../services/membership-request.service';
-import { Notification } from '../../../types/notifications.types';
-import NotificationList from '../NotificationList';
+} from '../../../../services/membership-request.service';
+import { Notification } from '../../../../types/notifications.types';
+
+import NotificationList from './NotificationList';
+
 import { Box, Typography, Button } from '@mui/material';
 
 const NotificationPage = () => {
