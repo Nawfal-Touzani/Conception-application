@@ -40,9 +40,9 @@ const AdminPage = () => {
   const loadAdmins = useCallback(() => {
     adminService
       .getAdmins(token)
-      .then((data) => setAdmins(data))
+      .then((data) => setAdmins(data.filter((m) => m.tag !== user?.tag)))
       .catch(() => setError('Erreur lors du chargement des administrateurs.'));
-  }, [token]);
+  }, [token, user?.tag]);
 
   const loadAllMembers = useCallback(() => {
     adminService
@@ -170,7 +170,6 @@ const AdminPage = () => {
             <MemberRow
               key={member.email}
               member={member}
-              isCurrentUser={member.tag === user?.tag}
               onDelete={setDemoteTarget}
             />
           ))}

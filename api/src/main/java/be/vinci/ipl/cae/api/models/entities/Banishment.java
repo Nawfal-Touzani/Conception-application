@@ -40,7 +40,7 @@ public class Banishment {
   @Column(nullable = false, updatable = false)
   private LocalDate banishmentDate;
 
-  @Column(nullable = true)
+  @Column(nullable = false)
   private String reason;
 
   /**

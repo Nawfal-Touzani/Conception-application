@@ -20,6 +20,7 @@ import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Speciality;
 import be.vinci.ipl.cae.api.models.entities.Team;
 import be.vinci.ipl.cae.api.models.entities.TeamComposition;
+import be.vinci.ipl.cae.api.repositories.BanishmentRepository;
 import be.vinci.ipl.cae.api.repositories.ImageRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
@@ -61,6 +62,9 @@ public class MemberServiceTest {
 
   @Mock
   private UnavailabilityRepository unavailabilityRepository;
+
+  @Mock
+  private BanishmentRepository banishmentRepository;
 
   /**
    * The Member service.
