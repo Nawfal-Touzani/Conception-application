@@ -1,5 +1,6 @@
 package be.vinci.ipl.cae.api.controllers;
 
+import be.vinci.ipl.cae.api.models.dtos.HomepageTournamentsDto;
 import be.vinci.ipl.cae.api.models.dtos.TournamentDto;
 import be.vinci.ipl.cae.api.models.dtos.TournamentResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
@@ -119,17 +120,28 @@ public class TournamentController {
   }
 
   /**
-   * GET /tournaments/{id} — Get a single tournament by id.
+   * Get the three homepage tournaments.
    */
-  @GetMapping("/{id}")
-  public TournamentResponseDto getTournamentById(@PathVariable long id) {
-    try {
-      return tournamentService.getTournamentById(id);
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          "Tournament get error: " + e.getMessage(), e);
-    }
+  @GetMapping("/homepage")
+  public HomepageTournamentsDto getHomepageTournaments() {
+    return tournamentService.getHomepageTournaments();
   }
+
+  /*
+   * GET /tournaments/{id}
+   * Get a single tournament by id.
+   * TODO: add visibility check before re-enabling.
+   *
+   * @GetMapping("/{id}")
+   * public TournamentResponseDto getTournamentById(@PathVariable long id) {
+   *   try {
+   *     return tournamentService.getTournamentById(id);
+   *   } catch (NoSuchElementException e) {
+   *     throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+   *         "Tournament get error: " + e.getMessage(), e);
+   *   }
+   * }
+   */
 
   /**
    * Register a team to a tournament.
