@@ -6,8 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 /**
- * RegisterCredentials DTO for member registration requests.
- * Contains only the fields expected from the registration form.
+ * RegisterCredentials DTO for member registration requests. Contains only the fields expected from
+ * the registration form.
  */
 public record RegisterCredentials(
         @NotBlank @Email String email,

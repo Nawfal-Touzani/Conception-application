@@ -82,6 +82,8 @@ public class AuthController {
   /**
    * Automatic authentification if in a session case scenario. New 24h token + infos sent.
    *
+   * @param authentication the authentication
+   * @return the authenticated member
    * @throws ResponseStatusException 403 if the member is banned
    */
   @GetMapping("/me")

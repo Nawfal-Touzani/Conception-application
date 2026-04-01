@@ -40,16 +40,16 @@ public class Banishment {
   @Column(nullable = false, updatable = false)
   private LocalDate banishmentDate;
 
-  @Column(nullable = true)
+  @Column(nullable = false)
   private String reason;
 
   /**
    * Constructs a Banishment with all required fields.
    *
-   * @param bannedMember the member being banned
-   * @param admin the admin who issued the ban
+   * @param bannedMember   the member being banned
+   * @param admin          the admin who issued the ban
    * @param banishmentDate the date of the banishment
-   * @param reason the reason for the banishment
+   * @param reason         the reason for the banishment
    */
   public Banishment(Member bannedMember, Member admin, LocalDate banishmentDate, String reason) {
     this.bannedMember = bannedMember;

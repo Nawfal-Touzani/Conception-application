@@ -18,10 +18,9 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * JWT authentication filter that intercepts incoming HTTP requests
- * to validate the JWT token provided in the Authorization header.
- * If the token is valid, the authenticated user is injected into
- * the Spring Security context to be accessible throughout the application.
+ * JWT authentication filter that intercepts incoming HTTP requests to validate the JWT token
+ * provided in the Authorization header. If the token is valid, the authenticated user is injected
+ * into the Spring Security context to be accessible throughout the application.
  */
 @Configuration
 public class JwtAuthenticationFilter extends OncePerRequestFilter {

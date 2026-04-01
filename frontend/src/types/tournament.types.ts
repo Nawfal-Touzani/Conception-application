@@ -28,4 +28,11 @@ export interface TournamentDetails {
   organizerTag: string;
   isPublic: boolean;
   winnerTeamName?: string | null;
+  registeredTeamNames?: string[];
+}
+
+export interface HomepageTournaments {
+  lastFinished: TournamentDetails | null;
+  inProgress: TournamentDetails | null;
+  nextUpcoming: TournamentDetails | null;
 }

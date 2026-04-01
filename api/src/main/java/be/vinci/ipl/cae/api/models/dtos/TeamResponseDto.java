@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * DTO used to return team info to the frontend safely,
- * avoiding circular JSON serialization issues with the Team entity.
+ * DTO used to return team info to the frontend safely, avoiding circular JSON serialization issues
+ * with the Team entity.
  */
 @Getter
 @Setter
