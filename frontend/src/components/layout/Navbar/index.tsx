@@ -9,11 +9,11 @@ import {
 } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/useAuth';
-import logo from '../../assets/images/logo.png';
-import member from '../../assets/images/member.png';
+import logo from '../../../assets/images/logo.png';
+import member from '../../../assets/images/member.png';
 import { useState, useEffect } from 'react';
 import { getNotifications } from '../../../services/notifications.service';
-import notifLogo from '../../assets/images/notif-logo.png';
+import notifLogo from '../../../assets/images/notif-logo.png';
 
 const NavBar = () => {
   const navigate = useNavigate();

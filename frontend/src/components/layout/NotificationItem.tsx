@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 import { Notification } from '../../types/notifications.types';
-import markRead from '../assets/images/notifImage.p.jpg';
+import markRead from '../../assets/images/notifImage.p.jpg';
 
 interface NotificationItemProps {
   notification: Notification;
