@@ -41,7 +41,7 @@ public interface TournamentRepository extends CrudRepository<Tournament, Long> {
    * Find a tournament by its name.
    *
    * @param name Tournament name
-   * @return tounament
+   * @return tounament optional
    */
   Optional<Tournament> findByName(String name);
 
