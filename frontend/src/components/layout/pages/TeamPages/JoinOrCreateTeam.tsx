@@ -5,12 +5,14 @@ import {
   Paper,
   Button,
   TextField,
-  List,
-  ListItem,
-  ListItemText,
   InputAdornment,
   Snackbar,
   Alert,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  ListSubheader,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { useAuth } from '../../../../contexts/useAuth';
@@ -32,7 +34,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
   const [teams, setTeams] = useState<TeamDto[]>([]);
   const [filteredTeams, setFilteredTeams] = useState<TeamDto[]>([]);
   const [search, setSearch] = useState('');
-  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
+  const [selectedTeamId, setSelectedTeamId] = useState<number | ''>('');
   const [teamName, setTeamName] = useState('');
   const [snack, setSnack] = useState<{
     open: boolean;
@@ -65,7 +67,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
         ),
       );
     }
-    setSelectedTeamId(null);
+    setSelectedTeamId('');
   }, [search, teams]);
 
   // Creer une equipe
@@ -106,7 +108,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
 
   // Rejoindre une equipe
   const joinTeam = async () => {
-    if (selectedTeamId === null) return;
+    if (selectedTeamId === '') return;
     try {
       const res = await teamService.sendJoinRequest(token, selectedTeamId);
 
@@ -116,7 +118,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
           msg: 'Demande envoyée avec succès !',
           severity: 'success',
         });
-        setSelectedTeamId(null);
+        setSelectedTeamId('');
       } else {
         setSnack({
           open: true,
@@ -162,9 +164,9 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
             borderRadius: '12px',
             p: 3.5,
             backgroundColor: '#fff',
-            minHeight: 360,
             display: 'flex',
             flexDirection: 'column',
+            gap: 2,
           }}
         >
           <Typography
@@ -185,84 +187,71 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
               backgroundColor: '#1a2744',
               borderRadius: 2,
               mx: 'auto',
-              mb: 2.5,
+              mt: -1,
             }}
           />
 
-          <TextField
-            fullWidth
-            placeholder="Nom de l'équipe"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            size="small"
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <SearchIcon sx={{ color: '#1a2744' }} />
-                </InputAdornment>
-              ),
-              sx: { borderRadius: '6px', fontSize: '0.9rem' },
-            }}
-            sx={{ mb: 1 }}
-          />
-
-          <Box
-            sx={{
-              flex: 1,
-              backgroundColor: '#1a2744',
-              borderRadius: '8px',
-              p: 1,
-              mb: 2,
-              minHeight: 160,
-              overflow: 'auto',
-            }}
-          >
-            <List disablePadding>
-              {filteredTeams.length === 0 && (
-                <ListItem>
-                  <ListItemText
-                    primary="Aucune équipe trouvée"
-                    primaryTypographyProps={{
-                      color: 'rgba(255,255,255,0.5)',
-                      fontSize: '0.85rem',
-                    }}
-                  />
-                </ListItem>
-              )}
-              {filteredTeams.map((team) => (
-                <ListItem
-                  key={team.id}
-                  onClick={() => setSelectedTeamId(team.id)}
-                  sx={{
-                    cursor: 'pointer',
-                    borderRadius: '6px',
-                    px: 1.5,
-                    py: 0.6,
-                    backgroundColor:
-                      selectedTeamId === team.id
-                        ? 'rgba(255,255,255,0.2)'
-                        : 'transparent',
-                    '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' },
-                    transition: 'background 0.15s',
+          {/* Liste déroulante avec recherche intégrée */}
+          <FormControl fullWidth size="small">
+            <InputLabel id="team-select-label">
+              Sélectionner une équipe
+            </InputLabel>
+            <Select
+              labelId="team-select-label"
+              value={selectedTeamId}
+              label="Sélectionner une équipe"
+              onChange={(e) => setSelectedTeamId(e.target.value as number)}
+              sx={{ borderRadius: '6px', fontSize: '0.9rem' }}
+              MenuProps={{
+                autoFocus: false,
+                PaperProps: {
+                  sx: { maxHeight: 320 },
+                },
+              }}
+            >
+              <ListSubheader sx={{ p: 1, lineHeight: 'normal' }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  placeholder="Rechercher..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  onKeyDown={(e) => e.stopPropagation()}
+                  autoFocus
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <SearchIcon
+                          sx={{ fontSize: '1rem', color: '#1a2744' }}
+                        />
+                      </InputAdornment>
+                    ),
+                    sx: { fontSize: '0.85rem', borderRadius: '6px' },
                   }}
-                >
-                  <ListItemText
-                    primary={team.name}
-                    primaryTypographyProps={{
-                      color: '#fff',
-                      fontSize: '0.9rem',
-                      fontWeight: selectedTeamId === team.id ? 600 : 400,
-                    }}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          </Box>
+                />
+              </ListSubheader>
+              {filteredTeams.length === 0 ? (
+                <MenuItem disabled value="">
+                  <Typography
+                    sx={{ color: 'rgba(0,0,0,0.4)', fontSize: '0.85rem' }}
+                  >
+                    Aucune équipe trouvée
+                  </Typography>
+                </MenuItem>
+              ) : (
+                filteredTeams.map((team) => (
+                  <MenuItem key={team.id} value={team.id}>
+                    {team.name}
+                  </MenuItem>
+                ))
+              )}
+            </Select>
+          </FormControl>
 
           <Box sx={{ textAlign: 'center' }}>
             <Button
               variant="contained"
-              disabled={selectedTeamId === null}
+              disabled={selectedTeamId === ''}
               onClick={joinTeam}
               sx={{
                 backgroundColor: '#1a2744',
@@ -290,9 +279,9 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
             borderRadius: '12px',
             p: 3.5,
             backgroundColor: '#fff',
-            minHeight: 360,
             display: 'flex',
             flexDirection: 'column',
+            gap: 2,
           }}
         >
           <Typography
@@ -313,17 +302,12 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
               backgroundColor: '#1a2744',
               borderRadius: 2,
               mx: 'auto',
-              mb: 3,
+              mt: -1,
             }}
           />
 
           <Typography
-            sx={{
-              color: '#1a2744',
-              fontWeight: 600,
-              mb: 1.5,
-              fontSize: '0.95rem',
-            }}
+            sx={{ color: '#1a2744', fontWeight: 600, fontSize: '0.95rem' }}
           >
             Entrez le nom de votre futur équipe :
           </Typography>
@@ -335,7 +319,6 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
             onKeyDown={(e) => e.key === 'Enter' && createTeam()}
             size="small"
             sx={{
-              mb: 3,
               '& .MuiOutlinedInput-root': {
                 backgroundColor: '#e8eaf0',
                 borderRadius: '6px',
@@ -344,7 +327,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
             }}
           />
 
-          <Box sx={{ mt: 'auto', textAlign: 'center' }}>
+          <Box sx={{ textAlign: 'center', mt: 'auto' }}>
             <Button
               variant="contained"
               disabled={!teamName.trim()}
