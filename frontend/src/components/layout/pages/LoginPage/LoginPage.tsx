@@ -7,6 +7,7 @@ import {
   Checkbox,
   FormControlLabel,
 } from '@mui/material';
+import { useRef } from 'react';
 import TextFieldStyle from '../../../ui/TextFieldStyle/TextFieldStyle'; // Reusable styled TextField
 import { useLoginForm } from '../../../../hooks/useLoginForm/useLoginForm'; // hook
 import { useAuth } from '../../../../contexts/useAuth';
@@ -24,6 +25,15 @@ const LoginPage: React.FC = () => {
     error,
     handleSubmit,
   } = useLoginForm();
+
+  const passwordRef = useRef<HTMLInputElement>(null);
+
+  const handleEmailKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !password.trim()) {
+      e.preventDefault();
+      passwordRef.current?.focus();
+    }
+  };
 
   return (
     // Background
@@ -78,6 +88,7 @@ const LoginPage: React.FC = () => {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setEmail(e.target.value)
               }
+              onKeyDown={handleEmailKeyDown}
             />
 
             <TextFieldStyle
@@ -87,6 +98,7 @@ const LoginPage: React.FC = () => {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setPassword(e.target.value)
               }
+              inputRef={passwordRef}
             />
 
             {/* Remember me */}
