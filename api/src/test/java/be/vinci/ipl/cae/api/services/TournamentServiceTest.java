@@ -73,8 +73,6 @@ class TournamentServiceTest {
     savedTournament.setOrganizer(organizer);
   }
 
-  // ── createTournament ──
-
   @Test
   void createTournamentSuccess() {
     when(memberRepository.findById(organizer.getId())).thenReturn(Optional.of(organizer));
@@ -185,8 +183,6 @@ class TournamentServiceTest {
     verify(tournamentRepository, never()).save(Mockito.any());
   }
 
-  // ── getAllTournaments ──
-
   @Test
   void getAllTournamentsNonAdminOnlySeesPublic() {
     Tournament publicTournament = new Tournament();
@@ -214,7 +210,7 @@ class TournamentServiceTest {
     privateTournament.setOrganizer(organizer);
 
     when(tournamentRepository.findAll()).thenReturn(List.of(publicTournament, privateTournament));
-    when(registrationRepository.countByTournamentId(Mockito.anyLong())).thenReturn(0);
+    when(registrationRepository.findByTournamentId(Mockito.anyLong())).thenReturn(List.of());
 
     List<TournamentResponseDto> result = tournamentService.getAllTournaments(null, null, false);
 
@@ -249,37 +245,12 @@ class TournamentServiceTest {
     privateTournament.setOrganizer(organizer);
 
     when(tournamentRepository.findAll()).thenReturn(List.of(publicTournament, privateTournament));
-    when(registrationRepository.countByTournamentId(Mockito.anyLong())).thenReturn(0);
+    when(registrationRepository.findByTournamentId(Mockito.anyLong())).thenReturn(List.of());
 
     List<TournamentResponseDto> result = tournamentService.getAllTournaments(null, null, true);
 
     assertEquals(2, result.size());
   }
-
-
-  /*
-  // ── getTournamentById ──
-  @Test
-  void getTournamentByIdSuccess() {
-    when(tournamentRepository.findById(1L)).thenReturn(Optional.of(savedTournament));
-    when(registrationRepository.countByTournamentId(1L)).thenReturn(0);
-
-    TournamentResponseDto result = tournamentService.getTournamentById(1L);
-
-    assertEquals("Tournoi Test", result.name());
-    assertEquals(Status.PREPARATION, result.status());
-  }
-
-  @Test
-  void getTournamentByIdNotFound() {
-    when(tournamentRepository.findById(99L)).thenReturn(Optional.empty());
-
-    assertThrows(NoSuchElementException.class,
-        () -> tournamentService.getTournamentById(99L));
-  }
-  */
-
-  // ── publishTournament ──
 
   @Test
   void publishTournamentSuccess() {
@@ -311,7 +282,6 @@ class TournamentServiceTest {
     verify(tournamentRepository, never()).save(Mockito.any());
   }
 
-  // HomePage
   @Test
   void getHomepageTournamentsAllFound() {
     LocalDate now = LocalDate.now();
@@ -344,7 +314,7 @@ class TournamentServiceTest {
         Optional.of(inProgress));
     when(tournamentRepository.findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(
         Status.PREPARATION)).thenReturn(Optional.of(savedTournament));
-    when(registrationRepository.countByTournamentId(Mockito.anyLong())).thenReturn(0);
+    when(registrationRepository.findByTournamentId(Mockito.anyLong())).thenReturn(List.of());
 
     HomepageTournamentsDto result = tournamentService.getHomepageTournaments();
 

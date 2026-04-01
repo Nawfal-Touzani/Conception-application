@@ -51,6 +51,7 @@ const baseTournament = {
   maxParticipants: 8,
   currentParticipants: 3,
   organizerTag: 'Admin',
+  registeredTeamNames: ['TEAM_ALPHA', 'TEAM_BETA', 'TEAM_GAMMA'],
 };
 
 const renderWithContext = (component: React.ReactElement) =>
@@ -81,7 +82,7 @@ describe('TournamentDetail', () => {
     expect(screen.getByText('Vinci Easter Cup 2026')).toBeTruthy();
   });
 
-  test('affiche "Inscriptions ouvertes" pour PREPARATION + isPublic true', () => {
+  test('affiche "Ouvert" pour PREPARATION + isPublic true', () => {
     renderWithContext(
       <TournamentDetail
         tournament={{
@@ -177,7 +178,7 @@ describe('TournamentDetail', () => {
     expect(screen.getByText('8')).toBeTruthy();
   });
 
-  test('affiche "Aucune équipe inscrite" si currentParticipants = 0', () => {
+  test('affiche "Aucune équipe inscrite" si registeredTeamNames est vide', () => {
     renderWithContext(
       <TournamentDetail
         tournament={{
@@ -185,6 +186,7 @@ describe('TournamentDetail', () => {
           status: 'PREPARATION',
           isPublic: true,
           currentParticipants: 0,
+          registeredTeamNames: [],
         }}
       />,
     );
@@ -193,18 +195,19 @@ describe('TournamentDetail', () => {
     ).toBeTruthy();
   });
 
-  test("affiche le nombre d'équipes inscrites si > 0", () => {
+  test('affiche les noms des équipes inscrites si présents', () => {
     renderWithContext(
       <TournamentDetail
         tournament={{
           ...baseTournament,
           status: 'PREPARATION',
           isPublic: true,
-          currentParticipants: 3,
         }}
       />,
     );
-    expect(screen.getByText('3 équipe(s) inscrite(s).')).toBeTruthy();
+    expect(screen.getByText('TEAM_ALPHA')).toBeTruthy();
+    expect(screen.getByText('TEAM_BETA')).toBeTruthy();
+    expect(screen.getByText('TEAM_GAMMA')).toBeTruthy();
   });
 
   test('affiche les sections du bracket', () => {
@@ -222,7 +225,7 @@ describe('TournamentDetail', () => {
     expect(screen.getByText('Finale')).toBeTruthy();
   });
 
-  test('affiche le panneau "Teams participantes"', () => {
+  test('affiche le panneau "Teams participantes" avec le compteur', () => {
     renderWithContext(
       <TournamentDetail
         tournament={{
