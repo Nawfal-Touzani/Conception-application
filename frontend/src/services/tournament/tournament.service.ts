@@ -63,7 +63,7 @@ export const getTournamentById = async (
   return response.json();
 };
 
-<<<<<<< HEAD
+// GET /api/tournaments/homepage
 export const getHomepageTournaments =
   async (): Promise<HomepageTournaments> => {
     // no token needed, public endpoint
@@ -75,8 +75,7 @@ export const getHomepageTournaments =
     }
     return response.json();
   };
-=======
->>>>>>> 532a309 (feat: update and publish tournament)
+
 // PUT — modifier un tournoi (admin seulement)
 export const updateTournament = async (
   id: number,
@@ -115,17 +114,3 @@ export const publishTournament = async (
   }
   return response.json();
 };
-<<<<<<< HEAD
-=======
-export const getHomepageTournaments =
-  async (): Promise<HomepageTournaments> => {
-    // no token needed, public endpoint
-    const response = await fetch(`${API_URL}/homepage`);
-    if (!response.ok) {
-      throw new Error(
-        "Erreur lors du chargement des tournois de la page d'accueil.",
-      );
-    }
-    return response.json();
-  };
->>>>>>> 532a309 (feat: update and publish tournament)
