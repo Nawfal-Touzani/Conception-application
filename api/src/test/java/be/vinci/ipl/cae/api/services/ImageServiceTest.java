@@ -19,6 +19,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+/**
+ * The type Image service test.
+ */
 @ExtendWith(MockitoExtension.class)
 class ImageServiceTest {
 
@@ -31,6 +34,9 @@ class ImageServiceTest {
   private Image image1;
   private Image image2;
 
+  /**
+   * Sets up.
+   */
   @BeforeEach
   void setUp() {
     image1 = new Image();
@@ -42,6 +48,9 @@ class ImageServiceTest {
     image2.setUrl("avatar02.png");
   }
 
+  /**
+   * Gets all images.
+   */
   @Test
   void getAllImages() {
     // Arrange
@@ -59,6 +68,9 @@ class ImageServiceTest {
     verify(imageRepository, times(1)).findAll();
   }
 
+  /**
+   * Gets all images no data equals empty list.
+   */
   @Test
   void getAllImagesNoDataEqualsEmptyList() {
     // Arrange

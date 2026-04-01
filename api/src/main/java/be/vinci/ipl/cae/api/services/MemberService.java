@@ -35,6 +35,13 @@ public class MemberService {
 
   /**
    * Constructor for MemberService.
+   *
+   * @param imageRepository           the image repository
+   * @param memberRepository          the member repository
+   * @param passwordEncoder           the password encoder
+   * @param specialityRepository      the speciality repository
+   * @param teamCompositionRepository the team composition repository
+   * @param unavailabilityRepository  the unavailability repository
    */
   public MemberService(ImageRepository imageRepository, MemberRepository memberRepository,
       BCryptPasswordEncoder passwordEncoder, SpecialityRepository specialityRepository,
@@ -159,6 +166,11 @@ public class MemberService {
     return memberRepository.findByIsAdminTrue();
   }
 
+  /**
+   * Gets all members.
+   *
+   * @return the all members
+   */
   @Transactional
   public List<MemberProfileResponseDto> getAllMembers() {
     return memberRepository.findAll().stream()

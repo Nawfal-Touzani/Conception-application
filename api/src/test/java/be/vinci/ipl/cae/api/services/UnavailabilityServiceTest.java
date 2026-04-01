@@ -38,18 +38,27 @@ public class UnavailabilityServiceTest {
   @Mock
   private MemberRepository memberRepository;
 
+  /**
+   * The Unavailability service.
+   */
   @InjectMocks
   UnavailabilityService unavailabilityService;
 
   private Member member;
   private final String email = "member@vinci.be";
 
+  /**
+   * Sets up.
+   */
   @BeforeEach
   void setUp() {
     member = new Member();
     member.setEmail(email);
   }
 
+  /**
+   * Add unavailability 1.
+   */
   @Test
   @DisplayName("Should add unavailability when dates are valid")
   void addUnavailability1() {
@@ -63,6 +72,9 @@ public class UnavailabilityServiceTest {
     verify(unavailabilityRepository).save(any(Unavailability.class));
   }
 
+  /**
+   * Add unavailability 2.
+   */
   @Test
   @DisplayName("Should throw exception when end date is before start date")
   void addUnavailability2() {
@@ -76,6 +88,9 @@ public class UnavailabilityServiceTest {
     verify(unavailabilityRepository, never()).save(any());
   }
 
+  /**
+   * Add unavailability 3.
+   */
   @Test
   @DisplayName("Should throw exception when start date is in the past")
   void addUnavailability3() {
@@ -89,6 +104,9 @@ public class UnavailabilityServiceTest {
     verify(unavailabilityRepository, never()).save(any());
   }
 
+  /**
+   * Add unavailability 4.
+   */
   @Test
   @DisplayName("Should return list of unavailabilities of member")
   void addUnavailability4() {

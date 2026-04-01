@@ -11,7 +11,11 @@ import {
   Typography,
 } from '@mui/material';
 import { useState } from 'react';
+<<<<<<<< HEAD:frontend/src/components/pages/AdminPages/Ban/BanModal.tsx
 import { MemberDto } from '../../../../types/admin.types';
+========
+import { MemberDto } from '../../../types/admin.types';
+>>>>>>>> develop:frontend/src/components/layout/Ban/BanModal.tsx
 
 interface BanModalProps {
   open: boolean;

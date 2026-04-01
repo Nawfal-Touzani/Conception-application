@@ -37,6 +37,9 @@ public class BanishmentServiceTest {
   private Member admin;
   private Member member;
 
+  /**
+   * Sets up.
+   */
   @BeforeEach
   void setUp() {
     admin = new Member();
@@ -47,6 +50,9 @@ public class BanishmentServiceTest {
     member.setBan(false);
   }
 
+  /**
+   * Ban member 1.
+   */
   @Test
   @DisplayName("Should ban member and save banishment")
   void banMember1() {
@@ -61,6 +67,9 @@ public class BanishmentServiceTest {
     verify(banishmentRepository, times(1)).save(any());
   }
 
+  /**
+   * Ban member 2.
+   */
   @Test
   @DisplayName("Should throw exception when member is already ban")
   void banMember2() {

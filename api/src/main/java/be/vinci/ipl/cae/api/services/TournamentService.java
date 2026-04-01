@@ -1,21 +1,24 @@
 package be.vinci.ipl.cae.api.services;
 
+import be.vinci.ipl.cae.api.models.dtos.HomepageTournamentsDto;
 import be.vinci.ipl.cae.api.models.dtos.TournamentDto;
 import be.vinci.ipl.cae.api.models.dtos.TournamentResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
+import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.models.entities.Tournament;
 import be.vinci.ipl.cae.api.models.entities.Tournament.Status;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.TournamentRegistrationRepository;
 import be.vinci.ipl.cae.api.repositories.TournamentRepository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 
 /**
- * Tournament service.
+ * The type Tournament service.
  */
 @Service
 public class TournamentService {
@@ -23,20 +26,32 @@ public class TournamentService {
   private final TournamentRepository tournamentRepository;
   private final MemberRepository memberRepository;
   private final TournamentRegistrationRepository registrationRepository;
+  private final NotificationService notificationService;
 
   /**
-   * Service constructor.
+   * Instantiates a new Tournament service.
+   *
+   * @param tournamentRepository   the tournament repository
+   * @param registrationRepository the registration repository
+   * @param memberRepository       the member repository
+   * @param notificationService    the notification service
    */
   public TournamentService(TournamentRepository tournamentRepository,
       TournamentRegistrationRepository registrationRepository,
-      MemberRepository memberRepository) {
+      MemberRepository memberRepository,
+      NotificationService notificationService) {
     this.tournamentRepository = tournamentRepository;
     this.registrationRepository = registrationRepository;
     this.memberRepository = memberRepository;
+    this.notificationService = notificationService;
   }
 
   /**
-   * Create a tournament.
+   * Create tournament tournament.
+   *
+   * @param organizerId the organizer id
+   * @param dto         the dto
+   * @return the tournament
    */
   public Tournament createTournament(Long organizerId, TournamentDto dto) {
     final Member organizer = memberRepository.findById(organizerId)
@@ -46,8 +61,7 @@ public class TournamentService {
       throw new IllegalStateException("The name of that tournament is already exist");
     }
 
-    if (dto.startDate().isBefore(LocalDate.now())
-        || dto.endDate().isBefore(LocalDate.now())) {
+    if (dto.startDate().isBefore(LocalDate.now()) || dto.endDate().isBefore(LocalDate.now())) {
       throw new IllegalArgumentException("Dates must be in the future");
     }
 
@@ -66,31 +80,60 @@ public class TournamentService {
   }
 
   /**
-   * Update a tournament (only allowed in PREPARATION status).
+   * Update tournament tournament.
+   *
+   * @param id  the id
+   * @param dto the dto
+   * @return the tournament
    */
   public Tournament updateTournament(Long id, TournamentDto dto) {
     Tournament tournament = getTournamentInPreparation(id);
+
+    if (dto.startDate().isBefore(LocalDate.now()) || dto.endDate().isBefore(LocalDate.now())) {
+      throw new IllegalArgumentException("Dates must be in the future not in past");
+    }
+
+    if (dto.registrationDeadline().isBefore(LocalDate.now())) {
+      throw new IllegalArgumentException("Registration deadline must be in the future");
+    }
+
     validateTournamentDto(dto);
     applyDtoToTournament(tournament, dto);
     return tournamentRepository.save(tournament);
   }
 
   /**
-   * Publish a tournament (make it public).
+   * Publish tournament tournament.
+   *
+   * @param id the id
+   * @return the tournament
    */
   public Tournament publishTournament(Long id) {
     Tournament tournament = getTournamentInPreparation(id);
     tournament.setPublic(true);
-    return tournamentRepository.save(tournament);
+    Tournament saved = tournamentRepository.save(tournament);
+
+    List<Member> allMembers = memberRepository.findAll();
+    for (Member member : allMembers) {
+      Notification notif = new Notification(
+          Notification.Type.TOURNAMENT,
+          "Le tournoi \"" + saved.getName() + "\" est maintenant disponible !",
+          LocalDateTime.now()
+      );
+      notif.setTournament(saved);
+      notificationService.send(member.getId(), notif);
+    }
+
+    return saved;
   }
 
   /**
-   * Get all tournaments.
+   * Gets all tournaments.
    *
-   * @param teamName  optional partial team name filter
-   * @param memberTag optional partial member tag filter
-   * @param isAdmin   whether the requester is admin
-   * @return list of tournament response DTOs
+   * @param teamName  the team name
+   * @param memberTag the member tag
+   * @param isAdmin   the is admin
+   * @return the all tournaments
    */
   public List<TournamentResponseDto> getAllTournaments(String teamName, String memberTag,
       boolean isAdmin) {
@@ -127,10 +170,10 @@ public class TournamentService {
   }
 
   /**
-   * Get a tournament by id.
+   * Gets tournament by id.
    *
-   * @param id the tournament id
-   * @return the tournament response DTO
+   * @param id the id
+   * @return the tournament by id
    */
   public TournamentResponseDto getTournamentById(Long id) {
     Tournament t = tournamentRepository.findById(id)
@@ -139,8 +182,26 @@ public class TournamentService {
   }
 
   /**
-   * Retrieve a tournament in PREPARATION status or throw.
+   * Gets homepage tournaments.
+   *
+   * @return the homepage tournaments
    */
+  public HomepageTournamentsDto getHomepageTournaments() {
+    TournamentResponseDto lastFinished = tournamentRepository
+        .findTopByStatusOrderByEndDateDesc(Status.FINISHED)
+        .map(this::toResponseDto).orElse(null);
+
+    TournamentResponseDto inProgress = tournamentRepository
+        .findFirstByStatus(Status.IN_PROGRESS)
+        .map(this::toResponseDto).orElse(null);
+
+    TournamentResponseDto nextUpcoming = tournamentRepository
+        .findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(Status.PREPARATION)
+        .map(this::toResponseDto).orElse(null);
+
+    return new HomepageTournamentsDto(lastFinished, inProgress, nextUpcoming);
+  }
+
   private Tournament getTournamentInPreparation(Long id) {
     Tournament tournament = tournamentRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
@@ -150,9 +211,6 @@ public class TournamentService {
     return tournament;
   }
 
-  /**
-   * Validate tournament dates and max participants.
-   */
   private void validateTournamentDto(TournamentDto dto) {
     if (dto.startDate().isAfter(dto.endDate())) {
       throw new IllegalArgumentException("Start date must be before end date");
@@ -165,9 +223,6 @@ public class TournamentService {
     }
   }
 
-  /**
-   * Apply DTO fields to a tournament entity.
-   */
   private void applyDtoToTournament(Tournament tournament, TournamentDto dto) {
     tournament.setName(dto.name());
     tournament.setDescription(dto.description());

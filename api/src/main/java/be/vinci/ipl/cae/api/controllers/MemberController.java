@@ -36,6 +36,9 @@ public class MemberController {
 
   /**
    * Constructor for MemberController.
+   *
+   * @param memberService         the member service
+   * @param unavailabilityService the unavailability service
    */
   public MemberController(MemberService memberService,
       UnavailabilityService unavailabilityService) {
@@ -183,6 +186,8 @@ public class MemberController {
 
   /**
    * Get all members (admin only).
+   *
+   * @return the all members
    */
   @GetMapping
   @PreAuthorize("hasRole('ROLE_ADMIN')")
