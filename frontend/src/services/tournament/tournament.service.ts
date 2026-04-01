@@ -63,7 +63,6 @@ export const getTournamentById = async (
   return response.json();
 };
 
-<<<<<<< HEAD
 // PUT — modifier un tournoi (admin seulement)
 export const updateTournament = async (
   id: number,
@@ -102,7 +101,6 @@ export const publishTournament = async (
   }
   return response.json();
 };
-=======
 export const getHomepageTournaments =
   async (): Promise<HomepageTournaments> => {
     // no token needed, public endpoint
@@ -114,4 +112,3 @@ export const getHomepageTournaments =
     }
     return response.json();
   };
->>>>>>> develop

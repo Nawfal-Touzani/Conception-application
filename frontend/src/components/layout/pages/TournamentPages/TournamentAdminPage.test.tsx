@@ -1,14 +1,14 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import TournamentAdminPage from './TournamentAdminPage';
-import { AuthContext } from '../../../contexts/AuthContext';
+import { AuthContext } from '../../../../contexts/AuthContext';
 
 vi.mock('../../../services/tournament/tournament.service', () => ({
   updateTournament: vi.fn(),
   publishTournament: vi.fn(),
 }));
 
-import * as tournamentService from '../../../services/tournament/tournament.service';
+import * as tournamentService from '../../../../services/tournament/tournament.service';
 
 const mockAdmin = {
   id: 1,

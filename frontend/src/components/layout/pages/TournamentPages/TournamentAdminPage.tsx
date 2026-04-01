@@ -8,9 +8,9 @@ import {
   Alert,
   Snackbar,
 } from '@mui/material';
-import { TournamentDetails } from '../../../types/tournament.types';
-import { useAuth } from '../../../contexts/useAuth';
-import * as tournamentService from '../../../services/tournament/tournament.service';
+import { TournamentDetails } from '../../../../types/tournament.types';
+import { useAuth } from '../../../../contexts/useAuth';
+import * as tournamentService from '../../../../services/tournament/tournament.service';
 
 type Props = {
   tournament: TournamentDetails;
