@@ -4,43 +4,37 @@ import be.vinci.ipl.cae.api.models.dtos.HomepageTournamentsDto;
 import be.vinci.ipl.cae.api.models.dtos.TournamentDto;
 import be.vinci.ipl.cae.api.models.dtos.TournamentResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
+import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.models.entities.Tournament;
 import be.vinci.ipl.cae.api.models.entities.Tournament.Status;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.TournamentRegistrationRepository;
 import be.vinci.ipl.cae.api.repositories.TournamentRepository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 
-/**
- * Tournament service.
- */
 @Service
 public class TournamentService {
 
   private final TournamentRepository tournamentRepository;
   private final MemberRepository memberRepository;
   private final TournamentRegistrationRepository registrationRepository;
+  private final NotificationService notificationService;
 
-  /**
-   * Service constructor.
-   */
   public TournamentService(TournamentRepository tournamentRepository,
-      TournamentRegistrationRepository registrationRepository, MemberRepository memberRepository) {
+      TournamentRegistrationRepository registrationRepository,
+      MemberRepository memberRepository,
+      NotificationService notificationService) {
     this.tournamentRepository = tournamentRepository;
     this.registrationRepository = registrationRepository;
     this.memberRepository = memberRepository;
+    this.notificationService = notificationService;
   }
 
-  // @Transactional ?
-  // Rollback en cas d'erreur SQL surtout pour les Create
-
-  /**
-   * Create a tournament.
-   */
   public Tournament createTournament(Long organizerId, TournamentDto dto) {
     final Member organizer = memberRepository.findById(organizerId)
         .orElseThrow(() -> new NoSuchElementException("Organizer not found"));
@@ -67,94 +61,97 @@ public class TournamentService {
     return tournamentRepository.save(tournament);
   }
 
-  /**
-   * Update a tournament (only allowed in PREPARATION status).
-   */
   public Tournament updateTournament(Long id, TournamentDto dto) {
     Tournament tournament = getTournamentInPreparation(id);
+
+    if (dto.startDate().isBefore(LocalDate.now()) || dto.endDate().isBefore(LocalDate.now())) {
+      throw new IllegalArgumentException("Dates must be in the future not in past");
+    }
+
+    if (dto.registrationDeadline().isBefore(LocalDate.now())) {
+      throw new IllegalArgumentException("Registration deadline must be in the future");
+    }
+
     validateTournamentDto(dto);
     applyDtoToTournament(tournament, dto);
     return tournamentRepository.save(tournament);
   }
 
-  /**
-   * Publish a tournament (make it public).
-   */
   public Tournament publishTournament(Long id) {
     Tournament tournament = getTournamentInPreparation(id);
     tournament.setPublic(true);
-    return tournamentRepository.save(tournament);
+    Tournament saved = tournamentRepository.save(tournament);
+
+    List<Member> allMembers = memberRepository.findAll();
+    for (Member member : allMembers) {
+      Notification notif = new Notification(
+          Notification.Type.TOURNAMENT,
+          "Le tournoi \"" + saved.getName() + "\" est maintenant disponible !",
+          LocalDateTime.now()
+      );
+      notif.setTournament(saved);
+      notificationService.send(member.getId(), notif);
+    }
+
+    return saved;
   }
 
-  /**
-   * Get all tournaments.
-   *
-   * @param teamName  optional partial team name filter
-   * @param memberTag optional partial member tag filter
-   * @param isAdmin   whether the requester is admin
-   * @return list of tournament response DTOs
-   */
   public List<TournamentResponseDto> getAllTournaments(String teamName, String memberTag,
       boolean isAdmin) {
     List<Tournament> tournaments;
 
     if (teamName != null && !teamName.isBlank()) {
-      List<Long> ids = registrationRepository.findByTeamNameContainingIgnoreCase(teamName).stream()
-          .map(r -> r.getTournament().getId()).distinct().toList();
+      List<Long> ids = registrationRepository
+          .findByTeamNameContainingIgnoreCase(teamName)
+          .stream()
+          .map(r -> r.getTournament().getId())
+          .distinct()
+          .toList();
       tournaments = tournamentRepository.findByIdIn(ids);
 
     } else if (memberTag != null && !memberTag.isBlank()) {
       String tagLower = memberTag.toLowerCase(Locale.ROOT);
-      tournaments = tournamentRepository.findAll().stream().filter(
-              t -> registrationRepository.findByTournamentId(t.getId()).stream().anyMatch(
-                  r -> r.getTeam().getTeamCompositions().stream().anyMatch(
-                      tc -> tc.getMember().getTag().toLowerCase(Locale.ROOT).contains(tagLower))))
+      tournaments = tournamentRepository.findAll().stream()
+          .filter(t -> registrationRepository.findByTournamentId(t.getId())
+              .stream()
+              .anyMatch(r -> r.getTeam().getTeamCompositions()
+                  .stream()
+                  .anyMatch(tc -> tc.getMember().getTag()
+                      .toLowerCase(Locale.ROOT).contains(tagLower))))
           .toList();
 
     } else {
       tournaments = tournamentRepository.findAll();
     }
 
-    return tournaments.stream().filter(t -> isAdmin || t.isPublic()).map(this::toResponseDto)
+    return tournaments.stream()
+        .filter(t -> isAdmin || t.isPublic())
+        .map(this::toResponseDto)
         .toList();
   }
 
-  /*
-   * Get a tournament by id.
-   *
-   * @param id the tournament id
-   * @return the tournament response DTO
-   */
-    public TournamentResponseDto getTournamentById(Long id) {
-      Tournament t = tournamentRepository.findById(id)
-          .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
-      return toResponseDto(t);
-    }
+  public TournamentResponseDto getTournamentById(Long id) {
+    Tournament t = tournamentRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
+    return toResponseDto(t);
+  }
 
-
-  /**
-   * Get the three tournaments displayed on the homepage.
-   *
-   * @return homepage tournaments DTO
-   */
   public HomepageTournamentsDto getHomepageTournaments() {
-    TournamentResponseDto lastFinished = tournamentRepository.findTopByStatusOrderByEndDateDesc(
-        Status.FINISHED).map(this::toResponseDto).orElse(null);
+    TournamentResponseDto lastFinished = tournamentRepository
+        .findTopByStatusOrderByEndDateDesc(Status.FINISHED)
+        .map(this::toResponseDto).orElse(null);
 
-    TournamentResponseDto inProgress = tournamentRepository.findFirstByStatus(Status.IN_PROGRESS)
+    TournamentResponseDto inProgress = tournamentRepository
+        .findFirstByStatus(Status.IN_PROGRESS)
         .map(this::toResponseDto).orElse(null);
 
     TournamentResponseDto nextUpcoming = tournamentRepository
-            .findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(Status.PREPARATION)
-            .map(this::toResponseDto)
-            .orElse(null);
+        .findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(Status.PREPARATION)
+        .map(this::toResponseDto).orElse(null);
 
     return new HomepageTournamentsDto(lastFinished, inProgress, nextUpcoming);
   }
 
-  /**
-   * Retrieve a tournament in PREPARATION status or throw.
-   */
   private Tournament getTournamentInPreparation(Long id) {
     Tournament tournament = tournamentRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
@@ -164,9 +161,6 @@ public class TournamentService {
     return tournament;
   }
 
-  /**
-   * Validate tournament dates and max participants.
-   */
   private void validateTournamentDto(TournamentDto dto) {
     if (dto.startDate().isAfter(dto.endDate())) {
       throw new IllegalArgumentException("Start date must be before end date");
@@ -179,9 +173,6 @@ public class TournamentService {
     }
   }
 
-  /**
-   * Apply DTO fields to a tournament entity.
-   */
   private void applyDtoToTournament(Tournament tournament, TournamentDto dto) {
     tournament.setName(dto.name());
     tournament.setDescription(dto.description());
@@ -196,10 +187,19 @@ public class TournamentService {
   }
 
   private TournamentResponseDto toResponseDto(Tournament t) {
-    return new TournamentResponseDto(t.getId(), t.getName(), t.getDescription(), t.getStartDate(),
-        t.getEndDate(), t.getRegistrationDeadline(), t.getMaxParticipants(),
-        registrationRepository.countByTournamentId(t.getId()), t.getStatus(),
-        t.getOrganizer().getTag(), t.isPublic(),
-        t.getWinnerTeam() != null ? t.getWinnerTeam().getName() : null);
+    return new TournamentResponseDto(
+        t.getId(),
+        t.getName(),
+        t.getDescription(),
+        t.getStartDate(),
+        t.getEndDate(),
+        t.getRegistrationDeadline(),
+        t.getMaxParticipants(),
+        registrationRepository.countByTournamentId(t.getId()),
+        t.getStatus(),
+        t.getOrganizer().getTag(),
+        t.isPublic(),
+        t.getWinnerTeam() != null ? t.getWinnerTeam().getName() : null
+    );
   }
 }
