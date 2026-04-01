@@ -50,7 +50,7 @@ const getStateLabel = (tournament: TournamentDetails): string => {
     return 'Terminé';
   }
 
-  return 'Annulé';
+  return 'Terminé';
 };
 
 const getInfoValue = (tournament: TournamentDetails): string => {
@@ -66,7 +66,7 @@ const getInfoValue = (tournament: TournamentDetails): string => {
     return tournament.isPublic ? 'Ouvertes' : 'Fermées';
   }
 
-  return 'Annulé';
+  return 'Inconnue';
 };
 
 const getTeamsValue = (tournament: TournamentDetails): string => {
@@ -113,6 +113,9 @@ const TournamentCard = ({ tournament }: TournamentCardProps) => (
         p: 2,
         flexGrow: 1,
         textAlign: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: 260,
       }}
     >
       <Typography variant="h6" fontWeight="bold" fontSize="1.2rem">
@@ -131,17 +134,19 @@ const TournamentCard = ({ tournament }: TournamentCardProps) => (
         {getInfoValue(tournament)}
       </Typography>
 
-      <Typography variant="caption" display="block" fontSize="0.6rem">
-        TEAMS
-      </Typography>
+      <Box sx={{ mt: 'auto' }}>
+        <Typography variant="caption" display="block" fontSize="0.6rem">
+          TEAMS
+        </Typography>
 
-      <Typography variant="body2" mb={2} fontWeight="bold" fontSize="1rem">
-        {getTeamsValue(tournament)}
-      </Typography>
+        <Typography variant="body2" mb={2} fontWeight="bold" fontSize="1rem">
+          {getTeamsValue(tournament)}
+        </Typography>
 
-      <Typography variant="body1" fontWeight="bold" fontSize="1.1rem">
-        {getStateLabel(tournament)}
-      </Typography>
+        <Typography variant="body1" fontWeight="bold" fontSize="1.1rem">
+          {getStateLabel(tournament)}
+        </Typography>
+      </Box>
     </Box>
   </Paper>
 );

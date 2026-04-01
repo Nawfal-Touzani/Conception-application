@@ -110,4 +110,16 @@ describe('TournamentCard', () => {
     const dateText = screen.getByText('16 févr. - 23 févr.');
     expect(dateText).toBeTruthy();
   });
+
+  test('handles CANCELLED tournaments correctly (coverage)', () => {
+    const cancelledTournament: TournamentDetails = {
+      ...mockTournament,
+      status: 'CANCELLED',
+    };
+
+    render(<TournamentCard tournament={cancelledTournament} />);
+
+    expect(screen.getByText('Vinci Bounty 2026')).toBeTruthy();
+    expect(screen.getByText('TEAMS')).toBeTruthy();
+  });
 });
