@@ -470,7 +470,7 @@ public class BcryptConfiguration {
       setupTournament("Elite Championship 2026", null,
           List.of(teamAlpha, teamOmega, teamIota, teamNova, teamVoid, teamStorm,
               teamBlaze, teamFrost, teamEmber, teamSurge, teamCrypt, teamApex,
-              teamWraith, teamTitan),
+              teamWraith, teamTitan, teamVenom),
           tournamentRepository, registrationRepository);
 
     };
