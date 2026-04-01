@@ -4,9 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * DTO representing an authenticated member.
- * Contains the JWT token and the minimum user info needed by the frontend
- * to render the navbar & home page.
+ * DTO representing an authenticated member. Contains the JWT token and the minimum user info needed
+ * by the frontend to render the navbar & home page.
  */
 public record AuthenticatedMember(
         @NotNull Long id,

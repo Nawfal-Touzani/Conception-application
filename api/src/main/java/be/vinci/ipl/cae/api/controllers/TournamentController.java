@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Tournament controller.
+ * The type Tournament controller.
  */
 @RestController
 @RequestMapping("/tournaments")
@@ -36,7 +36,10 @@ public class TournamentController {
   private final TournamentRegistrationService tournamentRegistrationService;
 
   /**
-   * Creates a new TournamentController.
+   * Instantiates a new Tournament controller.
+   *
+   * @param tournamentService             the tournament service
+   * @param tournamentRegistrationService the tournament registration service
    */
   public TournamentController(TournamentService tournamentService,
       TournamentRegistrationService tournamentRegistrationService) {
@@ -45,7 +48,12 @@ public class TournamentController {
   }
 
   /**
-   * Create a tournament.
+   * Create tournament tournament.
+   *
+   * @param organizerId   the organizer id
+   * @param currentMember the current member
+   * @param dto           the dto
+   * @return the tournament
    */
   @PostMapping("/{organizerId}")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -70,7 +78,11 @@ public class TournamentController {
   }
 
   /**
-   * Update a tournament (only if PREPARATION).
+   * Update tournament tournament.
+   *
+   * @param id  the id
+   * @param dto the dto
+   * @return the tournament
    */
   @PutMapping("/{id}")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -90,7 +102,10 @@ public class TournamentController {
   }
 
   /**
-   * Publish a tournament (make it public).
+   * Publish tournament tournament.
+   *
+   * @param id the id
+   * @return the tournament
    */
   @PatchMapping("/{id}/publish")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -107,8 +122,12 @@ public class TournamentController {
   }
 
   /**
-   * GET /tournaments — Get all tournaments. Optional filters: teamName (team registered in the
-   * tournament), memberTag (member tag in a registered team).
+   * Gets all tournaments.
+   *
+   * @param currentMember the current member
+   * @param teamName      the team name
+   * @param memberTag     the member tag
+   * @return the all tournaments
    */
   @GetMapping
   public List<TournamentResponseDto> getAllTournaments(
@@ -120,31 +139,38 @@ public class TournamentController {
   }
 
   /**
-   * Get the three homepage tournaments.
+   * Gets homepage tournaments.
+   *
+   * @return the homepage tournaments
    */
   @GetMapping("/homepage")
   public HomepageTournamentsDto getHomepageTournaments() {
     return tournamentService.getHomepageTournaments();
   }
 
-  /*
-   * GET /tournaments/{id}
-   * Get a single tournament by id.
-   * TODO: add visibility check before re-enabling.
+  /**
+   * Gets tournament by id.
    *
-   * @GetMapping("/{id}")
-   * public TournamentResponseDto getTournamentById(@PathVariable long id) {
-   *   try {
-   *     return tournamentService.getTournamentById(id);
-   *   } catch (NoSuchElementException e) {
-   *     throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-   *         "Tournament get error: " + e.getMessage(), e);
-   *   }
-   * }
+   * @param id the id
+   * @return the tournament by id
    */
+  @GetMapping("/{id}")
+  public TournamentResponseDto getTournamentById(@PathVariable long id) {
+    try {
+      return tournamentService.getTournamentById(id);
+    } catch (NoSuchElementException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Tournament get error: " + e.getMessage(), e);
+    }
+  }
 
   /**
-   * Register a team to a tournament.
+   * Register team tournament registration.
+   *
+   * @param idTournament  the id tournament
+   * @param idTeam        the id team
+   * @param currentMember the current member
+   * @return the tournament registration
    */
   @PostMapping("/{idTournament}/teams/{idTeam}")
   @ResponseStatus(HttpStatus.CREATED)

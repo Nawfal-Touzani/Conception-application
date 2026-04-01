@@ -62,6 +62,9 @@ public class MemberServiceTest {
   @Mock
   private UnavailabilityRepository unavailabilityRepository;
 
+  /**
+   * The Member service.
+   */
   @InjectMocks
   MemberService memberService;
 
@@ -70,6 +73,9 @@ public class MemberServiceTest {
   private Image image;
   private final String email = "test@gmail.com";
 
+  /**
+   * Sets up.
+   */
   @BeforeEach
   void setUp() {
     speciality = new Speciality();
@@ -86,6 +92,9 @@ public class MemberServiceTest {
     member.setProfileCreationDate(LocalDate.now());
   }
 
+  /**
+   * Gets profile 1.
+   */
   @Test
   @DisplayName("Should return profile DTO when member exists")
   void getProfile1() {
@@ -103,6 +112,9 @@ public class MemberServiceTest {
     verify(memberRepository).findByEmail(email);
   }
 
+  /**
+   * Gets profile 2.
+   */
   @Test
   @DisplayName("Should return null when member doesn't exists")
   void getProfile2() {
@@ -113,6 +125,9 @@ public class MemberServiceTest {
     assertNull(result);
   }
 
+  /**
+   * Gets profile 3.
+   */
   @Test
   @DisplayName("Should include team name when member has a team")
   void getProfile3() {
@@ -136,6 +151,9 @@ public class MemberServiceTest {
     assertEquals("Vinci", result.teamName());
   }
 
+  /**
+   * Update profile 1.
+   */
   @Test
   @DisplayName("Should update profile and return new DTO")
   void updateProfile1() {
@@ -162,6 +180,9 @@ public class MemberServiceTest {
     assertEquals("img2.png", result.profileImage());
   }
 
+  /**
+   * Update profile 2.
+   */
   @Test
   @DisplayName("Should not update speciality or image if they don't exist in DB")
   void updateProfile2() {
@@ -183,6 +204,9 @@ public class MemberServiceTest {
     verify(memberRepository).save(member);
   }
 
+  /**
+   * Update profile 3.
+   */
   @Test
   @DisplayName("Should return null when updating a non-existent member")
   void updateProfile3() {
@@ -195,6 +219,9 @@ public class MemberServiceTest {
     verify(memberRepository, never()).save(any());
   }
 
+  /**
+   * Update profile 4.
+   */
   @Test
   @DisplayName("Should skip updates when payload fields are null")
   void updateProfile4() {
@@ -213,6 +240,9 @@ public class MemberServiceTest {
     verify(memberRepository).save(member);
   }
 
+  /**
+   * Change password 1.
+   */
   @Test
   @DisplayName("Should change password when old password matches")
   void changePassword1() {
@@ -229,6 +259,9 @@ public class MemberServiceTest {
     verify(memberRepository).save(member);
   }
 
+  /**
+   * Change password 2.
+   */
   @Test
   @DisplayName("Should return false when old password doesn't matches")
   void changePassword2() {
@@ -243,6 +276,9 @@ public class MemberServiceTest {
     verify(memberRepository, never()).save(member);
   }
 
+  /**
+   * Change password 3.
+   */
   @Test
   @DisplayName("Should return false when member not found")
   void changePassword3() {
@@ -255,6 +291,9 @@ public class MemberServiceTest {
     assertFalse(result);
   }
 
+  /**
+   * Change password 4.
+   */
   @Test
   @DisplayName("Should return false when new password and confirmation do not match")
   void changePassword4() {
@@ -266,6 +305,9 @@ public class MemberServiceTest {
     verify(memberRepository, never()).findByEmail(any());
   }
 
+  /**
+   * Change password 5.
+   */
   @Test
   @DisplayName("Should return false when new password is the same as old password")
   void changePassword5() {
@@ -277,6 +319,9 @@ public class MemberServiceTest {
     verify(memberRepository, never()).findByEmail(any());
   }
 
+  /**
+   * Change password 6.
+   */
   @Test
   @DisplayName("Should return false when new password is null")
   void changePassword6() {
@@ -284,6 +329,9 @@ public class MemberServiceTest {
     assertFalse(memberService.changePassword(email, dto));
   }
 
+  /**
+   * Change password 7.
+   */
   @Test
   @DisplayName("Should return false when ChangePasswordDto is null")
   void changePassword7() {
@@ -291,6 +339,9 @@ public class MemberServiceTest {
     assertFalse(result);
   }
 
+  /**
+   * Change password 8.
+   */
   @Test
   @DisplayName("Should return false when old password is null in DTO")
   void changePassword8() {
@@ -300,6 +351,9 @@ public class MemberServiceTest {
     assertFalse(result);
   }
 
+  /**
+   * Change password 9.
+   */
   @Test
   @DisplayName("Should return false when confirm password is null")
   void changePassword9() {
@@ -311,6 +365,9 @@ public class MemberServiceTest {
     assertFalse(result);
   }
 
+  /**
+   * Promote to admin success.
+   */
   @Test
   @DisplayName("Should promote a member to admin successfully")
   void promoteToAdmin_success() {
@@ -323,6 +380,9 @@ public class MemberServiceTest {
     verify(memberRepository).save(member);
   }
 
+  /**
+   * Promote to admin already admin.
+   */
   @Test
   @DisplayName("Should throw exception if member is already admin")
   void promoteToAdmin_alreadyAdmin() {
@@ -337,6 +397,9 @@ public class MemberServiceTest {
     verify(memberRepository, never()).save(any());
   }
 
+  /**
+   * Promote to admin member not found.
+   */
   @Test
   @DisplayName("Should throw exception if member not found")
   void promoteToAdmin_memberNotFound() {
@@ -350,6 +413,9 @@ public class MemberServiceTest {
     verify(memberRepository, never()).save(any());
   }
 
+  /**
+   * Demote from admin success.
+   */
   @Test
   @DisplayName("Should demote admin successfully when not last admin")
   void demoteFromAdmin_success() {
@@ -363,6 +429,9 @@ public class MemberServiceTest {
     verify(memberRepository).save(member);
   }
 
+  /**
+   * Demote from admin not admin.
+   */
   @Test
   @DisplayName("Should throw exception if member is not admin")
   void demoteFromAdmin_notAdmin() {
@@ -377,6 +446,9 @@ public class MemberServiceTest {
     verify(memberRepository, never()).save(any());
   }
 
+  /**
+   * Demote from admin last admin.
+   */
   @Test
   @DisplayName("Should throw exception if trying to remove last admin")
   void demoteFromAdmin_lastAdmin() {
@@ -392,6 +464,9 @@ public class MemberServiceTest {
     verify(memberRepository, never()).save(any());
   }
 
+  /**
+   * Demote from admin member not found.
+   */
   @Test
   @DisplayName("Should throw exception if member not found when demoting")
   void demoteFromAdmin_memberNotFound() {
@@ -405,6 +480,9 @@ public class MemberServiceTest {
     verify(memberRepository, never()).save(any());
   }
 
+  /**
+   * Gets all admins success.
+   */
   @Test
   @DisplayName("Should return all admins")
   void getAllAdmins_success() {
@@ -423,6 +501,9 @@ public class MemberServiceTest {
     verify(memberRepository).findByIsAdminTrue();
   }
 
+  /**
+   * Gets public profile 1.
+   */
   @Test
   @DisplayName("Should return profile public if member exists")
   void getPublicProfile1() {
@@ -442,6 +523,9 @@ public class MemberServiceTest {
     verify(memberRepository).findById(memberId);
   }
 
+  /**
+   * Gets public profile 2.
+   */
   @Test
   @DisplayName("Doit lancer une NoSuchElementException si le membre n'existe pas")
   void getPublicProfile2() {

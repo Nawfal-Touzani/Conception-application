@@ -63,6 +63,7 @@ export const getTournamentById = async (
   return response.json();
 };
 
+// GET /api/tournaments/homepage
 export const getHomepageTournaments =
   async (): Promise<HomepageTournaments> => {
     // no token needed, public endpoint
@@ -74,3 +75,42 @@ export const getHomepageTournaments =
     }
     return response.json();
   };
+
+// PUT — modifier un tournoi (admin seulement)
+export const updateTournament = async (
+  id: number,
+  tournament: Omit<Tournament, 'id' | 'status'>,
+  token: string,
+): Promise<Tournament> => {
+  const response = await fetch(`${API_URL}/${id}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(tournament),
+  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || 'Erreur lors de la modification du tournoi');
+  }
+  return response.json();
+};
+
+// PATCH — rendre un tournoi public (admin seulement)
+export const publishTournament = async (
+  id: number,
+  token: string,
+): Promise<Tournament> => {
+  const response = await fetch(`${API_URL}/${id}/publish`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || 'Erreur lors de la publication du tournoi');
+  }
+  return response.json();
+};
