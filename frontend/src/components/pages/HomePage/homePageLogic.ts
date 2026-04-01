@@ -11,7 +11,7 @@ export const filterDisplayedTournaments = (
   // And returns an array of the non-null ones, in the order
   const validTournaments: TournamentDetails[] = [];
   for (const tournament of allTournaments) {
-    if (tournament !== null) {
+    if (tournament !== null && tournament.status !== 'CANCELLED') {
       validTournaments.push(tournament);
     }
   }

@@ -105,4 +105,25 @@ describe('useHomePage', () => {
     expect(result.current.error).toBeNull();
     expect(result.current.tournaments[0].name).toBe('Vinci Bounty 2026');
   });
+
+  test('filters out CANCELLED tournaments from the backend response', async () => {
+    vi.mocked(tournamentService.getHomepageTournaments).mockResolvedValue({
+      lastFinished: mockResponse.lastFinished,
+      inProgress: {
+        ...mockResponse.inProgress,
+        status: 'CANCELLED' as const,
+      },
+      nextUpcoming: mockResponse.nextUpcoming,
+    });
+
+    const { result } = renderHook(() => useHomePage());
+
+    await waitFor(() => {
+      expect(result.current.tournaments).toHaveLength(2);
+    });
+
+    expect(result.current.error).toBeNull();
+    expect(result.current.tournaments[0].name).toBe('Winter Cup 2026');
+    expect(result.current.tournaments[1].name).toBe('Vinci Major 2026');
+  });
 });
