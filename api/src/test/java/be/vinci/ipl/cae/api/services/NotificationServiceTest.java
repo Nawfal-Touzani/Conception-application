@@ -28,11 +28,23 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+/**
+ * The type Notification service test.
+ */
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceTest {
 
+  /**
+   * The Notification 1.
+   */
   Notification notification1;
+  /**
+   * The Notification 2.
+   */
   Notification notification2;
+  /**
+   * The Member 1.
+   */
   Member member1;
 
   @Mock
@@ -44,6 +56,9 @@ class NotificationServiceTest {
   @InjectMocks
   private NotificationService notificationService;
 
+  /**
+   * Sets up.
+   */
   @BeforeEach
   void setUp() {
     notification1 = new Notification(Type.RESULT, "resultat du match 1-0", LocalDateTime.now());
@@ -53,6 +68,9 @@ class NotificationServiceTest {
     member1.setId(1L);
   }
 
+  /**
+   * Gets all notification by member.
+   */
   @Test
   void getAllNotificationByMember() {
     notification1.setMember(member1);
@@ -67,6 +85,9 @@ class NotificationServiceTest {
     assertEquals(List.of(notification1, notification2), result);
   }
 
+  /**
+   * Gets all notification by member not found.
+   */
   @Test
   void getAllNotificationByMemberNotFound() {
     long unknownId = 23L;
@@ -79,6 +100,9 @@ class NotificationServiceTest {
     verify(notificationRepository, never()).findByMemberId(unknownId);
   }
 
+  /**
+   * Send.
+   */
   @Test
   void send() {
     when(memberRepository.findById(member1.getId())).thenReturn(Optional.of(member1));
@@ -89,6 +113,9 @@ class NotificationServiceTest {
     assertEquals(notification1, result);
   }
 
+  /**
+   * Send member not found.
+   */
   @Test
   void sendMemberNotFound() {
     long unknownId = 76L;
@@ -101,6 +128,9 @@ class NotificationServiceTest {
     verify(notificationRepository, never()).save(notification2);
   }
 
+  /**
+   * Mark notification read.
+   */
   @Test
   void markNotificationRead() {
     notification1.setId(1L);
@@ -114,6 +144,9 @@ class NotificationServiceTest {
     verify(notificationRepository).save(notification1);
   }
 
+  /**
+   * Mark notification read not found.
+   */
   @Test
   void markNotificationReadNotFound() {
     long unknownId = 9L;
@@ -126,6 +159,9 @@ class NotificationServiceTest {
     verify(notificationRepository, never()).save(any());
   }
 
+  /**
+   * Gets notifications by read status.
+   */
   @Test
   void getNotificationsByReadStatus() {
     Notification notification3 = new Notification(Type.RESULT, "ex", LocalDateTime.now());
@@ -142,6 +178,9 @@ class NotificationServiceTest {
     assertEquals(List.of(notification1, notification3), result);
   }
 
+  /**
+   * Gets notifications by read status member not found.
+   */
   @Test
   void getNotificationsByReadStatusMemberNotFound() {
     long unknownId = 9L;

@@ -19,6 +19,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+/**
+ * The type Speciality service test.
+ */
 @ExtendWith(MockitoExtension.class)
 class SpecialityServiceTest {
 
@@ -31,6 +34,9 @@ class SpecialityServiceTest {
   private Speciality sp1;
   private Speciality sp2;
 
+  /**
+   * Sets up.
+   */
   @BeforeEach
   void setUp() {
     sp1 = new Speciality();
@@ -42,6 +48,9 @@ class SpecialityServiceTest {
     sp2.setName("Gum Gum Bazooka");
   }
 
+  /**
+   * Gets all specialities.
+   */
   @Test
   void getAllSpecialities() {
     // Arrange
@@ -57,6 +66,9 @@ class SpecialityServiceTest {
     verify(specialityRepository, times(1)).findAll();
   }
 
+  /**
+   * Gets all specialities no data equals empty list.
+   */
   @Test
   void getAllSpecialitiesNoDataEqualsEmptyList() {
     // Arrange

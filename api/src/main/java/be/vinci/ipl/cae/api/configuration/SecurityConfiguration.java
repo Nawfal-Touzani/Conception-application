@@ -53,9 +53,9 @@ public class SecurityConfiguration {
   }
 
   /**
-   * CORS configuration source for the security configuration.
-   * Allows all local origins (any port), all standard HTTP methods,
-   * and all headers — including the Authorization header used for JWT authentication.
+   * CORS configuration source for the security configuration. Allows all local origins (any port),
+   * all standard HTTP methods, and all headers — including the Authorization header used for JWT
+   * authentication.
    *
    * @return the CorsConfigurationSource.
    */

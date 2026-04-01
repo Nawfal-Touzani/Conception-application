@@ -25,6 +25,11 @@ public class TournamentRegistrationService {
 
   /**
    * Constructor for TournamentRegistrationService.
+   *
+   * @param tournamentRegistrationRepository the tournament registration repository
+   * @param tournamentRepository             the tournament repository
+   * @param teamRepository                   the team repository
+   * @param teamCompositionRepository        the team composition repository
    */
   public TournamentRegistrationService(
       TournamentRegistrationRepository tournamentRegistrationRepository,
@@ -44,7 +49,6 @@ public class TournamentRegistrationService {
    * @param idResponsable the user responsible for the registration
    * @return the created registration
    */
-
   public TournamentRegistration createRegistration(Long idTournament, Long idTeam,
       Long idResponsable) {
 

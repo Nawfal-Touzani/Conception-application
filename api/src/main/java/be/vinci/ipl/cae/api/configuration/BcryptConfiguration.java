@@ -124,6 +124,16 @@ public class BcryptConfiguration {
 
   /**
    * Bean for initializing default users in the database.
+   *
+   * @param memberRepository          the member repository
+   * @param imageRepository           the image repository
+   * @param specialityRepository      the speciality repository
+   * @param teamRepository            the team repository
+   * @param teamCompositionRepository the team composition repository
+   * @param tournamentRepository      the tournament repository
+   * @param registrationRepository    the registration repository
+   * @param passwordEncoder           the password encoder
+   * @return the command line runner
    */
   @Bean
   public CommandLineRunner initUsers(MemberRepository memberRepository,
