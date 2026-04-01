@@ -119,17 +119,19 @@ public class TournamentService {
         .toList();
   }
 
-  /**
+  /*
    * Get a tournament by id.
    *
    * @param id the tournament id
    * @return the tournament response DTO
-   */
-  public TournamentResponseDto getTournamentById(Long id) {
-    Tournament t = tournamentRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
-    return toResponseDto(t);
-  }
+   * TODO: add visibility check before re-enabling.
+   *
+    public TournamentResponseDto getTournamentById(Long id) {
+      Tournament t = tournamentRepository.findById(id)
+          .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
+      return toResponseDto(t);
+    }
+  */
 
   /**
    * Get the three tournaments displayed on the homepage.
@@ -143,8 +145,10 @@ public class TournamentService {
     TournamentResponseDto inProgress = tournamentRepository.findFirstByStatus(Status.IN_PROGRESS)
         .map(this::toResponseDto).orElse(null);
 
-    TournamentResponseDto nextUpcoming = tournamentRepository.findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(
-        Status.PREPARATION).map(this::toResponseDto).orElse(null);
+    TournamentResponseDto nextUpcoming = tournamentRepository
+            .findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(Status.PREPARATION)
+            .map(this::toResponseDto)
+            .orElse(null);
 
     return new HomepageTournamentsDto(lastFinished, inProgress, nextUpcoming);
   }
