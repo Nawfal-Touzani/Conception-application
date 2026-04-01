@@ -5,7 +5,7 @@ interface TournamentCardProps {
   tournament: TournamentDetails;
 }
 
-// Maps the backend status enum to a human-readable French label
+// Enum to a readable label
 const statusLabel: Record<string, string> = {
   PREPARATION: 'Prochain',
   IN_PROGRESS: 'À la une',
@@ -13,12 +13,20 @@ const statusLabel: Record<string, string> = {
   CANCELLED: 'Annulé',
 };
 
-// Formats a LocalDateTime string from Spring into a readable date (ex: "5 janv.")
+// Date format
 const formatDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString('fr-BE', {
     day: 'numeric',
     month: 'short',
   });
+
+// Checks if registration is open
+const isRegistrationOpen = (tournament: TournamentDetails): boolean => {
+  if (!tournament.isPublic) return false;
+  const deadlinePassed = new Date(tournament.registrationDeadline) < new Date();
+  const isFull = tournament.currentParticipants >= tournament.maxParticipants;
+  return !deadlinePassed && !isFull;
+};
 
 // Differents display possible for a tournament card
 const getInfoLabel = (tournament: TournamentDetails): string => {
@@ -39,7 +47,7 @@ const getInfoLabel = (tournament: TournamentDetails): string => {
 
 const getStateLabel = (tournament: TournamentDetails): string => {
   if (tournament.status === 'PREPARATION') {
-    return tournament.isPublic ? 'Ouvert' : 'Fermé';
+    return 'À venir';
   }
 
   if (tournament.status === 'IN_PROGRESS') {
@@ -63,7 +71,7 @@ const getInfoValue = (tournament: TournamentDetails): string => {
   }
 
   if (tournament.status === 'PREPARATION') {
-    return tournament.isPublic ? 'Ouvertes' : 'Fermées';
+    return isRegistrationOpen(tournament) ? 'Ouvertes' : 'Fermées';
   }
 
   return 'Inconnue';
