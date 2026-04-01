@@ -324,4 +324,33 @@ describe('TournamentsPage', () => {
 
     expect(await screen.findByText('Quarts')).toBeTruthy();
   });
+  test('clique sur Administrer navigue vers TournamentAdminPage', async () => {
+    (
+      tournamentService.getTournaments as ReturnType<typeof vi.fn>
+    ).mockResolvedValue([tournamentOpen]);
+    renderAsAdmin();
+    await screen.findByText('Vinci Easter Cup 2026');
+
+    fireEvent.click(screen.getByText('Administrer'));
+
+    expect(await screen.findByText('Gestion du tournoi')).toBeTruthy();
+  });
+
+  test('la flèche retour depuis TournamentAdminPage revient à la liste', async () => {
+    (
+      tournamentService.getTournaments as ReturnType<typeof vi.fn>
+    ).mockResolvedValue([tournamentOpen]);
+    renderAsAdmin();
+    await screen.findByText('Vinci Easter Cup 2026');
+
+    fireEvent.click(screen.getByText('Administrer'));
+    await screen.findByText('Gestion du tournoi');
+
+    const backButtons = screen
+      .getAllByRole('button')
+      .filter((btn) => btn.querySelector('svg'));
+    fireEvent.click(backButtons[0]);
+
+    expect(await screen.findByText('Vinci Easter Cup 2026')).toBeTruthy();
+  });
 });

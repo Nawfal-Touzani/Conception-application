@@ -22,6 +22,7 @@ import {
   TournamentStatus,
 } from '../../../../types/tournament.types';
 import TournamentDetail from './TournamentDetailPage';
+import TournamentAdminPage from './TournamentAdminPage';
 
 const COLUMNS = 3;
 const CARD_WIDTH = 320;
@@ -58,6 +59,8 @@ const TournamentsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedTournament, setSelectedTournament] =
     useState<TournamentDetails | null>(null);
+  const [adminTournament, setAdminTournament] =
+    useState<TournamentDetails | null>(null);
 
   const [teamSearch, setTeamSearch] = useState('');
   const [tagSearch, setTagSearch] = useState('');
@@ -71,7 +74,6 @@ const TournamentsPage = () => {
     'public' | 'private' | ''
   >('');
 
-  // Charge les tournois — fonctionne avec ou sans token (visiteur non connecté)
   const loadTournaments = useCallback(
     (teamName?: string, memberTag?: string) => {
       setError(null);
@@ -83,12 +85,10 @@ const TournamentsPage = () => {
     [token],
   );
 
-  // Chargement initial — pas de condition sur token
   useEffect(() => {
     loadTournaments();
   }, [loadTournaments]);
 
-  // Debounce 400ms sur team et tag
   useEffect(() => {
     const timer = setTimeout(() => {
       loadTournaments(
@@ -147,6 +147,33 @@ const TournamentsPage = () => {
     rows.push(filtered.slice(i, i + COLUMNS));
   }
 
+  // ── Vue admin ──
+  if (adminTournament) {
+    return (
+      <Box sx={{ flexGrow: 1, backgroundColor: '#1a2744', minHeight: '100vh' }}>
+        <Box sx={{ pt: 1, pl: 1 }}>
+          <IconButton
+            onClick={() => setAdminTournament(null)}
+            sx={{ color: '#fff' }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+        </Box>
+        <TournamentAdminPage
+          tournament={adminTournament}
+          onBack={() => setAdminTournament(null)}
+          onUpdated={(updated) => {
+            setAdminTournament(updated);
+            setTournaments((prev) =>
+              prev.map((t) => (t.id === updated.id ? updated : t)),
+            );
+          }}
+        />
+      </Box>
+    );
+  }
+
+  // ── Vue détail ──
   if (selectedTournament) {
     return (
       <Box sx={{ flexGrow: 1, backgroundColor: '#1a2744', minHeight: '100vh' }}>
@@ -176,7 +203,7 @@ const TournamentsPage = () => {
         alignItems: 'flex-start',
       }}
     >
-      {/* ── Panneau filtres gauche — sticky ── */}
+      {/* ── Panneau filtres gauche ── */}
       <Paper
         elevation={0}
         sx={{
@@ -621,7 +648,7 @@ const TournamentsPage = () => {
                 ))}
               </Box>
 
-              {/* Bouton Administrer — grisé uniquement si FINISHED ou CANCELLED */}
+              {/* Bouton Administrer */}
               {isAdmin && (
                 <Box
                   sx={{
@@ -639,6 +666,7 @@ const TournamentsPage = () => {
                         tournament.status === 'FINISHED' ||
                         tournament.status === 'CANCELLED'
                       }
+                      onClick={() => setAdminTournament(tournament)}
                       sx={{
                         width: CARD_WIDTH,
                         flexShrink: 0,

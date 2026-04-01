@@ -18,10 +18,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
- * Service handling authentication operations including member registration,
- * login, and JWT token management.
- * JWT tokens are signed using HMAC256 with a secret injected via environment
- * variable and have a lifetime of 24 hours.
+ * Service handling authentication operations including member registration, login, and JWT token
+ * management. JWT tokens are signed using HMAC256 with a secret injected via environment variable
+ * and have a lifetime of 24 hours.
  */
 @Service
 public class AuthService {
@@ -39,10 +38,10 @@ public class AuthService {
   /**
    * Constructor of the required dependencies.
    *
-   * @param passwordEncoder        encoder used to hash and verify passwords
-   * @param memberRepository       repository for member persistence and lookup
-   * @param imageRepository        repository used to validate the profile image on registration
-   * @param specialityRepository   repository used to validate the speciality on registration
+   * @param passwordEncoder      encoder used to hash and verify passwords
+   * @param memberRepository     repository for member persistence and lookup
+   * @param imageRepository      repository used to validate the profile image on registration
+   * @param specialityRepository repository used to validate the speciality on registration
    */
   public AuthService(BCryptPasswordEncoder passwordEncoder, MemberRepository memberRepository,
       ImageRepository imageRepository, SpecialityRepository specialityRepository) {
@@ -54,6 +53,8 @@ public class AuthService {
 
   /**
    * Register a new member. No automatic authentification. No token, we only save the member.
+   *
+   * @param registerCredentials the register credentials
    */
   public void register(RegisterCredentials registerCredentials) {
     // Verifications
@@ -82,6 +83,9 @@ public class AuthService {
 
   /**
    * Login a member.
+   *
+   * @param loginCredentials the login credentials
+   * @return the authenticated member
    */
   public AuthenticatedMember login(LoginCredentials loginCredentials) {
     Member member = memberRepository.findByEmail(loginCredentials.email()).orElse(null);
@@ -101,6 +105,9 @@ public class AuthService {
 
   /**
    * Create a JWT token and populate the AuthenticatedMember DTO.
+   *
+   * @param member the member
+   * @return the authenticated member
    */
   public AuthenticatedMember createJwtToken(Member member) {
     Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
@@ -122,6 +129,9 @@ public class AuthService {
 
   /**
    * Verify a JWT token and return the email.
+   *
+   * @param token the token
+   * @return the string
    */
   public String verifyJwtToken(String token) {
     try {
@@ -134,6 +144,9 @@ public class AuthService {
 
   /**
    * Read a member from its email.
+   *
+   * @param email the email
+   * @return the member
    */
   public Member readOneFromEmail(String email) {
     return memberRepository.findByEmail(email).orElse(null);
