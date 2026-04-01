@@ -3,20 +3,21 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import BlockIcon from '@mui/icons-material/Block';
 import { MemberDto } from '../../../../types/admin.types';
 import { Link } from 'react-router-dom';
+import InfoIcon from '@mui/icons-material/Info';
 
 interface MemberRowProps {
   member: MemberDto;
-  isCurrentUser?: boolean;
   onDelete?: (member: MemberDto) => void;
   showStatus?: boolean;
   onBan?: (member: MemberDto) => void;
+  onShowBanInfo?: (member: MemberDto) => void;
 }
 
 export const MemberRow = ({
   member,
-  isCurrentUser,
   onDelete,
   onBan,
+  onShowBanInfo,
 }: MemberRowProps) => (
   <Box
     sx={{
@@ -73,51 +74,27 @@ export const MemberRow = ({
     </Typography>
 
     <Box sx={{ display: 'flex', gap: 1 }}>
-      {onBan && (
-        <Tooltip
-          title={
-            isCurrentUser
-              ? 'Vous ne pouvez pas vous bannir'
-              : 'Bannir le membre'
-          }
-        >
-          <span>
-            {' '}
-            <IconButton
-              onClick={() => onBan(member)}
-              disabled={isCurrentUser}
-              sx={{
-                color: '#ae210f',
-                '&.Mui-disabled': { color: 'rgba(103, 94, 93, 0.3)' },
-              }}
-            >
-              <BlockIcon />
-            </IconButton>
-          </span>
+      {member.isBan && onShowBanInfo && (
+        <Tooltip title="Détails du bannissement">
+          <IconButton
+            onClick={() => onShowBanInfo(member)}
+            sx={{ color: '#1a2744' }}
+          >
+            <InfoIcon />
+          </IconButton>
         </Tooltip>
       )}
 
+      {onBan && (
+        <IconButton onClick={() => onBan(member)} sx={{ color: '#ae210f' }}>
+          <BlockIcon />
+        </IconButton>
+      )}
+
       {onDelete && (
-        <Tooltip
-          title={
-            isCurrentUser
-              ? 'Vous ne pouvez pas vous révoquer'
-              : 'Révoquer Admin'
-          }
-        >
-          <span>
-            <IconButton
-              onClick={() => onDelete(member)}
-              disabled={isCurrentUser}
-              sx={{
-                color: '#f31212',
-                '&.Mui-disabled': { color: 'rgba(104, 96, 96, 0.43)' },
-              }}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </span>
-        </Tooltip>
+        <IconButton onClick={() => onDelete(member)} sx={{ color: '#f31212' }}>
+          <DeleteIcon />
+        </IconButton>
       )}
     </Box>
   </Box>

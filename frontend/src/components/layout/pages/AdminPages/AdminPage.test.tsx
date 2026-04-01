@@ -28,6 +28,7 @@ const adminMember = {
   isAvailable: true,
   isAdmin: true,
   admin: true,
+  isBan: false,
 };
 
 const regularMember = {
@@ -40,6 +41,7 @@ const regularMember = {
   isAvailable: false,
   isAdmin: false,
   admin: false,
+  isBan: false,
 };
 
 const otherAdmin = {
@@ -52,6 +54,7 @@ const otherAdmin = {
   isAvailable: true,
   isAdmin: true,
   admin: true,
+  isBan: false,
 };
 
 const mockContextValue = {
@@ -102,14 +105,17 @@ describe('AdminPage', () => {
 
   test('affiche la liste des admins', async () => {
     (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => [adminMember] })
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [adminMember, regularMember],
+        json: async () => [adminMember, otherAdmin],
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [adminMember, otherAdmin, regularMember],
       });
 
     renderAdminPage();
-    expect(await screen.findByText('AdminTag')).toBeTruthy();
+    expect(await screen.findByText('OtherAdmin')).toBeTruthy();
   });
 
   test('ouvre le dialog ajouter admin en cliquant sur +', async () => {
@@ -121,7 +127,7 @@ describe('AdminPage', () => {
       });
 
     renderAdminPage();
-    await screen.findByText('AdminTag');
+    await screen.findByText('Gestion des administrateurs');
     fireEvent.click(screen.getByText('+'));
 
     expect(await screen.findByText('Ajouter un administrateur')).toBeTruthy();
@@ -130,7 +136,7 @@ describe('AdminPage', () => {
 
   test('promeut un membre en admin avec succès', async () => {
     (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => [adminMember] })
+      .mockResolvedValueOnce({ ok: true, json: async () => [] })
       .mockResolvedValueOnce({
         ok: true,
         json: async () => [adminMember, regularMember],
@@ -138,28 +144,25 @@ describe('AdminPage', () => {
       .mockResolvedValueOnce({ ok: true })
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => [adminMember, { ...regularMember, isAdmin: true }],
+        json: async () => [regularMember],
       })
       .mockResolvedValueOnce({ ok: true, json: async () => [] });
 
     renderAdminPage();
-    await screen.findByText('AdminTag');
-    fireEvent.click(screen.getByText('+'));
+    fireEvent.click(await screen.findByText('+'));
     await screen.findByText('MemberTag');
 
     const addButton = getAddButtonInDialog();
     if (addButton) fireEvent.click(addButton);
 
-    await waitFor(() => {
-      expect(
-        screen.queryByText('MemberTag est maintenant administrateur.'),
-      ).toBeTruthy();
-    });
+    expect(
+      await screen.findByText('MemberTag est maintenant administrateur.'),
+    ).toBeTruthy();
   });
 
   test('affiche une erreur si la promotion échoue', async () => {
     (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => [adminMember] })
+      .mockResolvedValueOnce({ ok: true, json: async () => [] })
       .mockResolvedValueOnce({
         ok: true,
         json: async () => [adminMember, regularMember],
@@ -167,17 +170,14 @@ describe('AdminPage', () => {
       .mockResolvedValueOnce({ ok: false });
 
     renderAdminPage();
-    await screen.findByText('AdminTag');
-    fireEvent.click(screen.getByText('+'));
+    fireEvent.click(await screen.findByText('+'));
 
     const addButton = getAddButtonInDialog();
     if (addButton) fireEvent.click(addButton);
 
-    await waitFor(() => {
-      expect(
-        screen.queryByText('Impossible de nommer cet administrateur.'),
-      ).toBeTruthy();
-    });
+    expect(
+      await screen.findByText('Impossible de nommer cet administrateur.'),
+    ).toBeTruthy();
   });
 
   test('ouvre le dialog de confirmation de révocation', async () => {
@@ -205,8 +205,11 @@ describe('AdminPage', () => {
       })
       .mockResolvedValueOnce({ ok: true, json: async () => [regularMember] })
       .mockResolvedValueOnce({ ok: true })
-      .mockResolvedValueOnce({ ok: true, json: async () => [adminMember] })
-      .mockResolvedValueOnce({ ok: true, json: async () => [regularMember] });
+      .mockResolvedValueOnce({ ok: true, json: async () => [] })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [regularMember, otherAdmin],
+      });
 
     renderAdminPage();
     await screen.findByText('OtherAdmin');
@@ -217,11 +220,9 @@ describe('AdminPage', () => {
     await screen.findByText('Révoquer un administrateur');
     fireEvent.click(screen.getByText('Confirmer'));
 
-    await waitFor(() => {
-      expect(
-        screen.queryByText("OtherAdmin n'est plus administrateur."),
-      ).toBeTruthy();
-    });
+    expect(
+      await screen.findByText("OtherAdmin n'est plus administrateur."),
+    ).toBeTruthy();
   });
 
   test('affiche erreur si la révocation échoue', async () => {
@@ -242,11 +243,9 @@ describe('AdminPage', () => {
     await screen.findByText('Révoquer un administrateur');
     fireEvent.click(screen.getByText('Confirmer'));
 
-    await waitFor(() => {
-      expect(
-        screen.queryByText('Impossible de révoquer cet administrateur.'),
-      ).toBeTruthy();
-    });
+    expect(
+      await screen.findByText('Impossible de révoquer cet administrateur.'),
+    ).toBeTruthy();
   });
 
   test('annule la révocation', async () => {
@@ -281,7 +280,7 @@ describe('AdminPage', () => {
 
     (global.fetch as ReturnType<typeof vi.fn>)
       .mockResolvedValueOnce({ ok: true, json: async () => manyAdmins })
-      .mockResolvedValueOnce({ ok: true, json: async () => manyAdmins });
+      .mockResolvedValueOnce({ ok: true, json: async () => [] });
 
     renderAdminPage();
 
