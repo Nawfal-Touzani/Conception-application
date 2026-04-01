@@ -231,7 +231,14 @@ const TournamentsPage = () => {
         </Typography>
 
         <Box>
-          <Typography sx={{ fontWeight: 700, color: '#1a2744', fontSize: '0.85rem', mb: 0.5 }}>
+          <Typography
+            sx={{
+              fontWeight: 700,
+              color: '#1a2744',
+              fontSize: '0.85rem',
+              mb: 0.5,
+            }}
+          >
             Nom
           </Typography>
           <TextField
@@ -252,7 +259,14 @@ const TournamentsPage = () => {
         </Box>
 
         <Box>
-          <Typography sx={{ fontWeight: 700, color: '#1a2744', fontSize: '0.85rem', mb: 0.5 }}>
+          <Typography
+            sx={{
+              fontWeight: 700,
+              color: '#1a2744',
+              fontSize: '0.85rem',
+              mb: 0.5,
+            }}
+          >
             Team
           </Typography>
           <TextField
@@ -273,7 +287,14 @@ const TournamentsPage = () => {
         </Box>
 
         <Box>
-          <Typography sx={{ fontWeight: 700, color: '#1a2744', fontSize: '0.85rem', mb: 0.5 }}>
+          <Typography
+            sx={{
+              fontWeight: 700,
+              color: '#1a2744',
+              fontSize: '0.85rem',
+              mb: 0.5,
+            }}
+          >
             Tag
           </Typography>
           <TextField
@@ -294,11 +315,24 @@ const TournamentsPage = () => {
         </Box>
 
         <Box>
-          <Typography sx={{ fontWeight: 700, color: '#1a2744', fontSize: '0.85rem', mb: 0.5 }}>
+          <Typography
+            sx={{
+              fontWeight: 700,
+              color: '#1a2744',
+              fontSize: '0.85rem',
+              mb: 0.5,
+            }}
+          >
             Période
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-            <Typography sx={{ fontSize: '0.75rem', color: '#555', minWidth: 20 }}>Du</Typography>
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}
+          >
+            <Typography
+              sx={{ fontSize: '0.75rem', color: '#555', minWidth: 20 }}
+            >
+              Du
+            </Typography>
             <TextField
               type="date"
               value={startDate}
@@ -309,7 +343,11 @@ const TournamentsPage = () => {
             />
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Typography sx={{ fontSize: '0.75rem', color: '#555', minWidth: 20 }}>Au</Typography>
+            <Typography
+              sx={{ fontSize: '0.75rem', color: '#555', minWidth: 20 }}
+            >
+              Au
+            </Typography>
             <TextField
               type="date"
               value={endDate}
@@ -324,7 +362,14 @@ const TournamentsPage = () => {
         <Divider />
 
         <Box>
-          <Typography sx={{ fontWeight: 700, color: '#1a2744', fontSize: '0.85rem', mb: 0.5 }}>
+          <Typography
+            sx={{
+              fontWeight: 700,
+              color: '#1a2744',
+              fontSize: '0.85rem',
+              mb: 0.5,
+            }}
+          >
             Statut
           </Typography>
           <RadioGroup
@@ -344,7 +389,11 @@ const TournamentsPage = () => {
                 control={
                   <Radio
                     size="small"
-                    sx={{ color: '#1a2744', '&.Mui-checked': { color: '#1a2744' }, p: 0.3 }}
+                    sx={{
+                      color: '#1a2744',
+                      '&.Mui-checked': { color: '#1a2744' },
+                      p: 0.3,
+                    }}
                   />
                 }
                 label={
@@ -360,7 +409,11 @@ const TournamentsPage = () => {
                 control={
                   <Radio
                     size="small"
-                    sx={{ color: '#1a2744', '&.Mui-checked': { color: '#1a2744' }, p: 0.3 }}
+                    sx={{
+                      color: '#1a2744',
+                      '&.Mui-checked': { color: '#1a2744' },
+                      p: 0.3,
+                    }}
                   />
                 }
                 label={
@@ -377,13 +430,22 @@ const TournamentsPage = () => {
           <>
             <Divider />
             <Box>
-              <Typography sx={{ fontWeight: 700, color: '#1a2744', fontSize: '0.85rem', mb: 0.5 }}>
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  color: '#1a2744',
+                  fontSize: '0.85rem',
+                  mb: 0.5,
+                }}
+              >
                 Visibilité
               </Typography>
               <RadioGroup
                 value={visibilityFilter}
                 onChange={(e) =>
-                  setVisibilityFilter(e.target.value as 'public' | 'private' | '')
+                  setVisibilityFilter(
+                    e.target.value as 'public' | 'private' | '',
+                  )
                 }
               >
                 {[
@@ -396,7 +458,11 @@ const TournamentsPage = () => {
                     control={
                       <Radio
                         size="small"
-                        sx={{ color: '#1a2744', '&.Mui-checked': { color: '#1a2744' }, p: 0.3 }}
+                        sx={{
+                          color: '#1a2744',
+                          '&.Mui-checked': { color: '#1a2744' },
+                          p: 0.3,
+                        }}
                       />
                     }
                     label={
@@ -444,7 +510,9 @@ const TournamentsPage = () => {
           </Typography>
         )}
         {filtered.length === 0 && (
-          <Typography sx={{ color: 'rgba(255,255,255,0.5)', textAlign: 'center', mt: 4 }}>
+          <Typography
+            sx={{ color: 'rgba(255,255,255,0.5)', textAlign: 'center', mt: 4 }}
+          >
             Aucun tournoi trouvé.
           </Typography>
         )}
@@ -501,12 +569,22 @@ const TournamentsPage = () => {
                         alignItems: 'center',
                       }}
                     >
-                      <Typography variant="caption" display="block" mb={1} fontSize="0.85rem">
+                      <Typography
+                        variant="caption"
+                        display="block"
+                        mb={1}
+                        fontSize="0.85rem"
+                      >
                         {formatDate(tournament.startDate)} -{' '}
                         {formatDate(tournament.endDate)}
                       </Typography>
 
-                      <Typography variant="body1" fontWeight="bold" mb={1} fontSize="1.1rem">
+                      <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        mb={1}
+                        fontSize="1.1rem"
+                      >
                         {getStateLabel(tournament)}
                       </Typography>
 
@@ -517,7 +595,8 @@ const TournamentsPage = () => {
                         fontSize="0.8rem"
                         sx={{ color: 'rgba(255,255,255,0.7)' }}
                       >
-                        Clôture le {formatDateFull(tournament.registrationDeadline)}
+                        Clôture le{' '}
+                        {formatDateFull(tournament.registrationDeadline)}
                       </Typography>
 
                       {tournament.description && (
@@ -541,8 +620,14 @@ const TournamentsPage = () => {
                       <Typography variant="caption" display="block">
                         TEAMS
                       </Typography>
-                      <Typography variant="body2" fontWeight="bold" fontSize="1rem" mb={1}>
-                        {tournament.currentParticipants}/{tournament.maxParticipants}
+                      <Typography
+                        variant="body2"
+                        fontWeight="bold"
+                        fontSize="1rem"
+                        mb={1}
+                      >
+                        {tournament.currentParticipants}/
+                        {tournament.maxParticipants}
                       </Typography>
 
                       <Box sx={{ mt: 'auto', pt: 1 }}>
@@ -550,7 +635,9 @@ const TournamentsPage = () => {
                           onClick={() => setSelectedTournament(tournament)}
                           sx={{
                             color: '#fff',
-                            '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' },
+                            '&:hover': {
+                              backgroundColor: 'rgba(255,255,255,0.1)',
+                            },
                           }}
                         >
                           <InfoOutlinedIcon fontSize="medium" />

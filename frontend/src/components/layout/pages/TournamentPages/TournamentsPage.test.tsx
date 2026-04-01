@@ -346,9 +346,9 @@ describe('TournamentsPage', () => {
     fireEvent.click(screen.getByText('Administrer'));
     await screen.findByText('Gestion du tournoi');
 
-    const backButtons = screen.getAllByRole('button').filter((btn) =>
-      btn.querySelector('svg'),
-    );
+    const backButtons = screen
+      .getAllByRole('button')
+      .filter((btn) => btn.querySelector('svg'));
     fireEvent.click(backButtons[0]);
 
     expect(await screen.findByText('Vinci Easter Cup 2026')).toBeTruthy();
