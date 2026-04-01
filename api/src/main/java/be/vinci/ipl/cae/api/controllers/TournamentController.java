@@ -25,6 +25,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * The type Tournament controller.
+ */
 @RestController
 @RequestMapping("/tournaments")
 public class TournamentController {
@@ -32,12 +35,26 @@ public class TournamentController {
   private final TournamentService tournamentService;
   private final TournamentRegistrationService tournamentRegistrationService;
 
+  /**
+   * Instantiates a new Tournament controller.
+   *
+   * @param tournamentService             the tournament service
+   * @param tournamentRegistrationService the tournament registration service
+   */
   public TournamentController(TournamentService tournamentService,
       TournamentRegistrationService tournamentRegistrationService) {
     this.tournamentService = tournamentService;
     this.tournamentRegistrationService = tournamentRegistrationService;
   }
 
+  /**
+   * Create tournament tournament.
+   *
+   * @param organizerId   the organizer id
+   * @param currentMember the current member
+   * @param dto           the dto
+   * @return the tournament
+   */
   @PostMapping("/{organizerId}")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @ResponseStatus(HttpStatus.CREATED)
@@ -60,6 +77,13 @@ public class TournamentController {
     }
   }
 
+  /**
+   * Update tournament tournament.
+   *
+   * @param id  the id
+   * @param dto the dto
+   * @return the tournament
+   */
   @PutMapping("/{id}")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   public Tournament updateTournament(@PathVariable long id, @RequestBody TournamentDto dto) {
@@ -77,6 +101,12 @@ public class TournamentController {
     }
   }
 
+  /**
+   * Publish tournament tournament.
+   *
+   * @param id the id
+   * @return the tournament
+   */
   @PatchMapping("/{id}/publish")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   public Tournament publishTournament(@PathVariable long id) {
@@ -91,6 +121,14 @@ public class TournamentController {
     }
   }
 
+  /**
+   * Gets all tournaments.
+   *
+   * @param currentMember the current member
+   * @param teamName      the team name
+   * @param memberTag     the member tag
+   * @return the all tournaments
+   */
   @GetMapping
   public List<TournamentResponseDto> getAllTournaments(
       @AuthenticationPrincipal Member currentMember,
@@ -100,11 +138,22 @@ public class TournamentController {
     return tournamentService.getAllTournaments(teamName, memberTag, isAdmin);
   }
 
+  /**
+   * Gets homepage tournaments.
+   *
+   * @return the homepage tournaments
+   */
   @GetMapping("/homepage")
   public HomepageTournamentsDto getHomepageTournaments() {
     return tournamentService.getHomepageTournaments();
   }
 
+  /**
+   * Gets tournament by id.
+   *
+   * @param id the id
+   * @return the tournament by id
+   */
   @GetMapping("/{id}")
   public TournamentResponseDto getTournamentById(@PathVariable long id) {
     try {
@@ -115,6 +164,14 @@ public class TournamentController {
     }
   }
 
+  /**
+   * Register team tournament registration.
+   *
+   * @param idTournament  the id tournament
+   * @param idTeam        the id team
+   * @param currentMember the current member
+   * @return the tournament registration
+   */
   @PostMapping("/{idTournament}/teams/{idTeam}")
   @ResponseStatus(HttpStatus.CREATED)
   @PreAuthorize("isAuthenticated()")

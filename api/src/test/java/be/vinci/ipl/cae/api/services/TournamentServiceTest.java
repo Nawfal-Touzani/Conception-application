@@ -30,11 +30,23 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+/**
+ * The type Tournament service test.
+ */
 @ExtendWith(MockitoExtension.class)
 class TournamentServiceTest {
 
+  /**
+   * The Organizer.
+   */
   Member organizer;
+  /**
+   * The Valid dto.
+   */
   TournamentDto validDto;
+  /**
+   * The Saved tournament.
+   */
   Tournament savedTournament;
 
   @Mock
@@ -52,6 +64,9 @@ class TournamentServiceTest {
   @InjectMocks
   private TournamentService tournamentService;
 
+  /**
+   * Sets up.
+   */
   @BeforeEach
   void setUp() {
     organizer = new Member();
@@ -79,6 +94,9 @@ class TournamentServiceTest {
 
   // ── createTournament ──
 
+  /**
+   * Create tournament success.
+   */
   @Test
   void createTournamentSuccess() {
     when(memberRepository.findById(organizer.getId())).thenReturn(Optional.of(organizer));
@@ -93,6 +111,9 @@ class TournamentServiceTest {
     assertEquals(organizer, result.getOrganizer());
   }
 
+  /**
+   * Create tournament organizer not found.
+   */
   @Test
   void createTournamentOrganizerNotFound() {
     long unknownId = 99L;
@@ -104,6 +125,9 @@ class TournamentServiceTest {
     verify(tournamentRepository, never()).save(Mockito.any());
   }
 
+  /**
+   * Create tournament start date after end date.
+   */
   @Test
   void createTournamentStartDateAfterEndDate() {
     when(memberRepository.findById(organizer.getId())).thenReturn(Optional.of(organizer));
@@ -118,6 +142,9 @@ class TournamentServiceTest {
     verify(tournamentRepository, never()).save(Mockito.any());
   }
 
+  /**
+   * Create tournament start date in past.
+   */
   @Test
   void createTournamentStartDateInPast() {
     when(memberRepository.findById(organizer.getId())).thenReturn(Optional.of(organizer));
@@ -132,6 +159,9 @@ class TournamentServiceTest {
     verify(tournamentRepository, never()).save(Mockito.any());
   }
 
+  /**
+   * Create tournament registration deadline after start date.
+   */
   @Test
   void createTournamentRegistrationDeadlineAfterStartDate() {
     when(memberRepository.findById(organizer.getId())).thenReturn(Optional.of(organizer));
@@ -146,6 +176,9 @@ class TournamentServiceTest {
     verify(tournamentRepository, never()).save(Mockito.any());
   }
 
+  /**
+   * Create tournament registration deadline in past.
+   */
   @Test
   void createTournamentRegistrationDeadlineInPast() {
     when(memberRepository.findById(organizer.getId())).thenReturn(Optional.of(organizer));
@@ -160,6 +193,9 @@ class TournamentServiceTest {
     verify(tournamentRepository, never()).save(Mockito.any());
   }
 
+  /**
+   * Create tournament max participants power of two.
+   */
   @Test
   void createTournamentMaxParticipantsPowerOfTwo() {
     when(memberRepository.findById(organizer.getId())).thenReturn(Optional.of(organizer));
@@ -175,6 +211,9 @@ class TournamentServiceTest {
     assertEquals(16, result.getMaxParticipants());
   }
 
+  /**
+   * Create tournament max participants not power of two.
+   */
   @Test
   void createTournamentMaxParticipantsNotPowerOfTwo() {
     when(memberRepository.findById(organizer.getId())).thenReturn(Optional.of(organizer));
@@ -189,6 +228,9 @@ class TournamentServiceTest {
     verify(tournamentRepository, never()).save(Mockito.any());
   }
 
+  /**
+   * Create tournament name already exists.
+   */
   @Test
   void createTournamentNameAlreadyExists() {
     when(memberRepository.findById(organizer.getId())).thenReturn(Optional.of(organizer));
@@ -202,6 +244,9 @@ class TournamentServiceTest {
 
   // ── updateTournament ──
 
+  /**
+   * Update tournament success.
+   */
   @Test
   void updateTournamentSuccess() {
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(savedTournament));
@@ -221,6 +266,9 @@ class TournamentServiceTest {
     assertEquals(16, result.getMaxParticipants());
   }
 
+  /**
+   * Update tournament not found.
+   */
   @Test
   void updateTournamentNotFound() {
     when(tournamentRepository.findById(99L)).thenReturn(Optional.empty());
@@ -231,6 +279,9 @@ class TournamentServiceTest {
     verify(tournamentRepository, never()).save(Mockito.any());
   }
 
+  /**
+   * Update tournament not in preparation.
+   */
   @Test
   void updateTournamentNotInPreparation() {
     savedTournament.setStatus(Status.IN_PROGRESS);
@@ -242,6 +293,9 @@ class TournamentServiceTest {
     verify(tournamentRepository, never()).save(Mockito.any());
   }
 
+  /**
+   * Update tournament start date after end date.
+   */
   @Test
   void updateTournamentStartDateAfterEndDate() {
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(savedTournament));
@@ -258,6 +312,9 @@ class TournamentServiceTest {
     verify(tournamentRepository, never()).save(Mockito.any());
   }
 
+  /**
+   * Update tournament start date in past.
+   */
   @Test
   void updateTournamentStartDateInPast() {
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(savedTournament));
@@ -274,6 +331,9 @@ class TournamentServiceTest {
     verify(tournamentRepository, never()).save(Mockito.any());
   }
 
+  /**
+   * Update tournament registration deadline after start date.
+   */
   @Test
   void updateTournamentRegistrationDeadlineAfterStartDate() {
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(savedTournament));
@@ -290,6 +350,9 @@ class TournamentServiceTest {
     verify(tournamentRepository, never()).save(Mockito.any());
   }
 
+  /**
+   * Update tournament registration deadline in past.
+   */
   @Test
   void updateTournamentRegistrationDeadlineInPast() {
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(savedTournament));
@@ -306,6 +369,9 @@ class TournamentServiceTest {
     verify(tournamentRepository, never()).save(Mockito.any());
   }
 
+  /**
+   * Update tournament max participants not power of two.
+   */
   @Test
   void updateTournamentMaxParticipantsNotPowerOfTwo() {
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(savedTournament));
@@ -324,6 +390,9 @@ class TournamentServiceTest {
 
   // ── getAllTournaments ──
 
+  /**
+   * Gets all tournaments non admin only sees public.
+   */
   @Test
   void getAllTournamentsNonAdminOnlySeesPublic() {
     Tournament publicTournament = new Tournament();
@@ -359,6 +428,9 @@ class TournamentServiceTest {
     assertEquals("Public", result.getFirst().name());
   }
 
+  /**
+   * Gets all tournaments admin sees all.
+   */
   @Test
   void getAllTournamentsAdminSeesAll() {
     Tournament publicTournament = new Tournament();
@@ -395,6 +467,9 @@ class TournamentServiceTest {
 
   // ── publishTournament ──
 
+  /**
+   * Publish tournament success.
+   */
   @Test
   void publishTournamentSuccess() {
     Member member1 = new Member();
@@ -414,6 +489,9 @@ class TournamentServiceTest {
         Mockito.any(Notification.class));
   }
 
+  /**
+   * Publish tournament not in preparation.
+   */
   @Test
   void publishTournamentNotInPreparation() {
     savedTournament.setStatus(Status.IN_PROGRESS);
@@ -427,6 +505,9 @@ class TournamentServiceTest {
 
   // ── getHomepageTournaments ──
 
+  /**
+   * Gets homepage tournaments all found.
+   */
   @Test
   void getHomepageTournamentsAllFound() {
     LocalDate now = LocalDate.now();
@@ -468,6 +549,9 @@ class TournamentServiceTest {
     assertEquals("Tournoi Test", result.nextUpcoming().name());
   }
 
+  /**
+   * Gets homepage tournaments all null.
+   */
   @Test
   void getHomepageTournamentsAllNull() {
     when(tournamentRepository.findTopByStatusOrderByEndDateDesc(Status.FINISHED))

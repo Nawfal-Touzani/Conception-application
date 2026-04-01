@@ -17,6 +17,9 @@ import java.util.Locale;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 
+/**
+ * The type Tournament service.
+ */
 @Service
 public class TournamentService {
 
@@ -25,6 +28,14 @@ public class TournamentService {
   private final TournamentRegistrationRepository registrationRepository;
   private final NotificationService notificationService;
 
+  /**
+   * Instantiates a new Tournament service.
+   *
+   * @param tournamentRepository   the tournament repository
+   * @param registrationRepository the registration repository
+   * @param memberRepository       the member repository
+   * @param notificationService    the notification service
+   */
   public TournamentService(TournamentRepository tournamentRepository,
       TournamentRegistrationRepository registrationRepository,
       MemberRepository memberRepository,
@@ -35,6 +46,13 @@ public class TournamentService {
     this.notificationService = notificationService;
   }
 
+  /**
+   * Create tournament tournament.
+   *
+   * @param organizerId the organizer id
+   * @param dto         the dto
+   * @return the tournament
+   */
   public Tournament createTournament(Long organizerId, TournamentDto dto) {
     final Member organizer = memberRepository.findById(organizerId)
         .orElseThrow(() -> new NoSuchElementException("Organizer not found"));
@@ -61,6 +79,13 @@ public class TournamentService {
     return tournamentRepository.save(tournament);
   }
 
+  /**
+   * Update tournament tournament.
+   *
+   * @param id  the id
+   * @param dto the dto
+   * @return the tournament
+   */
   public Tournament updateTournament(Long id, TournamentDto dto) {
     Tournament tournament = getTournamentInPreparation(id);
 
@@ -77,6 +102,12 @@ public class TournamentService {
     return tournamentRepository.save(tournament);
   }
 
+  /**
+   * Publish tournament tournament.
+   *
+   * @param id the id
+   * @return the tournament
+   */
   public Tournament publishTournament(Long id) {
     Tournament tournament = getTournamentInPreparation(id);
     tournament.setPublic(true);
@@ -96,6 +127,14 @@ public class TournamentService {
     return saved;
   }
 
+  /**
+   * Gets all tournaments.
+   *
+   * @param teamName  the team name
+   * @param memberTag the member tag
+   * @param isAdmin   the is admin
+   * @return the all tournaments
+   */
   public List<TournamentResponseDto> getAllTournaments(String teamName, String memberTag,
       boolean isAdmin) {
     List<Tournament> tournaments;
@@ -130,12 +169,23 @@ public class TournamentService {
         .toList();
   }
 
+  /**
+   * Gets tournament by id.
+   *
+   * @param id the id
+   * @return the tournament by id
+   */
   public TournamentResponseDto getTournamentById(Long id) {
     Tournament t = tournamentRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
     return toResponseDto(t);
   }
 
+  /**
+   * Gets homepage tournaments.
+   *
+   * @return the homepage tournaments
+   */
   public HomepageTournamentsDto getHomepageTournaments() {
     TournamentResponseDto lastFinished = tournamentRepository
         .findTopByStatusOrderByEndDateDesc(Status.FINISHED)

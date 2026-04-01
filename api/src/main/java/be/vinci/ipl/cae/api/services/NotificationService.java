@@ -18,6 +18,9 @@ public class NotificationService {
 
   /**
    * Creates a new NotificationService.
+   *
+   * @param notificationRepository the notification repository
+   * @param memberRepository       the member repository
    */
   public NotificationService(NotificationRepository notificationRepository,
       MemberRepository memberRepository) {
@@ -27,6 +30,9 @@ public class NotificationService {
 
   /**
    * Gets all notifications by a member id.
+   *
+   * @param id the id
+   * @return the all notification by member
    */
   public Iterable<Notification> getAllNotificationByMember(long id) {
 
@@ -37,6 +43,10 @@ public class NotificationService {
 
   /**
    * Send a notification to a member.
+   *
+   * @param id           the id
+   * @param notification the notification
+   * @return the notification
    */
   public Notification send(long id, Notification notification) {
     Member member = getMemberOrThrow(id);
@@ -47,6 +57,9 @@ public class NotificationService {
 
   /**
    * Mark the notification to read.
+   *
+   * @param id the id
+   * @return the notification
    */
   public Notification markNotificationRead(long id) {
     Notification notification = notificationRepository.findById(id)
@@ -58,6 +71,10 @@ public class NotificationService {
 
   /**
    * Get the notification of a member by read status.
+   *
+   * @param id   the id
+   * @param read the read
+   * @return the notifications by read status
    */
   public Iterable<Notification> getNotificationsByReadStatus(long id, boolean read) {
     getMemberOrThrow(id);
