@@ -1,4 +1,8 @@
-import { Tournament, TournamentDetails } from '../../types/tournament.types';
+import {
+  Tournament,
+  TournamentDetails,
+  HomepageTournaments,
+} from '../../types/tournament.types';
 
 const API_URL = '/api/tournaments';
 
@@ -58,3 +62,15 @@ export const getTournamentById = async (
   if (!response.ok) throw new Error('Tournoi introuvable.');
   return response.json();
 };
+
+export const getHomepageTournaments =
+  async (): Promise<HomepageTournaments> => {
+    // no token needed, public endpoint
+    const response = await fetch(`${API_URL}/homepage`);
+    if (!response.ok) {
+      throw new Error(
+        "Erreur lors du chargement des tournois de la page d'accueil.",
+      );
+    }
+    return response.json();
+  };
