@@ -1,5 +1,5 @@
 @baseUrl = http://localhost:3000
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibHVmZnlAdmluY2kuYmUiLCJpYXQiOjE3NzQ0NjYyNjMsImV4cCI6MTc3NDU1MjY2M30.AziiEJ1uP-Cphx0z6itSuUIq-ZmkcCq5IhoOluzHHSM
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoiYWRtaW5AdmluY2kuYmUiLCJpYXQiOjE3NzQ4MDUzMTQsImV4cCI6MTc3NDg5MTcxNH0.gOJBJiJud7OoHR65WDDpgF8HKAwZrRFnmEM3SJ_9fGY
 
 
 ### Get my profile
@@ -103,3 +103,16 @@ Content-Type: application/json
   "newPassword": "LeoVinci123!",
   "confirmPassword": "LeoVinci123!"
 }
+
+### Get a member public profile (OK - Existing ID)
+GET {{baseUrl}}/members/1
+Authorization: Bearer {{token}}
+
+### Get a member public profile (KO - 404 Not found)
+GET {{baseUrl}}/members/9999999
+
+### Get a member public profile (OK - (without Token))
+GET {{baseUrl}}/members/2
+
+
+

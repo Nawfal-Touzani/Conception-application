@@ -20,6 +20,7 @@ import JoinOrCreateTeam from './JoinOrCreateTeam';
 import { useAuth } from '../../../../contexts/useAuth';
 import * as teamService from '../../../../services/team.service';
 import { TeamDto, TeamMember } from '../../../../types/team.types';
+import { useNavigate } from 'react-router-dom';
 
 function formatDate(dateStr?: string | null) {
   if (!dateStr) return '—';
@@ -33,13 +34,13 @@ function formatDate(dateStr?: string | null) {
 // Composant réutilisable pour afficher une ligne label + valeur dans un bloc bleu
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5, gap: 2 }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', mb: 4, gap: 2 }}>
       <Typography
         sx={{
-          minWidth: 160,
-          fontWeight: 600,
+          minWidth: 270,
+          fontWeight: 800,
           color: '#1a2744',
-          fontSize: '0.95rem',
+          fontSize: '1.4rem',
         }}
       >
         {label}
@@ -50,13 +51,11 @@ function InfoRow({ label, value }: { label: string; value: string }) {
           backgroundColor: '#1a2744',
           borderRadius: '6px',
           px: 2,
-          py: 0.8,
+          py: 1.3,
           textAlign: 'center',
         }}
       >
-        <Typography
-          sx={{ color: '#fff', fontSize: '0.95rem', fontWeight: 500 }}
-        >
+        <Typography sx={{ color: '#fff', fontSize: '1.1rem', fontWeight: 600 }}>
           {value}
         </Typography>
       </Box>
@@ -66,6 +65,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 const TeamPage = () => {
   const { user } = useAuth(); // on recup le user connecté depuis le contexte globale
+  const navigate = useNavigate();
   const token = user?.token ?? ''; // extrait le token en string pour eviter les boucles useEffects
 
   const [team, setTeam] = useState<TeamDto | null>(null);
@@ -185,9 +185,9 @@ const TeamPage = () => {
       <Box
         sx={{
           display: 'flex',
-          gap: 4,
+          gap: 6,
           width: '100%',
-          maxWidth: 860,
+          maxWidth: 1000,
           alignItems: 'flex-start',
         }}
       >
@@ -195,9 +195,9 @@ const TeamPage = () => {
         <Paper
           elevation={0}
           sx={{
-            flex: '0 0 420px',
+            flex: '0 0 480px',
             borderRadius: '12px',
-            p: 3.5,
+            p: 5,
             backgroundColor: '#fff',
           }}
         >
@@ -228,8 +228,8 @@ const TeamPage = () => {
               onClick={() => setConfirmOpen(true)}
               sx={{
                 backgroundColor: '#c0392b',
-                borderRadius: '30px',
-                px: 4,
+                borderRadius: '10px',
+                px: 6,
                 py: 1.2,
                 fontSize: '1rem',
                 fontWeight: 700,
@@ -289,29 +289,32 @@ const TeamPage = () => {
               return (
                 <ListItem
                   key={member.gameTag}
+                  onClick={() => navigate(`/members/${member.memberId}`)}
                   sx={{
                     backgroundColor: '#fff',
                     borderRadius: '8px',
-                    px: 2,
-                    py: 0.8,
+                    px: 3,
+                    py: 1.5,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 1,
+                    gap: 2,
+                    textDecoration: 'none',
+                    cursor: 'pointer',
                   }}
                 >
-                  <ListItemAvatar sx={{ minWidth: 48 }}>
+                  <ListItemAvatar sx={{ minWidth: 60 }}>
                     <Avatar
                       src={`http://localhost:3000${member.avatarUrl}`}
                       alt={member.gameTag}
-                      sx={{ width: 36, height: 36 }}
+                      sx={{ width: 50, height: 50 }}
                     />
                   </ListItemAvatar>
 
                   {/* Indicateur disponibilité */}
                   <Box
                     sx={{
-                      width: 10,
-                      height: 10,
+                      width: 12,
+                      height: 12,
                       borderRadius: '50%',
                       backgroundColor: member.isAvailable
                         ? '#27ae60'
@@ -323,9 +326,14 @@ const TeamPage = () => {
                   <ListItemText
                     primary={member.gameTag}
                     primaryTypographyProps={{
-                      fontSize: '0.95rem',
+                      fontSize: '1.2rem',
                       fontWeight: 500,
                       color: '#1a2744',
+                      sx: {
+                        '.MuiListItem-root:hover &': {
+                          textDecoration: 'underline',
+                        },
+                      },
                     }}
                   />
 
@@ -334,7 +342,10 @@ const TeamPage = () => {
                     <Button
                       size="small"
                       variant="outlined"
-                      onClick={() => handleNominate(member.memberId)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // pour pas rediriger quand on clique sur nommer
+                        handleNominate(member.memberId);
+                      }}
                       sx={{
                         ml: 'auto',
                         flexShrink: 0,
@@ -342,7 +353,7 @@ const TeamPage = () => {
                         color: '#1a2744',
                         textTransform: 'none',
                         fontWeight: 600,
-                        fontSize: '0.8rem',
+                        fontSize: '0.9rem',
                         borderRadius: '6px',
                         '&:hover': {
                           backgroundColor: '#1a2744',
