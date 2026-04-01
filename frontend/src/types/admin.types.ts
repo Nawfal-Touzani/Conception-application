@@ -9,4 +9,6 @@ export interface MemberDto {
   isAdmin: boolean;
   admin: boolean;
   isBan: boolean;
+  banReason?: string;
+  banDate?: string;
 }

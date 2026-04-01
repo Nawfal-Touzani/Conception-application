@@ -11,7 +11,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useState } from 'react';
-import { MemberDto } from '../../types/admin.types';
+import { MemberDto } from '../../../../types/admin.types';
 
 interface BanModalProps {
   open: boolean;

@@ -4,7 +4,9 @@ import be.vinci.ipl.cae.api.models.dtos.ChangePasswordDto;
 import be.vinci.ipl.cae.api.models.dtos.MemberProfileResponseDto;
 import be.vinci.ipl.cae.api.models.dtos.PublicMemberDto;
 import be.vinci.ipl.cae.api.models.dtos.UpdateMemberProfileDto;
+import be.vinci.ipl.cae.api.models.entities.Banishment;
 import be.vinci.ipl.cae.api.models.entities.Member;
+import be.vinci.ipl.cae.api.repositories.BanishmentRepository;
 import be.vinci.ipl.cae.api.repositories.ImageRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
@@ -29,6 +31,7 @@ public class MemberService {
   private BCryptPasswordEncoder passwordEncoder;
   private final TeamCompositionRepository teamCompositionRepository;
   private final UnavailabilityRepository unavailabilityRepository;
+  private final BanishmentRepository banishmentRepository;
 
   /**
    * Constructor for MemberService.
@@ -36,13 +39,15 @@ public class MemberService {
   public MemberService(ImageRepository imageRepository, MemberRepository memberRepository,
       BCryptPasswordEncoder passwordEncoder, SpecialityRepository specialityRepository,
       TeamCompositionRepository teamCompositionRepository,
-      UnavailabilityRepository unavailabilityRepository) {
+      UnavailabilityRepository unavailabilityRepository,
+      BanishmentRepository banishmentRepository) {
     this.imageRepository = imageRepository;
     this.memberRepository = memberRepository;
     this.passwordEncoder = passwordEncoder;
     this.specialityRepository = specialityRepository;
     this.teamCompositionRepository = teamCompositionRepository;
     this.unavailabilityRepository = unavailabilityRepository;
+    this.banishmentRepository = banishmentRepository;
   }
 
   /**
@@ -176,6 +181,8 @@ public class MemberService {
   }
 
   private MemberProfileResponseDto mapToProfileDto(Member member) {
+    Banishment ban = banishmentRepository.findByBannedMemberId(member.getId()).orElse(null);
+
     return new MemberProfileResponseDto(
         member.getId(),
         member.getEmail(),
@@ -186,7 +193,9 @@ public class MemberService {
         member.getProfileCreationDate(),
         member.getIsAdmin(),
         isMemberAvailable(member),
-        member.isBan()
+        member.isBan(),
+        ban != null ? ban.getReason() : null,
+        ban != null ? ban.getBanishmentDate() : null
     );
   }
 

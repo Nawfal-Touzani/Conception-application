@@ -3,6 +3,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import BlockIcon from '@mui/icons-material/Block';
 import { MemberDto } from '../../../types/admin.types';
 import { Link } from 'react-router-dom';
+import InfoIcon from '@mui/icons-material/Info';
 
 interface MemberRowProps {
   member: MemberDto;
@@ -10,6 +11,7 @@ interface MemberRowProps {
   onDelete?: (member: MemberDto) => void;
   showStatus?: boolean;
   onBan?: (member: MemberDto) => void;
+  onShowBanInfo?: (member: MemberDto) => void;
 }
 
 export const MemberRow = ({
@@ -17,6 +19,7 @@ export const MemberRow = ({
   isCurrentUser,
   onDelete,
   onBan,
+  onShowBanInfo,
 }: MemberRowProps) => (
   <Box
     sx={{
@@ -73,6 +76,17 @@ export const MemberRow = ({
     </Typography>
 
     <Box sx={{ display: 'flex', gap: 1 }}>
+      {member.isBan && onShowBanInfo && (
+        <Tooltip title="Détails du bannissement">
+          <IconButton
+            onClick={() => onShowBanInfo(member)}
+            sx={{ color: '#1a2744' }}
+          >
+            <InfoIcon />
+          </IconButton>
+        </Tooltip>
+      )}
+
       {onBan && (
         <Tooltip
           title={

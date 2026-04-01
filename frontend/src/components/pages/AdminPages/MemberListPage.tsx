@@ -5,7 +5,8 @@ import * as adminService from '../../../services/admin.service';
 import { MemberDto } from '../../../types/admin.types';
 import { useAuth } from '../../../contexts/useAuth';
 import { MemberRow } from './MemberRow';
-import { BanModal } from '../../Ban/BanModal';
+import { BanModal } from './Ban/BanModal';
+import { BanInfoModal } from './Ban/BanInfoModal';
 
 const MembersListPage = () => {
   const [members, setMembers] = useState<MemberDto[]>([]);
@@ -13,6 +14,7 @@ const MembersListPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [banTarget, setBanTarget] = useState<MemberDto | null>(null);
+  const [infoTarget, setInfoTarget] = useState<MemberDto | null>(null);
 
   useEffect(() => {
     adminService
@@ -142,7 +144,11 @@ const MembersListPage = () => {
               ) : (
                 <Box sx={{ opacity: 0.5 }}>
                   {bannedMembers.map((m) => (
-                    <MemberRow key={m.id} member={m} isCurrentUser={false} />
+                    <MemberRow
+                      key={m.id}
+                      member={m}
+                      onShowBanInfo={(member) => setInfoTarget(member)}
+                    />
                   ))}
                 </Box>
               )}
@@ -157,6 +163,12 @@ const MembersListPage = () => {
           onConfirm={handleConfirmBan}
         />
       </Box>
+
+      <BanInfoModal
+        open={!!infoTarget}
+        onClose={() => setInfoTarget(null)}
+        member={infoTarget}
+      />
     </Box>
   );
 };
