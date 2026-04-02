@@ -1,10 +1,11 @@
 import { Box, Button, Divider, Paper, Typography } from '@mui/material';
 import { TournamentDetails } from '../../../../types/tournament.types';
 import { useTournamentDetail } from '../../../../hooks/useTournamentDetail/useTournamentDetail';
-import BracketSVG, {
+import BracketSVG from '../../../ui/BracketSVG/BracketSVG';
+import {
   BRACKET_TEAM_W,
   BRACKET_COL_GAP,
-} from '../../../ui/BracketSVG/BracketSVG';
+} from '../../../ui/BracketSVG/BracketSVG.constants';
 import { formatDate, formatStatus } from '../../../../utils/tournament.utils';
 
 type Props = {
