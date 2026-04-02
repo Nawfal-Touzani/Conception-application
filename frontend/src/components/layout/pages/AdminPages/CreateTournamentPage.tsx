@@ -66,7 +66,11 @@ const CreateTournamentPage = () => {
       setRegistrationDeadline('');
       setMaxParticipants('');
     } catch (err) {
-      setErrors([err instanceof Error ? err.message : 'Erreur inconnue']);
+      if (err instanceof Error && err.message.includes('409')) {
+        setErrors(['Un tournoi avec ce nom existe déjà.']);
+      } else {
+        setErrors([err instanceof Error ? err.message : 'Erreur inconnue']);
+      }
     }
   };
 
