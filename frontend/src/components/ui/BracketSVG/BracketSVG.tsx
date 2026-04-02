@@ -25,9 +25,6 @@ const col1X = col0X + TEAM_W + COL_GAP;
 const col2X = col1X + TEAM_W + COL_GAP;
 const svgW = col2X + TEAM_W;
 
-export const BRACKET_TEAM_W = TEAM_W;
-export const BRACKET_COL_GAP = COL_GAP;
-
 function MatchBox({
   x,
   y,
