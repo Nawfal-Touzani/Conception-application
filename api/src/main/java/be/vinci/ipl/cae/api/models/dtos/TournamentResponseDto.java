@@ -10,7 +10,6 @@ import java.util.List;
 /**
  * DTO returned to the frontend for a tournament.
  */
-@JsonInclude(JsonInclude.Include.ALWAYS)
 public record TournamentResponseDto(
     Long id,
     String name,
