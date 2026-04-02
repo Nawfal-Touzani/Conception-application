@@ -3,8 +3,8 @@ import { Box, Typography, Button, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { MemberDto } from '../../../../types/admin.types';
 import { useAuth } from '../../../../contexts/useAuth';
-import { BanModal } from '../../../pages/AdminPages/Ban/BanModal';
-import { BanInfoModal } from '../../../pages/AdminPages/Ban/BanInfoModal';
+import { BanModal } from './Ban/BanModal';
+import { BanInfoModal } from './Ban/BanInfoModal';
 import { useMembersManagement } from '../../../../hooks/useMemberManagement/useMembersManagement';
 import { MemberListSection } from './MemberListSection';
 

@@ -8,7 +8,7 @@ import {
   Typography,
   Box,
 } from '@mui/material';
-import { MemberDto } from '../../../../types/admin.types';
+import { MemberDto } from '../../../../../types/admin.types';
 
 interface BanInfoModalProps {
   open: boolean;
