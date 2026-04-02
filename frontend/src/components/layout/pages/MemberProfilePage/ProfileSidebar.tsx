@@ -126,11 +126,11 @@ export const ProfileSidebar = ({ profile }: { profile: MemberProfile }) => {
           <Typography
             sx={{
               fontSize: 'inherit',
-              color: profile.available ? '#4caf50' : '#f44336',
-              fontWeight: profile.available ? 'normal' : 'bold',
+              color: profile.isAvailable ? '#4caf50' : '#f44336',
+              fontWeight: profile.isAvailable ? 'normal' : 'bold',
             }}
           >
-            {profile.available ? 'Disponible' : 'Indisponible'}
+            {profile.isAvailable ? 'Disponible' : 'Indisponible'}
           </Typography>
         </Box>
       </Box>
