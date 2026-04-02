@@ -531,7 +531,7 @@ public class MemberServiceTest {
    * Gets public profile 2.
    */
   @Test
-  @DisplayName("Doit lancer une NoSuchElementException si le membre n'existe pas")
+  @DisplayName("Should throw a NoSuchElementException if member doesn't exists")
   void getPublicProfile2() {
     Long memberId = 109383L;
     when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
@@ -539,6 +539,50 @@ public class MemberServiceTest {
     assertThrows(NoSuchElementException.class, () -> {
       memberService.getPublicProfile(memberId);
     });
+  }
 
+  @Test
+  @DisplayName("Should return a list of profile Dtos for all members")
+  void getAllMembers1() {
+    Member member2 = new Member();
+    member2.setEmail("vinci2@gmail.com");
+    member2.setTag("PlayerTwo");
+    member2.setSpeciality(speciality);
+    member2.setImage(image);
+    member2.setProfileCreationDate(LocalDate.now());
+
+    List<Member> allMembers = List.of(member, member2);
+
+    when(memberRepository.findAll()).thenReturn(allMembers);
+
+    when(memberRepository.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
+    when(memberRepository.findByEmail(member2.getEmail())).thenReturn(Optional.of(member2));
+    when(teamCompositionRepository.findByMemberId(any())).thenReturn(Optional.empty());
+    when(unavailabilityRepository.existsByMemberAndStartDateBeforeAndEndDateAfter(any(), any(),
+        any()))
+        .thenReturn(false);
+
+    List<MemberProfileResponseDto> result = memberService.getAllMembers();
+
+    assertNotNull(result);
+    assertEquals(2, result.size());
+    assertEquals("PlayerOne", result.get(0).tag());
+    assertEquals("PlayerTwo", result.get(1).tag());
+    verify(memberRepository).findAll();
+    verify(memberRepository).findByEmail(member.getEmail());
+    verify(memberRepository).findByEmail(member2.getEmail());
+  }
+
+  @Test
+  @DisplayName("Should return an empty list when no members exist")
+  void getAllMembers2() {
+    when(memberRepository.findAll()).thenReturn(List.of());
+
+    List<MemberProfileResponseDto> result = memberService.getAllMembers();
+
+    assertNotNull(result);
+    assertTrue(result.isEmpty());
+    verify(memberRepository).findAll();
+    verify(memberRepository, never()).findByEmail(any());
   }
 }
