@@ -19,7 +19,7 @@ const mockProfile = {
   speciality: 'architect',
   teamName: 'Vincinho ',
   creationDate: '2024-01-01',
-  available: false,
+  isAvailable: false,
   tag: 'Player1',
   email: 'test@vinci.com',
 };
