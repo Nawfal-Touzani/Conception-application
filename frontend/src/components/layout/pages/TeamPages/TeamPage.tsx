@@ -15,11 +15,15 @@ import {
   DialogContentText,
   DialogActions,
   Alert,
+  Tab,
+  Tabs,
 } from '@mui/material';
 import JoinOrCreateTeam from './JoinOrCreateTeam';
 import { useAuth } from '../../../../contexts/useAuth';
 import * as teamService from '../../../../services/team.service';
+import * as tournamentService from '../../../../services/tournament/tournament.service';
 import { TeamDto, TeamMember } from '../../../../types/team.types';
+import { TournamentDetails } from '../../../../types/tournament.types';
 import { useNavigate } from 'react-router-dom';
 
 function formatDate(dateStr?: string | null) {
@@ -31,7 +35,6 @@ function formatDate(dateStr?: string | null) {
   });
 }
 
-// Composant réutilisable pour afficher une ligne label + valeur dans un bloc bleu
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', mb: 4, gap: 2 }}>
@@ -64,9 +67,9 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 }
 
 const TeamPage = () => {
-  const { user } = useAuth(); // on recup le user connecté depuis le contexte globale
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const token = user?.token ?? ''; // extrait le token en string pour eviter les boucles useEffects
+  const token = user?.token ?? '';
 
   const [team, setTeam] = useState<TeamDto | null>(null);
   const [members, setMembers] = useState<TeamMember[]>([]);
@@ -76,25 +79,26 @@ const TeamPage = () => {
   const [leaveError, setLeaveError] = useState<string | null>(null);
   const [nominateError, setNominateError] = useState<string | null>(null);
   const [nominateSuccess, setNominateSuccess] = useState<string | null>(null);
+  const [tournaments, setTournaments] = useState<TournamentDetails[]>([]);
+  const [tabIndex, setTabIndex] = useState(0);
 
-  // pour savoir si le membre est le dernier de son ekip
   const isSolo = members.length === 1;
 
-  // Obtenir lequipe et les membres de celle ci dun joueur connecté
   const loadTeamData = useCallback(() => {
-    setHasTeam(null); // etat du chargement en cours, affiche rien pendant le fetch
-
+    setHasTeam(null);
     teamService
       .getMyTeamMembers(token)
-      // .then sexecute quand le fetch reussi et memberdata contient le tableau des joueurs
       .then(async (memberData) => {
         setMembers(memberData);
         setHasTeam(true);
-
         const teamData = await teamService.getMyTeam(token);
         setTeam(teamData);
+        const teamTournaments = await tournamentService.getTournaments(
+          token,
+          teamData.name,
+        );
+        setTournaments(teamTournaments);
       })
-      // sexecute si le membre n'a pas de team
       .catch(() => setHasTeam(false));
   }, [token]);
 
@@ -102,12 +106,10 @@ const TeamPage = () => {
     if (user) loadTeamData();
   }, [user, loadTeamData]);
 
-  // Quitter une equipe
   const handleLeave = async () => {
-    setLeaveLoading(true); // desac le bouton confirmer pendant la requete
+    setLeaveLoading(true);
     try {
       const res = await teamService.leaveTeam(token);
-
       if (res.status === 409) {
         const body = await res.json();
         setLeaveError(
@@ -116,13 +118,11 @@ const TeamPage = () => {
         setConfirmOpen(false);
         return;
       }
-
       if (!res.ok) {
         setLeaveError('Une erreur est survenue.');
         setConfirmOpen(false);
         return;
       }
-
       setConfirmOpen(false);
       loadTeamData();
     } catch {
@@ -132,24 +132,20 @@ const TeamPage = () => {
     }
   };
 
-  // Nommer un second responsable
   const handleNominate = async (memberId: number) => {
     if (!team) return;
     setNominateError(null);
     setNominateSuccess(null);
-
     try {
       const res = await teamService.nominateSecondaryManager(
         token,
         team.id,
         memberId,
       );
-
       if (!res.ok) {
         setNominateError('Impossible de nommer ce membre.');
         return;
       }
-
       setNominateSuccess('Second responsable nommé avec succès.');
       loadTeamData();
     } catch {
@@ -157,11 +153,17 @@ const TeamPage = () => {
     }
   };
 
-  // Vérifie si l'utilisateur connecté est le responsable
   const isResponsible =
     team?.responsibleTag != null &&
     members.find((m) => m.gameTag === team.responsibleTag) != null &&
     user?.tag === team.responsibleTag;
+
+  const tournamentsInProgress = tournaments.filter(
+    (t) => t.status === 'IN_PROGRESS',
+  );
+  const tournamentsUpcoming = tournaments.filter(
+    (t) => t.status === 'PREPARATION' && t.isPublic,
+  );
 
   if (hasTeam === null) return null;
   if (!hasTeam) return <JoinOrCreateTeam onTeamCreated={loadTeamData} />;
@@ -185,17 +187,17 @@ const TeamPage = () => {
       <Box
         sx={{
           display: 'flex',
-          gap: 6,
+          gap: 4,
           width: '100%',
-          maxWidth: 1000,
+          maxWidth: 1200,
           alignItems: 'flex-start',
         }}
       >
-        {/* ── Left: Team Info ── */}
+        {/* ── Colonne 1 : Infos équipe ── */}
         <Paper
           elevation={0}
           sx={{
-            flex: '0 0 480px',
+            flex: '0 0 420px',
             borderRadius: '12px',
             p: 5,
             backgroundColor: '#fff',
@@ -243,7 +245,7 @@ const TeamPage = () => {
           </Box>
         </Paper>
 
-        {/* ── Right: Members ── */}
+        {/* ── Colonne 2 : Membres ── */}
         <Box sx={{ flex: 1 }}>
           <Typography
             variant="h6"
@@ -298,7 +300,6 @@ const TeamPage = () => {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 2,
-                    textDecoration: 'none',
                     cursor: 'pointer',
                   }}
                 >
@@ -309,8 +310,6 @@ const TeamPage = () => {
                       sx={{ width: 50, height: 50 }}
                     />
                   </ListItemAvatar>
-
-                  {/* Indicateur disponibilité */}
                   <Box
                     sx={{
                       width: 12,
@@ -322,28 +321,20 @@ const TeamPage = () => {
                       flexShrink: 0,
                     }}
                   />
-
                   <ListItemText
                     primary={member.gameTag}
                     primaryTypographyProps={{
                       fontSize: '1.2rem',
                       fontWeight: 500,
                       color: '#1a2744',
-                      sx: {
-                        '.MuiListItem-root:hover &': {
-                          textDecoration: 'underline',
-                        },
-                      },
                     }}
                   />
-
-                  {/* Bouton Nommer — visible uniquement pour le responsable, sur les autres membres */}
                   {isResponsible && !isCurrentUser && (
                     <Button
                       size="small"
                       variant="outlined"
                       onClick={(e) => {
-                        e.stopPropagation(); // pour pas rediriger quand on clique sur nommer
+                        e.stopPropagation();
                         handleNominate(member.memberId);
                       }}
                       sx={{
@@ -369,7 +360,6 @@ const TeamPage = () => {
             })}
           </List>
 
-          {/* Légende */}
           <Box sx={{ display: 'flex', gap: 3, mt: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Box
@@ -402,6 +392,136 @@ const TeamPage = () => {
               </Typography>
             </Box>
           </Box>
+        </Box>
+
+        {/* ── Colonne 3 : Tournois ── */}
+        <Box sx={{ flex: 1 }}>
+          <Typography
+            variant="h6"
+            sx={{ color: '#fff', fontWeight: 700, mb: 2, textAlign: 'center' }}
+          >
+            Tournois
+          </Typography>
+
+          <Tabs
+            value={tabIndex}
+            onChange={(_, v) => setTabIndex(v)}
+            sx={{
+              mb: 2,
+              '& .MuiTab-root': {
+                color: 'rgba(255,255,255,0.6)',
+                textTransform: 'none',
+                fontWeight: 600,
+              },
+              '& .Mui-selected': { color: '#fff' },
+              '& .MuiTabs-indicator': { backgroundColor: '#fff' },
+            }}
+          >
+            <Tab label={`En cours (${tournamentsInProgress.length})`} />
+            <Tab label={`À venir (${tournamentsUpcoming.length})`} />
+          </Tabs>
+
+          {tabIndex === 0 && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {tournamentsInProgress.length === 0 ? (
+                <Typography
+                  sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}
+                >
+                  Aucun tournoi en cours.
+                </Typography>
+              ) : (
+                tournamentsInProgress.map((t) => (
+                  <Paper
+                    key={t.id}
+                    elevation={0}
+                    sx={{
+                      borderRadius: '8px',
+                      p: 2,
+                      backgroundColor: '#fff',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Box>
+                      <Typography
+                        sx={{
+                          fontWeight: 700,
+                          color: '#1a2744',
+                          fontSize: '0.95rem',
+                        }}
+                      >
+                        {t.name}
+                      </Typography>
+                      <Typography sx={{ color: '#555', fontSize: '0.8rem' }}>
+                        {formatDate(t.startDate)} — {formatDate(t.endDate)}
+                      </Typography>
+                    </Box>
+                    <Typography
+                      sx={{
+                        fontSize: '0.8rem',
+                        color: '#27ae60',
+                        fontWeight: 700,
+                      }}
+                    >
+                      En cours
+                    </Typography>
+                  </Paper>
+                ))
+              )}
+            </Box>
+          )}
+
+          {tabIndex === 1 && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {tournamentsUpcoming.length === 0 ? (
+                <Typography
+                  sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}
+                >
+                  Aucun tournoi à venir.
+                </Typography>
+              ) : (
+                tournamentsUpcoming.map((t) => (
+                  <Paper
+                    key={t.id}
+                    elevation={0}
+                    sx={{
+                      borderRadius: '8px',
+                      p: 2,
+                      backgroundColor: '#fff',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Box>
+                      <Typography
+                        sx={{
+                          fontWeight: 700,
+                          color: '#1a2744',
+                          fontSize: '0.95rem',
+                        }}
+                      >
+                        {t.name}
+                      </Typography>
+                      <Typography sx={{ color: '#555', fontSize: '0.8rem' }}>
+                        {formatDate(t.startDate)} — {formatDate(t.endDate)}
+                      </Typography>
+                    </Box>
+                    <Typography
+                      sx={{
+                        fontSize: '0.8rem',
+                        color: '#1a2744',
+                        fontWeight: 700,
+                      }}
+                    >
+                      Inscriptions ouvertes
+                    </Typography>
+                  </Paper>
+                ))
+              )}
+            </Box>
+          )}
         </Box>
       </Box>
 
