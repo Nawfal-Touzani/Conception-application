@@ -34,7 +34,26 @@ public class Notification {
    * Type enumeration.
    */
   public enum Type {
-    TOURNAMENT, MATCH, RESULT, MEMBERSHIP_REQUEST, RESULT_CONFIRMATION
+    /**
+     * Tournament type.
+     */
+    TOURNAMENT,
+    /**
+     * Match type.
+     */
+    MATCH,
+    /**
+     * Result type.
+     */
+    RESULT,
+    /**
+     * Membership request type.
+     */
+    MEMBERSHIP_REQUEST,
+    /**
+     * Result confirmation type.
+     */
+    RESULT_CONFIRMATION
   }
 
   @Id
@@ -78,6 +97,10 @@ public class Notification {
 
   /**
    * Notification constructor.
+   *
+   * @param type     the type
+   * @param message  the message
+   * @param sendDate the send date
    */
   public Notification(Type type, String message, LocalDateTime sendDate) {
     this.type = type;

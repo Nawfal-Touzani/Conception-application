@@ -74,9 +74,9 @@ public class Member {
    * @param password            the password of the member
    * @param tag                 the display tag of the member
    * @param isAdmin             whether the member has admin privileges
+   * @param profileCreationDate creation date of the member
    * @param image               the profile image of the member
    * @param speciality          the speciality of the member
-   * @param profileCreationDate creation date of the member
    */
   public Member(String email, String password, String tag, Boolean isAdmin,
       LocalDate profileCreationDate, Image image, Speciality speciality) {

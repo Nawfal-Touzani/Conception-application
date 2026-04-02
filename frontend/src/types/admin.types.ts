@@ -8,4 +8,7 @@ export interface MemberDto {
   isAvailable: boolean;
   isAdmin: boolean;
   admin: boolean;
+  isBan: boolean;
+  banReason?: string;
+  banDate?: string;
 }

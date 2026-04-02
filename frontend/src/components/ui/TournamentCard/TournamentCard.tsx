@@ -1,11 +1,11 @@
 import { Box, Paper, Typography } from '@mui/material';
-import { Tournament } from '../../../types/tournament.types';
+import { TournamentDetails } from '../../../types/tournament.types';
 
 interface TournamentCardProps {
-  tournament: Tournament;
+  tournament: TournamentDetails;
 }
 
-// Maps the backend status enum to a human-readable French label
+// Enum to a readable label
 const statusLabel: Record<string, string> = {
   PREPARATION: 'Prochain',
   IN_PROGRESS: 'À la une',
@@ -13,19 +13,77 @@ const statusLabel: Record<string, string> = {
   CANCELLED: 'Annulé',
 };
 
-const stateLabel: Record<string, string> = {
-  PREPARATION: 'Inscriptions ouvertes',
-  IN_PROGRESS: 'En cours',
-  FINISHED: 'Terminé',
-  CANCELLED: 'Annulé',
-};
-
-// Formats a LocalDateTime string from Spring into a readable date (ex: "5 janv.")
+// Date format
 const formatDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString('fr-BE', {
     day: 'numeric',
     month: 'short',
   });
+
+// Checks if registration is open
+const isRegistrationOpen = (tournament: TournamentDetails): boolean => {
+  if (!tournament.isPublic) return false;
+  const deadlinePassed = new Date(tournament.registrationDeadline) < new Date();
+  const isFull = tournament.currentParticipants >= tournament.maxParticipants;
+  return !deadlinePassed && !isFull;
+};
+
+// Differents display possible for a tournament card
+const getInfoLabel = (tournament: TournamentDetails): string => {
+  if (tournament.status === 'FINISHED') {
+    return 'VAINQUEUR';
+  }
+
+  if (tournament.status === 'IN_PROGRESS') {
+    return 'PHASE';
+  }
+
+  if (tournament.status === 'PREPARATION') {
+    return 'INSCRIPTIONS';
+  }
+
+  return '';
+};
+
+const getStateLabel = (tournament: TournamentDetails): string => {
+  if (tournament.status === 'PREPARATION') {
+    return 'À venir';
+  }
+
+  if (tournament.status === 'IN_PROGRESS') {
+    return 'En cours';
+  }
+
+  if (tournament.status === 'FINISHED') {
+    return 'Terminé';
+  }
+
+  return 'Terminé';
+};
+
+const getInfoValue = (tournament: TournamentDetails): string => {
+  if (tournament.status === 'FINISHED') {
+    return tournament.winnerTeamName ?? 'Non défini';
+  }
+
+  if (tournament.status === 'IN_PROGRESS') {
+    return 'Inconnue';
+  }
+
+  if (tournament.status === 'PREPARATION') {
+    return isRegistrationOpen(tournament) ? 'Ouvertes' : 'Fermées';
+  }
+
+  return 'Inconnue';
+};
+
+const getTeamsValue = (tournament: TournamentDetails): string => {
+  if (tournament.status === 'PREPARATION') {
+    return `${tournament.currentParticipants}/${tournament.maxParticipants}`;
+  }
+
+  return `${tournament.currentParticipants}`;
+};
 
 // Displays a single tournament card — extracted from HomePage to avoid JSX repetition
 const TournamentCard = ({ tournament }: TournamentCardProps) => (
@@ -33,7 +91,7 @@ const TournamentCard = ({ tournament }: TournamentCardProps) => (
     sx={{
       p: 1,
       borderRadius: '10px',
-      width: 200,
+      width: 280,
       display: 'flex',
       flexDirection: 'column',
       gap: 1,
@@ -63,30 +121,40 @@ const TournamentCard = ({ tournament }: TournamentCardProps) => (
         p: 2,
         flexGrow: 1,
         textAlign: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: 260,
       }}
     >
       <Typography variant="h6" fontWeight="bold" fontSize="1.2rem">
         {tournament.name}
       </Typography>
 
-      <Typography variant="caption" display="block" mb={3} fontSize="0.8rem">
+      <Typography variant="caption" display="block" mb={2} fontSize="0.8rem">
         {formatDate(tournament.startDate)} - {formatDate(tournament.endDate)}
       </Typography>
 
-      <Typography variant="body1" fontWeight="bold" mb={3} fontSize="1.1rem">
-        {stateLabel[tournament.status]}
+      <Typography variant="caption" display="block" fontSize="0.6rem">
+        {getInfoLabel(tournament)}
       </Typography>
 
-      {tournament.maxParticipant != null && (
-        <>
-          <Typography variant="caption" display="block">
-            TEAMS
-          </Typography>
-          <Typography variant="body2" mb={1} fontWeight="bold" fontSize="1rem">
-            {tournament.maxParticipant}
-          </Typography>
-        </>
-      )}
+      <Typography variant="body1" fontWeight="bold" mb={2} fontSize="1.3rem">
+        {getInfoValue(tournament)}
+      </Typography>
+
+      <Box sx={{ mt: 'auto' }}>
+        <Typography variant="caption" display="block" fontSize="0.6rem">
+          TEAMS
+        </Typography>
+
+        <Typography variant="body2" mb={2} fontWeight="bold" fontSize="1rem">
+          {getTeamsValue(tournament)}
+        </Typography>
+
+        <Typography variant="body1" fontWeight="bold" fontSize="1.1rem">
+          {getStateLabel(tournament)}
+        </Typography>
+      </Box>
     </Box>
   </Paper>
 );

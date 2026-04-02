@@ -26,6 +26,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+/**
+ * The type Tournament registration service test.
+ */
 @ExtendWith(MockitoExtension.class)
 class TournamentRegistrationServiceTest {
 
@@ -41,12 +44,30 @@ class TournamentRegistrationServiceTest {
   @InjectMocks
   private TournamentRegistrationService tournamentRegistrationService;
 
+  /**
+   * The Responsible.
+   */
   Member responsible;
+  /**
+   * The Second responsible.
+   */
   Member secondResponsible;
+  /**
+   * The Other member.
+   */
   Member otherMember;
+  /**
+   * The Team.
+   */
   Team team;
+  /**
+   * The Tournament.
+   */
   Tournament tournament;
 
+  /**
+   * Sets up.
+   */
   @BeforeEach
   void setUp() {
     responsible = new Member();
@@ -72,6 +93,9 @@ class TournamentRegistrationServiceTest {
     tournament.setPublic(true);
   }
 
+  /**
+   * Create registration success.
+   */
   @Test
   void createRegistrationSuccess() {
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
@@ -88,6 +112,9 @@ class TournamentRegistrationServiceTest {
     assertEquals(tournament, result.getTournament());
   }
 
+  /**
+   * Create registration tournament not found.
+   */
   @Test
   void createRegistrationTournamentNotFound() {
     when(tournamentRepository.findById(99L)).thenReturn(Optional.empty());
@@ -98,6 +125,9 @@ class TournamentRegistrationServiceTest {
     verify(tournamentRegistrationRepository, never()).save(any());
   }
 
+  /**
+   * Create registration team not found.
+   */
   @Test
   void createRegistrationTeamNotFound() {
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
@@ -109,6 +139,9 @@ class TournamentRegistrationServiceTest {
     verify(tournamentRegistrationRepository, never()).save(any());
   }
 
+  /**
+   * Create registration tournament not in preparation.
+   */
   @Test
   void createRegistrationTournamentNotInPreparation() {
     tournament.setStatus(Status.IN_PROGRESS);
@@ -121,6 +154,9 @@ class TournamentRegistrationServiceTest {
     verify(tournamentRegistrationRepository, never()).save(any());
   }
 
+  /**
+   * Create registration deadline passed.
+   */
   @Test
   void createRegistrationDeadlinePassed() {
     tournament.setRegistrationDeadline(LocalDate.now().minusDays(1));
@@ -133,6 +169,9 @@ class TournamentRegistrationServiceTest {
     verify(tournamentRegistrationRepository, never()).save(any());
   }
 
+  /**
+   * Create registration team already registered.
+   */
   @Test
   void createRegistrationTeamAlreadyRegistered() {
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
@@ -145,6 +184,9 @@ class TournamentRegistrationServiceTest {
     verify(tournamentRegistrationRepository, never()).save(any());
   }
 
+  /**
+   * Create registration tournament full.
+   */
   @Test
   void createRegistrationTournamentFull() {
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
@@ -158,6 +200,9 @@ class TournamentRegistrationServiceTest {
     verify(tournamentRegistrationRepository, never()).save(any());
   }
 
+  /**
+   * Create registration tournament not public.
+   */
   @Test
   void createRegistrationTournamentNotPublic() {
     tournament.setPublic(false);
@@ -170,6 +215,9 @@ class TournamentRegistrationServiceTest {
     verify(tournamentRegistrationRepository, never()).save(any());
   }
 
+  /**
+   * Create registration team not enough members.
+   */
   @Test
   void createRegistrationTeamNotEnoughMembers() {
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
@@ -184,6 +232,9 @@ class TournamentRegistrationServiceTest {
     verify(tournamentRegistrationRepository, never()).save(any());
   }
 
+  /**
+   * Create registration not responsible.
+   */
   @Test
   void createRegistrationNotResponsible() {
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
@@ -198,6 +249,9 @@ class TournamentRegistrationServiceTest {
     verify(tournamentRegistrationRepository, never()).save(any());
   }
 
+  /**
+   * Create registration success with second responsible.
+   */
   @Test
   void createRegistrationSuccessWithSecondResponsible() {
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));

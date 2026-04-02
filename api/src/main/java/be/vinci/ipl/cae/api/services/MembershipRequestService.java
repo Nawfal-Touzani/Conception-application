@@ -25,6 +25,7 @@ public class MembershipRequestService {
    *
    * @param membershipRequestRepository the membership request repository
    * @param teamCompositionRepository   the team composition repository
+   * @param notificationService         the notification service
    */
   public MembershipRequestService(MembershipRequestRepository membershipRequestRepository,
       TeamCompositionRepository teamCompositionRepository,
