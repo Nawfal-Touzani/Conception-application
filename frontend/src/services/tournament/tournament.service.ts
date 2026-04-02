@@ -55,8 +55,8 @@ export const getTournaments = async (
 export const getTournamentById = async (
   token: string,
   id: number,
-): Promise<Tournament> => {
-  const response = await fetch(`${API_URL}/${id}`, {
+): Promise<TournamentDetails> => {
+  const response = await fetch(`api/tournaments/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!response.ok) throw new Error('Tournoi introuvable.');

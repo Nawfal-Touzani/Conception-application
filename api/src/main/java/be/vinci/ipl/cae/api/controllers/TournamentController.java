@@ -5,7 +5,6 @@ import be.vinci.ipl.cae.api.models.dtos.TournamentDto;
 import be.vinci.ipl.cae.api.models.dtos.TournamentResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Tournament;
-import be.vinci.ipl.cae.api.models.entities.TournamentRegistration;
 import be.vinci.ipl.cae.api.services.TournamentRegistrationService;
 import be.vinci.ipl.cae.api.services.TournamentService;
 import java.util.List;
@@ -175,10 +174,10 @@ public class TournamentController {
   @PostMapping("/{idTournament}/teams/{idTeam}")
   @ResponseStatus(HttpStatus.CREATED)
   @PreAuthorize("isAuthenticated()")
-  public TournamentRegistration registerTeam(@PathVariable Long idTournament,
+  public void registerTeam(@PathVariable Long idTournament,
       @PathVariable Long idTeam, @AuthenticationPrincipal Member currentMember) {
     try {
-      return tournamentRegistrationService.createRegistration(idTournament, idTeam,
+       tournamentRegistrationService.createRegistration(idTournament, idTeam,
           currentMember.getId());
     } catch (NoSuchElementException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);

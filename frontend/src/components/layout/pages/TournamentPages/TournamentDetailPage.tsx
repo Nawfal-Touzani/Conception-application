@@ -7,6 +7,7 @@ import * as teamService from '../../../../services/team.service';
 
 type Props = {
   tournament: TournamentDetails;
+  onRegister: () => Promise<void>;
 };
 
 function formatDate(dateStr: string) {
@@ -178,7 +179,7 @@ function BracketSVG() {
   );
 }
 
-const TournamentDetail = ({ tournament }: Props) => {
+const TournamentDetail = ({ tournament, onRegister }: Props) => {
   const { user } = useAuth();
   const token = user?.token ?? '';
 
@@ -199,6 +200,10 @@ const TournamentDetail = ({ tournament }: Props) => {
     (myTeam.responsibleTag === user?.tag ||
       myTeam.secondResponsibleTag === user?.tag);
 
+  const isAlreadyRegistered =
+    myTeam !== null &&
+    (tournament.registeredTeamNames ?? []).includes(myTeam.name);
+
   const registrationOpen =
     tournament.status === 'PREPARATION' && tournament.isPublic;
 
@@ -208,21 +213,40 @@ const TournamentDetail = ({ tournament }: Props) => {
     try {
       const response = await fetch(
         `/api/tournaments/${tournament.id}/teams/${myTeam.id}`,
-        {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-        },
+        { method: 'POST', headers: { Authorization: `Bearer ${token}` } },
       );
       if (!response.ok) {
         const text = await response.text();
         try {
           const json = JSON.parse(text);
-          setRegisterError(json.message || "Erreur lors de l'inscription.");
+          const msg = json.message || '';
+          if (msg.includes('already')) {
+            await onRegister();
+          } else if (msg.includes('4 member')) {
+            setRegisterError('Votre équipe doit avoir au moins 4 membres.');
+          } else if (msg.includes('deadline') || msg.includes('past')) {
+            setRegisterError("La date limite d'inscription est dépassée.");
+          } else if (msg.includes('full') || msg.includes('maximum')) {
+            setRegisterError('Le tournoi est complet.');
+          } else if (msg.includes('public')) {
+            setRegisterError(
+              "Le tournoi n'est pas encore ouvert aux inscriptions.",
+            );
+          } else if (msg.includes('preparation')) {
+            setRegisterError("Le tournoi n'est plus en phase d'inscription.");
+          } else if (msg.includes('responsible')) {
+            setRegisterError(
+              'Seul le responsable ou second responsable peut inscrire la team.',
+            );
+          } else {
+            setRegisterError(msg || "Erreur lors de l'inscription.");
+          }
         } catch {
           setRegisterError(text || "Erreur lors de l'inscription.");
         }
       } else {
         setRegisterSuccess(true);
+        await onRegister();
       }
     } catch {
       setRegisterError("Erreur lors de l'inscription.");
@@ -242,9 +266,28 @@ const TournamentDetail = ({ tournament }: Props) => {
         pb: 5,
       }}
     >
-      <Typography variant="h4" sx={{ color: '#fff', fontWeight: 800, mb: 3 }}>
+      {/* Titre */}
+      <Typography
+        variant="h4"
+        sx={{ color: '#fff', fontWeight: 800, mb: 1, textAlign: 'center' }}
+      >
         {tournament.name}
       </Typography>
+
+      {/* Description */}
+      {tournament.description && (
+        <Typography
+          sx={{
+            color: 'rgba(255,255,255,0.6)',
+            fontSize: '1rem',
+            mb: 3,
+            textAlign: 'center',
+            maxWidth: 700,
+          }}
+        >
+          {tournament.description}
+        </Typography>
+      )}
 
       <Box
         sx={{
@@ -497,34 +540,60 @@ const TournamentDetail = ({ tournament }: Props) => {
                 fontWeight: 800,
                 color: '#1a2744',
                 fontSize: '1.6rem',
-                mb: registrationOpen && isResponsible ? 2 : 0,
+                mb:
+                  registrationOpen && isResponsible && !isAlreadyRegistered
+                    ? 2
+                    : 0,
               }}
             >
               {registrationOpen ? 'Ouvert' : formatStatus(tournament)}
             </Typography>
 
-            {registrationOpen && isResponsible && !registerSuccess && (
-              <Button
-                variant="contained"
-                onClick={handleRegister}
-                fullWidth
-                sx={{
-                  backgroundColor: '#1a2744',
-                  color: '#fff',
-                  textTransform: 'none',
-                  fontWeight: 700,
-                  fontSize: '1rem',
-                  borderRadius: '8px',
-                  '&:hover': { backgroundColor: '#243560' },
-                }}
-              >
-                S'inscrire
-              </Button>
-            )}
+            {registrationOpen &&
+              isResponsible &&
+              !isAlreadyRegistered &&
+              !registerSuccess && (
+                <Button
+                  variant="contained"
+                  onClick={handleRegister}
+                  fullWidth
+                  sx={{
+                    backgroundColor: '#1a2744',
+                    color: '#fff',
+                    textTransform: 'none',
+                    fontWeight: 700,
+                    fontSize: '1rem',
+                    borderRadius: '8px',
+                    '&:hover': { backgroundColor: '#243560' },
+                  }}
+                >
+                  S'inscrire
+                </Button>
+              )}
 
             {registerSuccess && (
-              <Typography sx={{ color: 'green', fontSize: '0.9rem', mt: 1 }}>
-                Inscription réussie !
+              <Typography
+                sx={{
+                  color: 'green',
+                  fontSize: '0.95rem',
+                  mt: 1,
+                  fontWeight: 600,
+                }}
+              >
+                Vous vous êtes inscrits avec succès !
+              </Typography>
+            )}
+
+            {isAlreadyRegistered && (
+              <Typography
+                sx={{
+                  color: '#1a2744',
+                  fontSize: '0.95rem',
+                  mt: 1,
+                  fontWeight: 600,
+                }}
+              >
+                Vous êtes déjà inscrits à ce tournoi.
               </Typography>
             )}
 

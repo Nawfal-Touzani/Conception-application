@@ -23,6 +23,7 @@ import {
 } from '../../../../types/tournament.types';
 import TournamentDetail from './TournamentDetailPage';
 import TournamentAdminPage from './TournamentAdminPage';
+import { useSearchParams } from 'react-router-dom';
 
 const COLUMNS = 3;
 const CARD_WIDTH = 320;
@@ -43,7 +44,15 @@ const formatDateFull = (dateStr: string) =>
 
 function getStateLabel(tournament: TournamentDetails): string {
   if (tournament.status === 'PREPARATION') {
-    return tournament.isPublic ? 'Inscriptions ouvertes' : 'En préparation';
+    if (!tournament.isPublic) return 'En préparation';
+
+    const deadlinePassed =
+      new Date(tournament.registrationDeadline) < new Date();
+    const isFull = tournament.currentParticipants >= tournament.maxParticipants;
+
+    if (deadlinePassed || isFull) return 'En préparation';
+
+    return 'Inscriptions ouvertes';
   }
   if (tournament.status === 'IN_PROGRESS') return 'En cours';
   if (tournament.status === 'FINISHED') return 'Terminé';
@@ -62,14 +71,16 @@ const TournamentsPage = () => {
   const [adminTournament, setAdminTournament] =
     useState<TournamentDetails | null>(null);
 
+  const [searchParams] = useSearchParams();
   const [teamSearch, setTeamSearch] = useState('');
-  const [tagSearch, setTagSearch] = useState('');
+  const [tagSearch, setTagSearch] = useState(searchParams.get('tag') || '');
   const [nameSearch, setNameSearch] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [statusFilter, setStatusFilter] = useState<
     TournamentStatus | 'OPEN' | ''
-  >('');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  >((searchParams.get('status') as any) || '');
   const [visibilityFilter, setVisibilityFilter] = useState<
     'public' | 'private' | ''
   >('');
@@ -99,6 +110,25 @@ const TournamentsPage = () => {
     return () => clearTimeout(timer);
   }, [teamSearch, tagSearch, loadTournaments]);
 
+  // Recharge un tournoi spécifique après inscription
+  const handleRegister = useCallback(
+    async (tournamentId: number) => {
+      try {
+        const updated = await tournamentService.getTournamentById(
+          token,
+          tournamentId,
+        );
+        setSelectedTournament(updated);
+        setTournaments((prev) =>
+          prev.map((t) => (t.id === updated.id ? updated : t)),
+        );
+      } catch {
+        // silently fail
+      }
+    },
+    [token],
+  );
+
   const filtered = useMemo(() => {
     return tournaments.filter((t) => {
       if (
@@ -108,17 +138,24 @@ const TournamentsPage = () => {
         return false;
       if (startDate && t.startDate < startDate) return false;
       if (endDate && t.endDate > endDate) return false;
-      if (
-        statusFilter === 'OPEN' &&
-        !(t.isPublic && t.status === 'PREPARATION')
-      )
-        return false;
-      else if (
+      if (statusFilter === 'OPEN') {
+        const deadlinePassed = new Date(t.registrationDeadline) < new Date();
+        const isFull = t.currentParticipants >= t.maxParticipants;
+        if (
+          !(
+            t.isPublic &&
+            t.status === 'PREPARATION' &&
+            !deadlinePassed &&
+            !isFull
+          )
+        )
+          return false;
+      } else if (
         statusFilter &&
-        statusFilter !== 'OPEN' &&
-        t.status !== statusFilter
-      )
+        t.status !== (statusFilter as TournamentStatus)
+      ) {
         return false;
+      }
       if (visibilityFilter === 'public' && !t.isPublic) return false;
       if (visibilityFilter === 'private' && t.isPublic) return false;
       return true;
@@ -185,7 +222,10 @@ const TournamentsPage = () => {
             <ArrowBackIcon />
           </IconButton>
         </Box>
-        <TournamentDetail tournament={selectedTournament} />
+        <TournamentDetail
+          tournament={selectedTournament}
+          onRegister={() => handleRegister(selectedTournament.id)}
+        />
       </Box>
     );
   }
@@ -555,7 +595,6 @@ const TournamentsPage = () => {
                         {tournament.name}
                       </Typography>
                     </Box>
-
                     <Box
                       sx={{
                         backgroundColor: '#1e2a44',
@@ -578,7 +617,6 @@ const TournamentsPage = () => {
                         {formatDate(tournament.startDate)} -{' '}
                         {formatDate(tournament.endDate)}
                       </Typography>
-
                       <Typography
                         variant="body1"
                         fontWeight="bold"
@@ -587,7 +625,6 @@ const TournamentsPage = () => {
                       >
                         {getStateLabel(tournament)}
                       </Typography>
-
                       <Typography
                         variant="caption"
                         display="block"
@@ -598,7 +635,6 @@ const TournamentsPage = () => {
                         Clôture le{' '}
                         {formatDateFull(tournament.registrationDeadline)}
                       </Typography>
-
                       {tournament.description && (
                         <Typography
                           variant="caption"
@@ -611,12 +647,12 @@ const TournamentsPage = () => {
                             display: '-webkit-box',
                             WebkitLineClamp: 2,
                             WebkitBoxOrient: 'vertical',
+                            wordBreak: 'break-all',
                           }}
                         >
                           {tournament.description}
                         </Typography>
                       )}
-
                       <Typography variant="caption" display="block">
                         TEAMS
                       </Typography>
@@ -629,7 +665,6 @@ const TournamentsPage = () => {
                         {tournament.currentParticipants}/
                         {tournament.maxParticipants}
                       </Typography>
-
                       <Box sx={{ mt: 'auto', pt: 1 }}>
                         <IconButton
                           onClick={() => setSelectedTournament(tournament)}
@@ -648,7 +683,6 @@ const TournamentsPage = () => {
                 ))}
               </Box>
 
-              {/* Bouton Administrer */}
               {isAdmin && (
                 <Box
                   sx={{
