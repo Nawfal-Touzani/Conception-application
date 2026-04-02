@@ -3,9 +3,9 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import PublicProfilePage from './PublicProfilePage';
-import * as memberService from '../../../services/memberService';
+import * as memberService from '../../../../services/memberService';
 
-vi.mock('../../../services/memberService', () => ({
+vi.mock('../../../../services/memberService', () => ({
   getPublicMemberById: vi.fn(),
 }));
 
@@ -58,7 +58,7 @@ describe('PublicProfilePage', () => {
     );
   });
 
-  test('diplays "/" if the memeber does not have team', async () => {
+  test('displays "/" if the member does not have team', async () => {
     (memberService.getPublicMemberById as any).mockResolvedValue({
       ...mockMember,
       teamName: null,
