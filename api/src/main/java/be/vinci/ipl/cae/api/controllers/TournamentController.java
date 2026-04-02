@@ -85,7 +85,8 @@ public class TournamentController {
    */
   @PutMapping("/{id}")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
-  public Tournament updateTournament(@PathVariable long id, @RequestBody TournamentDto dto) {
+  public TournamentResponseDto updateTournament(@PathVariable long id,
+      @RequestBody TournamentDto dto) {
     try {
       return tournamentService.updateTournament(id, dto);
     } catch (NoSuchElementException e) {
@@ -101,7 +102,7 @@ public class TournamentController {
   }
 
   /**
-   * Publish tournament tournament.
+   * Publish tournament.
    *
    * @param id the id
    * @return the tournament
@@ -177,7 +178,7 @@ public class TournamentController {
   public void registerTeam(@PathVariable Long idTournament,
       @PathVariable Long idTeam, @AuthenticationPrincipal Member currentMember) {
     try {
-       tournamentRegistrationService.createRegistration(idTournament, idTeam,
+      tournamentRegistrationService.createRegistration(idTournament, idTeam,
           currentMember.getId());
     } catch (NoSuchElementException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
