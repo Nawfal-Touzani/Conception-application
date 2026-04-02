@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 import { MemberDto } from '../../../../../types/admin.types';
+import { banFieldStyle } from './BanModal.styles';
 
 interface BanModalProps {
   open: boolean;
@@ -19,17 +20,6 @@ interface BanModalProps {
   member: MemberDto | null;
   onConfirm: (reason: string) => Promise<void>;
 }
-
-const fieldStyle = {
-  '& .MuiOutlinedInput-root': {
-    color: 'white',
-    '& fieldset': { borderColor: '#ffffff' },
-    '&:hover fieldset': { borderColor: 'white' },
-    '&.Mui-focused fieldset': { borderColor: 'white' },
-  },
-  '& .MuiInputLabel-root': { color: '#ffffff99' },
-  '&.Mui-focused': { color: 'white' },
-};
 
 export const BanModal = ({
   open,
@@ -85,6 +75,7 @@ export const BanModal = ({
       >
         Bannir le membre
       </DialogTitle>
+
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
           <Typography sx={{ color: 'white', textAlign: 'center', mb: 1 }}>
@@ -103,12 +94,13 @@ export const BanModal = ({
             multiline
             rows={4}
             variant="outlined"
-            sx={fieldStyle}
+            sx={banFieldStyle}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
           />
         </Box>
       </DialogContent>
+
       <DialogActions sx={{ justifyContent: 'center', gap: 2, pb: 3, px: 3 }}>
         <Button
           onClick={onClose}

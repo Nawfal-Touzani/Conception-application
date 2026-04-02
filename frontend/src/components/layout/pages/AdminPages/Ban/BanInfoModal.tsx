@@ -9,6 +9,7 @@ import {
   Box,
 } from '@mui/material';
 import { MemberDto } from '../../../../../types/admin.types';
+import { modalPaperSx } from './BanModal.styles';
 
 interface BanInfoModalProps {
   open: boolean;
@@ -16,34 +17,36 @@ interface BanInfoModalProps {
   member: MemberDto | null;
 }
 
-export const BanInfoModal = ({ open, onClose, member }: BanInfoModalProps) => {
-  const labelStyle = {
-    fontSize: '0.95rem',
-    color: 'rgba(255,255,255,0.6)',
-    mb: 0.3,
-  };
+const BanDetailItem = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | undefined;
+}) => (
+  <Box sx={{ mb: 1.5 }}>
+    <Typography
+      sx={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.6)', mb: 0.3 }}
+    >
+      {label}
+    </Typography>
+    <Typography sx={{ fontSize: '1.15rem', color: '#ffffff', mb: 2 }}>
+      {value}
+    </Typography>
+  </Box>
+);
 
-  const valueStyle = {
-    fontSize: '1.15rem',
-    color: '#ffffff',
-    mb: 2,
-  };
+export const BanInfoModal = ({ open, onClose, member }: BanInfoModalProps) => {
+  const formattedDate = member?.banDate
+    ? new Date(member.banDate).toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'numeric',
+        year: 'numeric',
+      })
+    : 'Inconnue';
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      PaperProps={{
-        sx: {
-          background: '#1a2744',
-          color: '#fff',
-          borderRadius: '14px',
-          minWidth: '420px',
-          px: 2,
-          py: 1,
-        },
-      }}
-    >
+    <Dialog open={open} onClose={onClose} PaperProps={{ sx: modalPaperSx }}>
       <DialogTitle
         sx={{
           fontWeight: 500,
@@ -59,28 +62,9 @@ export const BanInfoModal = ({ open, onClose, member }: BanInfoModalProps) => {
       <Divider sx={{ bgcolor: 'rgba(255,255,255,0.15)', mx: 2 }} />
 
       <DialogContent sx={{ mt: 2 }}>
-        <Box sx={{ mb: 1.5 }}>
-          <Typography sx={labelStyle}>Membre</Typography>
-          <Typography sx={valueStyle}>{member?.tag}</Typography>
-        </Box>
-
-        <Box sx={{ mb: 1.5 }}>
-          <Typography sx={labelStyle}>Date du bannissement</Typography>
-          <Typography sx={valueStyle}>
-            {member?.banDate
-              ? new Date(member.banDate).toLocaleDateString('fr-FR', {
-                  day: 'numeric',
-                  month: 'numeric',
-                  year: 'numeric',
-                })
-              : 'Inconnue'}
-          </Typography>
-        </Box>
-
-        <Box>
-          <Typography sx={labelStyle}>Raison</Typography>
-          <Typography sx={valueStyle}>{member?.banReason}</Typography>
-        </Box>
+        <BanDetailItem label="Membre" value={member?.tag} />
+        <BanDetailItem label="Date du bannissement" value={formattedDate} />
+        <BanDetailItem label="Raison" value={member?.banReason} />
       </DialogContent>
 
       <DialogActions sx={{ justifyContent: 'right', pb: 3, pt: 1 }}>
@@ -91,9 +75,7 @@ export const BanInfoModal = ({ open, onClose, member }: BanInfoModalProps) => {
             backgroundColor: '#951c1e',
             px: 4,
             borderRadius: '4px',
-            '&:hover': {
-              backgroundColor: '#701b19',
-            },
+            '&:hover': { backgroundColor: '#701b19' },
           }}
         >
           Fermer
