@@ -182,7 +182,7 @@ public class BcryptConfiguration {
       // Members & Admins in DB
       if (!memberRepository.existsByEmail("lea@mail.com")) {
         memberRepository.save(
-            buildMember("lea@mail.com", "lea", "Lynx", false, imageRepository.findAll().getFirst(),
+            buildMember("lea@mail.com", "lea", "Lynx", true, imageRepository.findAll().getFirst(),
                 tacticien, LocalDate.of(2025, 11, 12), passwordEncoder));
       }
 

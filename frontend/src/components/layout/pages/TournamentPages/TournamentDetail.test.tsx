@@ -3,7 +3,7 @@ import { describe, test, expect, vi, beforeEach } from 'vitest';
 import TournamentDetail from './TournamentDetailPage';
 import { AuthContext } from '../../../../contexts/AuthContext';
 
-vi.mock('../../../../services/team.service', () => ({
+vi.mock('../../../services/team.service', () => ({
   getMyTeam: vi.fn(),
 }));
 
@@ -41,6 +41,8 @@ const myTeamNotResponsible = {
   creationDate: null,
 };
 
+const onRegister = async () => {};
+
 const baseTournament = {
   id: 1,
   name: 'Vinci Easter Cup 2026',
@@ -51,7 +53,7 @@ const baseTournament = {
   maxParticipants: 8,
   currentParticipants: 3,
   organizerTag: 'Admin',
-  registeredTeamNames: ['TEAM_ALPHA', 'TEAM_BETA', 'TEAM_GAMMA'],
+  registeredTeamNames: ['TEAM_OMEGA', 'TEAM_NOVA', 'TEAM_VOID'],
 };
 
 const renderWithContext = (component: React.ReactElement) =>
@@ -77,6 +79,7 @@ describe('TournamentDetail', () => {
           status: 'PREPARATION',
           isPublic: true,
         }}
+        onRegister={onRegister}
       />,
     );
     expect(screen.getByText('Vinci Easter Cup 2026')).toBeTruthy();
@@ -90,6 +93,7 @@ describe('TournamentDetail', () => {
           status: 'PREPARATION',
           isPublic: true,
         }}
+        onRegister={onRegister}
       />,
     );
     expect(screen.getByText('Ouvert')).toBeTruthy();
@@ -103,9 +107,10 @@ describe('TournamentDetail', () => {
           status: 'PREPARATION',
           isPublic: false,
         }}
+        onRegister={onRegister}
       />,
     );
-    expect(screen.getAllByText('En préparation').length).toBeGreaterThan(0);
+    expect(screen.getByText('En préparation')).toBeTruthy();
   });
 
   test('affiche "En cours" pour IN_PROGRESS', () => {
@@ -116,6 +121,7 @@ describe('TournamentDetail', () => {
           status: 'IN_PROGRESS',
           isPublic: true,
         }}
+        onRegister={onRegister}
       />,
     );
     expect(screen.getAllByText('En cours').length).toBeGreaterThan(0);
@@ -125,6 +131,7 @@ describe('TournamentDetail', () => {
     renderWithContext(
       <TournamentDetail
         tournament={{ ...baseTournament, status: 'FINISHED', isPublic: true }}
+        onRegister={onRegister}
       />,
     );
     expect(screen.getAllByText('Terminé').length).toBeGreaterThan(0);
@@ -134,6 +141,7 @@ describe('TournamentDetail', () => {
     renderWithContext(
       <TournamentDetail
         tournament={{ ...baseTournament, status: 'CANCELLED', isPublic: false }}
+        onRegister={onRegister}
       />,
     );
     expect(screen.getAllByText('Annulé').length).toBeGreaterThan(0);
@@ -147,6 +155,7 @@ describe('TournamentDetail', () => {
           status: 'PREPARATION',
           isPublic: true,
         }}
+        onRegister={onRegister}
       />,
     );
     expect(screen.getByText('15/04/2026')).toBeTruthy();
@@ -160,6 +169,7 @@ describe('TournamentDetail', () => {
           status: 'PREPARATION',
           isPublic: true,
         }}
+        onRegister={onRegister}
       />,
     );
     expect(screen.getByText(/08\/04\/2026/)).toBeTruthy();
@@ -173,12 +183,13 @@ describe('TournamentDetail', () => {
           status: 'PREPARATION',
           isPublic: true,
         }}
+        onRegister={onRegister}
       />,
     );
     expect(screen.getByText('8')).toBeTruthy();
   });
 
-  test('affiche "Aucune équipe inscrite" si registeredTeamNames est vide', () => {
+  test('affiche "Aucune équipe inscrite" si currentParticipants = 0', () => {
     renderWithContext(
       <TournamentDetail
         tournament={{
@@ -188,6 +199,7 @@ describe('TournamentDetail', () => {
           currentParticipants: 0,
           registeredTeamNames: [],
         }}
+        onRegister={onRegister}
       />,
     );
     expect(
@@ -195,7 +207,7 @@ describe('TournamentDetail', () => {
     ).toBeTruthy();
   });
 
-  test('affiche les noms des équipes inscrites si présents', () => {
+  test('affiche la liste des équipes inscrites', () => {
     renderWithContext(
       <TournamentDetail
         tournament={{
@@ -203,11 +215,12 @@ describe('TournamentDetail', () => {
           status: 'PREPARATION',
           isPublic: true,
         }}
+        onRegister={onRegister}
       />,
     );
-    expect(screen.getByText('TEAM_ALPHA')).toBeTruthy();
-    expect(screen.getByText('TEAM_BETA')).toBeTruthy();
-    expect(screen.getByText('TEAM_GAMMA')).toBeTruthy();
+    expect(screen.getByText('TEAM_OMEGA')).toBeTruthy();
+    expect(screen.getByText('TEAM_NOVA')).toBeTruthy();
+    expect(screen.getByText('TEAM_VOID')).toBeTruthy();
   });
 
   test('affiche les sections du bracket', () => {
@@ -218,6 +231,7 @@ describe('TournamentDetail', () => {
           status: 'IN_PROGRESS',
           isPublic: true,
         }}
+        onRegister={onRegister}
       />,
     );
     expect(screen.getByText('Quarts')).toBeTruthy();
@@ -225,7 +239,7 @@ describe('TournamentDetail', () => {
     expect(screen.getByText('Finale')).toBeTruthy();
   });
 
-  test('affiche le panneau "Teams participantes" avec le compteur', () => {
+  test('affiche le panneau "Teams participantes"', () => {
     renderWithContext(
       <TournamentDetail
         tournament={{
@@ -233,6 +247,7 @@ describe('TournamentDetail', () => {
           status: 'PREPARATION',
           isPublic: true,
         }}
+        onRegister={onRegister}
       />,
     );
     expect(screen.getByText('Teams participantes')).toBeTruthy();
@@ -248,6 +263,7 @@ describe('TournamentDetail', () => {
           isPublic: true,
           winnerTeamName: 'TEAM_NOVA',
         }}
+        onRegister={onRegister}
       />,
     );
     expect(screen.getByText('🏆 Gagnant')).toBeTruthy();
@@ -258,6 +274,7 @@ describe('TournamentDetail', () => {
     renderWithContext(
       <TournamentDetail
         tournament={{ ...baseTournament, status: 'FINISHED', isPublic: true }}
+        onRegister={onRegister}
       />,
     );
     expect(screen.queryByText('🏆 Gagnant')).toBeFalsy();
@@ -274,6 +291,7 @@ describe('TournamentDetail', () => {
           status: 'PREPARATION',
           isPublic: true,
         }}
+        onRegister={onRegister}
       />,
     );
     await waitFor(() => {
@@ -281,7 +299,7 @@ describe('TournamentDetail', () => {
     });
   });
 
-  test("affiche le bouton S'inscrire si l'utilisateur est responsable et inscriptions ouvertes", async () => {
+  test("affiche le bouton S'inscrire si responsable et inscriptions ouvertes et pas encore inscrit", async () => {
     (teamService.getMyTeam as ReturnType<typeof vi.fn>).mockResolvedValue(
       myTeamResponsible,
     );
@@ -291,11 +309,36 @@ describe('TournamentDetail', () => {
           ...baseTournament,
           status: 'PREPARATION',
           isPublic: true,
+          registeredTeamNames: [],
         }}
+        onRegister={onRegister}
       />,
     );
     await waitFor(() => {
       expect(screen.queryByText("S'inscrire")).toBeTruthy();
+    });
+  });
+
+  test("n'affiche pas le bouton S'inscrire si la team est déjà inscrite", async () => {
+    (teamService.getMyTeam as ReturnType<typeof vi.fn>).mockResolvedValue(
+      myTeamResponsible,
+    );
+    renderWithContext(
+      <TournamentDetail
+        tournament={{
+          ...baseTournament,
+          status: 'PREPARATION',
+          isPublic: true,
+          registeredTeamNames: ['TEAM_ALPHA'],
+        }}
+        onRegister={onRegister}
+      />,
+    );
+    await waitFor(() => {
+      expect(screen.queryByText("S'inscrire")).toBeFalsy();
+      expect(
+        screen.queryByText('Vous êtes déjà inscrits à ce tournoi.'),
+      ).toBeTruthy();
     });
   });
 
@@ -310,6 +353,7 @@ describe('TournamentDetail', () => {
           status: 'IN_PROGRESS',
           isPublic: true,
         }}
+        onRegister={onRegister}
       />,
     );
     await waitFor(() => {
