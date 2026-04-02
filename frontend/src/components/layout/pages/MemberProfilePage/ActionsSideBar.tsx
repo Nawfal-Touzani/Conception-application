@@ -6,8 +6,14 @@ export const ActionSidebar = ({ profile }: { profile: MemberProfile }) => {
   const navigate = useNavigate();
 
   const actions = [
-    { text: 'Consulter mes tournois disputés', path: '#' },
-    { text: 'Visualiser mes tournois à venir', path: '#' },
+    {
+      text: 'Consulter mes tournois disputés',
+      path: `/tournaments?tag=${profile.tag}&status=FINISHED`,
+    },
+    {
+      text: 'Visualiser mes tournois à venir',
+      path: `/tournaments?tag=${profile.tag}&status=OPEN`,
+    },
   ];
 
   if (!profile.teamName) {

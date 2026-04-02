@@ -23,6 +23,7 @@ import {
 } from '../../../../types/tournament.types';
 import TournamentDetail from './TournamentDetailPage';
 import TournamentAdminPage from './TournamentAdminPage';
+import { useSearchParams } from 'react-router-dom';
 
 const COLUMNS = 3;
 const CARD_WIDTH = 320;
@@ -62,14 +63,16 @@ const TournamentsPage = () => {
   const [adminTournament, setAdminTournament] =
     useState<TournamentDetails | null>(null);
 
+  const [searchParams] = useSearchParams();
   const [teamSearch, setTeamSearch] = useState('');
-  const [tagSearch, setTagSearch] = useState('');
+  const [tagSearch, setTagSearch] = useState(searchParams.get('tag') || '');
   const [nameSearch, setNameSearch] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [statusFilter, setStatusFilter] = useState<
     TournamentStatus | 'OPEN' | ''
-  >('');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  >((searchParams.get('status') as any) || '');
   const [visibilityFilter, setVisibilityFilter] = useState<
     'public' | 'private' | ''
   >('');
