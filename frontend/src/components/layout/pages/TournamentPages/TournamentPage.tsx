@@ -44,7 +44,15 @@ const formatDateFull = (dateStr: string) =>
 
 function getStateLabel(tournament: TournamentDetails): string {
   if (tournament.status === 'PREPARATION') {
-    return tournament.isPublic ? 'Inscriptions ouvertes' : 'En préparation';
+    if (!tournament.isPublic) return 'En préparation';
+
+    const deadlinePassed =
+      new Date(tournament.registrationDeadline) < new Date();
+    const isFull = tournament.currentParticipants >= tournament.maxParticipants;
+
+    if (deadlinePassed || isFull) return 'En préparation';
+
+    return 'Inscriptions ouvertes';
   }
   if (tournament.status === 'IN_PROGRESS') return 'En cours';
   if (tournament.status === 'FINISHED') return 'Terminé';
@@ -129,18 +137,25 @@ const TournamentsPage = () => {
       )
         return false;
       if (startDate && t.startDate < startDate) return false;
-      if (endDate && t.startDate > endDate) return false;
-      if (
-        statusFilter === 'OPEN' &&
-        !(t.isPublic && t.status === 'PREPARATION')
-      )
-        return false;
-      else if (
+      if (endDate && t.endDate > endDate) return false;
+      if (statusFilter === 'OPEN') {
+        const deadlinePassed = new Date(t.registrationDeadline) < new Date();
+        const isFull = t.currentParticipants >= t.maxParticipants;
+        if (
+          !(
+            t.isPublic &&
+            t.status === 'PREPARATION' &&
+            !deadlinePassed &&
+            !isFull
+          )
+        )
+          return false;
+      } else if (
         statusFilter &&
-        statusFilter !== 'OPEN' &&
-        t.status !== statusFilter
-      )
+        t.status !== (statusFilter as TournamentStatus)
+      ) {
         return false;
+      }
       if (visibilityFilter === 'public' && !t.isPublic) return false;
       if (visibilityFilter === 'private' && t.isPublic) return false;
       return true;
