@@ -1,257 +1,26 @@
-import { useEffect, useState } from 'react';
 import { Box, Button, Divider, Paper, Typography } from '@mui/material';
 import { TournamentDetails } from '../../../../types/tournament.types';
-import { TeamDto } from '../../../../types/team.types';
-import { useAuth } from '../../../../contexts/useAuth';
-import * as teamService from '../../../../services/team.service';
+import { useTournamentDetail } from '../../../../hooks/useTournamentDetail/useTournamentDetail';
+import BracketSVG, {
+  BRACKET_TEAM_W,
+  BRACKET_COL_GAP,
+} from '../../../ui/BracketSVG/BracketSVG';
+import { formatDate, formatStatus } from '../../../../utils/tournament.utils';
 
 type Props = {
   tournament: TournamentDetails;
   onRegister: () => Promise<void>;
 };
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('fr-BE', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
-}
-
-function formatStatus(tournament: TournamentDetails): string {
-  if (tournament.status === 'PREPARATION') {
-    return tournament.isPublic ? 'Inscriptions ouvertes' : 'En préparation';
-  }
-  if (tournament.status === 'IN_PROGRESS') return 'En cours';
-  if (tournament.status === 'FINISHED') return 'Terminé';
-  return 'Annulé';
-}
-
-// ── Bracket SVG ──
-const TEAM_W = 180;
-const TEAM_H = 28;
-const TEAM_GAP = 6;
-const MATCH_H = TEAM_H * 2 + TEAM_GAP;
-const COL_GAP = 60;
-const ROW_GAP = 32;
-
-function quartsY(): number[] {
-  return [0, 1, 2, 3].map((i) => i * (MATCH_H + ROW_GAP) + MATCH_H / 2);
-}
-
-function demisY(): number[] {
-  const q = quartsY();
-  return [(q[0] + q[1]) / 2, (q[2] + q[3]) / 2];
-}
-
-function finaleY(): number {
-  const d = demisY();
-  return (d[0] + d[1]) / 2;
-}
-
-const svgH = 4 * MATCH_H + 3 * ROW_GAP;
-const col0X = 0;
-const col1X = col0X + TEAM_W + COL_GAP;
-const col2X = col1X + TEAM_W + COL_GAP;
-const svgW = col2X + TEAM_W;
-
-function MatchBox({
-  x,
-  y,
-  topWinner,
-}: {
-  x: number;
-  y: number;
-  topWinner?: boolean;
-  label?: string;
-}) {
-  const topColor = topWinner ? '#27ae60' : '#e74c3c';
-  const botColor = topWinner ? '#e74c3c' : '#27ae60';
-  return (
-    <g>
-      <rect
-        x={x}
-        y={y}
-        width={TEAM_W}
-        height={TEAM_H}
-        fill="#1a2744"
-        stroke={topColor}
-        strokeWidth={2}
-        rx={3}
-      />
-      <text x={x + 8} y={y + TEAM_H / 2 + 5} fill="#fff" fontSize={12}>
-        Nom équipe
-      </text>
-      <text
-        x={x + TEAM_W - 8}
-        y={y + TEAM_H / 2 + 5}
-        fill="#fff"
-        fontSize={12}
-        textAnchor="end"
-      >
-        score
-      </text>
-      <rect
-        x={x}
-        y={y + TEAM_H + TEAM_GAP}
-        width={TEAM_W}
-        height={TEAM_H}
-        fill="#1a2744"
-        stroke={botColor}
-        strokeWidth={2}
-        rx={3}
-      />
-      <text
-        x={x + 8}
-        y={y + TEAM_H + TEAM_GAP + TEAM_H / 2 + 5}
-        fill="#fff"
-        fontSize={12}
-      >
-        Nom équipe
-      </text>
-      <text
-        x={x + TEAM_W - 8}
-        y={y + TEAM_H + TEAM_GAP + TEAM_H / 2 + 5}
-        fill="#fff"
-        fontSize={12}
-        textAnchor="end"
-      >
-        score
-      </text>
-    </g>
-  );
-}
-
-function BracketSVG() {
-  const qCY = quartsY();
-  const dCY = demisY();
-  const fCY = finaleY();
-  const qBoxY = qCY.map((cy) => cy - MATCH_H / 2);
-  const dBoxY = dCY.map((cy) => cy - MATCH_H / 2);
-  const fBoxY = fCY - MATCH_H / 2;
-  const connectorQD = [
-    { q0: 0, q1: 1, d: 0 },
-    { q0: 2, q1: 3, d: 1 },
-  ];
-
-  return (
-    <svg width={svgW} height={svgH} style={{ overflow: 'visible' }}>
-      {qBoxY.map((y, i) => (
-        <MatchBox key={i} x={col0X} y={y} topWinner={true} />
-      ))}
-      {connectorQD.map(({ q0, q1, d }) => {
-        const midX = col0X + TEAM_W + COL_GAP / 2;
-        return (
-          <g key={d} stroke="#fff" strokeWidth={2} fill="none">
-            <line x1={col0X + TEAM_W} y1={qCY[q0]} x2={midX} y2={qCY[q0]} />
-            <line x1={col0X + TEAM_W} y1={qCY[q1]} x2={midX} y2={qCY[q1]} />
-            <line x1={midX} y1={qCY[q0]} x2={midX} y2={qCY[q1]} />
-            <line x1={midX} y1={dCY[d]} x2={col1X} y2={dCY[d]} />
-          </g>
-        );
-      })}
-      {dBoxY.map((y, i) => (
-        <MatchBox key={i} x={col1X} y={y} topWinner={true} />
-      ))}
-      <g stroke="#fff" strokeWidth={2} fill="none">
-        <line
-          x1={col1X + TEAM_W}
-          y1={dCY[0]}
-          x2={col1X + TEAM_W + COL_GAP / 2}
-          y2={dCY[0]}
-        />
-        <line
-          x1={col1X + TEAM_W}
-          y1={dCY[1]}
-          x2={col1X + TEAM_W + COL_GAP / 2}
-          y2={dCY[1]}
-        />
-        <line
-          x1={col1X + TEAM_W + COL_GAP / 2}
-          y1={dCY[0]}
-          x2={col1X + TEAM_W + COL_GAP / 2}
-          y2={dCY[1]}
-        />
-        <line x1={col1X + TEAM_W + COL_GAP / 2} y1={fCY} x2={col2X} y2={fCY} />
-      </g>
-      <MatchBox x={col2X} y={fBoxY} topWinner={true} />
-    </svg>
-  );
-}
-
 const TournamentDetail = ({ tournament, onRegister }: Props) => {
-  const { user } = useAuth();
-  const token = user?.token ?? '';
-
-  const [myTeam, setMyTeam] = useState<TeamDto | null>(null);
-  const [registerSuccess, setRegisterSuccess] = useState(false);
-  const [registerError, setRegisterError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!token) return;
-    teamService
-      .getMyTeam(token)
-      .then((team) => setMyTeam(team))
-      .catch(() => setMyTeam(null));
-  }, [token]);
-
-  const isResponsible =
-    myTeam !== null &&
-    (myTeam.responsibleTag === user?.tag ||
-      myTeam.secondResponsibleTag === user?.tag);
-
-  const isAlreadyRegistered =
-    myTeam !== null &&
-    (tournament.registeredTeamNames ?? []).includes(myTeam.name);
-
-  const registrationOpen =
-    tournament.status === 'PREPARATION' && tournament.isPublic;
-
-  const handleRegister = async () => {
-    if (!myTeam) return;
-    setRegisterError(null);
-    try {
-      const response = await fetch(
-        `/api/tournaments/${tournament.id}/teams/${myTeam.id}`,
-        { method: 'POST', headers: { Authorization: `Bearer ${token}` } },
-      );
-      if (!response.ok) {
-        const text = await response.text();
-        try {
-          const json = JSON.parse(text);
-          const msg = json.message || '';
-          if (msg.includes('already')) {
-            await onRegister();
-          } else if (msg.includes('4 member')) {
-            setRegisterError('Votre équipe doit avoir au moins 4 membres.');
-          } else if (msg.includes('deadline') || msg.includes('past')) {
-            setRegisterError("La date limite d'inscription est dépassée.");
-          } else if (msg.includes('full') || msg.includes('maximum')) {
-            setRegisterError('Le tournoi est complet.');
-          } else if (msg.includes('public')) {
-            setRegisterError(
-              "Le tournoi n'est pas encore ouvert aux inscriptions.",
-            );
-          } else if (msg.includes('preparation')) {
-            setRegisterError("Le tournoi n'est plus en phase d'inscription.");
-          } else if (msg.includes('responsible')) {
-            setRegisterError(
-              'Seul le responsable ou second responsable peut inscrire la team.',
-            );
-          } else {
-            setRegisterError(msg || "Erreur lors de l'inscription.");
-          }
-        } catch {
-          setRegisterError(text || "Erreur lors de l'inscription.");
-        }
-      } else {
-        setRegisterSuccess(true);
-        await onRegister();
-      }
-    } catch {
-      setRegisterError("Erreur lors de l'inscription.");
-    }
-  };
+  const {
+    isResponsible,
+    isAlreadyRegistered,
+    registrationOpen,
+    registerSuccess,
+    registerError,
+    handleRegister,
+  } = useTournamentDetail(tournament, onRegister);
 
   return (
     <Box
@@ -266,7 +35,6 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
         pb: 5,
       }}
     >
-      {/* Titre */}
       <Typography
         variant="h4"
         sx={{ color: '#fff', fontWeight: 800, mb: 1, textAlign: 'center' }}
@@ -274,7 +42,6 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
         {tournament.name}
       </Typography>
 
-      {/* Description */}
       {tournament.description && (
         <Typography
           sx={{
@@ -305,31 +72,31 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
                 color: '#fff',
                 fontWeight: 800,
                 fontSize: '1.2rem',
-                width: TEAM_W,
+                width: BRACKET_TEAM_W,
                 textAlign: 'center',
               }}
             >
               Quarts
             </Typography>
-            <Box sx={{ width: COL_GAP }} />
+            <Box sx={{ width: BRACKET_COL_GAP }} />
             <Typography
               sx={{
                 color: '#fff',
                 fontWeight: 800,
                 fontSize: '1.2rem',
-                width: TEAM_W,
+                width: BRACKET_TEAM_W,
                 textAlign: 'center',
               }}
             >
               Demi
             </Typography>
-            <Box sx={{ width: COL_GAP }} />
+            <Box sx={{ width: BRACKET_COL_GAP }} />
             <Typography
               sx={{
                 color: '#fff',
                 fontWeight: 800,
                 fontSize: '1.2rem',
-                width: TEAM_W,
+                width: BRACKET_TEAM_W,
                 textAlign: 'center',
               }}
             >
@@ -349,7 +116,6 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
             gap: 2,
           }}
         >
-          {/* Date / Teams / Statut */}
           <Paper
             elevation={0}
             sx={{ borderRadius: '12px', p: 3, backgroundColor: '#fff' }}
@@ -418,7 +184,6 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
             </Box>
           </Paper>
 
-          {/* Teams participantes */}
           <Paper
             elevation={0}
             sx={{ borderRadius: '12px', p: 3, backgroundColor: '#fff' }}
@@ -491,7 +256,6 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
             )}
           </Paper>
 
-          {/* Gagnant */}
           {tournament.status === 'FINISHED' && tournament.winnerTeamName && (
             <Paper
               elevation={0}
@@ -516,7 +280,6 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
             </Paper>
           )}
 
-          {/* Inscriptions */}
           <Paper
             elevation={0}
             sx={{ borderRadius: '12px', p: 3, backgroundColor: '#fff' }}
