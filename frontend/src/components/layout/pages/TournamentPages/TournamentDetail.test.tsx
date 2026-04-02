@@ -53,7 +53,7 @@ const baseTournament = {
   maxParticipants: 8,
   currentParticipants: 3,
   organizerTag: 'Admin',
-  registeredTeamNames: ['TEAM_OMEGA', 'TEAM_NOVA', 'TEAM_VOID'],
+  registeredTeamNames: ['TEAM_OMEGA', 'TEAM_VOID', 'TEAM_STORM'],
 };
 
 const renderWithContext = (component: React.ReactElement) =>
@@ -110,7 +110,7 @@ describe('TournamentDetail', () => {
         onRegister={onRegister}
       />,
     );
-    expect(screen.getByText('En préparation')).toBeTruthy();
+    expect(screen.getAllByText('En préparation').length).toBeGreaterThan(0);
   });
 
   test('affiche "En cours" pour IN_PROGRESS', () => {
@@ -219,8 +219,8 @@ describe('TournamentDetail', () => {
       />,
     );
     expect(screen.getByText('TEAM_OMEGA')).toBeTruthy();
-    expect(screen.getByText('TEAM_NOVA')).toBeTruthy();
     expect(screen.getByText('TEAM_VOID')).toBeTruthy();
+    expect(screen.getByText('TEAM_STORM')).toBeTruthy();
   });
 
   test('affiche les sections du bracket', () => {
@@ -261,13 +261,14 @@ describe('TournamentDetail', () => {
           ...baseTournament,
           status: 'FINISHED',
           isPublic: true,
-          winnerTeamName: 'TEAM_NOVA',
+          winnerTeamName: 'TEAM_WINNER',
+          registeredTeamNames: [],
         }}
         onRegister={onRegister}
       />,
     );
     expect(screen.getByText('🏆 Gagnant')).toBeTruthy();
-    expect(screen.getByText('TEAM_NOVA')).toBeTruthy();
+    expect(screen.getByText('TEAM_WINNER')).toBeTruthy();
   });
 
   test("n'affiche pas le gagnant si FINISHED mais winnerTeamName absent", () => {
