@@ -5,10 +5,14 @@ import {
   Button,
   Alert,
   Paper,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import { useAuth } from '../../../../contexts/useAuth';
 import * as tournamentService from '../../../../services/tournament/tournament.service';
 import { useTournamentForm } from '../../../../hooks/useTournamentForm/useTournamentForm';
+
+const NUMBER_OF_TEAM = [2, 4, 8, 16, 32, 64, 128];
 
 const CreateTournamentPage = () => {
   const { user } = useAuth();
@@ -193,20 +197,40 @@ const CreateTournamentPage = () => {
                 sx={inputSx}
               />
             </Box>
+
             <Box>
               <Label text="Nombre maximum d'équipes :" />
-              <TextField
-                placeholder="Doit être une puissance de deux"
-                type="number"
+              <Select
                 value={maxParticipants}
                 onChange={(e) =>
                   setMaxParticipants(
                     e.target.value === '' ? '' : Number(e.target.value),
                   )
                 }
+                displayEmpty
                 fullWidth
-                sx={inputSx}
-              />
+                renderValue={(selected) => {
+                  if (!selected) {
+                    return (
+                      <span style={{ color: '#999' }}>
+                        Choisir le nombre d'équipes
+                      </span>
+                    );
+                  }
+                  return selected;
+                }}
+                sx={{
+                  backgroundColor: '#fff',
+                  borderRadius: '6px',
+                  '& .MuiSelect-select': { py: '16.5px' },
+                }}
+              >
+                {NUMBER_OF_TEAM.map((val) => (
+                  <MenuItem key={val} value={val}>
+                    {val} équipes
+                  </MenuItem>
+                ))}
+              </Select>
             </Box>
           </Box>
         </Box>

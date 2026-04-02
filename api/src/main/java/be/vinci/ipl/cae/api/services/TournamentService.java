@@ -47,7 +47,7 @@ public class TournamentService {
   }
 
   /**
-   * Create tournament tournament.
+   * Create tournament.
    *
    * @param organizerId the organizer id
    * @param dto         the dto
@@ -86,7 +86,7 @@ public class TournamentService {
    * @param dto the dto
    * @return the tournament
    */
-  public Tournament updateTournament(Long id, TournamentDto dto) {
+  public TournamentResponseDto updateTournament(Long id, TournamentDto dto) {
     Tournament tournament = getTournamentInPreparation(id);
 
     if (dto.startDate().isBefore(LocalDate.now()) || dto.endDate().isBefore(LocalDate.now())) {
@@ -98,12 +98,19 @@ public class TournamentService {
     }
 
     validateTournamentDto(dto);
+    int currentParticipants = registrationRepository.findByTournamentId(tournament.getId()).size();
+    if (dto.maxParticipant() < currentParticipants) {
+      throw new IllegalArgumentException(
+          "Max participants cannot be lower than the number of registered teams"
+      );
+    }
     applyDtoToTournament(tournament, dto);
-    return tournamentRepository.save(tournament);
+    Tournament saved = tournamentRepository.save(tournament);
+    return toResponseDto(saved);
   }
 
   /**
-   * Publish tournament tournament.
+   * Publish tournament.
    *
    * @param id the id
    * @return the tournament

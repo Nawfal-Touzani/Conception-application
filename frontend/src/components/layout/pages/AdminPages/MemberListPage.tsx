@@ -1,46 +1,31 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Box, Typography, Button, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import * as adminService from '../../../../services/admin.service';
 import { MemberDto } from '../../../../types/admin.types';
 import { useAuth } from '../../../../contexts/useAuth';
-import { MemberRow } from './MemberRow';
-import { BanModal } from '../../../pages/AdminPages/Ban/BanModal';
-import { BanInfoModal } from '../../../pages/AdminPages/Ban/BanInfoModal';
+import { BanModal } from './Ban/BanModal';
+import { BanInfoModal } from './Ban/BanInfoModal';
+import { useMembersManagement } from '../../../../hooks/useMemberManagement/useMembersManagement';
+import { MemberListSection } from './MemberListSection';
 
 const MembersListPage = () => {
-  const [members, setMembers] = useState<MemberDto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const { activeMembers, bannedMembers, loading, handleBan } =
+    useMembersManagement(user?.token ?? '', user?.tag);
+
   const [banTarget, setBanTarget] = useState<MemberDto | null>(null);
   const [infoTarget, setInfoTarget] = useState<MemberDto | null>(null);
 
-  useEffect(() => {
-    adminService
-      .getAllMembers(user?.token ?? '')
-      .then(setMembers)
-      .finally(() => setLoading(false));
-  }, [user]);
-
-  const activeMembers = members.filter((m) => !m.isBan && m.tag !== user?.tag);
-  const bannedMembers = members.filter((m) => m.isBan && m.tag !== user?.tag);
-
-  const handleConfirmBan = async (reason: string) => {
-    if (!banTarget) return;
-
-    const res = await adminService.banMember(
-      user?.token ?? '',
-      banTarget.id,
-      reason,
-    );
-    if (res.ok) {
-      const updatedMembers = await adminService.getAllMembers(
-        user?.token ?? '',
-      );
-      setMembers(updatedMembers);
-    } else {
-      throw new Error();
+  const onConfirmBan = async (reason: string) => {
+    if (banTarget) {
+      try {
+        await handleBan(banTarget.id, reason);
+        setBanTarget(null);
+      } catch (error) {
+        alert('Erreur lors du bannissement');
+      }
     }
   };
 
@@ -89,69 +74,22 @@ const MembersListPage = () => {
               alignItems: 'flex-start',
             }}
           >
-            <Box sx={{ flex: 1, width: '100%' }}>
-              <Typography
-                variant="h6"
-                sx={{
-                  color: '#fff',
-                  mb: 2,
-                  borderBottom: '2px solid #11981a',
-                  pb: 1,
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <span>Membres Actifs</span>
-                <span>{activeMembers.length}</span>
-              </Typography>
+            <MemberListSection
+              title="Membres Actifs"
+              count={activeMembers.length}
+              members={activeMembers}
+              borderColor="#11981a"
+              onAction={setBanTarget}
+            />
 
-              {activeMembers.map((m) => (
-                <MemberRow
-                  key={m.id}
-                  member={m}
-                  onBan={() => setBanTarget(m)}
-                />
-              ))}
-            </Box>
-
-            <Box sx={{ flex: 1, width: '100%' }}>
-              <Typography
-                variant="h6"
-                sx={{
-                  color: '#fff',
-                  mb: 2,
-                  borderBottom: '2px solid #b40f0f',
-                  pb: 1,
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <span>Membres Bannis</span>
-                <span>{bannedMembers.length}</span>
-              </Typography>
-
-              {bannedMembers.length === 0 ? (
-                <Typography
-                  sx={{
-                    color: 'rgba(255,255,255,0.4)',
-                    textAlign: 'center',
-                    mt: 4,
-                  }}
-                >
-                  Aucun membre banni
-                </Typography>
-              ) : (
-                <Box sx={{ opacity: 0.5 }}>
-                  {bannedMembers.map((m) => (
-                    <MemberRow
-                      key={m.id}
-                      member={m}
-                      onShowBanInfo={(member) => setInfoTarget(member)}
-                    />
-                  ))}
-                </Box>
-              )}
-            </Box>
+            <MemberListSection
+              title="Membres Bannis"
+              count={bannedMembers.length}
+              members={bannedMembers}
+              borderColor="#b40f0f"
+              isBannedSection
+              onAction={setInfoTarget}
+            />
           </Box>
         )}
 
@@ -159,15 +97,15 @@ const MembersListPage = () => {
           open={!!banTarget}
           member={banTarget}
           onClose={() => setBanTarget(null)}
-          onConfirm={handleConfirmBan}
+          onConfirm={onConfirmBan}
+        />
+
+        <BanInfoModal
+          open={!!infoTarget}
+          onClose={() => setInfoTarget(null)}
+          member={infoTarget}
         />
       </Box>
-
-      <BanInfoModal
-        open={!!infoTarget}
-        onClose={() => setInfoTarget(null)}
-        member={infoTarget}
-      />
     </Box>
   );
 };

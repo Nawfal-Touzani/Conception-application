@@ -38,9 +38,21 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
   const [registrationDeadline, setRegistrationDeadline] = useState(
     tournament.registrationDeadline,
   );
+  const [maxParticipants, setMaxParticipants] = useState(
+    tournament.maxParticipants,
+  );
 
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const isPowerOfTwo = (n: number) => n > 0 && (n & (n - 1)) === 0;
+
+  const maxParticipantsError =
+    maxParticipants < tournament.currentParticipants
+      ? 'Impossible de mettre moins que les équipes déjà inscrites.'
+      : !isPowerOfTwo(maxParticipants)
+        ? 'Le nombre de teams doit être une puissance de 2.'
+        : '';
 
   const handleUpdate = async () => {
     setErrorMsg(null);
@@ -53,7 +65,7 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
           startDate,
           endDate,
           registrationDeadline,
-          maxParticipant: tournament.maxParticipants,
+          maxParticipant: maxParticipants,
         },
         token,
       );
@@ -100,7 +112,6 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
         pb: 6,
       }}
     >
-      {/* Header */}
       <Box
         sx={{
           width: '100%',
@@ -129,7 +140,6 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
         />
       </Box>
 
-      {/* Form card */}
       <Box
         sx={{
           width: '100%',
@@ -142,9 +152,7 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
           gap: 3,
         }}
       >
-        {/* Row: info + deadline */}
         <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-          {/* Colonne gauche */}
           <Box
             sx={{
               flex: 1,
@@ -205,7 +213,6 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
             />
           </Box>
 
-          {/* Colonne droite */}
           <Box
             sx={{
               flex: 1,
@@ -229,7 +236,34 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
               sx={inputSx}
             />
 
-            {/* Actions */}
+            <Typography
+              sx={{ color: '#fff', fontWeight: 600, fontSize: '0.9rem' }}
+            >
+              Nombre de teams :
+            </Typography>
+            <TextField
+              fullWidth
+              type="number"
+              value={maxParticipants}
+              onChange={(e) => setMaxParticipants(Number(e.target.value))}
+              size="small"
+              error={!!maxParticipantsError}
+              helperText={
+                maxParticipantsError ||
+                `Équipes déjà inscrites : ${tournament.currentParticipants}`
+              }
+              inputProps={{ min: tournament.currentParticipants, step: 1 }}
+              sx={{
+                ...inputSx,
+                '& .MuiFormHelperText-root': {
+                  color: maxParticipantsError
+                    ? '#ffb3b3'
+                    : 'rgba(255,255,255,0.7)',
+                  marginLeft: 0,
+                },
+              }}
+            />
+
             <Typography
               sx={{ color: '#fff', fontWeight: 600, fontSize: '0.9rem', mt: 2 }}
             >
@@ -269,11 +303,11 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
           </Box>
         </Box>
 
-        {/* Bouton confirmer */}
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
           <Button
             variant="contained"
             onClick={handleUpdate}
+            disabled={!!maxParticipantsError}
             sx={{
               backgroundColor: '#fff',
               color: '#1a2744',
@@ -283,6 +317,10 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
               borderRadius: '8px',
               px: 5,
               '&:hover': { backgroundColor: '#e8e8e8' },
+              '&.Mui-disabled': {
+                backgroundColor: 'rgba(255,255,255,0.3)',
+                color: 'rgba(26,39,68,0.6)',
+              },
             }}
           >
             Confirmer les modifications
@@ -290,7 +328,6 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
         </Box>
       </Box>
 
-      {/* Snackbars */}
       <Snackbar
         open={!!successMsg}
         autoHideDuration={3000}
