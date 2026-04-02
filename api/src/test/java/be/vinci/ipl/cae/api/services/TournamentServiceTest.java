@@ -250,20 +250,25 @@ class TournamentServiceTest {
   @Test
   void updateTournamentSuccess() {
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(savedTournament));
+    when(registrationRepository.findByTournamentId(1L)).thenReturn(List.of());
     when(tournamentRepository.save(Mockito.any(Tournament.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
     LocalDate now = LocalDate.now();
     TournamentDto updateDto = new TournamentDto(
-        "Nouveau nom", "Nouvelle description",
-        now.plusDays(6), now.plusDays(12), now.plusDays(4), 16
+        "Nouveau nom",
+        "Nouvelle description",
+        now.plusDays(6),
+        now.plusDays(12),
+        now.plusDays(4),
+        16
     );
 
-    Tournament result = tournamentService.updateTournament(1L, updateDto);
+    TournamentResponseDto result = tournamentService.updateTournament(1L, updateDto);
 
-    assertEquals("Nouveau nom", result.getName());
-    assertEquals("Nouvelle description", result.getDescription());
-    assertEquals(16, result.getMaxParticipants());
+    assertEquals("Nouveau nom", result.name());
+    assertEquals("Nouvelle description", result.description());
+    assertEquals(16, result.maxParticipants());
   }
 
   /**

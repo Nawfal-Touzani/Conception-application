@@ -49,10 +49,10 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
 
   const maxParticipantsError =
     maxParticipants < tournament.currentParticipants
-      ? "Impossible de mettre moins que les équipes déjà inscrites."
+      ? 'Impossible de mettre moins que les équipes déjà inscrites.'
       : !isPowerOfTwo(maxParticipants)
-      ? 'Le nombre de teams doit être une puissance de 2.'
-      : '';
+        ? 'Le nombre de teams doit être une puissance de 2.'
+        : '';
 
   const handleUpdate = async () => {
     setErrorMsg(null);
