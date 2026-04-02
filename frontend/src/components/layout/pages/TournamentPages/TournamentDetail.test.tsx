@@ -3,7 +3,7 @@ import { describe, test, expect, vi, beforeEach } from 'vitest';
 import TournamentDetail from './TournamentDetailPage';
 import { AuthContext } from '../../../../contexts/AuthContext';
 
-vi.mock('../../../services/team.service', () => ({
+vi.mock('../../../../services/team.service', () => ({
   getMyTeam: vi.fn(),
 }));
 
