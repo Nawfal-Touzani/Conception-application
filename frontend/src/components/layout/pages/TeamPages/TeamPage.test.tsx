@@ -4,6 +4,10 @@ import { describe, test, expect, vi, beforeEach } from 'vitest';
 import TeamPage from './TeamPage';
 import { AuthContext } from '../../../../contexts/AuthContext';
 
+vi.mock('../../../../services/tournament/tournament.service', () => ({
+  getTournaments: vi.fn().mockResolvedValue([]),
+}));
+
 const mockUser = {
   id: 1,
   email: 'lynx@vinci.be',
@@ -52,7 +56,7 @@ const renderTeamPage = () =>
     </MemoryRouter>,
   );
 
-// Mock les deux fetches initiaux (membres + équipe)
+// Mock les fetches initiaux : membres + équipe
 const mockInitialFetches = () => {
   (global.fetch as ReturnType<typeof vi.fn>)
     .mockResolvedValueOnce({
@@ -103,7 +107,6 @@ describe('TeamPage — avec équipe', () => {
     mockInitialFetches();
     renderTeamPage();
     await screen.findByText('TEAM_ALPHA');
-    // Lynx apparaît dans "Responsable :" et dans la liste — on vérifie qu'il y en a au moins 2
     const lynxElements = screen.getAllByText('Lynx');
     expect(lynxElements.length).toBeGreaterThanOrEqual(2);
   });
@@ -157,14 +160,15 @@ describe('TeamPage — avec équipe', () => {
     fireEvent.click(screen.getByText('Quitter'));
     await screen.findByText("Quitter l'équipe");
 
-    // DELETE réussi + reload → 404 (plus d'équipe) + GET /teams pour JoinOrCreateTeam
     (global.fetch as ReturnType<typeof vi.fn>)
       .mockResolvedValueOnce({ ok: true, status: 200 })
-      .mockResolvedValueOnce({ ok: false, status: 404, json: async () => ({}) })
-      .mockResolvedValueOnce({ ok: true, json: async () => [] });
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        json: async () => ({}),
+      });
 
     fireEvent.click(screen.getByText('Confirmer'));
-
     await waitFor(() => {
       expect(screen.queryByText("Quitter l'équipe")).toBeFalsy();
     });
@@ -184,7 +188,6 @@ describe('TeamPage — avec équipe', () => {
     });
 
     fireEvent.click(screen.getByText('Confirmer'));
-
     expect(await screen.findByText('Une erreur est survenue.')).toBeTruthy();
   });
 
@@ -204,7 +207,6 @@ describe('TeamPage — avec équipe', () => {
     });
 
     fireEvent.click(screen.getByText('Confirmer'));
-
     expect(
       await screen.findByText(
         'Désignez un second responsable avant de quitter.',
@@ -224,7 +226,6 @@ describe('TeamPage — avec équipe', () => {
     );
 
     fireEvent.click(screen.getByText('Confirmer'));
-
     expect(await screen.findByText('Erreur réseau.')).toBeTruthy();
   });
 
@@ -239,14 +240,12 @@ describe('TeamPage — avec équipe', () => {
     renderTeamPage();
     await screen.findByText('Nommer');
 
-    // PUT réussi + reload
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
     });
     mockReload();
 
     fireEvent.click(screen.getByText('Nommer'));
-
     expect(
       await screen.findByText('Second responsable nommé avec succès.'),
     ).toBeTruthy();
@@ -255,17 +254,24 @@ describe('TeamPage — avec équipe', () => {
   test('affiche erreur si la nomination échoue', async () => {
     mockInitialFetches();
     renderTeamPage();
-    await screen.findByText('Nommer');
+    expect(await screen.findByText('Nommer')).toBeTruthy();
 
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: false,
     });
 
     fireEvent.click(screen.getByText('Nommer'));
-
     expect(
       await screen.findByText('Impossible de nommer ce membre.'),
     ).toBeTruthy();
+  });
+
+  test('affiche les onglets Tournois', async () => {
+    mockInitialFetches();
+    renderTeamPage();
+    await screen.findByText('Mon équipe');
+    expect(await screen.findByText(/En cours/)).toBeTruthy();
+    expect(await screen.findByText(/À venir/)).toBeTruthy();
   });
 });
 
@@ -292,9 +298,8 @@ describe('TeamPage — dernier membre', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => mockTeam });
 
     renderTeamPage();
-    await screen.findByText('Quitter');
+    expect(await screen.findByText('Quitter')).toBeTruthy();
     fireEvent.click(screen.getByText('Quitter'));
-
     expect(
       await screen.findByText(/Quitter supprimera définitivement l'équipe/),
     ).toBeTruthy();
