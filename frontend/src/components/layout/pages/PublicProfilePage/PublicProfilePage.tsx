@@ -1,21 +1,11 @@
-import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, Avatar, Button } from '@mui/material';
-import { getPublicMemberById } from '../../../../services/memberService';
-import { PublicMember } from '../../../../types/publicMember';
+import { usePublicMember } from '../../../../hooks/usePublicMember/usePublicMember';
 
 const PublicProfilePage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [member, setMember] = useState<PublicMember | null>(null);
-
-  useEffect(() => {
-    if (id) {
-      getPublicMemberById(id)
-        .then(setMember)
-        .catch(() => navigate('/'));
-    }
-  }, [id, navigate]);
+  const { member } = usePublicMember(id);
 
   if (!member) return null;
 
