@@ -1,11 +1,5 @@
 import { Box } from '@mui/material';
-
-interface AvatarItemProps {
-  url: string;
-  isSelected: boolean;
-  onClick: () => void;
-  altText: string;
-}
+import { AvatarItemProps } from '../../../types/avatar.types';
 
 export const AvatarItem = ({
   url,

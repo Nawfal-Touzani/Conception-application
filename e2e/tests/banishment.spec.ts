@@ -10,7 +10,7 @@ import {
   generateValidCredentials,
 } from "./helper";
 
-const BAN_REASON = "Comportement inapproprié lors des parties.";
+const BAN_REASON = "Triches";
 
 test.describe("Ban Member", () => {
 
