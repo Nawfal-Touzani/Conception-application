@@ -319,7 +319,8 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
             {registrationOpen &&
               isResponsible &&
               !isAlreadyRegistered &&
-              !registerSuccess && (
+              !registerSuccess &&
+              tournament.currentParticipants < tournament.maxParticipants && (
                 <Button
                   variant="contained"
                   onClick={handleRegister}
@@ -338,6 +339,16 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
                 </Button>
               )}
 
+            {registrationOpen &&
+              !isAlreadyRegistered &&
+              tournament.currentParticipants >= tournament.maxParticipants && (
+                <Typography
+                  sx={{ color: '#e74c3c', fontSize: '0.9rem', mt: 1 }}
+                >
+                  Le tournoi est complet.
+                </Typography>
+              )}
+
             {registerSuccess && (
               <Typography
                 sx={{
@@ -351,7 +362,7 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
               </Typography>
             )}
 
-            {isAlreadyRegistered && (
+            {registrationOpen && isAlreadyRegistered && !registerSuccess && (
               <Typography
                 sx={{
                   color: '#1a2744',
