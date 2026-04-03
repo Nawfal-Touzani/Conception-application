@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useTournamentForm } from './useTournamentForm';
-import * as validationUtils from '../../utils/tournamentValidation';
+import * as validationUtils from '../../utils/TournamentValidation/tournamentValidation';
 
 describe('useTournamentForm', () => {
   test('initial state is empty', () => {

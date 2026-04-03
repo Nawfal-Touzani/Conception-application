@@ -1,4 +1,4 @@
-import { TournamentDetails } from '../types/tournament.types';
+import { TournamentDetails } from '../../types/tournament.types';
 
 export const formatDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString('fr-BE', {

@@ -6,7 +6,10 @@ import {
   BRACKET_TEAM_W,
   BRACKET_COL_GAP,
 } from '../../../ui/BracketSVG/BracketSVG.constants';
-import { formatDate, formatStatus } from '../../../../utils/tournament.utils';
+import {
+  formatDate,
+  formatStatus,
+} from '../../../../utils/TournamentFormat/tournament.utils';
 
 type Props = {
   tournament: TournamentDetails;
