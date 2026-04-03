@@ -16,70 +16,23 @@ import {
   Divider,
 } from '@mui/material';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import { useState } from 'react';
-import { useAuth } from '../../../contexts/useAuth';
-import * as memberService from '../../../services/member/member.service';
+import { useUnavailability } from '../../../hooks/useUnavailability/useUnavailability';
+import { validateUnavailabilityDates } from '../../../utils/Unavailability/unavailability.utils';
 
 export const UnavailabilitySection = () => {
-  const { user } = useAuth();
-  const [dates, setDates] = useState({ startDate: '', endDate: '' });
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<boolean>(false);
-  const [openModal, setOpenModal] = useState(false);
-  const [unavailabilities, setUnavailabilities] = useState<
-    memberService.UnavailabilityDto[]
-  >([]);
-  const [loadingList, setLoadingList] = useState(false);
-
-  const handleConfirm = async () => {
-    if (!user?.token) return;
-    setError(null);
-    setSuccess(false);
-
-    if (!dates.startDate || !dates.endDate) {
-      setError('Veuillez sélectionner une date de début et de fin');
-      return;
-    }
-
-    const today = new Date().toISOString().split('T')[0];
-    if (dates.startDate < today) {
-      setError('La date de début ne peut pas être dans le passé');
-      return;
-    }
-
-    if (dates.endDate < dates.startDate) {
-      setError('La date de fin doit être postérieure à la date de début');
-      return;
-    }
-
-    const isSuccess = await memberService.addUnavailability(
-      user.token,
-      dates.startDate,
-      dates.endDate,
-    );
-
-    if (isSuccess) {
-      setSuccess(true);
-      setDates({ startDate: '', endDate: '' });
-      setTimeout(() => setSuccess(false), 3000);
-    } else {
-      setError('Erreur : Dates invalides');
-    }
-  };
-
-  const handleShowList = async () => {
-    if (!user?.token) return;
-    setOpenModal(true);
-    setLoadingList(true);
-    try {
-      const data = await memberService.getMyUnavailabilities(user.token);
-      setUnavailabilities(data);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoadingList(false);
-    }
-  };
+  const {
+    dates,
+    error,
+    success,
+    openModal,
+    unavailabilities,
+    loadingList,
+    setStartDate,
+    setEndDate,
+    handleConfirm,
+    handleShowList,
+    handleCloseModal,
+  } = useUnavailability();
 
   return (
     <Box sx={{ mt: 2, mb: 1, p: 2, borderTop: '2px solid #1e2a44' }}>
@@ -121,11 +74,10 @@ export const UnavailabilitySection = () => {
                 fullWidth
                 value={dates.startDate}
                 sx={{ bgcolor: 'white', borderRadius: 1 }}
-                onChange={(e) =>
-                  setDates({ ...dates, startDate: e.target.value })
-                }
+                onChange={(e) => setStartDate(e.target.value)}
               />
             </Box>
+
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               <Typography sx={{ minWidth: 40, fontWeight: 'bold' }}>
                 Au :
@@ -136,9 +88,7 @@ export const UnavailabilitySection = () => {
                 fullWidth
                 value={dates.endDate}
                 sx={{ bgcolor: 'white', borderRadius: 1 }}
-                onChange={(e) =>
-                  setDates({ ...dates, endDate: e.target.value })
-                }
+                onChange={(e) => setEndDate(e.target.value)}
               />
             </Box>
 
@@ -188,13 +138,14 @@ export const UnavailabilitySection = () => {
 
       <Dialog
         open={openModal}
-        onClose={() => setOpenModal(false)}
+        onClose={handleCloseModal}
         fullWidth
         maxWidth="xs"
       >
         <DialogTitle sx={{ fontWeight: 'bold', color: '#1e2a44' }}>
           Mes Indisponibilités
         </DialogTitle>
+
         <DialogContent dividers>
           {loadingList ? (
             <Box display="flex" justifyContent="center" p={3}>
@@ -203,11 +154,11 @@ export const UnavailabilitySection = () => {
           ) : unavailabilities.length > 0 ? (
             <List>
               {unavailabilities.map((item, index) => (
-                <Box key={index}>
+                <Box key={`${item.startDate}-${item.endDate}-${index}`}>
                   <ListItem>
                     <ListItemText
-                      primary={`Du ${new Date(item.startDate).toLocaleDateString()}`}
-                      secondary={`Au ${new Date(item.endDate).toLocaleDateString()}`}
+                      primary={`Du ${validateUnavailabilityDates({ startDate: item.startDate, endDate: '' })}`}
+                      secondary={`Au ${validateUnavailabilityDates({ startDate: '', endDate: item.endDate })}`}
                     />
                   </ListItem>
                   {index < unavailabilities.length - 1 && <Divider />}
