@@ -543,9 +543,11 @@ class TournamentServiceTest {
         .thenReturn(Optional.of(finished));
     when(tournamentRepository.findFirstByStatus(Status.IN_PROGRESS))
         .thenReturn(Optional.of(inProgress));
-    when(tournamentRepository.findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(Status.PREPARATION))
+    when(tournamentRepository.findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(
+        Status.PREPARATION))
         .thenReturn(Optional.of(savedTournament));
-    when(registrationRepository.findByTournamentId(Mockito.anyLong())).thenReturn(List.of()); // ← corrigé
+    when(registrationRepository.findByTournamentId(Mockito.anyLong())).thenReturn(
+        List.of()); // ← corrigé
 
     HomepageTournamentsDto result = tournamentService.getHomepageTournaments();
 
@@ -563,7 +565,8 @@ class TournamentServiceTest {
         .thenReturn(Optional.empty());
     when(tournamentRepository.findFirstByStatus(Status.IN_PROGRESS))
         .thenReturn(Optional.empty());
-    when(tournamentRepository.findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(Status.PREPARATION))
+    when(tournamentRepository.findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(
+        Status.PREPARATION))
         .thenReturn(Optional.empty());
 
     HomepageTournamentsDto result = tournamentService.getHomepageTournaments();
@@ -571,5 +574,60 @@ class TournamentServiceTest {
     assertNull(result.lastFinished());
     assertNull(result.inProgress());
     assertNull(result.nextUpcoming());
+  }
+
+  @Test
+  void getAllTournamentsByTeamName() {
+    savedTournament.setPublic(true);
+    when(registrationRepository.findByTeamNameContainingIgnoreCase("Alpha"))
+        .thenReturn(List.of());
+    when(tournamentRepository.findByIdIn(List.of())).thenReturn(List.of());
+
+    List<TournamentResponseDto> result = tournamentService.getAllTournaments("Alpha", null, false);
+
+    assertEquals(0, result.size());
+  }
+
+  @Test
+  void getAllTournamentsByMemberTag() {
+    savedTournament.setPublic(true);
+    when(tournamentRepository.findAll()).thenReturn(List.of(savedTournament));
+    when(registrationRepository.findByTournamentId(1L)).thenReturn(List.of());
+
+    List<TournamentResponseDto> result = tournamentService.getAllTournaments(null, "tag1", false);
+
+    assertEquals(0, result.size());
+  }
+
+  @Test
+  void getAllTournamentsBlankTeamNameFallsBackToAll() {
+    savedTournament.setPublic(true);
+    when(tournamentRepository.findAll()).thenReturn(List.of(savedTournament));
+    when(registrationRepository.findByTournamentId(1L)).thenReturn(List.of());
+
+    List<TournamentResponseDto> result = tournamentService.getAllTournaments("   ", null, false);
+
+    assertEquals(1, result.size());
+  }
+
+
+  @Test
+  void getTournamentByIdSuccess() {
+    savedTournament.setPublic(true);
+    when(tournamentRepository.findById(1L)).thenReturn(Optional.of(savedTournament));
+    when(registrationRepository.findByTournamentId(1L)).thenReturn(List.of());
+
+    TournamentResponseDto result = tournamentService.getTournamentById(1L);
+
+    assertEquals("Tournoi Test", result.name());
+    assertEquals(Status.PREPARATION, result.status());
+  }
+
+  @Test
+  void getTournamentByIdNotFound() {
+    when(tournamentRepository.findById(99L)).thenReturn(Optional.empty());
+
+    assertThrows(NoSuchElementException.class,
+        () -> tournamentService.getTournamentById(99L));
   }
 }
