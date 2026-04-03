@@ -1,6 +1,5 @@
 import { test, expect } from "@playwright/test";
 import {
-  goToLoginPage,
   goToAdminMembersPage,
   loginWith,
   loginAsAdmin,
@@ -14,7 +13,7 @@ const BAN_REASON = "Triches";
 
 test.describe("Ban Member", () => {
 
-  test("BAN1: should move member from active list to banned list after ban", async ({
+  test("should move member from active list to banned list after ban", async ({
     page,
   }) => {
     const creds = generateValidCredentials();
@@ -37,7 +36,7 @@ test.describe("Ban Member", () => {
     });
   });
 
-  test("BAN2: banned member should not be able to login", async ({
+  test("banned member should not be able to login", async ({
     page,
   }) => {
     const creds = generateValidCredentials();
@@ -61,7 +60,7 @@ test.describe("Ban Member", () => {
     });
   });
 
-  test("BAN3: ban info modal should display correct reason and member tag", async ({
+  test("ban info modal should display correct reason and member tag", async ({
     page,
   }) => {
     const creds = generateValidCredentials();
@@ -88,7 +87,7 @@ test.describe("Ban Member", () => {
   });
 
 
-  test("BAN4: should show error when ban reason is empty", async ({
+  test("should show error when ban reason is empty", async ({
     page,
   }) => {
     const creds = generateValidCredentials();
@@ -115,7 +114,7 @@ test.describe("Ban Member", () => {
     ).toBeVisible();
   });
 
-  test("BAN5: should show error when ban reason is only whitespace", async ({
+  test("should show error when ban reason is only whitespace", async ({
     page,
   }) => {
     const creds = generateValidCredentials();
@@ -144,7 +143,7 @@ test.describe("Ban Member", () => {
   });
 
 
-  test("BAN6: modal should close when clicking Annuler", async ({
+  test("modal should close when clicking Annuler", async ({
     page,
   }) => {
     const creds = generateValidCredentials();
@@ -171,7 +170,7 @@ test.describe("Ban Member", () => {
     await expect(page.getByText(creds.tag).first()).toBeVisible();
   });
 
-  test("BAN7: reason field should be reset after closing and reopening ban modal", async ({
+  test("reason field should be reset after closing and reopening ban modal", async ({
     page,
   }) => {
     const creds = generateValidCredentials();
@@ -205,7 +204,7 @@ test.describe("Ban Member", () => {
   });
 
 
-  test("BAN8: non-admin member should not see any members on admin page", async ({
+  test("non-admin member should not see any members on admin page", async ({
     page,
   }) => {
     const creds = generateValidCredentials();
