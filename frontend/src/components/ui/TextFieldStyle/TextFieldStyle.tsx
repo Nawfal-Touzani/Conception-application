@@ -1,6 +1,6 @@
 import { TextField, TextFieldProps } from '@mui/material';
 
-import { inputSx } from '../../../styles/page.styles';
+import { inputSx } from '../../../styles/textField.styles';
 
 // Palette pre-applied
 // Avoids copy-pasting the same styles in every component
