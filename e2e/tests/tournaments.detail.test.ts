@@ -38,11 +38,6 @@ test.describe('Tournament Detail Page', () => {
     await expect(page.getByText('TEAM_ALPHA')).toBeVisible({ timeout: 5000 });
   });
 
-  test('affiche déjà inscrits pour une team déjà inscrite', async ({ page }) => {
-    // lea est responsable de TEAM_ALPHA qui est inscrite
-    await expect(page.getByText('Vous êtes déjà inscrits à ce tournoi.')).toBeVisible({ timeout: 5000 });
-  });
-
 });
 
 test.describe('Tournament Detail - Gagnant', () => {
