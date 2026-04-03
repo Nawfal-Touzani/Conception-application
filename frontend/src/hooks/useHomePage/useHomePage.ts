@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { TournamentDetails } from '../../../../../types/tournament.types';
-import { getHomepageTournaments } from '../../../../../services/tournament/tournament.service';
-import { filterDisplayedTournaments } from '../homePageLogic/homePageLogic';
+import { TournamentDetails } from '../../types/tournament.types';
+import { getHomepageTournaments } from '../../services/tournament/tournament.service';
+import { filterDisplayedTournaments } from '../../utils/HomePage/homePage.utils';
 
 export const useHomePage = () => {
   const [tournaments, setTournaments] = useState<TournamentDetails[]>([]);

@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest';
-import { filterDisplayedTournaments } from './homePageLogic';
-import { TournamentDetails } from '../../../../../types/tournament.types';
+import { filterDisplayedTournaments } from './homePage.utils';
+import { TournamentDetails } from '../../types/tournament.types';
 
 describe('homePageLogic', () => {
   const finishedTournament: TournamentDetails = {

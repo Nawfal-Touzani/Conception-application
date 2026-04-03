@@ -4,7 +4,7 @@ import { useAuth } from '../../../../contexts/useAuth';
 import { useNavigate } from 'react-router-dom';
 import homeImage from '../../../../assets/images/home_logo.png';
 import TournamentCard from '../../../ui/TournamentCard/TournamentCard';
-import { useHomePage } from './useHomePage/useHomePage';
+import { useHomePage } from '../../../../hooks/useHomePage/useHomePage';
 
 const HomePage: React.FC = () => {
   const { user } = useAuth();
