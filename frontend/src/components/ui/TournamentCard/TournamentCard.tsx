@@ -1,92 +1,15 @@
 import { Box, Paper, Typography } from '@mui/material';
-import { TournamentDetails } from '../../../types/tournament.types';
+import { TournamentCard } from '../../../types/tournament.types';
+import {
+  statusLabel,
+  formatDate,
+  getInfoLabel,
+  getInfoValue,
+  getStateLabel,
+  getTeamsValue,
+} from '../../../utils/TournamentCard/TournamentCard.utils';
 
-interface TournamentCardProps {
-  tournament: TournamentDetails;
-}
-
-// Enum to a readable label
-const statusLabel: Record<string, string> = {
-  PREPARATION: 'Prochain',
-  IN_PROGRESS: 'À la une',
-  FINISHED: 'Dernier',
-  CANCELLED: 'Annulé',
-};
-
-// Date format
-const formatDate = (dateStr: string) =>
-  new Date(dateStr).toLocaleDateString('fr-BE', {
-    day: 'numeric',
-    month: 'short',
-  });
-
-// Checks if registration is open
-const isRegistrationOpen = (tournament: TournamentDetails): boolean => {
-  if (!tournament.isPublic) return false;
-  const deadlinePassed = new Date(tournament.registrationDeadline) < new Date();
-  const isFull = tournament.currentParticipants >= tournament.maxParticipants;
-  return !deadlinePassed && !isFull;
-};
-
-// Differents display possible for a tournament card
-const getInfoLabel = (tournament: TournamentDetails): string => {
-  if (tournament.status === 'FINISHED') {
-    return 'VAINQUEUR';
-  }
-
-  if (tournament.status === 'IN_PROGRESS') {
-    return 'PHASE';
-  }
-
-  if (tournament.status === 'PREPARATION') {
-    return 'INSCRIPTIONS';
-  }
-
-  return '';
-};
-
-const getStateLabel = (tournament: TournamentDetails): string => {
-  if (tournament.status === 'PREPARATION') {
-    return 'À venir';
-  }
-
-  if (tournament.status === 'IN_PROGRESS') {
-    return 'En cours';
-  }
-
-  if (tournament.status === 'FINISHED') {
-    return 'Terminé';
-  }
-
-  return 'Terminé';
-};
-
-const getInfoValue = (tournament: TournamentDetails): string => {
-  if (tournament.status === 'FINISHED') {
-    return tournament.winnerTeamName ?? 'Non défini';
-  }
-
-  if (tournament.status === 'IN_PROGRESS') {
-    return 'Inconnue';
-  }
-
-  if (tournament.status === 'PREPARATION') {
-    return isRegistrationOpen(tournament) ? 'Ouvertes' : 'Fermées';
-  }
-
-  return 'Inconnue';
-};
-
-const getTeamsValue = (tournament: TournamentDetails): string => {
-  if (tournament.status === 'PREPARATION') {
-    return `${tournament.currentParticipants}/${tournament.maxParticipants}`;
-  }
-
-  return `${tournament.currentParticipants}`;
-};
-
-// Displays a single tournament card — extracted from HomePage to avoid JSX repetition
-const TournamentCard = ({ tournament }: TournamentCardProps) => (
+const TournamentCardProps = ({ tournament }: TournamentCard) => (
   <Paper
     sx={{
       p: 1,
@@ -159,4 +82,4 @@ const TournamentCard = ({ tournament }: TournamentCardProps) => (
   </Paper>
 );
 
-export default TournamentCard;
+export default TournamentCardProps;

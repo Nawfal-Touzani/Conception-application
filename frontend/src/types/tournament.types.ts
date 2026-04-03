@@ -36,3 +36,7 @@ export interface HomepageTournaments {
   inProgress: TournamentDetails | null;
   nextUpcoming: TournamentDetails | null;
 }
+
+export interface TournamentCard {
+  tournament: TournamentDetails;
+}

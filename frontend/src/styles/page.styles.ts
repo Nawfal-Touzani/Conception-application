@@ -1,4 +1,3 @@
-// Inputs style
 export const inputSx = {
   '& .MuiFilledInput-root': {
     backgroundColor: '#1a2744',

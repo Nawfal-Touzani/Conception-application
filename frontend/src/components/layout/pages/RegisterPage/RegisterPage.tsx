@@ -12,7 +12,7 @@ import {
 
 import { useRegisterForm } from '../../../../hooks/useRegisterForm/useRegisterForm';
 import TextFieldStyle from '../../../ui/TextFieldStyle/TextFieldStyle'; // Reusable styled TextField
-import { inputSx, menuPropsSx } from '../../../../styles/sharedStyles'; // Reusable styles
+import { inputSx, menuPropsSx } from '../../../../styles/page.styles'; // Reusable styles
 
 const RegisterPage: React.FC = () => {
   const {
