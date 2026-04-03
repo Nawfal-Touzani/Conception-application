@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { validateTournament } from '../../../utils/tournamentValidation';
+import { validateTournament } from '../../utils/tournamentValidation';
 
 export const useTournamentForm = () => {
   const [name, setName] = useState('');
