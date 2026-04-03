@@ -1,6 +1,6 @@
 import { render, waitFor } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
-import { SpecialityMenu } from './SpecialityMenu.utils';
+import { SpecialityMenu } from './useSpecialityMenu';
 import * as specialityService from '../../services/speciality/speciality.service';
 
 const specialityMenuUIMock = vi.fn();

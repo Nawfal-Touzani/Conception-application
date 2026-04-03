@@ -5,7 +5,7 @@ import { MemberProfile } from '../../../../types/member';
 import * as memberService from '../../../../services/memberService';
 import { ProfileInputField } from './ProfileInputField';
 import { PasswordModal } from '../../Password/PassordModal';
-import { SpecialityMenu } from '../../../../utils/SpecialityMenu/SpecialityMenu.utils';
+import { SpecialityMenu } from '../../../../hooks/useSpecialityMenu/useSpecialityMenu';
 
 export const MemberInfoForm = ({ profile }: { profile: MemberProfile }) => {
   const { user } = useAuth();

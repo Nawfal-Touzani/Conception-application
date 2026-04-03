@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
-import NavBarContainer from './NavBar.utils';
+import NavBarContainer from './useNavBar';
 import { AuthContext } from '../../contexts/AuthContext';
 import * as notifService from '../../services/notifications.service';
 import { Notification } from '../../types/notifications.types';
