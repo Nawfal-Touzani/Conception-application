@@ -16,8 +16,8 @@ import {
   Divider,
 } from '@mui/material';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import { useUnavailability } from '../../../hooks/useUnavailability/useUnavailability';
-import { validateUnavailabilityDates } from '../../../utils/Unavailability/unavailability.utils';
+import { useUnavailability } from '../../../../../hooks/useUnavailability/useUnavailability';
+import { validateUnavailabilityDates } from '../../../../../utils/Unavailability/unavailability.utils';
 
 export const UnavailabilitySection = () => {
   const {
