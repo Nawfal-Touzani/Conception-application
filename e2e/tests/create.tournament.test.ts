@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+import { goToLoginPage, loginWith } from './helper';
 
 const fillDate = async (page: Page, index: number, value: string) => {
   const input = page.locator('input[type="date"]').nth(index);
@@ -13,11 +14,8 @@ const selectTeamCount = async (page: Page, count: number) => {
 test.describe('Create Tournament', () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:5173/login');
-    await page.getByLabel('Adresse email').fill('tibo@mail.com');
-    await page.getByLabel('Mot de passe').fill('tibo');
-    await page.getByRole('checkbox', { name: 'Se souvenir de moi' }).check();
-    await page.getByRole('main').getByRole('button', { name: 'Se connecter' }).click();
+    await goToLoginPage(page);
+    await loginWith(page, 'tibo@mail.com', 'tibo');
     await page.waitForURL('http://localhost:5173/');
     await page.goto('http://localhost:5173/tournament/create');
   });
