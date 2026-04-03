@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { PasswordData } from '../../types/password.type';
-import { validatePassword } from '../../utils/Password/passwordValidator';
+import { validatePassword } from '../../utils/Password/passwordValidator.utils';
 import * as memberService from '../../services/member/member.service';
 
 export const usePasswordForm = (token: string, onClose: () => void) => {
