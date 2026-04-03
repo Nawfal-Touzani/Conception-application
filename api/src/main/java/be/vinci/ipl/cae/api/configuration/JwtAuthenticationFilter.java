@@ -18,10 +18,9 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * JWT authentication filter that intercepts incoming HTTP requests
- * to validate the JWT token provided in the Authorization header.
- * If the token is valid, the authenticated user is injected into
- * the Spring Security context to be accessible throughout the application.
+ * JWT authentication filter that intercepts incoming HTTP requests to validate the JWT token
+ * provided in the Authorization header. If the token is valid, the authenticated user is injected
+ * into the Spring Security context to be accessible throughout the application.
  */
 @Configuration
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -67,6 +66,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     if (member == null) {
       // user doesn't exist anymore
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User not found");
+      return;
+    }
+
+    // If the member is banned, we block the request immediately
+    if (member.isBan()) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN, "Votre compte a été banni.");
       return;
     }
 

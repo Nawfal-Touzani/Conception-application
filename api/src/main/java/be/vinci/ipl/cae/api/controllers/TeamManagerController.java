@@ -1,13 +1,16 @@
 package be.vinci.ipl.cae.api.controllers;
 
-import be.vinci.ipl.cae.api.repositories.MemberRepository;
+import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.services.TeamManagerService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The type Team manager controller.
@@ -15,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/teams")
 @PreAuthorize("isAuthenticated()")
-public class TeamManagerController extends BaseController {
+public class TeamManagerController {
 
   private final TeamManagerService teamManagerService;
 
@@ -23,26 +26,32 @@ public class TeamManagerController extends BaseController {
    * Instantiates a new Team manager controller.
    *
    * @param teamManagerService the team manager service
-   * @param memberRepository   the member repository
    */
-  public TeamManagerController(TeamManagerService teamManagerService,
-      MemberRepository memberRepository) {
-    super(memberRepository);
+  public TeamManagerController(TeamManagerService teamManagerService) {
     this.teamManagerService = teamManagerService;
   }
 
   /**
    * Assign secondary manager response entity.
    *
-   * @param teamId   the team id
-   * @param memberId the member id
+   * @param teamId        the team id
+   * @param memberId      the member id
+   * @param currentMember the current member
    * @return the response entity
    */
   @PutMapping("/{teamId}/secondary-manager/{memberId}")
   public ResponseEntity<Void> assignSecondaryManager(@PathVariable Long teamId,
-      @PathVariable Long memberId) {
-    teamManagerService.assignSecondaryManager(teamId, memberId,
-        getConnectedMember().getId());
+      @PathVariable Long memberId,
+      @AuthenticationPrincipal Member currentMember) {
+    try {
+      teamManagerService.assignSecondaryManager(teamId, memberId, currentMember.getId());
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Team manager error: " + e.getMessage(), e);
+    } catch (IllegalStateException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
+          "Team manager error: " + e.getMessage(), e);
+    }
     return ResponseEntity.noContent().build();
   }
 }

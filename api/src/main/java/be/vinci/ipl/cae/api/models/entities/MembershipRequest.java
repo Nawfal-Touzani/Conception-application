@@ -37,7 +37,18 @@ public class MembershipRequest {
    * State enumeration.
    */
   public enum State {
-    PENDING, ACCEPTED, REFUSED
+    /**
+     * Pending state.
+     */
+    PENDING,
+    /**
+     * Accepted state.
+     */
+    ACCEPTED,
+    /**
+     * Refused state.
+     */
+    REFUSED
   }
 
   @Id
@@ -72,6 +83,10 @@ public class MembershipRequest {
 
   /**
    * MembershipRequest constructor.
+   *
+   * @param state          the state
+   * @param refusalReason  the refusal reason
+   * @param processingDate the processing date
    */
   public MembershipRequest(State state,
       String refusalReason,

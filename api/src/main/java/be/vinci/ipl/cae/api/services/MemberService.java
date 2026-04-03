@@ -2,8 +2,11 @@ package be.vinci.ipl.cae.api.services;
 
 import be.vinci.ipl.cae.api.models.dtos.ChangePasswordDto;
 import be.vinci.ipl.cae.api.models.dtos.MemberProfileResponseDto;
+import be.vinci.ipl.cae.api.models.dtos.PublicMemberDto;
 import be.vinci.ipl.cae.api.models.dtos.UpdateMemberProfileDto;
+import be.vinci.ipl.cae.api.models.entities.Banishment;
 import be.vinci.ipl.cae.api.models.entities.Member;
+import be.vinci.ipl.cae.api.repositories.BanishmentRepository;
 import be.vinci.ipl.cae.api.repositories.ImageRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
@@ -12,6 +15,7 @@ import be.vinci.ipl.cae.api.repositories.UnavailabilityRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,20 +31,30 @@ public class MemberService {
   private BCryptPasswordEncoder passwordEncoder;
   private final TeamCompositionRepository teamCompositionRepository;
   private final UnavailabilityRepository unavailabilityRepository;
+  private final BanishmentRepository banishmentRepository;
 
   /**
    * Constructor for MemberService.
+   *
+   * @param imageRepository           the image repository
+   * @param memberRepository          the member repository
+   * @param passwordEncoder           the password encoder
+   * @param specialityRepository      the speciality repository
+   * @param teamCompositionRepository the team composition repository
+   * @param unavailabilityRepository  the unavailability repository
    */
   public MemberService(ImageRepository imageRepository, MemberRepository memberRepository,
       BCryptPasswordEncoder passwordEncoder, SpecialityRepository specialityRepository,
       TeamCompositionRepository teamCompositionRepository,
-      UnavailabilityRepository unavailabilityRepository) {
+      UnavailabilityRepository unavailabilityRepository,
+      BanishmentRepository banishmentRepository) {
     this.imageRepository = imageRepository;
     this.memberRepository = memberRepository;
     this.passwordEncoder = passwordEncoder;
     this.specialityRepository = specialityRepository;
     this.teamCompositionRepository = teamCompositionRepository;
     this.unavailabilityRepository = unavailabilityRepository;
+    this.banishmentRepository = banishmentRepository;
   }
 
   /**
@@ -56,28 +70,7 @@ public class MemberService {
       return null;
     }
 
-    LocalDate today = LocalDate.now();
-    boolean isUnavailable = unavailabilityRepository
-        .existsByMemberAndStartDateBeforeAndEndDateAfter(
-            member,
-            today.plusDays(1),
-            today.minusDays(1)
-        );
-
-    MemberProfileResponseDto dto = new MemberProfileResponseDto();
-    dto.setEmail(member.getEmail());
-    dto.setTag(member.getTag());
-    dto.setSpeciality(member.getSpeciality().getName());
-    dto.setProfileImage(member.getImage().getUrl());
-    dto.setCreationDate(member.getProfileCreationDate());
-    dto.setAdmin(member.getIsAdmin());
-    dto.setAvailable(!isUnavailable);
-    dto.setId(member.getId());
-    teamCompositionRepository.findByMemberId(member.getId())
-        .ifPresent(composition -> dto.setTeamName(composition.getTeam()
-            .getName()));
-
-    return dto;
+    return mapToProfileDto(member);
   }
 
   /**
@@ -94,16 +87,7 @@ public class MemberService {
       return null;
     }
 
-    if (payload.getSpeciality() != null) {
-      specialityRepository.findByName(payload.getSpeciality())
-          .ifPresent(member::setSpeciality);
-    }
-
-    if (payload.getProfileImage() != null) {
-      imageRepository.findByUrl(payload.getProfileImage())
-          .ifPresent(member::setImage);
-    }
-
+    performProfileUpdates(member, payload);
     memberRepository.save(member);
     return getProfile(email);
   }
@@ -116,26 +100,17 @@ public class MemberService {
    * @return true if the password was changed, false if member not found or old password incorrect
    */
   public boolean changePassword(String email, ChangePasswordDto dto) {
-    if (dto == null || dto.getNewPassword() == null
-        || dto.getNewPassword().equals(dto.getOldPassword())) {
-      return false;
-    }
-
-    if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
+    if (isInvalidPasswordRequest(dto)) {
       return false;
     }
 
     Member member = memberRepository.findByEmail(email).orElse(null);
 
-    if (member == null) {
+    if (member == null || !passwordEncoder.matches(dto.oldPassword(), member.getPassword())) {
       return false;
     }
 
-    if (!passwordEncoder.matches(dto.getOldPassword(), member.getPassword())) {
-      return false;
-    }
-
-    member.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+    member.setPassword(passwordEncoder.encode(dto.newPassword()));
     memberRepository.save(member);
     return true;
   }
@@ -191,10 +166,99 @@ public class MemberService {
     return memberRepository.findByIsAdminTrue();
   }
 
+  /**
+   * Gets all members.
+   *
+   * @return the all members
+   */
   @Transactional
   public List<MemberProfileResponseDto> getAllMembers() {
     return memberRepository.findAll().stream()
         .map(m -> getProfile(m.getEmail()))
         .toList();
   }
+
+  /**
+   * Retrieves the public profile of a member by their ID.
+   *
+   * @param id the ID of the member
+   * @return the public profile of the member
+   * @throws NoSuchElementException if the member is not found
+   */
+  public PublicMemberDto getPublicProfile(Long id) {
+    Member member = memberRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("Membre introuvable"));
+
+    return mapToPublicProfileDto(member);
+  }
+
+  private MemberProfileResponseDto mapToProfileDto(Member member) {
+    Banishment ban = banishmentRepository.findByBannedMemberId(member.getId()).orElse(null);
+
+    return new MemberProfileResponseDto(
+        member.getId(),
+        member.getEmail(),
+        member.getTag(),
+        member.getSpeciality().getName(),
+        getMemberTeamName(member.getId()),
+        member.getImage().getUrl(),
+        member.getProfileCreationDate(),
+        member.getIsAdmin(),
+        isMemberAvailable(member),
+        member.isBan(),
+        ban != null ? ban.getReason() : null,
+        ban != null ? ban.getBanishmentDate() : null
+    );
+  }
+
+  private String getMemberTeamName(Long memberId) {
+    return teamCompositionRepository.findByMemberId(memberId)
+        .map(compo -> compo.getTeam().getName())
+        .orElse(null);
+  }
+
+  private boolean isMemberAvailable(Member member) {
+    LocalDate today = LocalDate.now();
+    boolean isUnavailable = unavailabilityRepository
+        .existsByMemberAndStartDateBeforeAndEndDateAfter(
+            member,
+            today.plusDays(1),
+            today.minusDays(1)
+        );
+    return !isUnavailable;
+  }
+
+  private void performProfileUpdates(Member member, UpdateMemberProfileDto payload) {
+    if (payload.speciality() != null) {
+      specialityRepository.findByName(payload.speciality())
+          .ifPresent(member::setSpeciality);
+    }
+
+    if (payload.profileImage() != null) {
+      imageRepository.findByUrl(payload.profileImage())
+          .ifPresent(member::setImage);
+    }
+  }
+
+  private boolean isInvalidPasswordRequest(ChangePasswordDto dto) {
+    return dto == null || dto.newPassword() == null
+        || dto.newPassword().equals(dto.oldPassword())
+        || !dto.newPassword().equals(dto.confirmPassword());
+  }
+
+  private PublicMemberDto mapToPublicProfileDto(Member member) {
+    String image = member.getImage().getUrl();
+    String speciality = member.getSpeciality().getName();
+    String teamName = getMemberTeamName(member.getId());
+
+    return new PublicMemberDto(
+        member.getId(),
+        member.getTag(),
+        image,
+        speciality,
+        teamName,
+        member.getProfileCreationDate()
+    );
+  }
+
 }

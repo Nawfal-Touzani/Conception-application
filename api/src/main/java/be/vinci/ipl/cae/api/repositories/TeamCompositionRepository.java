@@ -4,7 +4,7 @@ import be.vinci.ipl.cae.api.models.entities.TeamComposition;
 import be.vinci.ipl.cae.api.models.entities.TeamCompositionId;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface TeamCompositionRepository extends
-    JpaRepository<TeamComposition, TeamCompositionId> {
+    CrudRepository<TeamComposition, TeamCompositionId> {
 
   /**
    * Exists by member id boolean.
@@ -45,4 +45,12 @@ public interface TeamCompositionRepository extends
    * @return team composition
    */
   Optional<TeamComposition> findFirstByMemberId(Long memberId);
+
+  /**
+   * Count member of team.
+   *
+   * @param idTeam the given team id.
+   * @return the count of member.
+   */
+  int countByTeamId(Long idTeam);
 }

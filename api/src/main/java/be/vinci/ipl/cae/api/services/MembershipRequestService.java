@@ -8,9 +8,7 @@ import be.vinci.ipl.cae.api.models.entities.TeamComposition;
 import be.vinci.ipl.cae.api.repositories.MembershipRequestRepository;
 import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
 import java.time.LocalDateTime;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The type Membership request service.
@@ -27,6 +25,7 @@ public class MembershipRequestService {
    *
    * @param membershipRequestRepository the membership request repository
    * @param teamCompositionRepository   the team composition repository
+   * @param notificationService         the notification service
    */
   public MembershipRequestService(MembershipRequestRepository membershipRequestRepository,
       TeamCompositionRepository teamCompositionRepository,
@@ -95,18 +94,14 @@ public class MembershipRequestService {
    */
   private MembershipRequest getValidatedRequest(Long requestId, Long responsibleId) {
     MembershipRequest request = membershipRequestRepository.findById(requestId)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-            "Request not found"));
+        .orElseThrow(() -> new IllegalArgumentException("Request not found"));
 
     if (!request.getTeam().getResponsible().getId().equals(responsibleId)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          "Only the team responsible can manage requests");
+      throw new IllegalStateException("Only the team responsible can manage requests");
     }
-
     if (request.getState() != State.PENDING) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "Request is already processed");
+      throw new IllegalStateException("Request is already processed");
     }
-
     return request;
   }
 }

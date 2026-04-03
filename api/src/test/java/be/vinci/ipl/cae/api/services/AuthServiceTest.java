@@ -31,6 +31,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
+/**
+ * The type Auth service test.
+ */
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
@@ -54,12 +57,15 @@ class AuthServiceTest {
   private Image mockImage;
   private Speciality mockSpeciality;
 
+  /**
+   * Sets up.
+   */
   @BeforeEach
   void setUp() {
     ReflectionTestUtils.setField(authService, "jwtSecret", "real-secret");
 
-    registerDto = new RegisterCredentials("test@vinci.be", "test", "Gamer", 1L, 1L);
-    loginDto = new LoginCredentials("test@vinci.be", "test");
+    registerDto = new RegisterCredentials("test@vinci.be", "Valid1@Password", "Gamer", 1L, 1L);
+    loginDto = new LoginCredentials("test@vinci.be", "Valid1@Password");
     mockImage = new Image("http://image.url");
     mockSpeciality = new Speciality("Architecte");
     mockMember = new Member("test@vinci.be", "hashedPassword", "Gamer", false, LocalDate.now(),
@@ -68,7 +74,10 @@ class AuthServiceTest {
         mockImage, mockSpeciality);
   }
 
-  // REGISTER TESTS
+  /**
+   * Register success.
+   */
+// REGISTER TESTS
   @Test
   void registerSuccess() {
     // Arrange
@@ -85,6 +94,9 @@ class AuthServiceTest {
     verify(memberRepository, times(1)).save(any(Member.class));
   }
 
+  /**
+   * Register email already exists.
+   */
   @Test
   void registerEmailAlreadyExists() {
     // Arrange
@@ -99,6 +111,9 @@ class AuthServiceTest {
     verify(memberRepository, never()).save(any(Member.class));
   }
 
+  /**
+   * Register image not found.
+   */
   @Test
   void registerImageNotFound() {
     // Arrange
@@ -111,6 +126,9 @@ class AuthServiceTest {
     assertEquals("Image introuvable.", exception.getMessage());
   }
 
+  /**
+   * Register speciality not found.
+   */
   @Test
   void registerSpecialityNotFound() {
     // Arrange
@@ -124,7 +142,10 @@ class AuthServiceTest {
     assertEquals("Spécialité introuvable.", exception.getMessage());
   }
 
-  // LOGIN TESTS
+  /**
+   * Login success.
+   */
+// LOGIN TESTS
   @Test
   void loginSuccess() {
     // Arrange
@@ -140,6 +161,9 @@ class AuthServiceTest {
     assertNotNull(result.token());
   }
 
+  /**
+   * Login member not found.
+   */
   @Test
   void loginMemberNotFound() {
     // Arrange
@@ -152,14 +176,17 @@ class AuthServiceTest {
     assertNull(result);
   }
 
+  /**
+   * Login wrong password.
+   */
   @Test
   void loginWrongPassword() {
     // Arrange
     when(memberRepository.findByEmail(loginDto.email())).thenReturn(Optional.of(mockMember));
-    when(passwordEncoder.matches("wrongPassword", mockMember.getPassword())).thenReturn(false);
+    when(passwordEncoder.matches("Wrong1@Password", mockMember.getPassword())).thenReturn(false);
 
     // Act
-    LoginCredentials badLogin = new LoginCredentials("test@vinci.be", "wrongPassword");
+    LoginCredentials badLogin = new LoginCredentials("test@vinci.be", "Wrong1@Password");
     AuthenticatedMember result = authService.login(badLogin);
 
     // Assert
@@ -168,6 +195,9 @@ class AuthServiceTest {
 
   // REPO TESTS
 
+  /**
+   * Read one from email found.
+   */
   @Test
   void readOneFromEmailFound() {
     // Arrange
@@ -181,6 +211,9 @@ class AuthServiceTest {
     assertEquals("test@vinci.be", result.getEmail());
   }
 
+  /**
+   * Read one from email not found.
+   */
   @Test
   void readOneFromEmailNotFound() {
     // Arrange
@@ -193,7 +226,10 @@ class AuthServiceTest {
     assertNull(result);
   }
 
-  // JWT TOKEN TESTS
+  /**
+   * Create jwt token for member.
+   */
+// JWT TOKEN TESTS
   @Test
   void createJwtTokenForMember() {
     // Arrange = mock
@@ -206,6 +242,9 @@ class AuthServiceTest {
     assertEquals("MEMBER", result.role());
   }
 
+  /**
+   * Create jwt token for admin.
+   */
   @Test
   void createJwtTokenForAdmin() {
     // Arrange = mock
@@ -218,6 +257,9 @@ class AuthServiceTest {
     assertEquals("ADMIN", result.role());
   }
 
+  /**
+   * Verify jwt token valid token.
+   */
   @Test
   void verifyJwtTokenValidToken() {
     // Arrange
@@ -231,6 +273,9 @@ class AuthServiceTest {
     assertEquals("test@vinci.be", email);
   }
 
+  /**
+   * Verify jwt token invalid token.
+   */
   @Test
   void verifyJwtTokenInvalidToken() {
     // Arrange
