@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import * as imageService from '../../../services/image/image.service';
-import { ProfileImage } from '../../../types/image.types';
+import * as imageService from '../../services/image/image.service';
+import { ProfileImage } from '../../types/image.types';
 
-export const useAvatars = (open: boolean, currentImage: string) => {
+export const useAvatar = (open: boolean, currentImage: string) => {
   const [images, setImages] = useState<ProfileImage[]>([]);
   const [selectedImage, setSelectedImage] = useState(currentImage);
 

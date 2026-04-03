@@ -1,15 +1,10 @@
 import { Box, Button, Dialog, DialogTitle, IconButton } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import { useAvatars } from './useAvatars';
+import { useAvatar } from '../../../hooks/useAvatar/useAvatar';
 import { AvatarItem } from './AvatarItem';
-
-interface AvatarModalProps {
-  open: boolean;
-  onClose: () => void;
-  onConfirm: (imageUrl: string) => void;
-  currentImage: string;
-}
+import { AvatarModalProps } from '../../../types/avatar.types';
+import { formatAvatarUrl } from '../../../utils/Avatar/avatar.utils';
 
 export const AvatarModal = ({
   open,
@@ -17,7 +12,7 @@ export const AvatarModal = ({
   onConfirm,
   currentImage,
 }: AvatarModalProps) => {
-  const { images, selectedImage, setSelectedImage, BASE_URL } = useAvatars(
+  const { images, selectedImage, setSelectedImage, BASE_URL } = useAvatar(
     open,
     currentImage,
   );
@@ -58,15 +53,18 @@ export const AvatarModal = ({
             justifyContent: 'center',
           }}
         >
-          {images.map((img) => (
-            <AvatarItem
-              key={img.id}
-              url={`${BASE_URL}${img.url}`}
-              altText={`Avatar ${img.id}`}
-              isSelected={selectedImage === `${BASE_URL}${img.url}`}
-              onClick={() => setSelectedImage(`${BASE_URL}${img.url}`)}
-            />
-          ))}
+          {images.map((img) => {
+            const fullUrl = formatAvatarUrl(BASE_URL, img.url);
+            return (
+              <AvatarItem
+                key={img.id}
+                url={fullUrl}
+                altText={`Avatar ${img.id}`}
+                isSelected={selectedImage === fullUrl}
+                onClick={() => setSelectedImage(fullUrl)}
+              />
+            );
+          })}
         </Box>
 
         <IconButton>
