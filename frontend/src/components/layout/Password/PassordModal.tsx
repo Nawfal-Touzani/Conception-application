@@ -9,97 +9,19 @@ import {
   DialogTitle,
   TextField,
 } from '@mui/material';
-import { useState } from 'react';
-import * as memberService from '../../../services/member/member.service';
-
-interface PasswordModalProps {
-  open: boolean;
-  onClose: () => void;
-  token: string;
-}
-
-const PASSWORD_REGEX =
-  /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
-
-const fieldStyle = {
-  '& .MuiOutlinedInput-root': {
-    color: 'white',
-    '& fieldset': { borderColor: '#ffffff' },
-    '&:hover fieldset': { borderColor: 'white' },
-    '&.Mui-focused fieldset': { borderColor: 'white' },
-  },
-  '& .MuiInputLabel-root': { color: '#ffffff99' },
-  '&.Mui-focused': { color: 'white' },
-};
+import { PasswordModalProps } from '../../../types/password.type';
+import { usePasswordForm } from '../../../hooks/usePassword/usePasswordForm';
+import { pswdFieldStyle } from '../../../styles/passwordModal.styles';
 
 export const PasswordModal = ({ open, onClose, token }: PasswordModalProps) => {
-  const [passwordData, setPasswordData] = useState({
-    oldPassword: '',
-    newPassword: '',
-    confirmPassword: '',
-  });
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-
-  const resetState = () => {
-    setError(null);
-    setSuccess(false);
-    setPasswordData({
-      oldPassword: '',
-      newPassword: '',
-      confirmPassword: '',
-    });
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async () => {
-    setError(null);
-    setSuccess(false);
-
-    if (
-      !passwordData.oldPassword ||
-      !passwordData.newPassword ||
-      !passwordData.confirmPassword
-    ) {
-      setError('Veuillez compléter tous les champs.');
-      return;
-    }
-
-    if (!PASSWORD_REGEX.test(passwordData.newPassword)) {
-      setError(
-        'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.',
-      );
-      return;
-    }
-
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setError('Les nouveaux mots de passe ne correspondent pas.');
-      return;
-    }
-
-    if (passwordData.newPassword === passwordData.oldPassword) {
-      setError("Le nouveau mot de passe doit être différent de l'actuel.");
-      return;
-    }
-
-    try {
-      const isSuccess = await memberService.changePassword(token, passwordData);
-      if (isSuccess) {
-        setSuccess(true);
-        setTimeout(() => {
-          onClose();
-          resetState();
-        }, 2000);
-      } else {
-        setError("L'ancien mot de passe est incorrect");
-      }
-    } catch (err) {
-      setError('Erreur de communication avec le serveur');
-    }
-  };
+  const {
+    passwordData,
+    error,
+    success,
+    handleChange,
+    handleSubmit,
+    resetState,
+  } = usePasswordForm(token, onClose);
 
   return (
     <Dialog
@@ -148,7 +70,7 @@ export const PasswordModal = ({ open, onClose, token }: PasswordModalProps) => {
             type="password"
             fullWidth
             variant="outlined"
-            sx={fieldStyle}
+            sx={pswdFieldStyle}
             value={passwordData.oldPassword}
             onChange={handleChange}
           />
@@ -158,7 +80,7 @@ export const PasswordModal = ({ open, onClose, token }: PasswordModalProps) => {
             type="password"
             fullWidth
             variant="outlined"
-            sx={fieldStyle}
+            sx={pswdFieldStyle}
             value={passwordData.newPassword}
             onChange={handleChange}
           />
@@ -168,7 +90,7 @@ export const PasswordModal = ({ open, onClose, token }: PasswordModalProps) => {
             type="password"
             fullWidth
             variant="outlined"
-            sx={fieldStyle}
+            sx={pswdFieldStyle}
             value={passwordData.confirmPassword}
             onChange={handleChange}
           />
