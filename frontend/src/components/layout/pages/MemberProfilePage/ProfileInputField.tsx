@@ -37,7 +37,11 @@ export const ProfileInputField = ({
             onEditClick
               ? {
                   endAdornment: (
-                    <IconButton onClick={onEditClick} size="small">
+                    <IconButton
+                      onClick={onEditClick}
+                      size="small"
+                      aria-label="Modifier le mot de passe"
+                    >
                       <EditIcon fontSize="small" sx={{ color: 'white' }} />
                     </IconButton>
                   ),

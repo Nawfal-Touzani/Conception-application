@@ -73,4 +73,59 @@ const generateValidCredentials = () => ({
   tag: faker.internet.username().slice(0, 15),
 });
 
-export { goToRegisterPage, goToLoginPage, fillRegisterForm, fillLoginForm, generateValidCredentials, submitRegisterForm, submitLoginForm, registerWith, loginWith };
+
+const goToProfilePage = async (page: Page) => {
+  await page.goto("/members/me");
+};
+
+const openChangePasswordModal = async (page: Page) => {
+  await page.getByRole("button", { name: "Modifier le mot de passe" }).click();
+};
+
+const fillChangePasswordForm = async (
+  page: Page,
+  {
+    oldPassword,
+    newPassword,
+    confirmPassword,
+  }: { oldPassword: string; newPassword: string; confirmPassword: string },
+) => {
+  await page.locator('input[name="oldPassword"]').fill(oldPassword);
+  await page.locator('input[name="newPassword"]').fill(newPassword);
+  await page.locator('input[name="confirmPassword"]').fill(confirmPassword);
+};
+
+const submitChangePasswordForm = async (page: Page) => {
+  await page.getByRole("button", { name: "Confirmer" }).click();
+};
+
+const changePasswordWith = async (
+  page: Page,
+  {
+    oldPassword,
+    newPassword,
+    confirmPassword,
+  }: { oldPassword: string; newPassword: string; confirmPassword: string },
+) => {
+  await openChangePasswordModal(page);
+  await fillChangePasswordForm(page, { oldPassword, newPassword, confirmPassword });
+  await submitChangePasswordForm(page);
+};
+
+
+export {
+  goToRegisterPage,
+  goToLoginPage,
+  goToProfilePage,
+  fillRegisterForm,
+  fillLoginForm,
+  submitRegisterForm,
+  submitLoginForm,
+  registerWith,
+  loginWith,
+  openChangePasswordModal,
+  fillChangePasswordForm,
+  submitChangePasswordForm,
+  changePasswordWith,
+  generateValidCredentials,
+};
