@@ -20,6 +20,7 @@ export const MemberRow = ({
   onShowBanInfo,
 }: MemberRowProps) => (
   <Box
+    data-testid={`member-row-${member.tag}`}
     sx={{
       display: 'flex',
       alignItems: 'center',
@@ -86,13 +87,21 @@ export const MemberRow = ({
       )}
 
       {onBan && (
-        <IconButton onClick={() => onBan(member)} sx={{ color: '#ae210f' }}>
+        <IconButton
+          onClick={() => onBan(member)}
+          sx={{ color: '#ae210f' }}
+          aria-label="Bannir le membre"
+        >
           <BlockIcon />
         </IconButton>
       )}
 
       {onDelete && (
-        <IconButton onClick={() => onDelete(member)} sx={{ color: '#f31212' }}>
+        <IconButton
+          onClick={() => onDelete(member)}
+          sx={{ color: '#f31212' }}
+          aria-label="Détails du bannissement"
+        >
           <DeleteIcon />
         </IconButton>
       )}

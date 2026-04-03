@@ -112,6 +112,35 @@ const changePasswordWith = async (
   await submitChangePasswordForm(page);
 };
 
+const ADMIN_CREDENTIALS = {
+  email: "admin@vinci.be",
+  password: "admin",
+};
+
+const goToAdminMembersPage = async (page: Page) => {
+  await page.goto("http://localhost:5174/admin/members");
+};
+
+const loginAsAdmin = async (page: Page) => {
+  await page.goto("http://localhost:5174/login");
+  await loginWith(
+    page,
+    ADMIN_CREDENTIALS.email,
+    ADMIN_CREDENTIALS.password,
+    false,
+  );
+  await page.waitForURL("http://localhost:5174/", { timeout: 10000 });
+};
+
+const banMember = async (page: Page, memberTag: string, reason: string) => {
+  await page
+    .getByTestId(`member-row-${memberTag}`)
+    .getByRole("button", { name: "Bannir le membre" })
+    .click();
+
+  await page.getByLabel("Raison du bannissement").fill(reason);
+  await page.getByRole("button", { name: "Confirmer" }).click();
+};
 
 export {
   goToRegisterPage,
@@ -128,4 +157,9 @@ export {
   submitChangePasswordForm,
   changePasswordWith,
   generateValidCredentials,
+  ADMIN_CREDENTIALS,
+  goToAdminMembersPage,
+  loginAsAdmin,
+  banMember,
 };
+
