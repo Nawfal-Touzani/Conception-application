@@ -21,9 +21,9 @@ public interface NotificationRepository extends CrudRepository<Notification, Lon
   /**
    * Finds all notifications for a given member filtered by read status.
    *
-   * @param id the ID of the member
+   * @param id   the ID of the member
    * @param read true for read notifications, false for unread
-   * @return  notifications with the filter
+   * @return notifications with the filter
    */
   Iterable<Notification> findByMemberIdAndRead(long id, boolean read);
 }

@@ -13,12 +13,14 @@ import static org.mockito.Mockito.when;
 
 import be.vinci.ipl.cae.api.models.dtos.ChangePasswordDto;
 import be.vinci.ipl.cae.api.models.dtos.MemberProfileResponseDto;
+import be.vinci.ipl.cae.api.models.dtos.PublicMemberDto;
 import be.vinci.ipl.cae.api.models.dtos.UpdateMemberProfileDto;
 import be.vinci.ipl.cae.api.models.entities.Image;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Speciality;
 import be.vinci.ipl.cae.api.models.entities.Team;
 import be.vinci.ipl.cae.api.models.entities.TeamComposition;
+import be.vinci.ipl.cae.api.repositories.BanishmentRepository;
 import be.vinci.ipl.cae.api.repositories.ImageRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
@@ -26,6 +28,7 @@ import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
 import be.vinci.ipl.cae.api.repositories.UnavailabilityRepository;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -60,6 +63,12 @@ public class MemberServiceTest {
   @Mock
   private UnavailabilityRepository unavailabilityRepository;
 
+  @Mock
+  private BanishmentRepository banishmentRepository;
+
+  /**
+   * The Member service.
+   */
   @InjectMocks
   MemberService memberService;
 
@@ -68,6 +77,9 @@ public class MemberServiceTest {
   private Image image;
   private final String email = "test@gmail.com";
 
+  /**
+   * Sets up.
+   */
   @BeforeEach
   void setUp() {
     speciality = new Speciality();
@@ -84,6 +96,9 @@ public class MemberServiceTest {
     member.setProfileCreationDate(LocalDate.now());
   }
 
+  /**
+   * Gets profile 1.
+   */
   @Test
   @DisplayName("Should return profile DTO when member exists")
   void getProfile1() {
@@ -96,11 +111,14 @@ public class MemberServiceTest {
     MemberProfileResponseDto result = memberService.getProfile(email);
 
     assertNotNull(result);
-    assertEquals(email, result.getEmail());
-    assertEquals("Architect", result.getSpeciality());
+    assertEquals(email, result.email());
+    assertEquals("Architect", result.speciality());
     verify(memberRepository).findByEmail(email);
   }
 
+  /**
+   * Gets profile 2.
+   */
   @Test
   @DisplayName("Should return null when member doesn't exists")
   void getProfile2() {
@@ -111,6 +129,9 @@ public class MemberServiceTest {
     assertNull(result);
   }
 
+  /**
+   * Gets profile 3.
+   */
   @Test
   @DisplayName("Should include team name when member has a team")
   void getProfile3() {
@@ -131,15 +152,16 @@ public class MemberServiceTest {
     MemberProfileResponseDto result = memberService.getProfile(email);
 
     assertNotNull(result);
-    assertEquals("Vinci", result.getTeamName());
+    assertEquals("Vinci", result.teamName());
   }
 
+  /**
+   * Update profile 1.
+   */
   @Test
   @DisplayName("Should update profile and return new DTO")
   void updateProfile1() {
-    UpdateMemberProfileDto payload = new UpdateMemberProfileDto();
-    payload.setSpeciality("Gardien");
-    payload.setProfileImage("img2.png");
+    UpdateMemberProfileDto payload = new UpdateMemberProfileDto("Gardien", "img2.png");
 
     Speciality newSpec = new Speciality();
     newSpec.setName("Gardien");
@@ -158,16 +180,17 @@ public class MemberServiceTest {
 
     assertNotNull(result);
     verify(memberRepository).save(any(Member.class));
-    assertEquals("Gardien", result.getSpeciality());
-    assertEquals("img2.png", result.getProfileImage());
+    assertEquals("Gardien", result.speciality());
+    assertEquals("img2.png", result.profileImage());
   }
 
+  /**
+   * Update profile 2.
+   */
   @Test
   @DisplayName("Should not update speciality or image if they don't exist in DB")
   void updateProfile2() {
-    UpdateMemberProfileDto payload = new UpdateMemberProfileDto();
-    payload.setSpeciality("Strange");
-    payload.setProfileImage("nonExisting.png");
+    UpdateMemberProfileDto payload = new UpdateMemberProfileDto("Strange", "nonExisting.png");
 
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
     when(specialityRepository.findByName("Strange")).thenReturn(Optional.empty());
@@ -180,29 +203,33 @@ public class MemberServiceTest {
     MemberProfileResponseDto result = memberService.updateProfile(email, payload);
 
     assertNotNull(result);
-    assertEquals("Architect", result.getSpeciality());
-    assertEquals("img1.png", result.getProfileImage());
+    assertEquals("Architect", result.speciality());
+    assertEquals("img1.png", result.profileImage());
     verify(memberRepository).save(member);
   }
 
+  /**
+   * Update profile 3.
+   */
   @Test
   @DisplayName("Should return null when updating a non-existent member")
   void updateProfile3() {
     when(memberRepository.findByEmail(email)).thenReturn(Optional.empty());
 
     MemberProfileResponseDto result = memberService.updateProfile(email,
-        new UpdateMemberProfileDto());
+        new UpdateMemberProfileDto(null, null));
 
     assertNull(result);
     verify(memberRepository, never()).save(any());
   }
 
+  /**
+   * Update profile 4.
+   */
   @Test
   @DisplayName("Should skip updates when payload fields are null")
   void updateProfile4() {
-    UpdateMemberProfileDto payload = new UpdateMemberProfileDto();
-    payload.setSpeciality(null);
-    payload.setProfileImage(null);
+    UpdateMemberProfileDto payload = new UpdateMemberProfileDto(null, null);
 
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
     when(teamCompositionRepository.findByMemberId(any())).thenReturn(Optional.empty());
@@ -217,17 +244,17 @@ public class MemberServiceTest {
     verify(memberRepository).save(member);
   }
 
+  /**
+   * Change password 1.
+   */
   @Test
   @DisplayName("Should change password when old password matches")
   void changePassword1() {
-    ChangePasswordDto dto = new ChangePasswordDto();
-    dto.setOldPassword("oldPswd");
-    dto.setNewPassword("newPswd");
-    dto.setConfirmPassword("newPswd");
+    ChangePasswordDto dto = new ChangePasswordDto("Old1@Pswd", "New1@Pswd", "New1@Pswd");
 
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
-    when(passwordEncoder.matches("oldPswd", member.getPassword())).thenReturn(true);
-    when(passwordEncoder.encode("newPswd")).thenReturn("hashedNewPswd");
+    when(passwordEncoder.matches("Old1@Pswd", member.getPassword())).thenReturn(true);
+    when(passwordEncoder.encode("New1@Pswd")).thenReturn("hashedNewPswd");
 
     boolean result = memberService.changePassword(email, dto);
 
@@ -236,16 +263,16 @@ public class MemberServiceTest {
     verify(memberRepository).save(member);
   }
 
+  /**
+   * Change password 2.
+   */
   @Test
   @DisplayName("Should return false when old password doesn't matches")
   void changePassword2() {
-    ChangePasswordDto dto = new ChangePasswordDto();
-    dto.setOldPassword("wrongPswd");
-    dto.setNewPassword("newPswd");
-    dto.setConfirmPassword("newPswd");
+    ChangePasswordDto dto = new ChangePasswordDto("Wrong1@Pswd", "New1@Pswd", "New1@Pswd");
 
     when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
-    when(passwordEncoder.matches("wrongPswd", member.getPassword())).thenReturn(false);
+    when(passwordEncoder.matches("Wrong1@Pswd", member.getPassword())).thenReturn(false);
 
     boolean result = memberService.changePassword(email, dto);
 
@@ -253,13 +280,13 @@ public class MemberServiceTest {
     verify(memberRepository, never()).save(member);
   }
 
+  /**
+   * Change password 3.
+   */
   @Test
   @DisplayName("Should return false when member not found")
   void changePassword3() {
-    ChangePasswordDto dto = new ChangePasswordDto();
-    dto.setOldPassword("oldPswd");
-    dto.setNewPassword("newPswd");
-    dto.setConfirmPassword("newPswd");
+    ChangePasswordDto dto = new ChangePasswordDto("Old1@Pswd", "New1@Pswd", "New1@Pswd");
 
     when(memberRepository.findByEmail(email)).thenReturn(Optional.empty());
 
@@ -268,13 +295,13 @@ public class MemberServiceTest {
     assertFalse(result);
   }
 
+  /**
+   * Change password 4.
+   */
   @Test
   @DisplayName("Should return false when new password and confirmation do not match")
   void changePassword4() {
-    ChangePasswordDto dto = new ChangePasswordDto();
-    dto.setOldPassword("oldPswd");
-    dto.setNewPassword("newPswd");
-    dto.setConfirmPassword("Pswd");
+    ChangePasswordDto dto = new ChangePasswordDto("Old1@Pswd", "New1@Pswd", "Pswd1@Other");
 
     boolean result = memberService.changePassword(email, dto);
 
@@ -282,13 +309,13 @@ public class MemberServiceTest {
     verify(memberRepository, never()).findByEmail(any());
   }
 
+  /**
+   * Change password 5.
+   */
   @Test
   @DisplayName("Should return false when new password is the same as old password")
   void changePassword5() {
-    ChangePasswordDto dto = new ChangePasswordDto();
-    dto.setOldPassword("PswdVinci");
-    dto.setNewPassword("PswdVinci");
-    dto.setConfirmPassword("PswdVinci");
+    ChangePasswordDto dto = new ChangePasswordDto("Pswd1@Vinci", "Pswd1@Vinci", "Pswd1@Vinci");
 
     boolean result = memberService.changePassword(email, dto);
 
@@ -296,15 +323,19 @@ public class MemberServiceTest {
     verify(memberRepository, never()).findByEmail(any());
   }
 
+  /**
+   * Change password 6.
+   */
   @Test
   @DisplayName("Should return false when new password is null")
   void changePassword6() {
-    ChangePasswordDto dto = new ChangePasswordDto();
-    dto.setOldPassword("old");
-    dto.setNewPassword(null);
+    ChangePasswordDto dto = new ChangePasswordDto("Old1@Pswd", null, null);
     assertFalse(memberService.changePassword(email, dto));
   }
 
+  /**
+   * Change password 7.
+   */
   @Test
   @DisplayName("Should return false when ChangePasswordDto is null")
   void changePassword7() {
@@ -312,32 +343,35 @@ public class MemberServiceTest {
     assertFalse(result);
   }
 
+  /**
+   * Change password 8.
+   */
   @Test
   @DisplayName("Should return false when old password is null in DTO")
   void changePassword8() {
-    ChangePasswordDto dto = new ChangePasswordDto();
-    dto.setOldPassword(null);
-    dto.setNewPassword("newPswd");
-    dto.setConfirmPassword("newPswd");
+    ChangePasswordDto dto = new ChangePasswordDto(null, "New1@Pswd", "New1@Pswd");
 
     boolean result = memberService.changePassword(email, dto);
     assertFalse(result);
   }
 
+  /**
+   * Change password 9.
+   */
   @Test
   @DisplayName("Should return false when confirm password is null")
   void changePassword9() {
 
-    ChangePasswordDto dto = new ChangePasswordDto();
-    dto.setOldPassword("old");
-    dto.setNewPassword("new");
-    dto.setConfirmPassword(null);
+    ChangePasswordDto dto = new ChangePasswordDto("Old1@Pswd", "New1@Pswd", null);
 
     boolean result = memberService.changePassword(email, dto);
 
     assertFalse(result);
   }
 
+  /**
+   * Promote to admin success.
+   */
   @Test
   @DisplayName("Should promote a member to admin successfully")
   void promoteToAdmin_success() {
@@ -350,6 +384,9 @@ public class MemberServiceTest {
     verify(memberRepository).save(member);
   }
 
+  /**
+   * Promote to admin already admin.
+   */
   @Test
   @DisplayName("Should throw exception if member is already admin")
   void promoteToAdmin_alreadyAdmin() {
@@ -364,6 +401,9 @@ public class MemberServiceTest {
     verify(memberRepository, never()).save(any());
   }
 
+  /**
+   * Promote to admin member not found.
+   */
   @Test
   @DisplayName("Should throw exception if member not found")
   void promoteToAdmin_memberNotFound() {
@@ -377,6 +417,9 @@ public class MemberServiceTest {
     verify(memberRepository, never()).save(any());
   }
 
+  /**
+   * Demote from admin success.
+   */
   @Test
   @DisplayName("Should demote admin successfully when not last admin")
   void demoteFromAdmin_success() {
@@ -390,6 +433,9 @@ public class MemberServiceTest {
     verify(memberRepository).save(member);
   }
 
+  /**
+   * Demote from admin not admin.
+   */
   @Test
   @DisplayName("Should throw exception if member is not admin")
   void demoteFromAdmin_notAdmin() {
@@ -404,6 +450,9 @@ public class MemberServiceTest {
     verify(memberRepository, never()).save(any());
   }
 
+  /**
+   * Demote from admin last admin.
+   */
   @Test
   @DisplayName("Should throw exception if trying to remove last admin")
   void demoteFromAdmin_lastAdmin() {
@@ -419,6 +468,9 @@ public class MemberServiceTest {
     verify(memberRepository, never()).save(any());
   }
 
+  /**
+   * Demote from admin member not found.
+   */
   @Test
   @DisplayName("Should throw exception if member not found when demoting")
   void demoteFromAdmin_memberNotFound() {
@@ -432,6 +484,9 @@ public class MemberServiceTest {
     verify(memberRepository, never()).save(any());
   }
 
+  /**
+   * Gets all admins success.
+   */
   @Test
   @DisplayName("Should return all admins")
   void getAllAdmins_success() {
@@ -450,4 +505,84 @@ public class MemberServiceTest {
     verify(memberRepository).findByIsAdminTrue();
   }
 
+  /**
+   * Gets public profile 1.
+   */
+  @Test
+  @DisplayName("Should return profile public if member exists")
+  void getPublicProfile1() {
+    Long memberId = 1L;
+    member.setId(memberId);
+
+    when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+    when(teamCompositionRepository.findByMemberId(memberId)).thenReturn(Optional.empty());
+
+    PublicMemberDto result = memberService.getPublicProfile(memberId);
+
+    assertNotNull(result);
+    assertEquals("PlayerOne", result.tag());
+    assertEquals("Architect", result.speciality());
+    assertEquals("img1.png", result.profileImage());
+    assertNull(result.teamName());
+    verify(memberRepository).findById(memberId);
+  }
+
+  /**
+   * Gets public profile 2.
+   */
+  @Test
+  @DisplayName("Should throw a NoSuchElementException if member doesn't exists")
+  void getPublicProfile2() {
+    Long memberId = 109383L;
+    when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
+
+    assertThrows(NoSuchElementException.class, () -> {
+      memberService.getPublicProfile(memberId);
+    });
+  }
+
+  @Test
+  @DisplayName("Should return a list of profile Dtos for all members")
+  void getAllMembers1() {
+    Member member2 = new Member();
+    member2.setEmail("vinci2@gmail.com");
+    member2.setTag("PlayerTwo");
+    member2.setSpeciality(speciality);
+    member2.setImage(image);
+    member2.setProfileCreationDate(LocalDate.now());
+
+    List<Member> allMembers = List.of(member, member2);
+
+    when(memberRepository.findAll()).thenReturn(allMembers);
+
+    when(memberRepository.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
+    when(memberRepository.findByEmail(member2.getEmail())).thenReturn(Optional.of(member2));
+    when(teamCompositionRepository.findByMemberId(any())).thenReturn(Optional.empty());
+    when(unavailabilityRepository.existsByMemberAndStartDateBeforeAndEndDateAfter(any(), any(),
+        any()))
+        .thenReturn(false);
+
+    List<MemberProfileResponseDto> result = memberService.getAllMembers();
+
+    assertNotNull(result);
+    assertEquals(2, result.size());
+    assertEquals("PlayerOne", result.get(0).tag());
+    assertEquals("PlayerTwo", result.get(1).tag());
+    verify(memberRepository).findAll();
+    verify(memberRepository).findByEmail(member.getEmail());
+    verify(memberRepository).findByEmail(member2.getEmail());
+  }
+
+  @Test
+  @DisplayName("Should return an empty list when no members exist")
+  void getAllMembers2() {
+    when(memberRepository.findAll()).thenReturn(List.of());
+
+    List<MemberProfileResponseDto> result = memberService.getAllMembers();
+
+    assertNotNull(result);
+    assertTrue(result.isEmpty());
+    verify(memberRepository).findAll();
+    verify(memberRepository, never()).findByEmail(any());
+  }
 }

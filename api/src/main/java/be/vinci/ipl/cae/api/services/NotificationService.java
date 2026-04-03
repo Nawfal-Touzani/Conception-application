@@ -4,7 +4,7 @@ import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.NotificationRepository;
-import java.util.Optional;
+import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,6 +18,9 @@ public class NotificationService {
 
   /**
    * Creates a new NotificationService.
+   *
+   * @param notificationRepository the notification repository
+   * @param memberRepository       the member repository
    */
   public NotificationService(NotificationRepository notificationRepository,
       MemberRepository memberRepository) {
@@ -27,40 +30,40 @@ public class NotificationService {
 
   /**
    * Gets all notifications by a member id.
+   *
+   * @param id the id
+   * @return the all notification by member
    */
   public Iterable<Notification> getAllNotificationByMember(long id) {
 
-    Member member = getMemberIfExist(id);
-    if (member == null) {
-      return null;
-    }
+    getMemberOrThrow(id);
+
     return notificationRepository.findByMemberId(id);
   }
 
   /**
    * Send a notification to a member.
+   *
+   * @param id           the id
+   * @param notification the notification
+   * @return the notification
    */
   public Notification send(long id, Notification notification) {
-    Member member = getMemberIfExist(id);
-    if (member == null) {
-      return null;
-    }
-    notification.setMember(member);
+    Member member = getMemberOrThrow(id);
 
+    notification.setMember(member);
     return notificationRepository.save(notification);
   }
 
   /**
    * Mark the notification to read.
+   *
+   * @param id the id
+   * @return the notification
    */
   public Notification markNotificationRead(long id) {
-    Optional<Notification> notificationOpt = notificationRepository.findById(id);
-
-    if (notificationOpt.isEmpty()) {
-      return null;
-    }
-
-    Notification notification = notificationOpt.get();
+    Notification notification = notificationRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("Notification not found"));
 
     notification.setRead(true);
     return notificationRepository.save(notification);
@@ -68,23 +71,22 @@ public class NotificationService {
 
   /**
    * Get the notification of a member by read status.
+   *
+   * @param id   the id
+   * @param read the read
+   * @return the notifications by read status
    */
   public Iterable<Notification> getNotificationsByReadStatus(long id, boolean read) {
-
-    Member member = getMemberIfExist(id);
-
-    if (member == null) {
-      return null;
-    }
-
+    getMemberOrThrow(id);
     return notificationRepository.findByMemberIdAndRead(id, read);
   }
 
   /**
-   * Gets a member if it exists.
+   * Gets a member by id or throws if not found.
    */
-  public Member getMemberIfExist(long id) {
-    return memberRepository.findById(id).orElse(null);
+  private Member getMemberOrThrow(long id) {
+    return memberRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("Member not found"));
   }
 
 }

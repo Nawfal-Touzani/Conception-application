@@ -36,6 +36,9 @@ public class MemberController {
 
   /**
    * Constructor for MemberController.
+   *
+   * @param memberService         the member service
+   * @param unavailabilityService the unavailability service
    */
   public MemberController(MemberService memberService,
       UnavailabilityService unavailabilityService) {
@@ -102,7 +105,7 @@ public class MemberController {
     boolean success = memberService.changePassword(principalMember.getEmail(), dto);
 
     if (!success) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid old password");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid password change request");
     }
   }
 
@@ -117,7 +120,12 @@ public class MemberController {
   public void addAvailability(Authentication authentication,
       @Valid @RequestBody UnavailabilityDto dto) {
     Member principal = (Member) authentication.getPrincipal();
-    unavailabilityService.addUnavailability(principal.getEmail(), dto);
+
+    try {
+      unavailabilityService.addUnavailability(principal.getEmail(), dto);
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    }
   }
 
 
@@ -128,7 +136,7 @@ public class MemberController {
    * @return a list of the member's unavailabilities
    */
   @GetMapping("/me/unavailabilities")
-  public List<UnavailabilityDto> getMyUnavailabilities(Authentication authentication) {
+  public Iterable<UnavailabilityDto> getMyUnavailabilities(Authentication authentication) {
     Member principal = (Member) authentication.getPrincipal();
     return unavailabilityService.getMyUnavailabilities(principal.getEmail());
   }
@@ -178,6 +186,8 @@ public class MemberController {
 
   /**
    * Get all members (admin only).
+   *
+   * @return the all members
    */
   @GetMapping
   @PreAuthorize("hasRole('ROLE_ADMIN')")

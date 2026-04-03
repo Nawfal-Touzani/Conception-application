@@ -2,10 +2,10 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import { AuthProvider } from './AuthProvider';
 import { useAuth } from './useAuth';
-import * as authService from '../services/auth.service';
+import * as authService from '../services/auth/auth.service';
 
 // Mock AuthService
-vi.mock('../services/auth.service');
+vi.mock('../services/auth/auth.service');
 
 describe('AuthContext', () => {
   const mockUser = {
@@ -137,5 +137,27 @@ describe('AuthContext', () => {
     expect(result.current.user).toBeNull();
     expect(localStorage.getItem('jwt_token')).toBeNull();
     expect(sessionStorage.getItem('jwt_token')).toBeNull();
+  });
+
+  test('autoLogin (useEffect) : set bannedError and clear tokens when user is banned', async () => {
+    // Arrange
+    localStorage.setItem('jwt_token', 'old-jwt-token');
+    sessionStorage.setItem('jwt_token', 'old-jwt-token');
+
+    // Service sends a 403 error for banned users
+    vi.mocked(authService.getMe).mockRejectedValue(
+      new Error('Votre compte a été banni.'),
+    );
+
+    const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider });
+
+    await waitFor(() => {
+      expect(result.current.user).toBeNull();
+      // tokens deleted
+      expect(localStorage.getItem('jwt_token')).toBeNull();
+      expect(sessionStorage.getItem('jwt_token')).toBeNull();
+      // ban message
+      expect(result.current.bannedError).toBe('Votre compte a été banni.');
+    });
   });
 });

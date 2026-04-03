@@ -1,5 +1,6 @@
 package be.vinci.ipl.cae.api.models.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -32,12 +33,24 @@ import lombok.Setter;
 public class Match {
 
   /**
-   *Match state.
+   * Match state.
    */
   public enum MatchState {
+    /**
+     * Scheduled match state.
+     */
     SCHEDULED,
+    /**
+     * Played match state.
+     */
     PLAYED,
+    /**
+     * Canceled match state.
+     */
     CANCELED,
+    /**
+     * Forfeit match state.
+     */
     FORFEIT
   }
 
@@ -45,9 +58,21 @@ public class Match {
    * Result validation state.
    */
   public enum ResultStatus {
+    /**
+     * Not entered result status.
+     */
     NOT_ENTERED,
+    /**
+     * Pending result status.
+     */
     PENDING,
+    /**
+     * Validated result status.
+     */
     VALIDATED,
+    /**
+     * Refused result status.
+     */
     REFUSED
   }
 
@@ -58,6 +83,7 @@ public class Match {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "id_tournament", nullable = false)
+  @JsonBackReference("tournament-matches")
   private Tournament tournament;
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -102,4 +128,5 @@ public class Match {
   @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonManagedReference("match-notifications")
   private List<Notification> notifications = new ArrayList<>();
+
 }
