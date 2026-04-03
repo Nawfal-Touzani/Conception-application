@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import { useState } from 'react';
 import { useAuth } from '../../../../contexts/useAuth';
 import { MemberProfile } from '../../../../types/member';
-import * as memberService from '../../../../services/memberService';
+import * as memberService from '../../../../services/member/member.service';
 import { ProfileInputField } from './ProfileInputField';
 import { PasswordModal } from '../../Password/PassordModal';
 import { SpecialityMenu } from '../../../../hooks/useSpecialityMenu/useSpecialityMenu';

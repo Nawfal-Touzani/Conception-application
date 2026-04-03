@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { usePublicMember } from './usePublicMember';
-import * as memberService from '../../services/memberService';
+import * as memberService from '../../services/member/member.service';
 import { MemoryRouter } from 'react-router-dom';
 import { PublicMember } from '../../types/publicMember';
 
@@ -14,7 +14,7 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-vi.mock('../../services/memberService', () => ({
+vi.mock('../../services/member/member.service', () => ({
   getPublicMemberById: vi.fn(),
 }));
 

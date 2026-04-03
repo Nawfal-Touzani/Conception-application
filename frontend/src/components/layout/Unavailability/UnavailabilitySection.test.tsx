@@ -2,11 +2,11 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { UnavailabilitySection } from './UnavailabilitySection';
-import * as memberService from '../../../services/memberService';
+import * as memberService from '../../../services/member/member.service';
 import { AuthContext } from '../../../contexts/AuthContext';
 import { act } from 'react';
 
-vi.mock('../../../services/memberService');
+vi.mock('../../../services/member/member.service');
 
 const mockAuth = {
   user: { token: 'fake-token' },

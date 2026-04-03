@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { ProfileSidebar } from './ProfileSidebar';
 import { AuthContext } from '../../../../contexts/AuthContext';
-import * as memberService from '../../../../services/memberService';
+import * as memberService from '../../../../services/member/member.service';
 
 vi.mock('../../services/memberService');
 

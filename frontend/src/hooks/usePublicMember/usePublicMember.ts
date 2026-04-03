@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getPublicMemberById } from '../../services/memberService';
+import { getPublicMemberById } from '../../services/member/member.service';
 import { PublicMember } from '../../types/publicMember';
 
 export const usePublicMember = (id: string | undefined) => {

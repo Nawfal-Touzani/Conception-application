@@ -10,7 +10,7 @@ import {
   TextField,
 } from '@mui/material';
 import { useState } from 'react';
-import * as memberService from '../../../services/memberService';
+import * as memberService from '../../../services/member/member.service';
 
 interface PasswordModalProps {
   open: boolean;

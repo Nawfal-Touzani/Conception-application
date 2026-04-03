@@ -18,7 +18,7 @@ import {
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { useState } from 'react';
 import { useAuth } from '../../../contexts/useAuth';
-import * as memberService from '../../../services/memberService';
+import * as memberService from '../../../services/member/member.service';
 
 export const UnavailabilitySection = () => {
   const { user } = useAuth();

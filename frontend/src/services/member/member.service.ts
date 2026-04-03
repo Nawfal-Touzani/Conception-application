@@ -1,5 +1,5 @@
-import { MemberProfile } from '../types/member';
-import { PublicMember } from '../types/publicMember';
+import { MemberProfile } from '../../types/member';
+import { PublicMember } from '../../types/publicMember';
 
 const API_URL = 'http://localhost:3000/members';
 

@@ -3,9 +3,9 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import PublicProfilePage from './PublicProfilePage';
-import * as memberService from '../../../../services/memberService';
+import * as memberService from '../../../../services/member/member.service';
 
-vi.mock('../../../../services/memberService', () => ({
+vi.mock('../../../../services/member/member.service', () => ({
   getPublicMemberById: vi.fn(),
 }));
 

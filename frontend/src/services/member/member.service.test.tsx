@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as memberService from './memberService';
+import * as memberService from './member.service';
 
 describe('memberService', () => {
   const token = 'fake-token';
