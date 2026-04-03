@@ -17,7 +17,6 @@ import {
 } from '@mui/material';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { useUnavailability } from '../../../../../hooks/useUnavailability/useUnavailability';
-import { validateUnavailabilityDates } from '../../../../../utils/Unavailability/unavailability.utils';
 
 export const UnavailabilitySection = () => {
   const {
@@ -157,8 +156,8 @@ export const UnavailabilitySection = () => {
                 <Box key={`${item.startDate}-${item.endDate}-${index}`}>
                   <ListItem>
                     <ListItemText
-                      primary={`Du ${validateUnavailabilityDates({ startDate: item.startDate, endDate: '' })}`}
-                      secondary={`Au ${validateUnavailabilityDates({ startDate: '', endDate: item.endDate })}`}
+                      primary={`Du ${new Date(item.startDate).toLocaleDateString()}`}
+                      secondary={`Au ${new Date(item.endDate).toLocaleDateString()}`}
                     />
                   </ListItem>
                   {index < unavailabilities.length - 1 && <Divider />}
