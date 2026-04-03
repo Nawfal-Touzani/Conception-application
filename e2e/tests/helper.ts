@@ -5,6 +5,10 @@ const goToRegisterPage = async (page: Page) => {
   await page.goto("/register");
 };
 
+const goToLoginPage = async (page: Page) => {
+  await page.goto('/login');
+};
+
 const fillRegisterForm = async (page: Page, { email, password, tag }: { email: string; password: string; tag: string },) => {
   await page.getByLabel("Adresse email").fill(email);
   await page.getByLabel("Mot de passe").fill(password);
@@ -17,8 +21,20 @@ const fillRegisterForm = async (page: Page, { email, password, tag }: { email: s
   await page.getByRole('img', { name: 'Avatar 1', exact: true }).click();
 };
 
+const fillLoginForm = async (
+  page: Page,
+  { email, password }: { email: string; password: string },
+) => {
+  await page.getByLabel('Adresse email').fill(email);
+  await page.getByLabel('Mot de passe').fill(password);
+};
+
 const submitRegisterForm = async (page: Page) => {
   await page.locator('main').getByRole('button', { name: "S'inscrire" }).click();
+};
+
+const submitLoginForm = async (page: Page) => {
+  await page.locator('main').getByRole('button', { name: 'Se connecter' }).click();
 };
 
 const registerWith = async (
@@ -31,6 +47,24 @@ const registerWith = async (
   await submitRegisterForm(page);
 };
 
+const loginWith = async (
+  page: Page,
+  email: string,
+  password: string,
+  rememberMe = true,
+) => {
+  await fillLoginForm(page, { email, password });
+
+  const rememberMeCheckbox = page.getByLabel('Se souvenir de moi');
+  if (rememberMe) {
+    await rememberMeCheckbox.check();
+  } else {
+    await rememberMeCheckbox.uncheck();
+  }
+
+  await submitLoginForm(page);
+};
+
 // Password to pass always
 // Faker psw never pass
 const generateValidCredentials = () => ({
@@ -39,4 +73,4 @@ const generateValidCredentials = () => ({
   tag: faker.internet.username().slice(0, 15),
 });
 
-export { goToRegisterPage, fillRegisterForm, generateValidCredentials, submitRegisterForm, registerWith };
+export { goToRegisterPage, goToLoginPage, fillRegisterForm, fillLoginForm, generateValidCredentials, submitRegisterForm, submitLoginForm, registerWith, loginWith };
