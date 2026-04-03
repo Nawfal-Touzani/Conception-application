@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../contexts/useAuth';
-import { getNotifications } from '../../../services/notifications.service';
-import NavBar from './NavBar';
-import { Notification } from '../../../types/notifications.types';
+import { useAuth } from '../../contexts/useAuth';
+import { getNotifications } from '../../services/notifications.service';
+import NavBar from '../../components/layout/Navbar/NavBar';
+import { Notification } from '../../types/notifications.types';
 
 const NavBarContainer = () => {
   const navigate = useNavigate();
