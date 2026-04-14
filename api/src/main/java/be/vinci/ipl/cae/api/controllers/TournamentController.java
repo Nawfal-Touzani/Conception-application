@@ -170,7 +170,6 @@ public class TournamentController {
    * @param idTournament  the id tournament
    * @param idTeam        the id team
    * @param currentMember the current member
-   * @return the tournament registration
    */
   @PostMapping("/{idTournament}/teams/{idTeam}")
   @ResponseStatus(HttpStatus.CREATED)
