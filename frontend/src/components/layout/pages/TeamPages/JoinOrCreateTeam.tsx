@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -15,160 +14,33 @@ import {
   ListSubheader,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { useAuth } from '../../../../contexts/useAuth';
-import * as teamService from '../../../../services/team/team.service';
-import { TeamDto } from '../../../../types/team.types';
+import { useJoinOrCreateTeam } from '../../../../hooks/useJoinOrCreateTeam/useJoinOrCreateTeam';
+import { joinOrCreateTeamSx } from '../../../../styles/joinOrCreateTeam.styles';
 
 type Props = {
   onTeamCreated: () => void;
 };
 
 const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
-  const { user } = useAuth();
-
-  //  Fix: extraire le token en variable primitive stable
-  // Un objet authHeaders recréé à chaque render causerait une boucle infinie
-  // si mis en dépendance de useEffect. On utilise le token (string) à la place.
-  const token = user?.token ?? '';
-
-  const [teams, setTeams] = useState<TeamDto[]>([]);
-  const [filteredTeams, setFilteredTeams] = useState<TeamDto[]>([]);
-  const [search, setSearch] = useState('');
-  const [selectedTeamId, setSelectedTeamId] = useState<number | ''>('');
-  const [teamName, setTeamName] = useState('');
-  const [snack, setSnack] = useState<{
-    open: boolean;
-    msg: string;
-    severity: 'success' | 'error';
-  }>({ open: false, msg: '', severity: 'success' });
-
-  //  Fix: dépendance sur `token` (string) et non sur `authHeaders` (objet recréé à chaque render)
-  useEffect(() => {
-    if (!token) return;
-    teamService
-      .getTeams(token)
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setTeams(data);
-          setFilteredTeams(data);
-        }
-      })
-      .catch(() => {});
-  }, [token]);
-
-  // Filtre la liste affichée a chaque fois que la recherche change
-  useEffect(() => {
-    if (!search.trim()) {
-      setFilteredTeams(teams);
-    } else {
-      setFilteredTeams(
-        teams.filter((t) =>
-          t.name.toLowerCase().includes(search.toLowerCase()),
-        ),
-      );
-    }
-    setSelectedTeamId('');
-  }, [search, teams]);
-
-  // Creer une equipe
-  const createTeam = async () => {
-    if (!teamName.trim()) return;
-    try {
-      const res = await teamService.createTeam(token, teamName);
-
-      if (res.status === 201) {
-        onTeamCreated();
-      } else if (res.status === 409) {
-        setSnack({
-          open: true,
-          msg: "Ce nom d'équipe existe déjà.",
-          severity: 'error',
-        });
-      } else if (res.status === 400) {
-        setSnack({
-          open: true,
-          msg: "Nom d'équipe invalide.",
-          severity: 'error',
-        });
-      } else {
-        setSnack({
-          open: true,
-          msg: 'Erreur lors de la création.',
-          severity: 'error',
-        });
-      }
-    } catch {
-      setSnack({
-        open: true,
-        msg: 'Impossible de joindre le serveur.',
-        severity: 'error',
-      });
-    }
-  };
-
-  // Rejoindre une equipe
-  const joinTeam = async () => {
-    if (selectedTeamId === '') return;
-    try {
-      const res = await teamService.sendJoinRequest(token, selectedTeamId);
-
-      if (res.ok || res.status === 201) {
-        setSnack({
-          open: true,
-          msg: 'Demande envoyée avec succès !',
-          severity: 'success',
-        });
-        setSelectedTeamId('');
-      } else {
-        setSnack({
-          open: true,
-          msg: "Erreur lors de l'envoi.",
-          severity: 'error',
-        });
-      }
-    } catch {
-      setSnack({
-        open: true,
-        msg: 'Impossible de joindre le serveur.',
-        severity: 'error',
-      });
-    }
-  };
+  const {
+    filteredTeams,
+    search,
+    setSearch,
+    selectedTeamId,
+    setSelectedTeamId,
+    teamName,
+    setTeamName,
+    snack,
+    closeSnack,
+    createTeam,
+    joinTeam,
+  } = useJoinOrCreateTeam(onTeamCreated);
 
   return (
-    <Box
-      sx={{
-        flexGrow: 1,
-        backgroundColor: '#1a2744',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        px: 2,
-      }}
-    >
-      <Box
-        sx={{
-          display: 'flex',
-          gap: 4,
-          width: '100%',
-          maxWidth: 860,
-          alignItems: 'flex-start',
-        }}
-      >
+    <Box sx={joinOrCreateTeamSx.root}>
+      <Box sx={joinOrCreateTeamSx.layout}>
         {/* ── Left: Rejoindre ── */}
-        <Paper
-          elevation={0}
-          sx={{
-            flex: 1,
-            borderRadius: '12px',
-            p: 3.5,
-            backgroundColor: '#fff',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-          }}
-        >
+        <Paper elevation={0} sx={joinOrCreateTeamSx.card}>
           <Typography
             variant="h5"
             sx={{
@@ -180,18 +52,8 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
           >
             Rejoindre une team
           </Typography>
-          <Box
-            sx={{
-              width: 40,
-              height: 3,
-              backgroundColor: '#1a2744',
-              borderRadius: 2,
-              mx: 'auto',
-              mt: -1,
-            }}
-          />
+          <Box sx={joinOrCreateTeamSx.divider} />
 
-          {/* Liste déroulante avec recherche intégrée */}
           <FormControl fullWidth size="small">
             <InputLabel id="team-select-label">
               Sélectionner une équipe
@@ -201,12 +63,10 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
               value={selectedTeamId}
               label="Sélectionner une équipe"
               onChange={(e) => setSelectedTeamId(e.target.value as number)}
-              sx={{ borderRadius: '6px', fontSize: '0.9rem' }}
+              sx={joinOrCreateTeamSx.select}
               MenuProps={{
                 autoFocus: false,
-                PaperProps: {
-                  sx: { maxHeight: 320 },
-                },
+                PaperProps: { sx: { maxHeight: 320 } },
               }}
             >
               <ListSubheader sx={{ p: 1, lineHeight: 'normal' }}>
@@ -226,7 +86,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
                         />
                       </InputAdornment>
                     ),
-                    sx: { fontSize: '0.85rem', borderRadius: '6px' },
+                    sx: joinOrCreateTeamSx.searchInput,
                   }}
                 />
               </ListSubheader>
@@ -253,18 +113,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
               variant="contained"
               disabled={selectedTeamId === ''}
               onClick={joinTeam}
-              sx={{
-                backgroundColor: '#1a2744',
-                borderRadius: '6px',
-                px: 3,
-                py: 1,
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                textTransform: 'none',
-                boxShadow: 'none',
-                '&:hover': { backgroundColor: '#243358' },
-                '&:disabled': { backgroundColor: '#ccc', color: '#888' },
-              }}
+              sx={joinOrCreateTeamSx.button}
             >
               Envoyer demande
             </Button>
@@ -272,18 +121,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
         </Paper>
 
         {/* ── Right: Créer ── */}
-        <Paper
-          elevation={0}
-          sx={{
-            flex: 1,
-            borderRadius: '12px',
-            p: 3.5,
-            backgroundColor: '#fff',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-          }}
-        >
+        <Paper elevation={0} sx={joinOrCreateTeamSx.card}>
           <Typography
             variant="h5"
             sx={{
@@ -295,16 +133,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
           >
             Créer une team
           </Typography>
-          <Box
-            sx={{
-              width: 40,
-              height: 3,
-              backgroundColor: '#1a2744',
-              borderRadius: 2,
-              mx: 'auto',
-              mt: -1,
-            }}
-          />
+          <Box sx={joinOrCreateTeamSx.divider} />
 
           <Typography
             sx={{ color: '#1a2744', fontWeight: 600, fontSize: '0.95rem' }}
@@ -318,13 +147,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
             onChange={(e) => setTeamName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && createTeam()}
             size="small"
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                backgroundColor: '#e8eaf0',
-                borderRadius: '6px',
-                '& fieldset': { border: 'none' },
-              },
-            }}
+            sx={joinOrCreateTeamSx.teamNameInput}
           />
 
           <Box sx={{ textAlign: 'center', mt: 'auto' }}>
@@ -332,18 +155,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
               variant="contained"
               disabled={!teamName.trim()}
               onClick={createTeam}
-              sx={{
-                backgroundColor: '#1a2744',
-                borderRadius: '6px',
-                px: 4,
-                py: 1,
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                textTransform: 'none',
-                boxShadow: 'none',
-                '&:hover': { backgroundColor: '#243358' },
-                '&:disabled': { backgroundColor: '#ccc', color: '#888' },
-              }}
+              sx={{ ...joinOrCreateTeamSx.button, px: 4 }}
             >
               Créer
             </Button>
@@ -354,13 +166,10 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
       <Snackbar
         open={snack.open}
         autoHideDuration={4000}
-        onClose={() => setSnack((s) => ({ ...s, open: false }))}
+        onClose={closeSnack}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert
-          severity={snack.severity}
-          onClose={() => setSnack((s) => ({ ...s, open: false }))}
-        >
+        <Alert severity={snack.severity} onClose={closeSnack}>
           {snack.msg}
         </Alert>
       </Snackbar>
