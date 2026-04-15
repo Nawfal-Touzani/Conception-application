@@ -2,6 +2,7 @@ package be.vinci.ipl.cae.api.models.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -69,6 +70,10 @@ public class Team {
   @OneToMany(mappedBy = "winnerTeam")
   @JsonBackReference("team-winner")
   private List<Tournament> tournamentsWon = new ArrayList<>();
+
+  @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonManagedReference("team_validation_result")
+  private List<ResultValidation> resultValidations = new ArrayList<>();
 
   /**
    * Full constructor to create a team with all essential attributes.
