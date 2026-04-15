@@ -1,4 +1,4 @@
-import { TeamDto, TeamMember } from '../types/team.types';
+import { TeamDto, TeamMember } from '../../types/team.types';
 
 // fonction asynchrone qui retourne une promise avec un tab de Team
 export const getTeams = async (token: string): Promise<TeamDto[]> => {
