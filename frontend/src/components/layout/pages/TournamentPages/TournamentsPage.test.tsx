@@ -42,13 +42,14 @@ const mockContextUser = {
   bannedError: null,
 };
 
+// ✅ deadline dans le futur pour que le filtre OPEN fonctionne
 const tournamentOpen = {
   id: 1,
   name: 'Vinci Easter Cup 2026',
   description: 'Tournoi de Pâques',
   startDate: '2026-04-15',
   endDate: '2026-04-25',
-  registrationDeadline: '2026-04-08',
+  registrationDeadline: '2099-12-31',
   maxParticipants: 8,
   currentParticipants: 3,
   status: 'PREPARATION' as const,
@@ -324,6 +325,7 @@ describe('TournamentsPage', () => {
 
     expect(await screen.findByText('Quarts')).toBeTruthy();
   });
+
   test('clique sur Administrer navigue vers TournamentAdminPage', async () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
