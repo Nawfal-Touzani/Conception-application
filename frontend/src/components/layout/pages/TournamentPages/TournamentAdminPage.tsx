@@ -8,11 +8,11 @@ import {
   Alert,
   Snackbar,
 } from '@mui/material';
-import { Tournam
-type Props = {entDetails } from '../../../../types/tournament.types';
+import { TournamentDetails } from '../../../../types/tournament.types';
 import { useAuth } from '../../../../contexts/useAuth';
 import * as tournamentService from '../../../../services/tournament/tournament.service';
 
+type Props = {
   tournament: TournamentDetails;
   onBack: () => void;
   onUpdated: (updated: TournamentDetails) => void;
