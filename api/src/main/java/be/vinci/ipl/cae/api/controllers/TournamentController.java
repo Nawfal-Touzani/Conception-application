@@ -176,13 +176,8 @@ public class TournamentController {
   @PreAuthorize("isAuthenticated()")
   public void registerTeam(@PathVariable Long idTournament,
       @PathVariable Long idTeam, @AuthenticationPrincipal Member currentMember) {
-    try {
-      tournamentRegistrationService.createRegistration(idTournament, idTeam,
-          currentMember.getId());
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-    } catch (IllegalArgumentException | IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
-    }
+    tournamentRegistrationService.createRegistration(idTournament, idTeam,
+        currentMember.getId());
   }
+
 }
