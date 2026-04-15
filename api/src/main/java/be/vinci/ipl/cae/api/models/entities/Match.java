@@ -129,4 +129,8 @@ public class Match {
   @JsonManagedReference("match-notifications")
   private List<Notification> notifications = new ArrayList<>();
 
+  @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonManagedReference("match_validation_result")
+  private List<ResultValidation> resultValidations = new ArrayList<>();
+
 }
