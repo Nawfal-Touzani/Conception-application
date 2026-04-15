@@ -1,5 +1,6 @@
 package be.vinci.ipl.cae.api.models.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -34,5 +35,6 @@ public class PlayersSelection {
   @ManyToOne(fetch = FetchType.LAZY)
   @MapsId("matchId")
   @JoinColumn(name = "match_id")
+  @JsonBackReference("match-selections")
   private Match match;
 }

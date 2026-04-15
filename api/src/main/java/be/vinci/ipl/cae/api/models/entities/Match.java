@@ -129,4 +129,7 @@ public class Match {
   @JsonManagedReference("match-notifications")
   private List<Notification> notifications = new ArrayList<>();
 
+  @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonManagedReference("match-selections")
+  private List<PlayersSelection> playersSelections = new ArrayList<>();
 }
