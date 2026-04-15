@@ -7,7 +7,7 @@ vi.mock('../../../../services/team.service', () => ({
   getMyTeam: vi.fn(),
 }));
 
-import * as teamService from '../../../../services/team.service';
+import * as teamService from '../../../../services/team/team.service';
 
 const mockUser = {
   id: 1,

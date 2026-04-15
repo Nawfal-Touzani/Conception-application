@@ -1,7 +1,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { useTournamentDetail } from './useTournamentDetail';
-import * as teamService from '../../services/team.service';
+import * as teamService from '../../services/team/team.service';
 
 vi.mock('../../services/team.service', () => ({
   getMyTeam: vi.fn(),

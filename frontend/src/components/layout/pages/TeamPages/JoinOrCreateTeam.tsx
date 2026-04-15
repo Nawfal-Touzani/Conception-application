@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { useAuth } from '../../../../contexts/useAuth';
-import * as teamService from '../../../../services/team.service';
+import * as teamService from '../../../../services/team/team.service';
 import { TeamDto } from '../../../../types/team.types';
 
 type Props = {
