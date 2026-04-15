@@ -27,7 +27,7 @@ public class PlayersSelection {
   private PlayersSelectionId id;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @MapsId("memberId")
+  @MapsId("memberId") // Lie le champ de la FK à son équivalent dans PlayersSelectionId
   @JoinColumn(name = "member_id")
   private Member member;
 
