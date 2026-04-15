@@ -168,7 +168,7 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
                   textAlign: 'right',
                 }}
               >
-                Statut
+                Etat
               </Typography>
             </Box>
             <Divider sx={{ mb: 1 }} />
