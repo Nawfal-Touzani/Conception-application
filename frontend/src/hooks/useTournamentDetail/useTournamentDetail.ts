@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/useAuth';
-import * as teamService from '../../services/team.service';
+import * as teamService from '../../services/team/team.service';
 import { TournamentDetails } from '../../types/tournament.types';
 import { TeamDto } from '../../types/team.types';
 

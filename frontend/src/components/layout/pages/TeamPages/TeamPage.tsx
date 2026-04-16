@@ -1,4 +1,3 @@
-import { useCallback, useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -19,45 +18,16 @@ import {
   Tabs,
 } from '@mui/material';
 import JoinOrCreateTeam from './JoinOrCreateTeam';
-import { useAuth } from '../../../../contexts/useAuth';
-import * as teamService from '../../../../services/team.service';
-import * as tournamentService from '../../../../services/tournament/tournament.service';
-import { TeamDto, TeamMember } from '../../../../types/team.types';
-import { TournamentDetails } from '../../../../types/tournament.types';
+import { useTeam } from '../../../../hooks/useTeam/useTeam';
+import { formatDate } from '../../../../utils/TeamFormat/team.utils';
+import { teamPageSx } from '../../../../styles/team.styles';
 import { useNavigate } from 'react-router-dom';
-
-function formatDate(dateStr?: string | null) {
-  if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('fr-BE', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
-}
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', mb: 4, gap: 2 }}>
-      <Typography
-        sx={{
-          minWidth: 270,
-          fontWeight: 800,
-          color: '#1a2744',
-          fontSize: '1.4rem',
-        }}
-      >
-        {label}
-      </Typography>
-      <Box
-        sx={{
-          flex: 1,
-          backgroundColor: '#1a2744',
-          borderRadius: '6px',
-          px: 2,
-          py: 1.3,
-          textAlign: 'center',
-        }}
-      >
+      <Typography sx={teamPageSx.infoRowLabel}>{label}</Typography>
+      <Box sx={teamPageSx.infoRowValue}>
         <Typography sx={{ color: '#fff', fontSize: '1.1rem', fontWeight: 600 }}>
           {value}
         </Typography>
@@ -67,142 +37,43 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 }
 
 const TeamPage = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
-  const token = user?.token ?? '';
-
-  const [team, setTeam] = useState<TeamDto | null>(null);
-  const [members, setMembers] = useState<TeamMember[]>([]);
-  const [hasTeam, setHasTeam] = useState<boolean | null>(null);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [leaveLoading, setLeaveLoading] = useState(false);
-  const [leaveError, setLeaveError] = useState<string | null>(null);
-  const [nominateError, setNominateError] = useState<string | null>(null);
-  const [nominateSuccess, setNominateSuccess] = useState<string | null>(null);
-  const [tournaments, setTournaments] = useState<TournamentDetails[]>([]);
-  const [tabIndex, setTabIndex] = useState(0);
-
-  const isSolo = members.length === 1;
-
-  const loadTeamData = useCallback(() => {
-    setHasTeam(null);
-    teamService
-      .getMyTeamMembers(token)
-      .then(async (memberData) => {
-        setMembers(memberData);
-        setHasTeam(true);
-        const teamData = await teamService.getMyTeam(token);
-        setTeam(teamData);
-        const teamTournaments = await tournamentService.getTournaments(
-          token,
-          teamData.name,
-        );
-        setTournaments(teamTournaments);
-      })
-      .catch(() => setHasTeam(false));
-  }, [token]);
-
-  useEffect(() => {
-    if (user) loadTeamData();
-  }, [user, loadTeamData]);
-
-  const handleLeave = async () => {
-    setLeaveLoading(true);
-    try {
-      const res = await teamService.leaveTeam(token);
-      if (res.status === 409) {
-        const body = await res.json();
-        setLeaveError(
-          body.message || 'Désignez un second responsable avant de quitter.',
-        );
-        setConfirmOpen(false);
-        return;
-      }
-      if (!res.ok) {
-        setLeaveError('Une erreur est survenue.');
-        setConfirmOpen(false);
-        return;
-      }
-      setConfirmOpen(false);
-      loadTeamData();
-    } catch {
-      setLeaveError('Erreur réseau.');
-    } finally {
-      setLeaveLoading(false);
-    }
-  };
-
-  const handleNominate = async (memberId: number) => {
-    if (!team) return;
-    setNominateError(null);
-    setNominateSuccess(null);
-    try {
-      const res = await teamService.nominateSecondaryManager(
-        token,
-        team.id,
-        memberId,
-      );
-      if (!res.ok) {
-        setNominateError('Impossible de nommer ce membre.');
-        return;
-      }
-      setNominateSuccess('Second responsable nommé avec succès.');
-      loadTeamData();
-    } catch {
-      setNominateError('Erreur réseau.');
-    }
-  };
-
-  const isResponsible =
-    team?.responsibleTag != null &&
-    members.find((m) => m.gameTag === team.responsibleTag) != null &&
-    user?.tag === team.responsibleTag;
-
-  const tournamentsInProgress = tournaments.filter(
-    (t) => t.status === 'IN_PROGRESS',
-  );
-  const tournamentsUpcoming = tournaments.filter(
-    (t) => t.status === 'PREPARATION' && t.isPublic,
-  );
+  const {
+    team,
+    members,
+    hasTeam,
+    isSolo,
+    isResponsible,
+    confirmOpen,
+    setConfirmOpen,
+    leaveLoading,
+    leaveError,
+    setLeaveError,
+    nominateError,
+    setNominateError,
+    nominateSuccess,
+    setNominateSuccess,
+    tournamentsInProgress,
+    tournamentsUpcoming,
+    tabIndex,
+    setTabIndex,
+    loadTeamData,
+    handleLeave,
+    handleNominate,
+  } = useTeam();
 
   if (hasTeam === null) return null;
   if (!hasTeam) return <JoinOrCreateTeam onTeamCreated={loadTeamData} />;
 
   return (
-    <Box
-      sx={{
-        flexGrow: 1,
-        backgroundColor: '#1a2744',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        pt: 5,
-        px: 2,
-      }}
-    >
+    <Box sx={teamPageSx.root}>
       <Typography variant="h4" sx={{ color: '#fff', fontWeight: 800, mb: 4 }}>
         Mon équipe
       </Typography>
 
-      <Box
-        sx={{
-          display: 'flex',
-          gap: 4,
-          width: '100%',
-          maxWidth: 1200,
-          alignItems: 'flex-start',
-        }}
-      >
+      <Box sx={teamPageSx.layout}>
         {/* ── Colonne 1 : Infos équipe ── */}
-        <Paper
-          elevation={0}
-          sx={{
-            flex: '0 0 420px',
-            borderRadius: '12px',
-            p: 5,
-            backgroundColor: '#fff',
-          }}
-        >
+        <Paper elevation={0} sx={teamPageSx.infoCard}>
           <InfoRow label="Nom :" value={team?.name ?? '—'} />
           <InfoRow label="Responsable :" value={team?.responsibleTag ?? '—'} />
           <InfoRow
@@ -228,17 +99,7 @@ const TeamPage = () => {
             <Button
               variant="contained"
               onClick={() => setConfirmOpen(true)}
-              sx={{
-                backgroundColor: '#c0392b',
-                borderRadius: '10px',
-                px: 6,
-                py: 1.2,
-                fontSize: '1rem',
-                fontWeight: 700,
-                textTransform: 'none',
-                boxShadow: 'none',
-                '&:hover': { backgroundColor: '#a93226' },
-              }}
+              sx={teamPageSx.leaveButton}
             >
               Quitter
             </Button>
@@ -292,16 +153,7 @@ const TeamPage = () => {
                 <ListItem
                   key={member.gameTag}
                   onClick={() => navigate(`/members/${member.memberId}`)}
-                  sx={{
-                    backgroundColor: '#fff',
-                    borderRadius: '8px',
-                    px: 3,
-                    py: 1.5,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 2,
-                    cursor: 'pointer',
-                  }}
+                  sx={teamPageSx.memberItem}
                 >
                   <ListItemAvatar sx={{ minWidth: 60 }}>
                     <Avatar
@@ -337,20 +189,7 @@ const TeamPage = () => {
                         e.stopPropagation();
                         handleNominate(member.memberId);
                       }}
-                      sx={{
-                        ml: 'auto',
-                        flexShrink: 0,
-                        borderColor: '#1a2744',
-                        color: '#1a2744',
-                        textTransform: 'none',
-                        fontWeight: 600,
-                        fontSize: '0.9rem',
-                        borderRadius: '6px',
-                        '&:hover': {
-                          backgroundColor: '#1a2744',
-                          color: '#fff',
-                        },
-                      }}
+                      sx={teamPageSx.nominateButton}
                     >
                       Nommer
                     </Button>
@@ -406,16 +245,7 @@ const TeamPage = () => {
           <Tabs
             value={tabIndex}
             onChange={(_, v) => setTabIndex(v)}
-            sx={{
-              mb: 2,
-              '& .MuiTab-root': {
-                color: 'rgba(255,255,255,0.6)',
-                textTransform: 'none',
-                fontWeight: 600,
-              },
-              '& .Mui-selected': { color: '#fff' },
-              '& .MuiTabs-indicator': { backgroundColor: '#fff' },
-            }}
+            sx={teamPageSx.tabs}
           >
             <Tab label={`En cours (${tournamentsInProgress.length})`} />
             <Tab label={`À venir (${tournamentsUpcoming.length})`} />
@@ -434,14 +264,7 @@ const TeamPage = () => {
                   <Paper
                     key={t.id}
                     elevation={0}
-                    sx={{
-                      borderRadius: '8px',
-                      p: 2,
-                      backgroundColor: '#fff',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
+                    sx={teamPageSx.tournamentCard}
                   >
                     <Box>
                       <Typography
@@ -485,14 +308,7 @@ const TeamPage = () => {
                   <Paper
                     key={t.id}
                     elevation={0}
-                    sx={{
-                      borderRadius: '8px',
-                      p: 2,
-                      backgroundColor: '#fff',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
+                    sx={teamPageSx.tournamentCard}
                   >
                     <Box>
                       <Typography

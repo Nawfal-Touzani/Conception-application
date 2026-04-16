@@ -135,7 +135,18 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
                   flex: 1,
                 }}
               >
-                Date
+                Début
+              </Typography>
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  color: '#1a2744',
+                  fontSize: '1rem',
+                  flex: 1,
+                  textAlign: 'center',
+                }}
+              >
+                Fin
               </Typography>
               <Typography
                 sx={{
@@ -157,13 +168,23 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
                   textAlign: 'right',
                 }}
               >
-                Statut
+                Etat
               </Typography>
             </Box>
             <Divider sx={{ mb: 1 }} />
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
               <Typography sx={{ fontSize: '0.95rem', color: '#333', flex: 1 }}>
                 {formatDate(tournament.startDate)}
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: '0.95rem',
+                  color: '#333',
+                  flex: 1,
+                  textAlign: 'center',
+                }}
+              >
+                {formatDate(tournament.endDate)}
               </Typography>
               <Typography
                 sx={{
