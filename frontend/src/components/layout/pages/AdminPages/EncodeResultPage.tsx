@@ -17,6 +17,7 @@ import { encodeResult } from '../../../../services/match/encode-result';
 import { Match } from '../../../../types/match.types';
 import { Tournament } from '../../../../types/tournament.types';
 import { TeamDto } from '../../../../types/team.types';
+import { validateEncoding } from '../../../../utils/EncodeValidation/EncodeValidation';
 
 const ResultEncodingPage = () => {
   const { user } = useAuth();
@@ -94,6 +95,16 @@ const ResultEncodingPage = () => {
 
   const handleValidate = async () => {
     if (!score1 || !score2) return setError('Veuillez entrer les deux scores.');
+    // Utilisation de votre fonction de validation personnalisée
+    const validationErrors = validateEncoding({
+      scoreA: Number(score1),
+      scoreB: Number(score2),
+    });
+
+    if (validationErrors.length > 0) {
+      // On affiche la première erreur trouvée
+      return setError(validationErrors[0]);
+    }
     try {
       await encodeResult(
         selectedMatch!.id,
