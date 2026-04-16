@@ -12,41 +12,68 @@ import {
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useAuth } from '../../../../contexts/useAuth';
-import * as tournamentService from '../../../../services/tournament/tournament.service';
+import { useParams, useLocation } from 'react-router-dom';
+import { encodeResult } from '../../../../services/match/encode-result';
+import { Match } from '../../../../types/match.types';
+import { Tournament } from '../../../../types/tournament.types';
+import { TeamDto } from '../../../../types/team.types';
 
 const ResultEncodingPage = () => {
   const { user } = useAuth();
   const token = user?.token ?? '';
 
-  // États pour les données
-  const [matches, setMatches] = useState<any[]>([]);
+  const { tournamentId } = useParams<{ tournamentId: string }>();
+  const { state } = useLocation();
+  const tournamentName = state?.tournamentName ?? '';
+
+  const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // États pour le match sélectionné
-  const [selectedMatch, setSelectedMatch] = useState<any | null>(null);
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [score1, setScore1] = useState('');
   const [score2, setScore2] = useState('');
 
-  // Simulation du chargement des matchs au montage
   useEffect(() => {
     const fetchMatches = async () => {
       try {
         setLoading(true);
-        // Remplace par ton appel service réel, ex:
-        // const data = await tournamentService.getMatchesByTournament(id, token);
+
+        // Décommente quand la route backend est dispo :
+        // const data = await getMatchesByTournament(Number(tournamentId), token);
         // setMatches(data);
 
-        // Mock pour démo visuelle
+        // Mock en attendant
         setMatches([
           {
             id: 1,
-            team1: 'Nom équipe 1',
-            team2: 'Nom équipe 2',
-            date: '15/04/2026',
+            teamA: { id: 1, name: 'Nom équipe 1' } as TeamDto,
+            teamB: { id: 2, name: 'Nom équipe 2' } as TeamDto,
+            dateTime: '2026-04-15T18:00:00',
+            state: 'SCHEDULED',
+            resultStatus: 'NOT_ENTERED',
+            scoreA: null,
+            scoreB: null,
+            winner: null,
+            nextMatch: null,
+            roundNumber: 1,
+            tournament: { id: 1 } as Tournament,
           },
-          { id: 2, team1: 'Eagles', team2: 'Tigers', date: '16/04/2026' },
+          {
+            id: 2,
+            teamA: { id: 3, name: 'Eagles' } as TeamDto,
+            teamB: { id: 4, name: 'Tigers' } as TeamDto,
+            dateTime: '2026-04-16T18:00:00',
+            state: 'SCHEDULED',
+            resultStatus: 'NOT_ENTERED',
+            scoreA: null,
+            scoreB: null,
+            winner: null,
+            nextMatch: null,
+            roundNumber: 1,
+            tournament: { id: 1 } as Tournament,
+          },
         ]);
       } catch (err) {
         setError('Erreur lors de la récupération des matchs.');
@@ -55,22 +82,25 @@ const ResultEncodingPage = () => {
       }
     };
     fetchMatches();
-  }, [token]);
+  }, [tournamentId, token]);
 
-  const handleSelectMatch = (match: any) => {
+  const handleSelectMatch = (match: Match) => {
     setSelectedMatch(match);
     setScore1('');
     setScore2('');
     setSuccess(null);
+    setError(null);
   };
 
   const handleValidate = async () => {
     if (!score1 || !score2) return setError('Veuillez entrer les deux scores.');
-
     try {
-      // Appel à ton service d'encodage
-      // await tournamentService.updateMatchScore(selectedMatch.id, { score1, score2 }, token);
-
+      await encodeResult(
+        selectedMatch!.id,
+        Number(score1),
+        Number(score2),
+        token,
+      );
       setSuccess(`Résultat enregistré : ${score1} - ${score2}`);
       setSelectedMatch(null);
     } catch (err) {
@@ -78,7 +108,6 @@ const ResultEncodingPage = () => {
     }
   };
 
-  // Styles CSS partagés
   const inputSx = {
     '& .MuiOutlinedInput-root': {
       backgroundColor: '#2c3e50',
@@ -103,7 +132,6 @@ const ResultEncodingPage = () => {
         px: 2,
       }}
     >
-      {/* Header avec bouton retour */}
       <Box sx={{ width: '100%', maxWidth: 900, mb: 1 }}>
         <IconButton
           sx={{ color: 'white' }}
@@ -138,17 +166,20 @@ const ResultEncodingPage = () => {
           </Alert>
         )}
         {success && (
-          <Alert severity="success" sx={{ mb: 2 }}>
+          <Alert
+            severity="success"
+            sx={{ mb: 2 }}
+            onClose={() => setSuccess(null)}
+          >
             {success}
           </Alert>
         )}
 
-        {/* Section Liste des Matchs */}
         <Box sx={{ mb: 4 }}>
           <TextField
             fullWidth
             disabled
-            value="Nom du tournoi actuel"
+            value={tournamentName}
             sx={{
               mb: 3,
               '& .MuiOutlinedInput-root': {
@@ -169,50 +200,55 @@ const ResultEncodingPage = () => {
             {loading ? (
               <CircularProgress sx={{ alignSelf: 'center', my: 2 }} />
             ) : (
-              matches.map((match) => (
-                <Box
-                  key={match.id}
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    p: 2,
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    borderRadius: '6px',
-                    transition: '0.3s',
-                    '&:hover': { backgroundColor: 'rgba(255,255,255,0.05)' },
-                  }}
-                >
-                  <Typography sx={{ color: 'white', flex: 2 }}>
-                    {match.team1} <span style={{ color: '#7f8c8d' }}>vs</span>{' '}
-                    {match.team2}
-                  </Typography>
-                  <Typography
-                    sx={{ color: '#bdc3c7', flex: 1, textAlign: 'center' }}
-                  >
-                    {match.date}
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    onClick={() => handleSelectMatch(match)}
+              matches
+                .filter(
+                  (m) =>
+                    m.state === 'SCHEDULED' && m.resultStatus === 'NOT_ENTERED',
+                )
+                .map((match) => (
+                  <Box
+                    key={match.id}
                     sx={{
-                      backgroundColor: '#fff',
-                      color: '#1a2744',
-                      fontWeight: 700,
-                      textTransform: 'none',
-                      px: 3,
-                      '&:hover': { backgroundColor: '#ecf0f1' },
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      p: 2,
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      borderRadius: '6px',
+                      transition: '0.3s',
+                      '&:hover': { backgroundColor: 'rgba(255,255,255,0.05)' },
                     }}
                   >
-                    Encoder résultat
-                  </Button>
-                </Box>
-              ))
+                    <Typography sx={{ color: 'white', flex: 2 }}>
+                      {match.teamA?.name}{' '}
+                      <span style={{ color: '#7f8c8d' }}>vs</span>{' '}
+                      {match.teamB?.name}
+                    </Typography>
+                    <Typography
+                      sx={{ color: '#bdc3c7', flex: 1, textAlign: 'center' }}
+                    >
+                      {new Date(match.dateTime).toLocaleDateString('fr-BE')}
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      onClick={() => handleSelectMatch(match)}
+                      sx={{
+                        backgroundColor: '#fff',
+                        color: '#1a2744',
+                        fontWeight: 700,
+                        textTransform: 'none',
+                        px: 3,
+                        '&:hover': { backgroundColor: '#ecf0f1' },
+                      }}
+                    >
+                      Encoder résultat
+                    </Button>
+                  </Box>
+                ))
             )}
           </Box>
         </Box>
 
-        {/* Formulaire d'encodage de score */}
         {selectedMatch && (
           <Box
             sx={{
@@ -232,7 +268,7 @@ const ResultEncodingPage = () => {
                 fontWeight: 600,
               }}
             >
-              {selectedMatch.team1} vs {selectedMatch.team2}
+              {selectedMatch.teamA?.name} vs {selectedMatch.teamB?.name}
             </Typography>
 
             <Box
@@ -277,7 +313,7 @@ const ResultEncodingPage = () => {
                   '&:hover': { backgroundColor: '#a93226' },
                 }}
               >
-                Supprimer
+                Annuler
               </Button>
               <Button
                 onClick={handleValidate}

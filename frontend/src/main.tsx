@@ -74,7 +74,7 @@ const router = createBrowserRouter([
         element: <PublicProfilePage />,
       },
       {
-        path: 'encode/result',
+        path: 'encode/result/:tournamentId',
         element: <ResultEncodingPage />,
       },
     ],
