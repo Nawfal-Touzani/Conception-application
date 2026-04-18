@@ -8,10 +8,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 /**
  * Repository for Banishment entity, providing basic CRUD operations.
  */
-public interface ResultValidationRepository extends JpaRepository<ResultValidation,Long> {
+public interface ResultValidationRepository extends JpaRepository<ResultValidation, Long> {
 
-  Optional<ResultValidation> findByMatchIdAndTeamId(Long idMatch,Long idTeam);
+  /**
+   *Find a match id and team id.
+   */
+  Optional<ResultValidation> findByMatchIdAndTeamId(Long idMatch, Long idTeam);
 
+  /**
+   *Find all match by match id.
+   */
   List<ResultValidation> findAllByMatchId(Long matchId);
 
 }

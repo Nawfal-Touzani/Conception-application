@@ -11,8 +11,11 @@ import be.vinci.ipl.cae.api.repositories.ResultValidationRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
+
+/**
+ * Result validation service .
+ */
 
 @Service
 public class ResultValidationService {
@@ -33,6 +36,9 @@ public class ResultValidationService {
     this.notificationService = notificationService;
   }
 
+  /**
+   * Confirm result .
+   */
   public void confirmResult(Long idMatch, Long idTeam) {
 
     final Match match = matchRepository.findById(idMatch)

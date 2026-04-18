@@ -1,6 +1,5 @@
 package be.vinci.ipl.cae.api.controllers;
 
-
 import be.vinci.ipl.cae.api.models.dtos.MatchEncodeDto;
 import be.vinci.ipl.cae.api.models.dtos.ResultRequest;
 import be.vinci.ipl.cae.api.services.MatchService;
@@ -45,7 +44,7 @@ public class MatchController {
   public MatchEncodeDto encodeMatch(@PathVariable Long idMatch,
       @RequestBody ResultRequest payload) {
 
-      return MatchEncodeDto.from(matchService.encodingResult(idMatch, payload));
+    return MatchEncodeDto.from(matchService.encodingResult(idMatch, payload));
 
   }
 }

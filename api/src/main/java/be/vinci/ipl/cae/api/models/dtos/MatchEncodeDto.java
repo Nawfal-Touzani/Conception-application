@@ -4,7 +4,9 @@ import be.vinci.ipl.cae.api.models.entities.Match;
 import be.vinci.ipl.cae.api.models.entities.Match.MatchState;
 import be.vinci.ipl.cae.api.models.entities.Match.ResultStatus;
 
-
+/**
+ * Match encode dto.
+ */
 public record MatchEncodeDto(
     Long id,
     Integer scoreA,
@@ -14,6 +16,9 @@ public record MatchEncodeDto(
     Long winnerId
 ) {
 
+  /**
+   * Transform match to encode Match dto.
+   */
   public static MatchEncodeDto from(Match match) {
     return new MatchEncodeDto(
         match.getId(),
