@@ -132,4 +132,8 @@ public class Match {
   @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonManagedReference("match-selections")
   private List<PlayersSelection> playersSelections = new ArrayList<>();
+
+  @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonManagedReference("match-validations")
+  private List<ValidationResult> validationResults = new ArrayList<>();
 }
