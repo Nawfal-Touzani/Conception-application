@@ -1,6 +1,8 @@
 package be.vinci.ipl.cae.api.controllers;
 
 import be.vinci.ipl.cae.api.models.dtos.HomepageTournamentsDto;
+import be.vinci.ipl.cae.api.models.dtos.MatchResponseDto;
+import be.vinci.ipl.cae.api.models.dtos.PlanningRequest;
 import be.vinci.ipl.cae.api.models.dtos.TournamentDto;
 import be.vinci.ipl.cae.api.models.dtos.TournamentResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
@@ -47,12 +49,7 @@ public class TournamentController {
   }
 
   /**
-   * Create tournament tournament.
-   *
-   * @param organizerId   the organizer id
-   * @param currentMember the current member
-   * @param dto           the dto
-   * @return the tournament
+   * Create tournament.
    */
   @PostMapping("/{organizerId}")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -65,23 +62,16 @@ public class TournamentController {
     try {
       return tournamentService.createTournament(organizerId, dto);
     } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          "Tournament create error: " + e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Tournament create error: " + e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT,
-          "Tournament create error: " + e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
     }
   }
 
   /**
-   * Update tournament tournament.
-   *
-   * @param id  the id
-   * @param dto the dto
-   * @return the tournament
+   * Update tournament.
    */
   @PutMapping("/{id}")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -90,44 +80,62 @@ public class TournamentController {
     try {
       return tournamentService.updateTournament(id, dto);
     } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          "Tournament update error: " + e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found", e);
     } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Tournament update error: " + e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid update data", e);
     } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT,
-          "Tournament update error: " + e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Tournament not in preparation", e);
     }
   }
 
   /**
-   * Publish tournament.
-   *
-   * @param id the id
-   * @return the tournament
+   * Publish tournament (rend le tournoi visible au public).
    */
   @PatchMapping("/{id}/publish")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
-  public Tournament publishTournament(@PathVariable long id) {
+  public TournamentResponseDto publishTournament(@PathVariable long id) {
     try {
       return tournamentService.publishTournament(id);
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          "Tournament publish error: " + e.getMessage(), e);
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found", e);
     } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT,
-          "Tournament publish error: " + e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Tournament cannot be published", e);
+    }
+  }
+
+  /**
+   * Update planning (confirme ou publie le bracket du tournoi).
+   */
+
+  @PatchMapping("/{id}/planning")
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  public TournamentResponseDto updatePlanning(@PathVariable long id,
+      @RequestBody PlanningRequest dto) {
+    try {
+      tournamentService.updatePlanning(id, dto);
+      return tournamentService.getTournamentById(id);
+    } catch (NoSuchElementException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament or team not found", e);
+    } catch (IllegalStateException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Planning update conflict", e);
+    }
+  }
+  /**
+   * Gets all matches of a tournament.
+   */
+
+  @GetMapping("/{id}/matches")
+  @PreAuthorize("isAuthenticated()")
+  public List<MatchResponseDto> getMatchesByTournament(@PathVariable long id) {
+    try {
+      return tournamentService.getMatchesByTournament(id);
+    } catch (NoSuchElementException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament matches not found", e);
     }
   }
 
   /**
    * Gets all tournaments.
-   *
-   * @param currentMember the current member
-   * @param teamName      the team name
-   * @param memberTag     the member tag
-   * @return the all tournaments
    */
   @GetMapping
   public List<TournamentResponseDto> getAllTournaments(
@@ -140,8 +148,6 @@ public class TournamentController {
 
   /**
    * Gets homepage tournaments.
-   *
-   * @return the homepage tournaments
    */
   @GetMapping("/homepage")
   public HomepageTournamentsDto getHomepageTournaments() {
@@ -150,26 +156,18 @@ public class TournamentController {
 
   /**
    * Gets tournament by id.
-   *
-   * @param id the id
-   * @return the tournament by id
    */
   @GetMapping("/{id}")
   public TournamentResponseDto getTournamentById(@PathVariable long id) {
     try {
       return tournamentService.getTournamentById(id);
     } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          "Tournament get error: " + e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found by id", e);
     }
   }
 
   /**
-   * Register team tournament registration.
-   *
-   * @param idTournament  the id tournament
-   * @param idTeam        the id team
-   * @param currentMember the current member
+   * Register team to tournament.
    */
   @PostMapping("/{idTournament}/teams/{idTeam}")
   @ResponseStatus(HttpStatus.CREATED)
@@ -179,5 +177,4 @@ public class TournamentController {
     tournamentRegistrationService.createRegistration(idTournament, idTeam,
         currentMember.getId());
   }
-
 }

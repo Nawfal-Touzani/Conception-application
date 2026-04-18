@@ -2,7 +2,6 @@ package be.vinci.ipl.cae.api.controllers;
 
 import be.vinci.ipl.cae.api.models.dtos.MatchResponseDto;
 import be.vinci.ipl.cae.api.models.dtos.ResultRequest;
-import be.vinci.ipl.cae.api.models.entities.Match;
 import be.vinci.ipl.cae.api.services.MatchService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
