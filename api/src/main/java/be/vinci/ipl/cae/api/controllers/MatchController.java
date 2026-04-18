@@ -1,6 +1,7 @@
 package be.vinci.ipl.cae.api.controllers;
 
-import be.vinci.ipl.cae.api.models.dtos.MatchResponseDto;
+
+import be.vinci.ipl.cae.api.models.dtos.MatchEncodeDto;
 import be.vinci.ipl.cae.api.models.dtos.ResultRequest;
 import be.vinci.ipl.cae.api.services.MatchService;
 import org.springframework.http.HttpStatus;
@@ -41,10 +42,10 @@ public class MatchController {
   @PatchMapping("/{idMatch}/result")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @ResponseStatus(HttpStatus.OK)
-  public MatchResponseDto encodeMatch(@PathVariable Long idMatch,
+  public MatchEncodeDto encodeMatch(@PathVariable Long idMatch,
       @RequestBody ResultRequest payload) {
 
-      return MatchResponseDto.from(matchService.encodingResult(idMatch, payload));
+      return MatchEncodeDto.from(matchService.encodingResult(idMatch, payload));
 
   }
 }
