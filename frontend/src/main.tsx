@@ -22,6 +22,7 @@ import CreateTournamentPage from './components/layout/pages/AdminPages/CreateTou
 import TournamentsPage from './components/layout/pages/TournamentPages/TournamentPage.tsx';
 import MembersListPage from './components/layout/pages/AdminPages/MemberListPage.tsx';
 import PublicProfilePage from './components/layout/pages/PublicProfilePage/PublicProfilePage.tsx';
+import ResultEncodingPage from './components/layout/pages/AdminPages/EncodeResultPage.tsx';
 
 const router = createBrowserRouter([
   {
@@ -71,6 +72,10 @@ const router = createBrowserRouter([
       {
         path: 'members/:id',
         element: <PublicProfilePage />,
+      },
+      {
+        path: 'encode/result/:tournamentId',
+        element: <ResultEncodingPage />,
       },
     ],
   },
