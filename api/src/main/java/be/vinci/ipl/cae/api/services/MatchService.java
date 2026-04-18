@@ -8,7 +8,6 @@ import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.models.entities.Notification.Type;
 import be.vinci.ipl.cae.api.repositories.MatchRepository;
 import java.time.LocalDateTime;
-import java.util.List;               // ← AJOUT
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 
@@ -59,7 +58,7 @@ public class MatchService {
     }
 
     // check the score is not null
-    if (dto.scoreA() <= 0 || dto.scoreB() <= 0) {
+    if (dto.scoreA() < 0 || dto.scoreB() < 0) {
       throw new IllegalArgumentException("the score must be superior at 0");
     }
 
@@ -85,6 +84,7 @@ public class MatchService {
     return matchRepository.save(match);
   }
 
+
   private void sendResultNotifications(Match match) {
     Notification notif = new Notification(
         Type.RESULT,
@@ -102,20 +102,6 @@ public class MatchService {
     if (match.getTeamB().getSecondResponsible() != null) {
       notificationService.send(match.getTeamB().getSecondResponsible().getId(), notif);
     }
-  }
-
-  /**
-   * Gets matches by tournament.
-   *
-   * @param tournamentId the tournament id
-   * @return the matches by tournament
-   */
-  public List<Match> getMatchesByTournament(long tournamentId) {
-    List<Match> matches = matchRepository.findByTournamentIdOrderByRoundNumberAsc(tournamentId);
-    if (matches.isEmpty()) {
-      throw new NoSuchElementException("No matches found for tournament " + tournamentId);
-    }
-    return matches;
   }
 
 }
