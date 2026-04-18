@@ -7,6 +7,7 @@ import be.vinci.ipl.cae.api.models.entities.PlayersSelectionId;
 import be.vinci.ipl.cae.api.models.entities.Team;
 import jakarta.transaction.Transactional;
 import java.util.List;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -33,6 +34,12 @@ public interface PlayersSelectionRepository extends
   long countByMatchAndTeam(Match match, Team team);
 
   /**
+   * Checks whether a member is already selected for a given match. Used as a guard in
+   * submitSelection to prevent duplicate entries.
+   */
+  boolean existsByMatchAndMember(Match match, Member member);
+
+  /**
    * Deletes all player selections for a team in a given match. Used when a manager modifies the
    * lineup (replaces the full selection) or when the system detects an invalid selection after a
    * team change.
@@ -47,12 +54,29 @@ public interface PlayersSelectionRepository extends
    */
   @Query(
       """
-      SELECT m FROM Match m
-      JOIN m.playersSelections ps
+      SELECT ps FROM PlayersSelection ps
       WHERE ps.member = :member
-        AND m.state = :state
+        AND ps.match.state = :state
       """)
   List<PlayersSelection> findByMemberAndMatchState(
+      @Param("member") Member member,
+      @Param("state") Match.MatchState state
+  );
+
+  /**
+   * Deletes all selections of a member for matches in a given state. Called when a member leaves
+   * their team — invalidates all future selections to force the responsible to re-select before the
+   * match.
+   */
+  @Transactional
+  @Modifying
+  @Query(
+      """
+      DELETE FROM PlayersSelection ps
+      WHERE ps.member = :member
+        AND ps.match.state = :state
+      """)
+  void deleteByMemberAndMatchState(
       @Param("member") Member member,
       @Param("state") Match.MatchState state
   );
