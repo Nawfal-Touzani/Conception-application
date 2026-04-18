@@ -50,6 +50,8 @@ const renderComponent = (tournament = baseTournament) =>
         tournament={tournament}
         onBack={onBack}
         onUpdated={onUpdated}
+        onNavigateToResults={vi.fn()}
+        onNavigateToPlanning={vi.fn()}
       />
     </AuthContext.Provider>,
   );

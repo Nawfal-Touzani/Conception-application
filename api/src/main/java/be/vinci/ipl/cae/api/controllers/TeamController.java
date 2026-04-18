@@ -57,9 +57,9 @@ public class TeamController {
     try {
       return teamService.createTeam(currentMember.getId(), request);
     } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid team creation data", e);
     } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Team name already exists", e);
     }
   }
 
@@ -132,9 +132,9 @@ public class TeamController {
     try {
       teamService.leaveTeam(currentMember.getEmail());
     } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Member not found in any team", e);
     } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot leave team as last member", e);
     }
   }
 }
