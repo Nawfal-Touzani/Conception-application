@@ -16,6 +16,8 @@ type Props = {
   tournament: TournamentDetails;
   onBack: () => void;
   onUpdated: (updated: TournamentDetails) => void;
+  onNavigateToResults: (id: number) => void;
+  onNavigateToPlanning: (id: number) => void;
 };
 
 function statusLabel(tournament: TournamentDetails): string {
@@ -27,7 +29,13 @@ function statusLabel(tournament: TournamentDetails): string {
   return 'Annulé';
 }
 
-const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
+const TournamentAdminPage = ({
+  tournament,
+  onUpdated,
+  onBack,
+  onNavigateToResults,
+  onNavigateToPlanning,
+}: Props) => {
   const { user } = useAuth();
   const token = user?.token ?? '';
 
@@ -300,6 +308,40 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
                 }}
               />
             )}
+
+            <Button
+              variant="contained"
+              onClick={() => onNavigateToResults(tournament.id)}
+              fullWidth
+              sx={{
+                backgroundColor: '#2ecc71',
+                color: '#fff',
+                textTransform: 'none',
+                fontWeight: 700,
+                fontSize: '0.95rem',
+                borderRadius: '8px',
+                '&:hover': { backgroundColor: '#27ae60' },
+              }}
+            >
+              Encoder les résultats
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={() => onNavigateToPlanning(tournament.id)}
+              fullWidth
+              sx={{
+                backgroundColor: '#3a7bd5',
+                color: '#fff',
+                textTransform: 'none',
+                fontWeight: 700,
+                fontSize: '0.95rem',
+                borderRadius: '8px',
+                '&:hover': { backgroundColor: '#2f65b8' },
+              }}
+            >
+              Planifier les matchs
+            </Button>
           </Box>
         </Box>
 
@@ -338,7 +380,6 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
           {successMsg}
         </Alert>
       </Snackbar>
-
       <Snackbar
         open={!!errorMsg}
         autoHideDuration={4000}

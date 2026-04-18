@@ -12,12 +12,24 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+  /**
+   * Handle not found string.
+   *
+   * @param e the e
+   * @return the string
+   */
   @ExceptionHandler(NoSuchElementException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public String handleNotFound(NoSuchElementException e) {
     return e.getMessage();
   }
 
+  /**
+   * Handle bad request string.
+   *
+   * @param e the e
+   * @return the string
+   */
   @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public String handleBadRequest(RuntimeException e) {
