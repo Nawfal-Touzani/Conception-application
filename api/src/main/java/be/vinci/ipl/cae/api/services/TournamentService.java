@@ -253,7 +253,7 @@ public class TournamentService {
         t.getId(), t.getName(), t.getDescription(),
         t.getStartDate(), t.getEndDate(), t.getRegistrationDeadline(),
         t.getMaxParticipants(),
-        teamNames.size(), //
+        teamNames.size(),
         t.getStatus(), t.getOrganizer().getTag(), t.isPublic(),
         t.getWinnerTeam() != null ? t.getWinnerTeam().getName() : null,
         teamNames

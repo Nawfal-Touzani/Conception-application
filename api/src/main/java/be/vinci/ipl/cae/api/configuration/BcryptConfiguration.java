@@ -450,7 +450,7 @@ public class BcryptConfiguration {
               teamFrost), tournamentRepository, registrationRepository);
 
       setupTournament("Vinci Easter Cup 2026", null,
-          List.of(teamTitan, teamOmega, teamIota, teamNova, teamVoid, teamStorm, teamBlaze),
+          List.of(teamTitan, teamOmega, teamVenom, teamNova, teamVoid, teamStorm, teamBlaze),
           tournamentRepository, registrationRepository);
 
       setupTournament("Elite Championship 2026", null,

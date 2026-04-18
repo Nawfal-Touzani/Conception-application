@@ -1,13 +1,13 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import TournamentDetail from './TournamentDetailPage';
 import { AuthContext } from '../../../../contexts/AuthContext';
 
-vi.mock('../../../../services/team.service', () => ({
-  getMyTeam: vi.fn(),
+vi.mock('../../../../hooks/useTournamentDetail/useTournamentDetail', () => ({
+  useTournamentDetail: vi.fn(),
 }));
 
-import * as teamService from '../../../../services/team.service';
+import * as useTournamentDetailModule from '../../../../hooks/useTournamentDetail/useTournamentDetail';
 
 const mockUser = {
   id: 1,
@@ -25,22 +25,6 @@ const mockContextUser = {
   bannedError: null,
 };
 
-const myTeamResponsible = {
-  id: 1,
-  name: 'TEAM_ALPHA',
-  responsibleTag: 'Lynx',
-  secondResponsibleTag: null,
-  creationDate: null,
-};
-
-const myTeamNotResponsible = {
-  id: 1,
-  name: 'TEAM_ALPHA',
-  responsibleTag: 'Rogue',
-  secondResponsibleTag: null,
-  creationDate: null,
-};
-
 const onRegister = async () => {};
 
 const baseTournament = {
@@ -56,6 +40,15 @@ const baseTournament = {
   registeredTeamNames: ['TEAM_OMEGA', 'TEAM_VOID', 'TEAM_STORM'],
 };
 
+const defaultHookReturn = {
+  isResponsible: false,
+  isAlreadyRegistered: false,
+  registrationOpen: false,
+  registerSuccess: false,
+  registerError: null,
+  handleRegister: vi.fn(),
+};
+
 const renderWithContext = (component: React.ReactElement) =>
   render(
     <AuthContext.Provider value={mockContextUser}>
@@ -65,9 +58,9 @@ const renderWithContext = (component: React.ReactElement) =>
 
 beforeEach(() => {
   vi.clearAllMocks();
-  (teamService.getMyTeam as ReturnType<typeof vi.fn>).mockRejectedValue(
-    new Error('no team'),
-  );
+  (
+    useTournamentDetailModule.useTournamentDetail as ReturnType<typeof vi.fn>
+  ).mockReturnValue(defaultHookReturn);
 });
 
 describe('TournamentDetail', () => {
@@ -86,6 +79,12 @@ describe('TournamentDetail', () => {
   });
 
   test('affiche "Ouvert" pour PREPARATION + isPublic true', () => {
+    (
+      useTournamentDetailModule.useTournamentDetail as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      ...defaultHookReturn,
+      registrationOpen: true,
+    });
     renderWithContext(
       <TournamentDetail
         tournament={{
@@ -281,10 +280,14 @@ describe('TournamentDetail', () => {
     expect(screen.queryByText('🏆 Gagnant')).toBeFalsy();
   });
 
-  test("n'affiche pas le bouton S'inscrire si l'utilisateur n'est pas responsable", async () => {
-    (teamService.getMyTeam as ReturnType<typeof vi.fn>).mockResolvedValue(
-      myTeamNotResponsible,
-    );
+  test("n'affiche pas le bouton S'inscrire si l'utilisateur n'est pas responsable", () => {
+    (
+      useTournamentDetailModule.useTournamentDetail as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      ...defaultHookReturn,
+      registrationOpen: true,
+      isResponsible: false,
+    });
     renderWithContext(
       <TournamentDetail
         tournament={{
@@ -295,15 +298,18 @@ describe('TournamentDetail', () => {
         onRegister={onRegister}
       />,
     );
-    await waitFor(() => {
-      expect(screen.queryByText("S'inscrire")).toBeFalsy();
-    });
+    expect(screen.queryByText("S'inscrire")).toBeFalsy();
   });
 
-  test("affiche le bouton S'inscrire si responsable et inscriptions ouvertes et pas encore inscrit", async () => {
-    (teamService.getMyTeam as ReturnType<typeof vi.fn>).mockResolvedValue(
-      myTeamResponsible,
-    );
+  test("affiche le bouton S'inscrire si responsable, inscriptions ouvertes, pas encore inscrit et tournoi non complet", () => {
+    (
+      useTournamentDetailModule.useTournamentDetail as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      ...defaultHookReturn,
+      registrationOpen: true,
+      isResponsible: true,
+      isAlreadyRegistered: false,
+    });
     renderWithContext(
       <TournamentDetail
         tournament={{
@@ -315,15 +321,18 @@ describe('TournamentDetail', () => {
         onRegister={onRegister}
       />,
     );
-    await waitFor(() => {
-      expect(screen.queryByText("S'inscrire")).toBeTruthy();
-    });
+    expect(screen.queryByText("S'inscrire")).toBeTruthy();
   });
 
-  test("n'affiche pas le bouton S'inscrire si la team est déjà inscrite", async () => {
-    (teamService.getMyTeam as ReturnType<typeof vi.fn>).mockResolvedValue(
-      myTeamResponsible,
-    );
+  test("affiche 'déjà inscrits' si registrationOpen et team déjà inscrite", () => {
+    (
+      useTournamentDetailModule.useTournamentDetail as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      ...defaultHookReturn,
+      registrationOpen: true,
+      isResponsible: true,
+      isAlreadyRegistered: true,
+    });
     renderWithContext(
       <TournamentDetail
         tournament={{
@@ -335,18 +344,97 @@ describe('TournamentDetail', () => {
         onRegister={onRegister}
       />,
     );
-    await waitFor(() => {
-      expect(screen.queryByText("S'inscrire")).toBeFalsy();
-      expect(
-        screen.queryByText('Vous êtes déjà inscrits à ce tournoi.'),
-      ).toBeTruthy();
-    });
+    expect(screen.queryByText("S'inscrire")).toBeFalsy();
+    expect(
+      screen.queryByText('Vous êtes déjà inscrits à ce tournoi.'),
+    ).toBeTruthy();
   });
 
-  test("n'affiche pas le bouton S'inscrire si le tournoi n'est pas en inscriptions ouvertes", async () => {
-    (teamService.getMyTeam as ReturnType<typeof vi.fn>).mockResolvedValue(
-      myTeamResponsible,
+  test("n'affiche pas 'déjà inscrits' si registrationOpen est false", () => {
+    (
+      useTournamentDetailModule.useTournamentDetail as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      ...defaultHookReturn,
+      registrationOpen: false,
+      isAlreadyRegistered: true,
+    });
+    renderWithContext(
+      <TournamentDetail
+        tournament={{
+          ...baseTournament,
+          status: 'IN_PROGRESS',
+          isPublic: true,
+          registeredTeamNames: ['TEAM_ALPHA'],
+        }}
+        onRegister={onRegister}
+      />,
     );
+    expect(
+      screen.queryByText('Vous êtes déjà inscrits à ce tournoi.'),
+    ).toBeFalsy();
+  });
+
+  test("n'affiche pas le bouton S'inscrire si le tournoi est complet", () => {
+    (
+      useTournamentDetailModule.useTournamentDetail as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      ...defaultHookReturn,
+      registrationOpen: true,
+      isResponsible: true,
+      isAlreadyRegistered: false,
+    });
+    renderWithContext(
+      <TournamentDetail
+        tournament={{
+          ...baseTournament,
+          status: 'PREPARATION',
+          isPublic: true,
+          currentParticipants: 8,
+          maxParticipants: 8,
+          registeredTeamNames: [],
+        }}
+        onRegister={onRegister}
+      />,
+    );
+    expect(screen.queryByText("S'inscrire")).toBeFalsy();
+    expect(screen.queryByText('Le tournoi est complet.')).toBeTruthy();
+  });
+
+  test("n'affiche pas le message complet si la team est déjà inscrite", () => {
+    (
+      useTournamentDetailModule.useTournamentDetail as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      ...defaultHookReturn,
+      registrationOpen: true,
+      isAlreadyRegistered: true,
+    });
+    renderWithContext(
+      <TournamentDetail
+        tournament={{
+          ...baseTournament,
+          status: 'PREPARATION',
+          isPublic: true,
+          currentParticipants: 8,
+          maxParticipants: 8,
+          registeredTeamNames: ['TEAM_ALPHA'],
+        }}
+        onRegister={onRegister}
+      />,
+    );
+    expect(screen.queryByText('Le tournoi est complet.')).toBeFalsy();
+    expect(
+      screen.queryByText('Vous êtes déjà inscrits à ce tournoi.'),
+    ).toBeTruthy();
+  });
+
+  test("n'affiche pas le bouton S'inscrire si le tournoi n'est pas en inscriptions ouvertes", () => {
+    (
+      useTournamentDetailModule.useTournamentDetail as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      ...defaultHookReturn,
+      registrationOpen: false,
+      isResponsible: true,
+    });
     renderWithContext(
       <TournamentDetail
         tournament={{
@@ -357,8 +445,6 @@ describe('TournamentDetail', () => {
         onRegister={onRegister}
       />,
     );
-    await waitFor(() => {
-      expect(screen.queryByText("S'inscrire")).toBeFalsy();
-    });
+    expect(screen.queryByText("S'inscrire")).toBeFalsy();
   });
 });

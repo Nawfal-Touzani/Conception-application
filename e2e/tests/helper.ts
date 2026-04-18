@@ -118,18 +118,18 @@ const ADMIN_CREDENTIALS = {
 };
 
 const goToAdminMembersPage = async (page: Page) => {
-  await page.goto("http://localhost:5174/admin/members");
+  await page.goto("http://localhost:5173/admin/members");
 };
 
 const loginAsAdmin = async (page: Page) => {
-  await page.goto("http://localhost:5174/login");
+  await page.goto("http://localhost:5173/login");
   await loginWith(
     page,
     ADMIN_CREDENTIALS.email,
     ADMIN_CREDENTIALS.password,
     false,
   );
-  await page.waitForURL("http://localhost:5174/", { timeout: 10000 });
+  await page.waitForURL("http://localhost:5173/", { timeout: 10000 });
 };
 
 const banMember = async (page: Page, memberTag: string, reason: string) => {

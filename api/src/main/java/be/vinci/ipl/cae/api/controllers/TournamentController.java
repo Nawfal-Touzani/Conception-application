@@ -170,20 +170,14 @@ public class TournamentController {
    * @param idTournament  the id tournament
    * @param idTeam        the id team
    * @param currentMember the current member
-   * @return the tournament registration
    */
   @PostMapping("/{idTournament}/teams/{idTeam}")
   @ResponseStatus(HttpStatus.CREATED)
   @PreAuthorize("isAuthenticated()")
   public void registerTeam(@PathVariable Long idTournament,
       @PathVariable Long idTeam, @AuthenticationPrincipal Member currentMember) {
-    try {
-      tournamentRegistrationService.createRegistration(idTournament, idTeam,
-          currentMember.getId());
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-    } catch (IllegalArgumentException | IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
-    }
+    tournamentRegistrationService.createRegistration(idTournament, idTeam,
+        currentMember.getId());
   }
+
 }

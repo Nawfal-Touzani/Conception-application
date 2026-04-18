@@ -119,10 +119,10 @@ public class Match {
   private ResultStatus resultStatus = ResultStatus.NOT_ENTERED;
 
   @Column(name = "team_a_has_already_contested", nullable = false)
-  private boolean teamAsHasAlreadyContested = false;
+  private boolean contestedByTeamA = false;
 
   @Column(name = "team_b_has_already_contested", nullable = false)
-  private boolean teamBsHasAlreadyContested = false;
+  private boolean contestedByTeamB = false;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "winner")
@@ -147,9 +147,9 @@ public class Match {
   /**
    * Constructs a Match with the minimum required fields at creation time.
    *
-   * @param tournament      the tournament this match belongs to
-   * @param roundNumber     the round number in the bracket
-   * @param dateTime        the scheduled date and time
+   * @param tournament       the tournament this match belongs to
+   * @param roundNumber      the round number in the bracket
+   * @param dateTime         the scheduled date and time
    * @param responsibleAdmin the admin responsible for this match
    */
   public Match(Tournament tournament, Integer roundNumber,
@@ -158,7 +158,5 @@ public class Match {
     this.roundNumber = roundNumber;
     this.dateTime = dateTime;
     this.responsibleAdmin = responsibleAdmin;
-    // + default initialisation
-    // other are nullable and can be initialized with the setters
   }
 }
