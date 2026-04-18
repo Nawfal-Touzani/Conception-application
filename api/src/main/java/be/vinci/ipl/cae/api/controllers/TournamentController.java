@@ -7,6 +7,7 @@ import be.vinci.ipl.cae.api.models.dtos.TournamentDto;
 import be.vinci.ipl.cae.api.models.dtos.TournamentResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Tournament;
+import be.vinci.ipl.cae.api.services.MatchService;
 import be.vinci.ipl.cae.api.services.TournamentRegistrationService;
 import be.vinci.ipl.cae.api.services.TournamentService;
 import java.util.List;
@@ -35,6 +36,7 @@ public class TournamentController {
 
   private final TournamentService tournamentService;
   private final TournamentRegistrationService tournamentRegistrationService;
+  private final MatchService matchService;
 
   /**
    * Instantiates a new Tournament controller.
@@ -43,9 +45,10 @@ public class TournamentController {
    * @param tournamentRegistrationService the tournament registration service
    */
   public TournamentController(TournamentService tournamentService,
-      TournamentRegistrationService tournamentRegistrationService) {
+      TournamentRegistrationService tournamentRegistrationService, MatchService matchService) {
     this.tournamentService = tournamentService;
     this.tournamentRegistrationService = tournamentRegistrationService;
+    this.matchService = matchService;
   }
 
   /**
@@ -177,4 +180,5 @@ public class TournamentController {
     tournamentRegistrationService.createRegistration(idTournament, idTeam,
         currentMember.getId());
   }
+
 }

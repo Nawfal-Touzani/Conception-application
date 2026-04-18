@@ -11,12 +11,12 @@ import {
 import { TournamentDetails } from '../../../../types/tournament.types';
 import { useAuth } from '../../../../contexts/useAuth';
 import * as tournamentService from '../../../../services/tournament/tournament.service';
+import { useNavigate } from 'react-router-dom';
 
 type Props = {
   tournament: TournamentDetails;
   onBack: () => void;
   onUpdated: (updated: TournamentDetails) => void;
-  onNavigateToResults: (id: number) => void;
   onNavigateToPlanning: (id: number) => void;
 };
 
@@ -33,11 +33,11 @@ const TournamentAdminPage = ({
   tournament,
   onUpdated,
   onBack,
-  onNavigateToResults,
   onNavigateToPlanning,
 }: Props) => {
   const { user } = useAuth();
   const token = user?.token ?? '';
+  const navigate = useNavigate();
 
   const [name, setName] = useState(tournament.name);
   const [description, setDescription] = useState(tournament.description ?? '');
@@ -311,7 +311,11 @@ const TournamentAdminPage = ({
 
             <Button
               variant="contained"
-              onClick={() => onNavigateToResults(tournament.id)}
+              onClick={() =>
+                navigate(`/encode/result/${tournament.id}`, {
+                  state: { tournamentName: tournament.name },
+                })
+              }
               fullWidth
               sx={{
                 backgroundColor: '#2ecc71',

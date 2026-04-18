@@ -84,10 +84,6 @@ const TournamentsPage = () => {
               prev.map((t) => (t.id === updated.id ? updated : t)),
             );
           }}
-          onNavigateToResults={(id) => {
-            // ton pote a déjà la page, adapte ici sa navigation
-            console.log('navigate to results for tournament', id);
-          }}
           onNavigateToPlanning={(id) => setPlanningTournamentId(id)} // ✅
         />
       </Box>

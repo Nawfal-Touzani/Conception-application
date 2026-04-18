@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import TournamentAdminPage from './TournamentAdminPage';
 import { AuthContext } from '../../../../contexts/AuthContext';
+import { MemoryRouter } from 'react-router-dom';
 
 vi.mock('../../../../services/tournament/tournament.service', () => ({
   updateTournament: vi.fn(),
@@ -9,6 +10,8 @@ vi.mock('../../../../services/tournament/tournament.service', () => ({
 }));
 
 import * as tournamentService from '../../../../services/tournament/tournament.service';
+
+// ─── Fixtures ─────────────────────────────────────────────────────────────────
 
 const mockAdmin = {
   id: 1,
@@ -45,20 +48,23 @@ const onUpdated = vi.fn();
 
 const renderComponent = (tournament = baseTournament) =>
   render(
-    <AuthContext.Provider value={mockContext}>
-      <TournamentAdminPage
-        tournament={tournament}
-        onBack={onBack}
-        onUpdated={onUpdated}
-        onNavigateToResults={vi.fn()}
-        onNavigateToPlanning={vi.fn()}
-      />
-    </AuthContext.Provider>,
+    <MemoryRouter>
+      <AuthContext.Provider value={mockContext}>
+        <TournamentAdminPage
+          tournament={tournament}
+          onBack={onBack}
+          onUpdated={onUpdated}
+          onNavigateToPlanning={vi.fn()}
+        />
+      </AuthContext.Provider>
+    </MemoryRouter>,
   );
 
 beforeEach(() => {
   vi.clearAllMocks();
 });
+
+// ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('TournamentAdminPage', () => {
   // ── Affichage ──
@@ -125,6 +131,16 @@ describe('TournamentAdminPage', () => {
       isPublic: true,
     });
     expect(screen.queryByText('Rendre public')).toBeFalsy();
+  });
+
+  test('affiche le bouton "Encoder les résultats"', () => {
+    renderComponent();
+    expect(screen.getByText('Encoder les résultats')).toBeTruthy();
+  });
+
+  test('affiche le bouton "Planifier les matchs"', () => {
+    renderComponent();
+    expect(screen.getByText('Planifier les matchs')).toBeTruthy();
   });
 
   // ── handleUpdate ──
