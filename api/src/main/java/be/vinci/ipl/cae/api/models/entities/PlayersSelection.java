@@ -37,4 +37,22 @@ public class PlayersSelection {
   @JoinColumn(name = "match_id")
   @JsonBackReference("match-selections")
   private Match match;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "team_id", nullable = false)
+  private Team team; // team A ou team B au moment de la selection
+
+  /**
+   * Constructs a PlayersSelection with all required fields.
+   *
+   * @param member the member being registered
+   * @param match  the match the member is registered to
+   * @param team   the team the member belongs to at the time of selection
+   */
+  public PlayersSelection(Member member, Match match, Team team) {
+    this.id = new PlayersSelectionId(member.getId(), match.getId());
+    this.member = member;
+    this.match = match;
+    this.team = team;
+  }
 }
