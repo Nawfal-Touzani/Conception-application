@@ -29,6 +29,7 @@ export interface TournamentDetails {
   isPublic: boolean;
   winnerTeamName?: string | null;
   registeredTeamNames?: string[];
+  teams?: string[];
 }
 
 export interface HomepageTournaments {
