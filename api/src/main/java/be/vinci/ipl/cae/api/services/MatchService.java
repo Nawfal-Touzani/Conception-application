@@ -8,6 +8,7 @@ import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.models.entities.Notification.Type;
 import be.vinci.ipl.cae.api.repositories.MatchRepository;
 import java.time.LocalDateTime;
+import java.util.List;               // ← AJOUT
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +24,8 @@ public class MatchService {
   /**
    * Create a new MatchService.
    *
-   * @param matchRepository match repository
+   * @param matchRepository     match repository
+   * @param notificationService the notification service
    */
   public MatchService(MatchRepository matchRepository,
       NotificationService notificationService) {
@@ -100,6 +102,20 @@ public class MatchService {
     if (match.getTeamB().getSecondResponsible() != null) {
       notificationService.send(match.getTeamB().getSecondResponsible().getId(), notif);
     }
+  }
+
+  /**
+   * Gets matches by tournament.
+   *
+   * @param tournamentId the tournament id
+   * @return the matches by tournament
+   */
+  public List<Match> getMatchesByTournament(long tournamentId) {
+    List<Match> matches = matchRepository.findByTournamentIdOrderByRoundNumberAsc(tournamentId);
+    if (matches.isEmpty()) {
+      throw new NoSuchElementException("No matches found for tournament " + tournamentId);
+    }
+    return matches;
   }
 
 }

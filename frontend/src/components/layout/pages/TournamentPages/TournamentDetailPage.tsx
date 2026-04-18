@@ -1,15 +1,74 @@
+import { useEffect, useState } from 'react';
 import { Box, Button, Divider, Paper, Typography } from '@mui/material';
 import { TournamentDetails } from '../../../../types/tournament.types';
 import { useTournamentDetail } from '../../../../hooks/useTournamentDetail/useTournamentDetail';
 import BracketSVG from '../../../ui/BracketSVG/BracketSVG';
 import {
-  BRACKET_TEAM_W,
-  BRACKET_COL_GAP,
-} from '../../../ui/BracketSVG/BracketSVG.constants';
-import {
   formatDate,
   formatStatus,
 } from '../../../../utils/TournamentFormat/tournament.utils';
+import { useAuth } from '../../../../contexts/useAuth';
+
+type Match = { team1: string; team2: string };
+type Round = Match[];
+
+type BackendMatch = {
+  roundNumber: number;
+  teamA: string | null;
+  teamB: string | null;
+};
+
+function buildBracketFromMatches(
+  matches: BackendMatch[],
+  allTeams: string[],
+): Round[] {
+  const round1 = matches.filter((m) => m.roundNumber === 1);
+  if (round1.length === 0) return [];
+
+  const realMatches: Match[] = round1.map((m) => ({
+    team1: m.teamA ?? '?',
+    team2: m.teamB ?? '?',
+  }));
+
+  // Trouver les bye teams : équipes inscrites mais absentes des matchs
+  const teamsInMatches = new Set<string>();
+  round1.forEach((m) => {
+    if (m.teamA) teamsInMatches.add(m.teamA);
+    if (m.teamB) teamsInMatches.add(m.teamB);
+  });
+  const byeTeams = allTeams.filter((t) => !teamsInMatches.has(t));
+
+  const rounds: Round[] = [realMatches];
+
+  // Round suivant : paires de winners + bye teams directement
+  const nextRound: Match[] = [];
+
+  for (let i = 0; i + 1 < realMatches.length; i += 2) {
+    nextRound.push({ team1: '?', team2: '?' });
+  }
+
+  if (realMatches.length % 2 === 1 && byeTeams.length > 0) {
+    nextRound.push({ team1: '?', team2: byeTeams.shift()! });
+  }
+
+  byeTeams.forEach((bye) => {
+    nextRound.push({ team1: bye, team2: '?' });
+  });
+
+  if (nextRound.length > 0) rounds.push(nextRound);
+
+  let prev = nextRound;
+  while (prev.length > 1) {
+    const count = Math.ceil(prev.length / 2);
+    const r: Match[] = Array.from({ length: count }, () => ({
+      team1: '?',
+      team2: '?',
+    }));
+    rounds.push(r);
+    prev = r;
+  }
+  return rounds;
+}
 
 type Props = {
   tournament: TournamentDetails;
@@ -17,6 +76,9 @@ type Props = {
 };
 
 const TournamentDetail = ({ tournament, onRegister }: Props) => {
+  const { user } = useAuth();
+  const token = user?.token ?? '';
+
   const {
     isResponsible,
     isAlreadyRegistered,
@@ -25,6 +87,25 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
     registerError,
     handleRegister,
   } = useTournamentDetail(tournament, onRegister);
+
+  const [bracketRounds, setBracketRounds] = useState<Round[]>([]);
+
+  useEffect(() => {
+    if (tournament.status !== 'IN_PROGRESS' && tournament.status !== 'FINISHED')
+      return;
+
+    fetch(`http://localhost:3000/tournaments/${tournament.id}/matches`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => (res.ok ? res.json() : []))
+      .then((matches: BackendMatch[]) => {
+        if (matches && matches.length > 0) {
+          const allTeams = tournament.registeredTeamNames ?? [];
+          setBracketRounds(buildBracketFromMatches(matches, allTeams));
+        }
+      })
+      .catch(() => {});
+  }, [tournament.id, token, tournament.status, tournament.registeredTeamNames]);
 
   return (
     <Box
@@ -70,44 +151,10 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
       >
         {/* ── Bracket ── */}
         <Box sx={{ flex: 1, overflowX: 'auto' }}>
-          <Box sx={{ display: 'flex', mb: 2 }}>
-            <Typography
-              sx={{
-                color: '#fff',
-                fontWeight: 800,
-                fontSize: '1.2rem',
-                width: BRACKET_TEAM_W,
-                textAlign: 'center',
-              }}
-            >
-              Quarts
-            </Typography>
-            <Box sx={{ width: BRACKET_COL_GAP }} />
-            <Typography
-              sx={{
-                color: '#fff',
-                fontWeight: 800,
-                fontSize: '1.2rem',
-                width: BRACKET_TEAM_W,
-                textAlign: 'center',
-              }}
-            >
-              Demi
-            </Typography>
-            <Box sx={{ width: BRACKET_COL_GAP }} />
-            <Typography
-              sx={{
-                color: '#fff',
-                fontWeight: 800,
-                fontSize: '1.2rem',
-                width: BRACKET_TEAM_W,
-                textAlign: 'center',
-              }}
-            >
-              Finale
-            </Typography>
-          </Box>
-          <BracketSVG />
+          <BracketSVG
+            rounds={bracketRounds.length > 0 ? bracketRounds : undefined}
+            teamCount={tournament.maxParticipants}
+          />
         </Box>
 
         {/* ── Panneau droit ── */}

@@ -16,24 +16,35 @@ import org.springframework.data.repository.query.Param;
 public interface MatchRepository extends ListCrudRepository<Match, Long> {
 
   /**
-   * Retrieves all matches belonging to a tournament.
+   * Retrieves all matches belonging to a tournament, ordered by round number ascending.
    * Used to build the bracket tree on the tournament detail page,
    * and to display the full match list in the admin planning view.
+   *
+   * @param tournament the tournament
+   * @return ordered list of matches
    */
-  List<Match> findByTournament(Tournament tournament);
+  List<Match> findByTournamentOrderByRoundNumberAsc(Tournament tournament);
 
   /**
    * Retrieves all matches of a tournament filtered by state.
    * Used by the admin to list only SCHEDULED matches for result encoding,
    * and to target matches to delete when resetting the planning.
+   *
+   * @param tournament the tournament
+   * @param state      the match state to filter by
+   * @return list of matches with the given state
    */
   List<Match> findByTournamentAndState(Tournament tournament, MatchState state);
 
   /**
    * Retrieves all matches in which a member was selected as a player,
    * filtered by match state.
-   * Used to display a member's upcoming (SCHEDULED) or past (PLAYED) tournaments
+   * Used to display a member's upcoming (SCHEDULED) or past (PLAYED) matches
    * in their personal space.
+   *
+   * @param member the member
+   * @param state  the match state to filter by
+   * @return list of matches where the member is selected
    */
   @Query(
       """
@@ -50,9 +61,11 @@ public interface MatchRepository extends ListCrudRepository<Match, Long> {
 
   /**
    * Deletes all matches belonging to a tournament.
-   * Used when the admin resets the planning, all existing matches are wiped
+   * Used when the admin resets the planning — all existing matches are wiped
    * and the generation algorithm is restarted from scratch.
    * Cascades handle the deletion of linked selections, validations and notifications.
+   *
+   * @param tournament the tournament whose matches must be deleted
    */
   @Transactional
   void deleteByTournament(Tournament tournament);

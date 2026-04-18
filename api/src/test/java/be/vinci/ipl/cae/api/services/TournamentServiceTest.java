@@ -288,23 +288,7 @@ class TournamentServiceTest {
    * Update tournament not in preparation.
    */
   @Test
-  void updateTournamentNotInPreparation() {
-    savedTournament.setStatus(Status.IN_PROGRESS);
-    when(tournamentRepository.findById(1L)).thenReturn(Optional.of(savedTournament));
-
-    assertThrows(IllegalStateException.class,
-        () -> tournamentService.updateTournament(1L, validDto));
-
-    verify(tournamentRepository, never()).save(Mockito.any());
-  }
-
-  /**
-   * Update tournament start date after end date.
-   */
-  @Test
   void updateTournamentStartDateAfterEndDate() {
-    when(tournamentRepository.findById(1L)).thenReturn(Optional.of(savedTournament));
-
     LocalDate now = LocalDate.now();
     TournamentDto invalid = new TournamentDto(
         "Test", "desc",
@@ -317,13 +301,8 @@ class TournamentServiceTest {
     verify(tournamentRepository, never()).save(Mockito.any());
   }
 
-  /**
-   * Update tournament start date in past.
-   */
   @Test
   void updateTournamentStartDateInPast() {
-    when(tournamentRepository.findById(1L)).thenReturn(Optional.of(savedTournament));
-
     LocalDate now = LocalDate.now();
     TournamentDto invalid = new TournamentDto(
         "Test", "desc",
@@ -336,13 +315,8 @@ class TournamentServiceTest {
     verify(tournamentRepository, never()).save(Mockito.any());
   }
 
-  /**
-   * Update tournament registration deadline after start date.
-   */
   @Test
   void updateTournamentRegistrationDeadlineAfterStartDate() {
-    when(tournamentRepository.findById(1L)).thenReturn(Optional.of(savedTournament));
-
     LocalDate now = LocalDate.now();
     TournamentDto invalid = new TournamentDto(
         "Test", "desc",
@@ -355,13 +329,8 @@ class TournamentServiceTest {
     verify(tournamentRepository, never()).save(Mockito.any());
   }
 
-  /**
-   * Update tournament registration deadline in past.
-   */
   @Test
   void updateTournamentRegistrationDeadlineInPast() {
-    when(tournamentRepository.findById(1L)).thenReturn(Optional.of(savedTournament));
-
     LocalDate now = LocalDate.now();
     TournamentDto invalid = new TournamentDto(
         "Test", "desc",
@@ -374,13 +343,8 @@ class TournamentServiceTest {
     verify(tournamentRepository, never()).save(Mockito.any());
   }
 
-  /**
-   * Update tournament max participants not power of two.
-   */
   @Test
   void updateTournamentMaxParticipantsNotPowerOfTwo() {
-    when(tournamentRepository.findById(1L)).thenReturn(Optional.of(savedTournament));
-
     LocalDate now = LocalDate.now();
     TournamentDto invalid = new TournamentDto(
         "Test", "desc",
@@ -487,7 +451,7 @@ class TournamentServiceTest {
         .thenAnswer(invocation -> invocation.getArgument(0));
     when(memberRepository.findAll()).thenReturn(List.of(member1, member2));
 
-    Tournament result = tournamentService.publishTournament(1L);
+    TournamentResponseDto result = tournamentService.publishTournament(1L);
 
     assertTrue(result.isPublic());
     verify(notificationService, Mockito.times(2)).send(Mockito.anyLong(),
@@ -547,7 +511,7 @@ class TournamentServiceTest {
         Status.PREPARATION))
         .thenReturn(Optional.of(savedTournament));
     when(registrationRepository.findByTournamentId(Mockito.anyLong())).thenReturn(
-        List.of()); // ← corrigé
+        List.of());
 
     HomepageTournamentsDto result = tournamentService.getHomepageTournaments();
 

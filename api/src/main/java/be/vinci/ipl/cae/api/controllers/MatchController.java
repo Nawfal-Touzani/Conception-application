@@ -44,7 +44,7 @@ public class MatchController {
   public Match encodeMatch(@PathVariable Long idMatch,
       @RequestBody ResultRequest payload) {
 
-      return matchService.encodingResult(idMatch, payload);
+    return matchService.encodingResult(idMatch, payload);
 
   }
 }

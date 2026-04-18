@@ -222,22 +222,6 @@ describe('TournamentDetail', () => {
     expect(screen.getByText('TEAM_STORM')).toBeTruthy();
   });
 
-  test('affiche les sections du bracket', () => {
-    renderWithContext(
-      <TournamentDetail
-        tournament={{
-          ...baseTournament,
-          status: 'IN_PROGRESS',
-          isPublic: true,
-        }}
-        onRegister={onRegister}
-      />,
-    );
-    expect(screen.getByText('Quarts')).toBeTruthy();
-    expect(screen.getByText('Demi')).toBeTruthy();
-    expect(screen.getByText('Finale')).toBeTruthy();
-  });
-
   test('affiche le panneau "Teams participantes"', () => {
     renderWithContext(
       <TournamentDetail
