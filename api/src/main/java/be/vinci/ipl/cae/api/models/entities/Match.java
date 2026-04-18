@@ -29,7 +29,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "matchs")
+@Table(name = "matches")
 public class Match {
 
   /**
@@ -87,17 +87,17 @@ public class Match {
   private Tournament tournament;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "id_team_A")
+  @JoinColumn(name = "id_team_a")
   private Team teamA;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "id_team_B")
+  @JoinColumn(name = "id_team_b")
   private Team teamB;
 
   @Column(name = "round_number", nullable = false)
   private Integer roundNumber;
 
-  @Column(name = "date_time", nullable = false)
+  @Column(name = "date_time")
   private LocalDateTime dateTime;
 
   @Enumerated(EnumType.STRING)
@@ -115,7 +115,7 @@ public class Match {
   private Integer scoreB;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "result_statut", nullable = false)
+  @Column(name = "result_status", nullable = false)
   private ResultStatus resultStatus = ResultStatus.NOT_ENTERED;
 
   @Column(name = "team_a_has_already_contested", nullable = false)
@@ -125,11 +125,11 @@ public class Match {
   private boolean contestedByTeamB = false;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "winner")
+  @JoinColumn(name = "id_winner")
   private Team winner;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "next_game")
+  @JoinColumn(name = "id_next_match")
   private Match nextMatch;
 
   @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)

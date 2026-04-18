@@ -44,6 +44,8 @@ public class PlayersSelection {
 
   /**
    * Constructs a PlayersSelection with all required fields.
+   * Member and match must already be persisted (non-null IDs)
+   * before calling this constructor.
    *
    * @param member the member being registered
    * @param match  the match the member is registered to
