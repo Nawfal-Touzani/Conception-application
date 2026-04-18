@@ -21,9 +21,12 @@ export interface Match {
 
 export interface MatchResponseDto {
   id: number;
+  teamA: string | null;
+  teamB: string | null;
+  roundNumber: number;
+  state: MatchState;
   scoreA: number | null;
   scoreB: number | null;
-  state: MatchState;
   resultStatus: ResultStatus;
-  winnerId: number | null;
+  winner: string | null;
 }

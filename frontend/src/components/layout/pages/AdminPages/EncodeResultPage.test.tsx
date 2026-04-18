@@ -3,6 +3,7 @@ import { describe, test, expect, vi, beforeEach } from 'vitest';
 import ResultEncodingPage from './EncodeResultPage';
 import { useAuth } from '../../../../contexts/useAuth';
 import * as encodeResultService from '../../../../services/match/encode-result';
+import * as matchService from '../../../../services/match/match-service';
 import type { MatchResponseDto } from '../../../../types/match.types';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
@@ -13,6 +14,10 @@ vi.mock('../../../../contexts/useAuth', () => ({
 
 vi.mock('../../../../services/match/encode-result', () => ({
   encodeResult: vi.fn(),
+}));
+
+vi.mock('../../../../services/match/match-service', () => ({
+  getMatchesByTournament: vi.fn(),
 }));
 
 vi.mock('react-router-dom', () => ({
@@ -40,34 +45,68 @@ const mockAuth: AuthContextType = {
 
 const mockMatchResponseDto: MatchResponseDto = {
   id: 1,
+  roundNumber: 1,
+  teamA: 'Nom équipe 1',
+  teamB: 'Nom équipe 2',
   scoreA: 3,
   scoreB: 1,
   state: 'PLAYED',
   resultStatus: 'PENDING',
-  winnerId: 1,
+  winner: 'Nom équipe 1',
 };
+
+const mockMatches: MatchResponseDto[] = [
+  {
+    id: 1,
+    roundNumber: 1,
+    teamA: 'Nom équipe 1',
+    teamB: 'Nom équipe 2',
+    scoreA: null,
+    scoreB: null,
+    state: 'SCHEDULED',
+    resultStatus: 'NOT_ENTERED',
+    winner: null,
+  },
+  {
+    id: 2,
+    roundNumber: 1,
+    teamA: 'Eagles',
+    teamB: 'Tigers',
+    scoreA: null,
+    scoreB: null,
+    state: 'SCHEDULED',
+    resultStatus: 'NOT_ENTERED',
+    winner: null,
+  },
+];
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('ResultEncodingPage', () => {
   beforeEach(() => {
     vi.mocked(useAuth).mockReturnValue(mockAuth);
+    vi.mocked(matchService.getMatchesByTournament).mockResolvedValue(
+      mockMatches,
+    );
     vi.clearAllMocks();
   });
 
   // — Affichage initial ——————————————————————————————————————————————————————
 
-  test('affiche le titre de la page', () => {
+  test('affiche le titre de la page', async () => {
     render(<ResultEncodingPage />);
     expect(screen.getByText('Encodage des résultats')).toBeTruthy();
   });
 
-  test('affiche le nom du tournoi', () => {
+  test('affiche le nom du tournoi', async () => {
     render(<ResultEncodingPage />);
     expect(screen.getByDisplayValue('Tournoi Test')).toBeTruthy();
   });
 
   test('affiche la liste des matchs après chargement', async () => {
+    vi.mocked(matchService.getMatchesByTournament).mockResolvedValue(
+      mockMatches,
+    );
     render(<ResultEncodingPage />);
     await waitFor(() => {
       expect(screen.getByText(/Nom équipe 1/)).toBeTruthy();
@@ -78,6 +117,9 @@ describe('ResultEncodingPage', () => {
   // — Sélection d'un match ———————————————————————————————————————————————————
 
   test('affiche le formulaire de score quand on clique sur Encoder résultat', async () => {
+    vi.mocked(matchService.getMatchesByTournament).mockResolvedValue(
+      mockMatches,
+    );
     render(<ResultEncodingPage />);
     await waitFor(() => screen.getAllByText('Encoder résultat'));
 
@@ -87,6 +129,9 @@ describe('ResultEncodingPage', () => {
   });
 
   test('cache le formulaire quand on clique sur Annuler', async () => {
+    vi.mocked(matchService.getMatchesByTournament).mockResolvedValue(
+      mockMatches,
+    );
     render(<ResultEncodingPage />);
     await waitFor(() => screen.getAllByText('Encoder résultat'));
 
@@ -99,6 +144,9 @@ describe('ResultEncodingPage', () => {
   // — Validation du formulaire ———————————————————————————————————————————————
 
   test('affiche une erreur si les scores ne sont pas remplis', async () => {
+    vi.mocked(matchService.getMatchesByTournament).mockResolvedValue(
+      mockMatches,
+    );
     render(<ResultEncodingPage />);
     await waitFor(() => screen.getAllByText('Encoder résultat'));
 
@@ -109,6 +157,9 @@ describe('ResultEncodingPage', () => {
   });
 
   test('appelle encodeResult avec les bons paramètres', async () => {
+    vi.mocked(matchService.getMatchesByTournament).mockResolvedValue(
+      mockMatches,
+    );
     vi.mocked(encodeResultService.encodeResult).mockResolvedValue(
       mockMatchResponseDto,
     );
@@ -134,6 +185,9 @@ describe('ResultEncodingPage', () => {
   });
 
   test('affiche le message de succès après encodage', async () => {
+    vi.mocked(matchService.getMatchesByTournament).mockResolvedValue(
+      mockMatches,
+    );
     vi.mocked(encodeResultService.encodeResult).mockResolvedValue(
       mockMatchResponseDto,
     );
@@ -156,6 +210,9 @@ describe('ResultEncodingPage', () => {
   // — Gestion des erreurs du service —————————————————————————————————————————
 
   test('affiche une erreur si encodeResult échoue', async () => {
+    vi.mocked(matchService.getMatchesByTournament).mockResolvedValue(
+      mockMatches,
+    );
     vi.mocked(encodeResultService.encodeResult).mockRejectedValue(
       new Error('Erreur serveur'),
     );

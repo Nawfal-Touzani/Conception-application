@@ -14,11 +14,9 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useAuth } from '../../../../contexts/useAuth';
 import { useParams, useLocation } from 'react-router-dom';
 import { encodeResult } from '../../../../services/match/encode-result';
-import { Match } from '../../../../types/match.types';
-import { Tournament } from '../../../../types/tournament.types';
-import { TeamDto } from '../../../../types/team.types';
+import { MatchResponseDto } from '../../../../types/match.types';
 import { validateEncoding } from '../../../../utils/EncodeValidation/EncodeValidation';
-
+import { getMatchesByTournament } from '../../../../services/match/match-service';
 const ResultEncodingPage = () => {
   const { user } = useAuth();
   const token = user?.token ?? '';
@@ -27,55 +25,22 @@ const ResultEncodingPage = () => {
   const { state } = useLocation();
   const tournamentName = state?.tournamentName ?? '';
 
-  const [matches, setMatches] = useState<Match[]>([]);
+  const [matches, setMatches] = useState<MatchResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+  const [selectedMatch, setSelectedMatch] = useState<MatchResponseDto | null>(
+    null,
+  );
   const [score1, setScore1] = useState('');
   const [score2, setScore2] = useState('');
-
   useEffect(() => {
     const fetchMatches = async () => {
       try {
         setLoading(true);
-
-        // Décommente quand la route backend est dispo :
-        // const data = await getMatchesByTournament(Number(tournamentId), token);
-        // setMatches(data);
-
-        // Mock en attendant
-        setMatches([
-          {
-            id: 1,
-            teamA: { id: 1, name: 'Nom équipe 1' } as TeamDto,
-            teamB: { id: 2, name: 'Nom équipe 2' } as TeamDto,
-            dateTime: '2026-04-15T18:00:00',
-            state: 'SCHEDULED',
-            resultStatus: 'NOT_ENTERED',
-            scoreA: null,
-            scoreB: null,
-            winner: null,
-            nextMatch: null,
-            roundNumber: 1,
-            tournament: { id: 1 } as Tournament,
-          },
-          {
-            id: 2,
-            teamA: { id: 3, name: 'Eagles' } as TeamDto,
-            teamB: { id: 4, name: 'Tigers' } as TeamDto,
-            dateTime: '2026-04-16T18:00:00',
-            state: 'SCHEDULED',
-            resultStatus: 'NOT_ENTERED',
-            scoreA: null,
-            scoreB: null,
-            winner: null,
-            nextMatch: null,
-            roundNumber: 1,
-            tournament: { id: 1 } as Tournament,
-          },
-        ]);
+        const data = await getMatchesByTournament(Number(tournamentId), token);
+        setMatches(data);
       } catch (err) {
         setError('Erreur lors de la récupération des matchs.');
       } finally {
@@ -85,7 +50,7 @@ const ResultEncodingPage = () => {
     fetchMatches();
   }, [tournamentId, token]);
 
-  const handleSelectMatch = (match: Match) => {
+  const handleSelectMatch = (match: MatchResponseDto) => {
     setSelectedMatch(match);
     setScore1('');
     setScore2('');
@@ -231,14 +196,8 @@ const ResultEncodingPage = () => {
                     }}
                   >
                     <Typography sx={{ color: 'white', flex: 2 }}>
-                      {match.teamA?.name}{' '}
-                      <span style={{ color: '#7f8c8d' }}>vs</span>{' '}
-                      {match.teamB?.name}
-                    </Typography>
-                    <Typography
-                      sx={{ color: '#bdc3c7', flex: 1, textAlign: 'center' }}
-                    >
-                      {new Date(match.dateTime).toLocaleDateString('fr-BE')}
+                      {match.teamA} <span style={{ color: '#7f8c8d' }}>vs</span>{' '}
+                      {match.teamB}
                     </Typography>
                     <Button
                       variant="contained"
@@ -279,7 +238,7 @@ const ResultEncodingPage = () => {
                 fontWeight: 600,
               }}
             >
-              {selectedMatch.teamA?.name} vs {selectedMatch.teamB?.name}
+              {selectedMatch.teamA} vs {selectedMatch.teamB}
             </Typography>
 
             <Box
