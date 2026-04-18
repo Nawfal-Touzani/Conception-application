@@ -99,9 +99,10 @@ public class Match {
 
   @Column(name = "date_time", nullable = false)
   private LocalDateTime dateTime;
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private MatchState state;
+  private MatchState state = MatchState.SCHEDULED;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "id_responsible_admin")
@@ -114,8 +115,8 @@ public class Match {
   private Integer scoreB;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "result_statut")
-  private ResultStatus resultStatus;
+  @Column(name = "result_statut", nullable = false)
+  private ResultStatus resultStatus = ResultStatus.NOT_ENTERED;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "winner")
@@ -136,4 +137,22 @@ public class Match {
   @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonManagedReference("match-validations")
   private List<ValidationResult> validationResults = new ArrayList<>();
+
+  /**
+   * Constructs a Match with the minimum required fields at creation time.
+   *
+   * @param tournament      the tournament this match belongs to
+   * @param roundNumber     the round number in the bracket
+   * @param dateTime        the scheduled date and time
+   * @param responsibleAdmin the admin responsible for this match
+   */
+  public Match(Tournament tournament, Integer roundNumber,
+      LocalDateTime dateTime, Member responsibleAdmin) {
+    this.tournament = tournament;
+    this.roundNumber = roundNumber;
+    this.dateTime = dateTime;
+    this.responsibleAdmin = responsibleAdmin;
+    // + default initialisation
+    // other are nullable and can be initialized with the setters
+  }
 }
