@@ -261,4 +261,15 @@ public class MemberService {
     );
   }
 
+  /**
+   * Retrieves a member by their email address.
+   *
+   * @param email the member's email
+   * @return the member
+   * @throws NoSuchElementException if not found
+   */
+  public Member getByEmail(String email) {
+    return memberRepository.findByEmail(email)
+        .orElseThrow(() -> new NoSuchElementException("Member not found with email " + email));
+  }
 }

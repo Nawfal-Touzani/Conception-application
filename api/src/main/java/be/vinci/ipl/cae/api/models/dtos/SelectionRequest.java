@@ -11,5 +11,6 @@ import java.util.List;
  * and are available for the match date.
  */
 public record SelectionRequest(
-    @NotNull @Size(min = 4, max = 4) List<Long> memberIds
+    @NotNull @Size(min = 4, max = 4, message = "Exactly 4 players must be selected")
+    List<Long> memberIds
 ) {}

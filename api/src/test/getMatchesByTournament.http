@@ -1,0 +1,7 @@
+@baseUrl = http://localhost:3000
+
+### Get all matches of a tournament - success (should return 200)
+GET {{baseUrl}}/matches/tournament/1
+
+### Get all matches of a tournament - not found (should return 404)
+GET {{baseUrl}}/matches/tournament/999

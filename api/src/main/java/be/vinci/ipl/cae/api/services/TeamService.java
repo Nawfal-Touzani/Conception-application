@@ -17,6 +17,7 @@ import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 
 
@@ -245,5 +246,18 @@ public class TeamService {
         team.getSecondResponsible() != null ? team.getSecondResponsible().getTag() : null,
         team.getCreationDate()
     );
+  }
+
+  /**
+   * Retrieves the team where the given member is responsible.
+   *
+   * @param responsible the responsible member
+   * @return the team
+   * @throws NoSuchElementException if no team found for this responsible
+   */
+  public Team getTeamByResponsible(Member responsible) {
+    return teamRepository.findByResponsible(responsible)
+        .orElseThrow(() -> new NoSuchElementException(
+            "No team found for responsible with id " + responsible.getId()));
   }
 }

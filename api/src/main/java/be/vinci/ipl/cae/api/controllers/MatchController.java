@@ -1,50 +1,263 @@
 package be.vinci.ipl.cae.api.controllers;
 
+import be.vinci.ipl.cae.api.models.dtos.MatchBracketDto;
+import be.vinci.ipl.cae.api.models.dtos.MatchDetailDto;
+import be.vinci.ipl.cae.api.models.dtos.SelectionRequest;
 import be.vinci.ipl.cae.api.models.dtos.ResultRequest;
 import be.vinci.ipl.cae.api.models.entities.Match;
+import be.vinci.ipl.cae.api.models.entities.Member;
+import be.vinci.ipl.cae.api.models.entities.Team;
+import be.vinci.ipl.cae.api.models.mappers.MatchMapper;
 import be.vinci.ipl.cae.api.services.MatchService;
+import be.vinci.ipl.cae.api.services.MemberService;
+import be.vinci.ipl.cae.api.services.TeamService;
+import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-
 /**
- * Controller for managing match.
+ * Controller for managing matches.
  */
 @RestController
 @RequestMapping("/matches")
 public class MatchController {
 
   private final MatchService matchService;
+  private final MatchMapper matchMapper;
+  private final MemberService memberService;
+  private final TeamService teamService;
 
   /**
-   * Create a new MatchController.
-   *
-   * @param matchService the match service
+   * Creates a new MatchController.
    */
-  public MatchController(MatchService matchService) {
+  public MatchController(MatchService matchService, MatchMapper matchMapper,
+      MemberService memberService, TeamService teamService) {
     this.matchService = matchService;
+    this.matchMapper = matchMapper;
+    this.memberService = memberService;
+    this.teamService = teamService;
+  }
+
+  // ─────────────────────────────────────────────
+  // PUBLIC — accessible à tous (visiteur inclus)
+  // ─────────────────────────────────────────────
+
+  /**
+   * Gets a match by its id.
+   * Returns the full detail view including lineups if result is VALIDATED.
+   *
+   * @param idMatch the match id
+   * @return the match detail DTO
+   */
+  @GetMapping("/{idMatch}")
+  @ResponseStatus(HttpStatus.OK)
+  public MatchDetailDto getMatch(@PathVariable Long idMatch) {
+    Match match = matchService.getMatchById(idMatch);
+    return matchMapper.toDetailDto(match);
   }
 
   /**
-   * Encode a match.
+   * Gets all matches of a tournament for the bracket tree view.
+   *
+   * @param idTournament the tournament id
+   * @return list of bracket DTOs ordered by round number
+   */
+  @GetMapping("/tournament/{idTournament}")
+  @ResponseStatus(HttpStatus.OK)
+  public List<MatchBracketDto> getMatchesByTournament(@PathVariable Long idTournament) {
+    return matchService.getMatchesByTournament(idTournament)
+        .stream()
+        .map(matchMapper::toBracketDto)
+        .toList();
+  }
+
+  // ─────────────────────────────────────────────
+  // JOUEUR — matchs personnels
+  // ─────────────────────────────────────────────
+
+  /**
+   * Gets upcoming matches for the authenticated member.
+   *
+   * @param email the authenticated member's email (from JWT)
+   * @return list of upcoming match detail DTOs
+   */
+  @GetMapping("/upcoming")
+  @PreAuthorize("isAuthenticated()")
+  @ResponseStatus(HttpStatus.OK)
+  public List<MatchDetailDto> getUpcomingMatches(@AuthenticationPrincipal String email) {
+    Member member = memberService.getByEmail(email);
+    return matchService.getUpcomingMatchesForMember(member)
+        .stream()
+        .map(matchMapper::toDetailDto)
+        .toList();
+  }
+
+  /**
+   * Gets past matches for the authenticated member.
+   *
+   * @param email the authenticated member's email (from JWT)
+   * @return list of past match detail DTOs
+   */
+  @GetMapping("/past")
+  @PreAuthorize("isAuthenticated()")
+  @ResponseStatus(HttpStatus.OK)
+  public List<MatchDetailDto> getPastMatches(@AuthenticationPrincipal String email) {
+    Member member = memberService.getByEmail(email);
+    return matchService.getPastMatchesForMember(member)
+        .stream()
+        .map(matchMapper::toDetailDto)
+        .toList();
+  }
+
+  // ─────────────────────────────────────────────
+  // RESPONSABLE — sélection et validation
+  // ─────────────────────────────────────────────
+
+  /**
+   * Submits a player selection for a match.
    *
    * @param idMatch the match id
-   * @param payload the score by the admin
-   * @return the result of the match
+   * @param payload the selection request with 4 member ids
+   * @param email   the authenticated responsible's email
+   * @return the match detail DTO with updated lineup status
+   */
+  @PostMapping("/{idMatch}/selection")
+  @PreAuthorize("hasRole('ROLE_RESPONSIBLE')")
+  @ResponseStatus(HttpStatus.CREATED)
+  public MatchDetailDto submitSelection(
+      @PathVariable Long idMatch,
+      @RequestBody @Valid SelectionRequest payload,
+      @AuthenticationPrincipal String email) {
+    Member responsible = memberService.getByEmail(email);
+    Team team = teamService.getTeamByResponsible(responsible);
+    matchService.submitSelection(idMatch, team, payload.memberIds());
+    return matchMapper.toDetailDto(matchService.getMatchById(idMatch));
+  }
+
+  /**
+   * Modifies the player selection for a match.
+   *
+   * @param idMatch the match id
+   * @param payload the new selection with 4 member ids
+   * @param email   the authenticated responsible's email
+   * @return the match detail DTO with updated lineup status
+   */
+  @PutMapping("/{idMatch}/selection")
+  @PreAuthorize("hasRole('ROLE_RESPONSIBLE')")
+  @ResponseStatus(HttpStatus.OK)
+  public MatchDetailDto modifySelection(
+      @PathVariable Long idMatch,
+      @RequestBody @Valid SelectionRequest payload,
+      @AuthenticationPrincipal String email) {
+    Member responsible = memberService.getByEmail(email);
+    Team team = teamService.getTeamByResponsible(responsible);
+    matchService.modifySelection(idMatch, team, payload.memberIds());
+    return matchMapper.toDetailDto(matchService.getMatchById(idMatch));
+  }
+
+  /**
+   * Validates a match result for the authenticated responsible's team.
+   *
+   * @param idMatch the match id
+   * @param email   the authenticated responsible's email
+   * @return the updated match detail DTO
+   */
+  @PostMapping("/{idMatch}/validate")
+  @PreAuthorize("hasRole('ROLE_RESPONSIBLE')")
+  @ResponseStatus(HttpStatus.OK)
+  public MatchDetailDto validateResult(
+      @PathVariable Long idMatch,
+      @AuthenticationPrincipal String email) {
+    Member responsible = memberService.getByEmail(email);
+    Team team = teamService.getTeamByResponsible(responsible);
+    matchService.validateResult(idMatch, team);
+    return matchMapper.toDetailDto(matchService.getMatchById(idMatch));
+  }
+
+  /**
+   * Contests a match result for the authenticated responsible's team.
+   *
+   * @param idMatch the match id
+   * @param email   the authenticated responsible's email
+   * @return the updated match detail DTO
+   */
+  @PostMapping("/{idMatch}/contest")
+  @PreAuthorize("hasRole('ROLE_RESPONSIBLE')")
+  @ResponseStatus(HttpStatus.OK)
+  public MatchDetailDto contestResult(
+      @PathVariable Long idMatch,
+      @AuthenticationPrincipal String email) {
+    Member responsible = memberService.getByEmail(email);
+    Team team = teamService.getTeamByResponsible(responsible);
+    matchService.contestResult(idMatch, team);
+    return matchMapper.toDetailDto(matchService.getMatchById(idMatch));
+  }
+
+  /**
+   * Declares forfeit for the authenticated responsible's team.
+   *
+   * @param idMatch the match id
+   * @param email   the authenticated responsible's email
+   * @return the updated match detail DTO
+   */
+  @PostMapping("/{idMatch}/forfeit")
+  @PreAuthorize("hasRole('ROLE_RESPONSIBLE')")
+  @ResponseStatus(HttpStatus.OK)
+  public MatchDetailDto declareForfeit(
+      @PathVariable Long idMatch,
+      @AuthenticationPrincipal String email) {
+    Member responsible = memberService.getByEmail(email);
+    Team team = teamService.getTeamByResponsible(responsible);
+    matchService.declareForfeit(idMatch, team);
+    return matchMapper.toDetailDto(matchService.getMatchById(idMatch));
+  }
+
+  // ─────────────────────────────────────────────
+  // ADMIN — encodage et correction
+  // ─────────────────────────────────────────────
+
+  /**
+   * Encodes a match result.
+   *
+   * @param idMatch the match id
+   * @param payload the score
+   * @return the updated match detail DTO
    */
   @PatchMapping("/{idMatch}/result")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @ResponseStatus(HttpStatus.OK)
-  public Match encodeMatch(@PathVariable Long idMatch,
+  public MatchDetailDto encodeMatch(
+      @PathVariable Long idMatch,
       @RequestBody ResultRequest payload) {
+    Match match = matchService.encodingResult(idMatch, payload);
+    return matchMapper.toDetailDto(match);
+  }
 
-    return matchService.encodingResult(idMatch, payload);
-
+  /**
+   * Corrects a contested match result.
+   *
+   * @param idMatch the match id
+   * @param payload the corrected score
+   * @return the updated match detail DTO
+   */
+  @PutMapping("/{idMatch}/result")
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @ResponseStatus(HttpStatus.OK)
+  public MatchDetailDto correctResult(
+      @PathVariable Long idMatch,
+      @RequestBody ResultRequest payload) {
+    Match match = matchService.correctResult(idMatch, payload);
+    return matchMapper.toDetailDto(match);
   }
 }

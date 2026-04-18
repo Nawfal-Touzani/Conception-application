@@ -1,0 +1,8 @@
+@baseUrl = http://localhost:3000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsInVzZXJuYW1lIjoibWFuYWdlciIsImlhdCI6MTc3Mjk4NDI4MiwiZXhwIjoxNzczMDcwNjgyfQ.CaWuGQLW9547D2q65CVYE_74SuX8g3wlX0eETMt8uHE
+
+### Get match by id - success (should return 200)
+GET {{baseUrl}}/matches/1
+
+### Get match by id - not found (should return 404)
+GET {{baseUrl}}/matches/999

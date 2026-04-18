@@ -244,7 +244,7 @@ public class TournamentService {
     if ("confirmed".equals(dto.getPhase()) || "published".equals(dto.getPhase())) {
 
       // Supprime les anciens matchs pour éviter les doublons si re-confirmation
-      matchRepository.deleteByTournamentId(id);
+      matchRepository.deleteByTournament(t);
 
       if (dto.getRounds() != null) {
         List<List<Match>> savedRounds = new ArrayList<>();
@@ -320,7 +320,10 @@ public class TournamentService {
    * @return the matches by tournament
    */
   public List<MatchResponseDto> getMatchesByTournament(long tournamentId) {
-    return matchRepository.findByTournamentIdOrderByRoundNumberAsc(tournamentId)
+    Tournament tournament = tournamentRepository.findById(tournamentId)
+        .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
+
+    return matchRepository.findByTournamentOrderByRoundNumberAsc(tournament)
         .stream()
         .map(m -> new MatchResponseDto(
             m.getId(),

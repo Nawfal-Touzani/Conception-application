@@ -1,5 +1,6 @@
 package be.vinci.ipl.cae.api.repositories;
 
+import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Team;
 import java.util.List;
 import java.util.Optional;
@@ -34,4 +35,12 @@ public interface TeamRepository extends CrudRepository<Team, Long> {
    * @return all active teams
    */
   List<Team> findByIsActiveTrue();
+
+  /**
+   * Finds a team by its responsible member.
+   *
+   * @param responsible the responsible member
+   * @return the team if found
+   */
+  Optional<Team> findByResponsible(Member responsible);
 }
