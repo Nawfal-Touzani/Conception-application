@@ -118,6 +118,12 @@ public class Match {
   @Column(name = "result_statut", nullable = false)
   private ResultStatus resultStatus = ResultStatus.NOT_ENTERED;
 
+  @Column(name = "team_a_has_already_contested", nullable = false)
+  private boolean teamAsHasAlreadyContested = false;
+
+  @Column(name = "team_b_has_already_contested", nullable = false)
+  private boolean teamBsHasAlreadyContested = false;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "winner")
   private Team winner;
