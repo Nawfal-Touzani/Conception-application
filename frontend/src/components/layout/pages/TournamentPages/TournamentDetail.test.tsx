@@ -222,7 +222,6 @@ describe('TournamentDetail', () => {
     expect(screen.getByText('TEAM_STORM')).toBeTruthy();
   });
 
-
   test('affiche le panneau "Teams participantes"', () => {
     renderWithContext(
       <TournamentDetail

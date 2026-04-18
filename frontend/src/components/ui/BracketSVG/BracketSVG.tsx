@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
+/* eslint-disable react-refresh/only-export-components */
 // BracketSVG.tsx
 const TEAM_W = 160;
 const TEAM_H = 28;
@@ -14,7 +15,6 @@ export const BRACKET_COL_GAP = COL_GAP;
 type Match = { team1: string; team2: string };
 type Round = Match[];
 
-/** Noms des rounds selon le nombre total de rounds */
 export function getRoundLabel(roundIndex: number, totalRounds: number): string {
   const fromEnd = totalRounds - 1 - roundIndex;
   if (fromEnd === 0) return 'Finale';
@@ -25,20 +25,13 @@ export function getRoundLabel(roundIndex: number, totalRounds: number): string {
   return `Round ${roundIndex + 1}`;
 }
 
-/**
- * Construit un bracket vide (tous TBD) selon le nombre d'équipes.
- * Gère les byes pour les puissances de 2 non entières.
- * ex: 11 équipes → 8èmes avec 3 matchs réels + 5 byes, puis quarts etc.
- */
 export function buildDefaultBracket(teamCount: number): Round[] {
-  // Trouver la prochaine puissance de 2
   let slots = 1;
   while (slots < teamCount) slots *= 2;
 
   const totalRounds = Math.log2(slots);
   const rounds: Round[] = [];
 
-  // Round 0 : slots/2 matchs, avec des byes pour les équipes en avance
   const firstRoundMatches = slots / 2;
   const byeCount = slots - teamCount; // équipes qui passent direct
   const actualFirstRound = firstRoundMatches - byeCount;

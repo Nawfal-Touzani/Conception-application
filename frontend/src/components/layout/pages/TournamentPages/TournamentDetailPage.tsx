@@ -12,25 +12,27 @@ import { useAuth } from '../../../../contexts/useAuth';
 type Match = { team1: string; team2: string };
 type Round = Match[];
 
+type BackendMatch = {
+  roundNumber: number;
+  teamA: string | null;
+  teamB: string | null;
+};
+
 function buildBracketFromMatches(
-  matches: {
-    roundNumber: number;
-    teamA: string | null;
-    teamB: string | null;
-  }[],
+  matches: BackendMatch[],
   allTeams: string[],
 ): Round[] {
-  const round1 = matches.filter((m: any) => m.roundNumber === 1);
+  const round1 = matches.filter((m) => m.roundNumber === 1);
   if (round1.length === 0) return [];
 
-  const realMatches: Match[] = round1.map((m: any) => ({
-    team1: m.teamA,
-    team2: m.teamB,
+  const realMatches: Match[] = round1.map((m) => ({
+    team1: m.teamA ?? '?',
+    team2: m.teamB ?? '?',
   }));
 
   // Trouver les bye teams : équipes inscrites mais absentes des matchs
   const teamsInMatches = new Set<string>();
-  round1.forEach((m: any) => {
+  round1.forEach((m) => {
     if (m.teamA) teamsInMatches.add(m.teamA);
     if (m.teamB) teamsInMatches.add(m.teamB);
   });
@@ -96,14 +98,14 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => (res.ok ? res.json() : []))
-      .then((matches: any[]) => {
+      .then((matches: BackendMatch[]) => {
         if (matches && matches.length > 0) {
           const allTeams = tournament.registeredTeamNames ?? [];
           setBracketRounds(buildBracketFromMatches(matches, allTeams));
         }
       })
       .catch(() => {});
-  }, [tournament.id, token]);
+  }, [tournament.id, token, tournament.status, tournament.registeredTeamNames]);
 
   return (
     <Box

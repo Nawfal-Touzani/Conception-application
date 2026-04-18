@@ -19,11 +19,6 @@ function shuffleArray(array: string[]): string[] {
   return shuffled;
 }
 
-/**
- * Construit un bracket complet à partir d'une liste d'équipes.
- * Si le nombre est impair, la dernière équipe reçoit un "bye" :
- * elle passe directement au round suivant et est visible dans ce round.
- */
 function buildBracket(teams: string[]): Round[] {
   const rounds: Round[] = [];
   let current = shuffleArray(teams);
@@ -36,11 +31,10 @@ function buildBracket(teams: string[]): Round[] {
       const team1 = current[i];
       const team2 = current[i + 1];
       if (team2 === undefined) {
-        // Bye : cette équipe passe directement au prochain round
         nextRoundSlots.push(team1);
       } else {
         round.push({ team1, team2 });
-        nextRoundSlots.push('?'); // gagnant à déterminer
+        nextRoundSlots.push('?');
       }
     }
 
@@ -51,17 +45,6 @@ function buildBracket(teams: string[]): Round[] {
   return rounds;
 }
 
-/**
- * Reconstruit le bracket COMPLET depuis les matchs backend.
- * - Round 0 : matchs réels (depuis backend)
- * - Rounds suivants : calculés avec les bye teams VISIBLES et TBD pour les gagnants
- *
- * Exemple 7 équipes (TEAM_TITAN bye) :
- *   Backend round 1 : [{TITAN, OMEGA}, {VENOM, NOVA}, {VOID, STORM}]  ← TEAM_BLAZE est le bye
- *   Round 0 affiché : [{TITAN, OMEGA}, {VENOM, NOVA}, {VOID, STORM}]
- *   Round 1 affiché : [{?, TEAM_BLAZE}, {?, ?}]   ← TEAM_BLAZE visible !
- *   Round 2 affiché : [{?, ?}]
- */
 function buildFullBracketFromBackend(
   backendMatches: {
     roundNumber: number;
@@ -169,32 +152,40 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
   const [showPubOverlay, setShowPubOverlay] = useState(false);
 
   useEffect(() => {
-  tournamentService.getTournamentById(token, tournamentId).then((t) => {
-    setTournament(t);
-    const teamNames = t.registeredTeamNames ?? [];
-    setTeams(teamNames);
+    tournamentService.getTournamentById(token, tournamentId).then((t) => {
+      setTournament(t);
+      const teamNames = t.registeredTeamNames ?? [];
+      setTeams(teamNames);
 
-    fetch(`http://localhost:3000/tournaments/${tournamentId}/matches`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => (res.ok ? res.json() : []))
-      .then((matches: any[]) => {
-        if (matches.length === 0) {
+      fetch(`http://localhost:3000/tournaments/${tournamentId}/matches`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => (res.ok ? res.json() : []))
+        .then(
+          (
+            matches: {
+              roundNumber: number;
+              teamA: string | null;
+              teamB: string | null;
+            }[],
+          ) => {
+            if (matches.length === 0) {
+              setRounds(buildBracket(teamNames));
+              setPhase('draft');
+            } else {
+              const full = buildFullBracketFromBackend(matches, teamNames);
+              setRounds(full);
+              setConfirmedRounds(full);
+              setPhase(t.status === 'IN_PROGRESS' ? 'published' : 'confirmed');
+            }
+          },
+        )
+        .catch(() => {
           setRounds(buildBracket(teamNames));
           setPhase('draft');
-        } else {
-          const full = buildFullBracketFromBackend(matches, teamNames);
-          setRounds(full);
-          setConfirmedRounds(full);
-          setPhase(t.status === 'IN_PROGRESS' ? 'published' : 'confirmed');
-        }
-      })
-      .catch(() => {
-        setRounds(buildBracket(teamNames));
-        setPhase('draft');
-      });
-  });
-}, [tournamentId, token]);
+        });
+    });
+  }, [tournamentId, token]);
 
   const callPlanningApi = async (p: Phase) => {
     const round1 = rounds[0] ?? [];
