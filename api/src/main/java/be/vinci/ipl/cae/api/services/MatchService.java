@@ -57,7 +57,7 @@ public class MatchService {
     }
 
     // check the score is not null
-    if (dto.scoreA() <= 0 || dto.scoreB() <= 0) {
+    if (dto.scoreA() < 0 || dto.scoreB() < 0) {
       throw new IllegalArgumentException("the score must be superior at 0");
     }
 
