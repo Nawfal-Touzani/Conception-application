@@ -29,12 +29,12 @@ public class PlayersSelection {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @MapsId("memberId") // Lie le champ de la FK à son équivalent dans PlayersSelectionId
-  @JoinColumn(name = "member_id")
+  @JoinColumn(name = "member_id", nullable = false)
   private Member member;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @MapsId("matchId")
-  @JoinColumn(name = "match_id")
+  @JoinColumn(name = "match_id", nullable = false)
   @JsonBackReference("match-selections")
   private Match match;
 

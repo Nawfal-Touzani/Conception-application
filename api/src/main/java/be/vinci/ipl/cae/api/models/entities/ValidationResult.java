@@ -19,6 +19,7 @@ import lombok.Setter;
  * Each team (A or B) has exactly one entry per match.
  * The hasAlreadyContested flag acts as an irreversible lock
  * to prevent a team from contesting more than once.
+ * The entity is created only when the membre contest or validate !
  */
 @Entity
 @Table(name = "validation_results")
@@ -41,12 +42,24 @@ public class ValidationResult {
   @JoinColumn(name = "team_id", nullable = false)
   private Team team;
 
-  @Column(name = "is_validated")
-  private boolean isValidated; // pas encore repondu ? Pas de creation dans la DB
+  @Column(name = "is_validated", nullable = false)
+  private boolean validated = false; // pas encore repondu ? Pas de creation dans la DB
 
   @Column(name = "has_already_contested", nullable = false)
   private boolean hasAlreadyContested = false; // utilisation unique, irreversible
 
   @Column(name = "validation_date")
   private LocalDateTime validationDate;
+
+  /**
+   * Constructs a ValidationResult for a given match and team.
+   *
+   * @param match the match being validated
+   * @param team  the team submitting the validation
+   */
+  public ValidationResult(Match match, Team team) {
+    this.id = new ValidationResultId(match.getId(), team.getId());
+    this.match = match;
+    this.team = team;
+  }
 }
