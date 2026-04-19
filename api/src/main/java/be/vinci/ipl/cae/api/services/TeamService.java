@@ -17,8 +17,8 @@ import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
-
 
 /**
  * The type Team service.
@@ -77,7 +77,7 @@ public class TeamService {
 
     Team team = new Team();
     team.setName(request.getName());
-    team.setIsActive(true);
+    team.setActive(true);
     team.setCreationDate(LocalDateTime.now());
     team.setResponsible(member);
 
@@ -140,7 +140,8 @@ public class TeamService {
         .map(tc -> {
           Member m = tc.getMember();
           boolean isAvailable = m.getUnavailabilities().stream()
-              .noneMatch(u -> !today.isBefore(u.getStartDate()) && !today.isAfter(u.getEndDate()));
+              .noneMatch(
+                  u -> !today.isBefore(u.getStartDate()) && !today.isAfter(u.getEndDate()));
           return new TeamMemberDto(
               m.getId(),
               m.getTag(),
@@ -161,14 +162,13 @@ public class TeamService {
   }
 
   /**
-   * NEW — Get all teams as safe DTOs (avoids circular JSON serialization). Used by GET /teams
-   * endpoint.
+   * Get all active teams as safe DTOs.
    *
    * @return the all team dtos
    */
   @Transactional
   public Iterable<TeamResponseDto> getAllTeamDtos() {
-    return teamRepository.findByIsActiveTrue().stream()
+    return teamRepository.findByActiveTrue().stream()
         .map(this::toDto)
         .toList();
   }
@@ -196,7 +196,7 @@ public class TeamService {
     int teamSize = teamCompositionRepository.findAllByTeamId(team.getId()).size();
 
     if (teamSize == 1) {
-      team.setIsActive(false);
+      team.setActive(false);
       team.setResponsible(null);
       team.setSecondResponsible(null);
       teamRepository.save(team);
@@ -226,13 +226,12 @@ public class TeamService {
   @Transactional
   public TeamResponseDto getTeamOfMemberAsDto(Long memberId) {
     TeamComposition composition = teamCompositionRepository.findByMemberId(memberId)
-        .orElseThrow(() -> new IllegalStateException(
-            "Member has no team"));
+        .orElseThrow(() -> new IllegalStateException("Member has no team"));
     return toDto(composition.getTeam());
   }
 
   /**
-   * Helper: converts a Team entity to a safe DTO (avoids circular JSON serialization).
+   * Helper: converts a Team entity to a safe DTO.
    *
    * @param team the team
    * @return the team response dto
@@ -245,5 +244,18 @@ public class TeamService {
         team.getSecondResponsible() != null ? team.getSecondResponsible().getTag() : null,
         team.getCreationDate()
     );
+  }
+
+  /**
+   * Retrieves the team where the given member is responsible.
+   *
+   * @param responsible the responsible member
+   * @return the team
+   * @throws NoSuchElementException if no team found for this responsible
+   */
+  public Team getTeamByResponsible(Member responsible) {
+    return teamRepository.findByResponsible(responsible)
+        .orElseThrow(() -> new NoSuchElementException(
+            "No team found for responsible with id " + responsible.getId()));
   }
 }

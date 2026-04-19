@@ -2,8 +2,6 @@ package be.vinci.ipl.cae.api.controllers;
 
 import be.vinci.ipl.cae.api.models.dtos.PublicMemberDto;
 import be.vinci.ipl.cae.api.services.MemberService;
-import java.util.NoSuchElementException;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,10 +35,6 @@ public class PublicController {
    */
   @GetMapping("/{id}")
   public PublicMemberDto getMemberPublicProfile(@PathVariable Long id) {
-    try {
-      return memberService.getPublicProfile(id);
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-    }
+    return memberService.getPublicProfile(id);
   }
 }
