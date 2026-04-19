@@ -149,11 +149,7 @@ public class MemberController {
   @PutMapping("/admins/{memberId}")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   public void promoteToAdmin(@PathVariable Long memberId) {
-    try {
-      memberService.promoteToAdmin(memberId);
-    } catch (RuntimeException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
-    }
+    memberService.promoteToAdmin(memberId);
   }
 
   /**
@@ -164,11 +160,7 @@ public class MemberController {
   @DeleteMapping("/admins/{memberId}")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   public void demoteFromAdmin(@PathVariable Long memberId) {
-    try {
-      memberService.demoteFromAdmin(memberId);
-    } catch (RuntimeException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
-    }
+    memberService.demoteFromAdmin(memberId);
   }
 
   /**

@@ -116,17 +116,18 @@ public class MemberService {
   }
 
   /**
-   * Promote a member to administrator.
+   * Promotes a member to administrator.
    *
    * @param memberId the ID of the member to promote
-   * @throws RuntimeException if the member does not exist or is already admin
+   * @throws NoSuchElementException if no member exists with the given ID
+   * @throws IllegalStateException if the member is already an administrator
    */
   public void promoteToAdmin(Long memberId) {
     Member member = memberRepository.findById(memberId)
-        .orElseThrow(() -> new RuntimeException("Member not found"));
+        .orElseThrow(() -> new NoSuchElementException("Member not found"));
 
     if (member.getIsAdmin()) {
-      throw new RuntimeException("Member is already an administrator");
+      throw new IllegalStateException("Member is already an administrator");
     }
 
     member.setIsAdmin(true);
@@ -134,22 +135,24 @@ public class MemberService {
   }
 
   /**
-   * Demote an administrator to regular member.
+   * Demotes an administrator to a regular member.
    *
    * @param memberId the ID of the member to demote
-   * @throws RuntimeException if the member does not exist, is not admin, or is the last admin
+   * @throws NoSuchElementException if no member exists with the given ID
+   * @throws IllegalStateException if the member is not an administrator
+   * @throws IllegalStateException if the member is the last remaining administrator
    */
   public void demoteFromAdmin(Long memberId) {
     Member member = memberRepository.findById(memberId)
-        .orElseThrow(() -> new RuntimeException("Member not found"));
+        .orElseThrow(() -> new NoSuchElementException("Member not found"));
 
     if (!member.getIsAdmin()) {
-      throw new RuntimeException("Member is not an administrator");
+      throw new IllegalStateException("Member is not an administrator");
     }
 
     long adminCount = memberRepository.countByIsAdminTrue();
     if (adminCount <= 1) {
-      throw new RuntimeException("Cannot remove the last administrator");
+      throw new IllegalStateException("Cannot remove the last administrator");
     }
 
     member.setIsAdmin(false);
