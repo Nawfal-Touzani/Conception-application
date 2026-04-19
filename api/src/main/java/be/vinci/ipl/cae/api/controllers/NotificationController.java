@@ -54,7 +54,7 @@ public class NotificationController {
       @RequestParam(required = false) Boolean read,
       @AuthenticationPrincipal Member currentMember) {
 
-    if (currentMember.getId() != id) {
+    if (!currentMember.getId().equals(id)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN);
     }
 
@@ -108,7 +108,7 @@ public class NotificationController {
   public NotificationResponseDto markNotificationAsRead(@PathVariable long idMember,
       @PathVariable long idNotification, @AuthenticationPrincipal Member currentMember) {
 
-    if (currentMember.getId() != idMember) {
+    if (!currentMember.getId().equals(idMember)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN);
     }
 
