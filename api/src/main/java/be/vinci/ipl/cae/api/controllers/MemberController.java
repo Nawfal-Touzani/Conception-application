@@ -179,9 +179,7 @@ public class MemberController {
   @GetMapping("/admins")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   public List<MemberProfileResponseDto> getAllAdmins() {
-    return memberService.getAllAdmins().stream()
-        .map(m -> memberService.getProfile(m.getEmail()))
-        .toList();
+    return memberService.getAllAdminProfiles();
   }
 
   /**
@@ -192,6 +190,6 @@ public class MemberController {
   @GetMapping
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   public List<MemberProfileResponseDto> getAllMembers() {
-    return memberService.getAllMembers();
+    return memberService.getAllMemberProfiles();
   }
 }

@@ -28,10 +28,10 @@ public class MemberService {
   private final MemberRepository memberRepository;
   private final SpecialityRepository specialityRepository;
   private final ImageRepository imageRepository;
-  private BCryptPasswordEncoder passwordEncoder;
   private final TeamCompositionRepository teamCompositionRepository;
   private final UnavailabilityRepository unavailabilityRepository;
   private final BanishmentRepository banishmentRepository;
+  private final BCryptPasswordEncoder passwordEncoder;
 
   /**
    * Constructor for MemberService.
@@ -173,9 +173,25 @@ public class MemberService {
    */
   @Transactional
   public List<MemberProfileResponseDto> getAllMembers() {
-    return memberRepository.findAll().stream()
-        .map(m -> getProfile(m.getEmail()))
-        .toList();
+    return memberRepository.findAll().stream().map(m -> getProfile(m.getEmail())).toList();
+  }
+
+  /**
+   * Gets all member profiles in a single query (admin only).
+   *
+   * @return list of all member profiles
+   */
+  public List<MemberProfileResponseDto> getAllMemberProfiles() {
+    return memberRepository.findAll().stream().map(this::mapToProfileDto).toList();
+  }
+
+  /**
+   * Gets all admin profiles in a single query (admin only).
+   *
+   * @return list of admin profiles
+   */
+  public List<MemberProfileResponseDto> getAllAdminProfiles() {
+    return memberRepository.findByIsAdminTrue().stream().map(this::mapToProfileDto).toList();
   }
 
   /**
@@ -195,54 +211,37 @@ public class MemberService {
   private MemberProfileResponseDto mapToProfileDto(Member member) {
     Banishment ban = banishmentRepository.findByBannedMemberId(member.getId()).orElse(null);
 
-    return new MemberProfileResponseDto(
-        member.getId(),
-        member.getEmail(),
-        member.getTag(),
-        member.getSpeciality().getName(),
-        getMemberTeamName(member.getId()),
-        member.getImage().getUrl(),
-        member.getProfileCreationDate(),
-        member.getIsAdmin(),
-        isMemberAvailable(member),
-        member.isBan(),
-        ban != null ? ban.getReason() : null,
-        ban != null ? ban.getBanishmentDate() : null
-    );
+    return new MemberProfileResponseDto(member.getId(), member.getEmail(), member.getTag(),
+        member.getSpeciality().getName(), getMemberTeamName(member.getId()),
+        member.getImage().getUrl(), member.getProfileCreationDate(), member.getIsAdmin(),
+        isMemberAvailable(member), member.isBan(), ban != null ? ban.getReason() : null,
+        ban != null ? ban.getBanishmentDate() : null);
   }
 
   private String getMemberTeamName(Long memberId) {
     return teamCompositionRepository.findByMemberId(memberId)
-        .map(compo -> compo.getTeam().getName())
-        .orElse(null);
+        .map(compo -> compo.getTeam().getName()).orElse(null);
   }
 
   private boolean isMemberAvailable(Member member) {
     LocalDate today = LocalDate.now();
-    boolean isUnavailable = unavailabilityRepository
-        .existsByMemberAndStartDateBeforeAndEndDateAfter(
-            member,
-            today.plusDays(1),
-            today.minusDays(1)
-        );
+    boolean isUnavailable = unavailabilityRepository.existsByMemberAndStartDateBeforeAndEndDateAfter(
+        member, today.plusDays(1), today.minusDays(1));
     return !isUnavailable;
   }
 
   private void performProfileUpdates(Member member, UpdateMemberProfileDto payload) {
     if (payload.speciality() != null) {
-      specialityRepository.findByName(payload.speciality())
-          .ifPresent(member::setSpeciality);
+      specialityRepository.findByName(payload.speciality()).ifPresent(member::setSpeciality);
     }
 
     if (payload.profileImage() != null) {
-      imageRepository.findByUrl(payload.profileImage())
-          .ifPresent(member::setImage);
+      imageRepository.findByUrl(payload.profileImage()).ifPresent(member::setImage);
     }
   }
 
   private boolean isInvalidPasswordRequest(ChangePasswordDto dto) {
-    return dto == null || dto.newPassword() == null
-        || dto.newPassword().equals(dto.oldPassword())
+    return dto == null || dto.newPassword() == null || dto.newPassword().equals(dto.oldPassword())
         || !dto.newPassword().equals(dto.confirmPassword());
   }
 
@@ -251,14 +250,8 @@ public class MemberService {
     String speciality = member.getSpeciality().getName();
     String teamName = getMemberTeamName(member.getId());
 
-    return new PublicMemberDto(
-        member.getId(),
-        member.getTag(),
-        image,
-        speciality,
-        teamName,
-        member.getProfileCreationDate()
-    );
+    return new PublicMemberDto(member.getId(), member.getTag(), image, speciality, teamName,
+        member.getProfileCreationDate());
   }
 
   /**
