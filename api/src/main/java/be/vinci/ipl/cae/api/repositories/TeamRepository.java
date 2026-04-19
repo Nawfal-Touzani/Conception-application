@@ -34,7 +34,7 @@ public interface TeamRepository extends CrudRepository<Team, Long> {
    *
    * @return all active teams
    */
-  List<Team> findByIsActiveTrue();
+  List<Team> findByActiveTrue();
 
   /**
    * Finds a team by its responsible member.

@@ -216,6 +216,7 @@ class MatchResultServiceTest {
   @Test
   void validateResultShouldFinalizeMatchWhenBothTeamsValidate() {
     match.setResultStatus(ResultStatus.PENDING);
+    match.setWinner(teamA);
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
     when(validationResultRepository.existsByMatchAndTeam(match, teamA)).thenReturn(false);
     when(validationResultRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -366,7 +367,7 @@ class MatchResultServiceTest {
     match.setState(MatchState.PLAYED);
     match.setResultStatus(ResultStatus.REFUSED);
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
-    when(matchRepository.save(any())).thenReturn(match);
+    when(matchRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
     Match result = matchResultService.correctResult(1L, new ResultRequest(4, 2));
 

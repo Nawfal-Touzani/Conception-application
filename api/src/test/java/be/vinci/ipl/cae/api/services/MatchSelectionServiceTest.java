@@ -15,14 +15,13 @@ import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.PlayersSelection;
 import be.vinci.ipl.cae.api.models.entities.Team;
 import be.vinci.ipl.cae.api.models.entities.Tournament;
-import be.vinci.ipl.cae.api.repositories.MatchRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.PlayersSelectionRepository;
 import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
 import be.vinci.ipl.cae.api.repositories.UnavailabilityRepository;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,18 +35,25 @@ class MatchSelectionServiceTest {
   Match match;
   Team teamA;
   Team teamB;
+
   @Mock
-  private MatchRepository matchRepository;
+  private MatchService matchService;
+
   @Mock
   private PlayersSelectionRepository playersSelectionRepository;
+
   @Mock
   private MemberRepository memberRepository;
+
   @Mock
   private TeamCompositionRepository teamCompositionRepository;
+
   @Mock
   private UnavailabilityRepository unavailabilityRepository;
+
   @Mock
   private NotificationService notificationService;
+
   @InjectMocks
   private MatchSelectionService matchSelectionService;
 
@@ -88,11 +94,11 @@ class MatchSelectionServiceTest {
     Member m3 = buildMember(3L);
     Member m4 = buildMember(4L);
 
-    when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
-    when(memberRepository.findById(1L)).thenReturn(Optional.of(m1));
-    when(memberRepository.findById(2L)).thenReturn(Optional.of(m2));
-    when(memberRepository.findById(3L)).thenReturn(Optional.of(m3));
-    when(memberRepository.findById(4L)).thenReturn(Optional.of(m4));
+    when(matchService.getScheduledMatchForTeam(1L, teamA)).thenReturn(match);
+    when(memberRepository.findById(1L)).thenReturn(java.util.Optional.of(m1));
+    when(memberRepository.findById(2L)).thenReturn(java.util.Optional.of(m2));
+    when(memberRepository.findById(3L)).thenReturn(java.util.Optional.of(m3));
+    when(memberRepository.findById(4L)).thenReturn(java.util.Optional.of(m4));
     when(teamCompositionRepository.existsByMemberAndTeamId(any(), any())).thenReturn(true);
     when(unavailabilityRepository.existsByMemberAndStartDateBeforeAndEndDateAfter(any(), any(),
         any())).thenReturn(false);
@@ -106,7 +112,7 @@ class MatchSelectionServiceTest {
 
   @Test
   void submitSelectionShouldThrowWhenNotExactly4Players() {
-    when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
+    when(matchService.getScheduledMatchForTeam(1L, teamA)).thenReturn(match);
 
     assertThrows(IllegalArgumentException.class,
         () -> matchSelectionService.submitSelection(1L, teamA, List.of(1L, 2L, 3L)));
@@ -116,8 +122,8 @@ class MatchSelectionServiceTest {
 
   @Test
   void submitSelectionShouldThrowWhenMatchNotScheduled() {
-    match.setState(MatchState.PLAYED);
-    when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
+    when(matchService.getScheduledMatchForTeam(1L, teamA))
+        .thenThrow(new IllegalStateException("The match must be scheduled"));
 
     assertThrows(IllegalStateException.class,
         () -> matchSelectionService.submitSelection(1L, teamA, List.of(1L, 2L, 3L, 4L)));
@@ -129,7 +135,9 @@ class MatchSelectionServiceTest {
   void submitSelectionShouldThrowWhenTeamNotInMatch() {
     Team outsider = new Team();
     outsider.setId(99L);
-    when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
+
+    when(matchService.getScheduledMatchForTeam(1L, outsider))
+        .thenThrow(new IllegalStateException("This team is not part of this match"));
 
     assertThrows(IllegalStateException.class,
         () -> matchSelectionService.submitSelection(1L, outsider, List.of(1L, 2L, 3L, 4L)));
@@ -140,10 +148,11 @@ class MatchSelectionServiceTest {
   @Test
   void submitSelectionShouldThrowWhenMemberNotInTeam() {
     Member outsider = buildMember(99L);
-    when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
-    when(memberRepository.findById(99L)).thenReturn(Optional.of(outsider));
-    when(teamCompositionRepository.existsByMemberAndTeamId(outsider, teamA.getId())).thenReturn(
-        false);
+
+    when(matchService.getScheduledMatchForTeam(1L, teamA)).thenReturn(match);
+    when(memberRepository.findById(99L)).thenReturn(java.util.Optional.of(outsider));
+    when(teamCompositionRepository.existsByMemberAndTeamId(outsider, teamA.getId()))
+        .thenReturn(false);
 
     assertThrows(IllegalStateException.class,
         () -> matchSelectionService.submitSelection(1L, teamA, List.of(99L, 2L, 3L, 4L)));
@@ -154,13 +163,25 @@ class MatchSelectionServiceTest {
   @Test
   void submitSelectionShouldThrowWhenMemberUnavailable() {
     Member unavailable = buildMember(1L);
-    when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
-    when(memberRepository.findById(1L)).thenReturn(Optional.of(unavailable));
+
+    when(matchService.getScheduledMatchForTeam(1L, teamA)).thenReturn(match);
+    when(memberRepository.findById(1L)).thenReturn(java.util.Optional.of(unavailable));
     when(teamCompositionRepository.existsByMemberAndTeamId(any(), any())).thenReturn(true);
     when(unavailabilityRepository.existsByMemberAndStartDateBeforeAndEndDateAfter(any(), any(),
         any())).thenReturn(true);
 
     assertThrows(IllegalStateException.class,
+        () -> matchSelectionService.submitSelection(1L, teamA, List.of(1L, 2L, 3L, 4L)));
+
+    verify(playersSelectionRepository, never()).save(any());
+  }
+
+  @Test
+  void submitSelectionShouldThrowWhenMemberNotFound() {
+    when(matchService.getScheduledMatchForTeam(1L, teamA)).thenReturn(match);
+    when(memberRepository.findById(1L)).thenReturn(java.util.Optional.empty());
+
+    assertThrows(NoSuchElementException.class,
         () -> matchSelectionService.submitSelection(1L, teamA, List.of(1L, 2L, 3L, 4L)));
 
     verify(playersSelectionRepository, never()).save(any());
@@ -176,12 +197,12 @@ class MatchSelectionServiceTest {
     Member m3 = buildMember(3L);
     Member m4 = buildMember(4L);
 
-    when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
+    when(matchService.getScheduledMatchForTeam(1L, teamA)).thenReturn(match);
     when(playersSelectionRepository.countByMatchAndTeam(match, teamA)).thenReturn(4L);
-    when(memberRepository.findById(1L)).thenReturn(Optional.of(m1));
-    when(memberRepository.findById(2L)).thenReturn(Optional.of(m2));
-    when(memberRepository.findById(3L)).thenReturn(Optional.of(m3));
-    when(memberRepository.findById(4L)).thenReturn(Optional.of(m4));
+    when(memberRepository.findById(1L)).thenReturn(java.util.Optional.of(m1));
+    when(memberRepository.findById(2L)).thenReturn(java.util.Optional.of(m2));
+    when(memberRepository.findById(3L)).thenReturn(java.util.Optional.of(m3));
+    when(memberRepository.findById(4L)).thenReturn(java.util.Optional.of(m4));
     when(teamCompositionRepository.existsByMemberAndTeamId(any(), any())).thenReturn(true);
     when(unavailabilityRepository.existsByMemberAndStartDateBeforeAndEndDateAfter(any(), any(),
         any())).thenReturn(false);
@@ -195,7 +216,7 @@ class MatchSelectionServiceTest {
 
   @Test
   void modifySelectionShouldThrowWhenNoExistingSelection() {
-    when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
+    when(matchService.getScheduledMatchForTeam(1L, teamA)).thenReturn(match);
     when(playersSelectionRepository.countByMatchAndTeam(match, teamA)).thenReturn(0L);
 
     assertThrows(IllegalStateException.class,

@@ -136,40 +136,36 @@ public class MatchResultService {
   }
 
   /**
-   * Corrects a contested match result (admin only).
-   * Resets all validation entries so both teams can respond again.
+   * Corrects a contested match result.
+   * Can only be called by admin when result is REFUSED.
    *
    * @param idMatch the match id
-   * @param dto     the corrected score
+   * @param payload the corrected score
    * @return the updated match
    */
   @Transactional
-  public Match correctResult(Long idMatch, ResultRequest dto) {
+  public Match correctResult(Long idMatch, ResultRequest payload) {
     Match match = matchRepository.findById(idMatch)
         .orElseThrow(() -> new NoSuchElementException("Match not found with id " + idMatch));
 
     if (!match.getResultStatus().equals(ResultStatus.REFUSED)) {
-      throw new IllegalStateException("Result can only be corrected if it has been contested");
+      throw new IllegalStateException("Correction can only be applied to a REFUSED result");
     }
 
-    if (dto.scoreA() < 0 || dto.scoreB() < 0) {
+    if (payload.scoreA() < 0 || payload.scoreB() < 0) {
       throw new IllegalArgumentException("Scores cannot be negative");
     }
-    if (dto.scoreA().equals(dto.scoreB())) {
-      throw new IllegalStateException("Match cannot end in a draw");
+
+    if (payload.scoreA().equals(payload.scoreB())) {
+      throw new IllegalStateException("Draw is not allowed");
     }
 
-    validationResultRepository.deleteByMatch(match);
+    match.setScoreA(payload.scoreA());
+    match.setScoreB(payload.scoreB());
+    match.setWinner(payload.scoreA() > payload.scoreB() ? match.getTeamA() : match.getTeamB());
 
-    match.setScoreA(dto.scoreA());
-    match.setScoreB(dto.scoreB());
-    match.setWinner(dto.scoreA() > dto.scoreB() ? match.getTeamA() : match.getTeamB());
-    match.setResultStatus(ResultStatus.PENDING);
-    matchRepository.save(match);
-
-    sendPendingNotifications(match);
-
-    return match;
+    match.setResultStatus(ResultStatus.VALIDATED);
+    return matchRepository.save(match);
   }
 
   // Private methods

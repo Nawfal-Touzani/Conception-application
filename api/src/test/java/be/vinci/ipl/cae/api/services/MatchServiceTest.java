@@ -132,7 +132,6 @@ class MatchServiceTest {
   @Test
   void declareForfeitShouldSetWinnerToOpponentWhenTeamAisForfeit() {
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
-    when(matchRepository.save(any())).thenReturn(match);
 
     Match result = matchService.declareForfeit(1L, teamA);
 
@@ -144,7 +143,6 @@ class MatchServiceTest {
   @Test
   void declareForfeitShouldSetWinnerToTeamAsWhenTeamBisForfeit() {
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
-    when(matchRepository.save(any())).thenReturn(match);
 
     Match result = matchService.declareForfeit(1L, teamB);
 
@@ -154,7 +152,6 @@ class MatchServiceTest {
   @Test
   void declareForfeitShouldNotify2ResponsiblesWhenNoSecondResponsible() {
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
-    when(matchRepository.save(any())).thenReturn(match);
 
     matchService.declareForfeit(1L, teamA);
 
@@ -166,7 +163,6 @@ class MatchServiceTest {
     teamA.setSecondResponsible(secondResponsibleA);
     teamB.setSecondResponsible(secondResponsibleB);
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
-    when(matchRepository.save(any())).thenReturn(match);
 
     matchService.declareForfeit(1L, teamA);
 

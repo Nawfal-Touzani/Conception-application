@@ -76,7 +76,7 @@ class TeamServiceTest {
     team = new Team();
     team.setId(10L);
     team.setName("TestTeam");
-    team.setIsActive(true);
+    team.setActive(true);
     team.setCreationDate(LocalDateTime.now());
     team.setResponsible(member);
 
@@ -273,7 +273,7 @@ class TeamServiceTest {
    */
   @Test
   void getAllTeamDtos_shouldReturnOnlyActiveTeams() {
-    when(teamRepository.findByIsActiveTrue()).thenReturn(List.of(team));
+    when(teamRepository.findByActiveTrue()).thenReturn(List.of(team));
 
     Iterable<TeamResponseDto> result = teamService.getAllTeamDtos();
     List<TeamResponseDto> list = StreamSupport.stream(result.spliterator(), false).toList();
@@ -296,7 +296,7 @@ class TeamServiceTest {
 
     teamService.leaveTeam("test@vinci.be");
 
-    assertFalse(team.getIsActive());
+    assertFalse(team.isActive());
     assertNull(team.getResponsible());
     assertNull(team.getSecondResponsible());
     verify(teamCompositionRepository).delete(composition);

@@ -29,12 +29,14 @@ public class MatchService {
 
   /**
    * Creates a new MatchService.
+   *
+   * @param matchRepository the match repository
+   * @param tournamentRepository the tournament repository
+   * @param notificationService the notification service
+   * @param matchResultService the match result service
    */
-  public MatchService(
-      MatchRepository matchRepository,
-      TournamentRepository tournamentRepository,
-      NotificationService notificationService,
-      MatchResultService matchResultService) {
+  public MatchService(MatchRepository matchRepository, TournamentRepository tournamentRepository,
+      NotificationService notificationService, MatchResultService matchResultService) {
     this.matchRepository = matchRepository;
     this.tournamentRepository = tournamentRepository;
     this.notificationService = notificationService;
@@ -91,21 +93,12 @@ public class MatchService {
    * The opposing team wins automatically and is placed in the next bracket match.
    *
    * @param idMatch the match id
-   * @param team    the team declaring forfeit
+   * @param team the team declaring forfeit
    * @return the updated match
    */
   @Transactional
   public Match declareForfeit(Long idMatch, Team team) {
-    Match match = matchRepository.findById(idMatch)
-        .orElseThrow(() -> new NoSuchElementException("Match not found with id " + idMatch));
-
-    if (!match.getState().equals(MatchState.SCHEDULED)) {
-      throw new IllegalStateException("Forfeit can only be declared for a SCHEDULED match");
-    }
-
-    if (!team.equals(match.getTeamA()) && !team.equals(match.getTeamB())) {
-      throw new IllegalStateException("This team is not part of this match");
-    }
+    Match match = fetchScheduledMatchForTeam(idMatch, team);
 
     Team winner = team.equals(match.getTeamA()) ? match.getTeamB() : match.getTeamA();
 
@@ -113,17 +106,62 @@ public class MatchService {
     match.setWinner(winner);
 
     matchResultService.finalizeMatch(match);
-
     sendForfeitNotifications(match, team, winner);
 
     return match;
   }
 
-  // Private methods
+  /**
+   * Retrieves a match only if it exists, is scheduled, and belongs to the given team.
+   *
+   * @param idMatch the match id
+   * @param team the team that wants to access the match
+   * @return the scheduled match if the conditions are met
+   * @throws NoSuchElementException if the match does not exist
+   * @throws IllegalStateException if the match is not scheduled or if the team is not part of the
+   *     match
+   */
+  public Match getScheduledMatchForTeam(Long idMatch, Team team) {
+    return fetchScheduledMatchForTeam(idMatch, team);
+  }
+
+  /**
+   * Retrieves a match only if it exists, is scheduled, and belongs to the given team.
+   *
+   * @param idMatch the match id
+   * @param team the team concerned by the match
+   * @return the scheduled match
+   * @throws NoSuchElementException if the match does not exist
+   * @throws IllegalStateException if the match is not scheduled or if the team is not part of the
+   *     match
+   */
+  private Match fetchScheduledMatchForTeam(Long idMatch, Team team) {
+    Match match = matchRepository.findById(idMatch)
+        .orElseThrow(() -> new NoSuchElementException("Match not found with id " + idMatch));
+
+    if (!match.getState().equals(MatchState.SCHEDULED)) {
+      throw new IllegalStateException("The match must be scheduled");
+    }
+
+    if (!team.equals(match.getTeamA()) && !team.equals(match.getTeamB())) {
+      throw new IllegalStateException("This team is not part of this match");
+    }
+
+    return match;
+  }
+
+  /**
+   * Sends notifications to both teams when a forfeit is declared.
+   *
+   * @param match the match
+   * @param forfeitTeam the team declaring the forfeit
+   * @param winner the winning team
+   */
   private void sendForfeitNotifications(Match match, Team forfeitTeam, Team winner) {
     List<Member> recipients = new ArrayList<>();
     recipients.add(forfeitTeam.getResponsible());
     recipients.add(winner.getResponsible());
+
     if (forfeitTeam.getSecondResponsible() != null) {
       recipients.add(forfeitTeam.getSecondResponsible());
     }

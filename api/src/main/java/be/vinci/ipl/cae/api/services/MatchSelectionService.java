@@ -7,7 +7,6 @@ import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.models.entities.Notification.Type;
 import be.vinci.ipl.cae.api.models.entities.PlayersSelection;
 import be.vinci.ipl.cae.api.models.entities.Team;
-import be.vinci.ipl.cae.api.repositories.MatchRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.PlayersSelectionRepository;
 import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
@@ -26,7 +25,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MatchSelectionService {
 
-  private final MatchRepository matchRepository;
+  private final MatchService matchService;
   private final PlayersSelectionRepository playersSelectionRepository;
   private final MemberRepository memberRepository;
   private final TeamCompositionRepository teamCompositionRepository;
@@ -36,14 +35,11 @@ public class MatchSelectionService {
   /**
    * Creates a new MatchSelectionService.
    */
-  public MatchSelectionService(
-      MatchRepository matchRepository,
-      PlayersSelectionRepository playersSelectionRepository,
-      MemberRepository memberRepository,
+  public MatchSelectionService(MatchService matchService,
+      PlayersSelectionRepository playersSelectionRepository, MemberRepository memberRepository,
       TeamCompositionRepository teamCompositionRepository,
-      UnavailabilityRepository unavailabilityRepository,
-      NotificationService notificationService) {
-    this.matchRepository = matchRepository;
+      UnavailabilityRepository unavailabilityRepository, NotificationService notificationService) {
+    this.matchService = matchService;
     this.playersSelectionRepository = playersSelectionRepository;
     this.memberRepository = memberRepository;
     this.teamCompositionRepository = teamCompositionRepository;
@@ -63,7 +59,7 @@ public class MatchSelectionService {
    */
   @Transactional
   public List<PlayersSelection> submitSelection(Long idMatch, Team team, List<Long> memberIds) {
-    Match match = fetchScheduledMatchForTeam(idMatch, team);
+    Match match = matchService.getScheduledMatchForTeam(idMatch, team);
 
     if (memberIds.size() != 4) {
       throw new IllegalArgumentException("Exactly 4 players must be selected");
@@ -113,7 +109,7 @@ public class MatchSelectionService {
    */
   @Transactional
   public List<PlayersSelection> modifySelection(Long idMatch, Team team, List<Long> memberIds) {
-    Match match = fetchScheduledMatchForTeam(idMatch, team);
+    Match match = matchService.getScheduledMatchForTeam(idMatch, team);
 
     if (playersSelectionRepository.countByMatchAndTeam(match, team) == 0) {
       throw new IllegalStateException("No existing selection found for this team in this match");
@@ -136,21 +132,6 @@ public class MatchSelectionService {
   }
 
   // Private methods
-  private Match fetchScheduledMatchForTeam(Long idMatch, Team team) {
-    Match match = matchRepository.findById(idMatch)
-        .orElseThrow(() -> new NoSuchElementException("Match not found with id " + idMatch));
-
-    if (!match.getState().equals(MatchState.SCHEDULED)) {
-      throw new IllegalStateException("Selection can only be submitted for a SCHEDULED match");
-    }
-
-    if (!team.equals(match.getTeamA()) && !team.equals(match.getTeamB())) {
-      throw new IllegalStateException("This team is not part of this match");
-    }
-
-    return match;
-  }
-
   private void sendSelectionNotifications(Match match, List<Member> members) {
     for (Member member : members) {
       Notification notif = new Notification(
