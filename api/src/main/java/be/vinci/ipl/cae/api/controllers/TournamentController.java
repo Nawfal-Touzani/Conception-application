@@ -1,12 +1,13 @@
 package be.vinci.ipl.cae.api.controllers;
 
 import be.vinci.ipl.cae.api.models.dtos.HomepageTournamentsDto;
+import be.vinci.ipl.cae.api.models.dtos.MatchBracketDto;
 import be.vinci.ipl.cae.api.models.dtos.MatchResponseDto;
 import be.vinci.ipl.cae.api.models.dtos.PlanningRequest;
 import be.vinci.ipl.cae.api.models.dtos.TournamentDto;
 import be.vinci.ipl.cae.api.models.dtos.TournamentResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
-import be.vinci.ipl.cae.api.models.entities.Tournament;
+import be.vinci.ipl.cae.api.models.mappers.MatchMapper;
 import be.vinci.ipl.cae.api.services.MatchService;
 import be.vinci.ipl.cae.api.services.TournamentRegistrationService;
 import be.vinci.ipl.cae.api.services.TournamentService;
@@ -28,7 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * The type Tournament controller.
+ * Controller for managing tournaments, including creation, publication,
+ * planning updates, registrations, and tournament match views.
  */
 @RestController
 @RequestMapping("/tournaments")
@@ -37,18 +39,23 @@ public class TournamentController {
   private final TournamentService tournamentService;
   private final TournamentRegistrationService tournamentRegistrationService;
   private final MatchService matchService;
+  private final MatchMapper matchMapper;
 
   /**
-   * Instantiates a new Tournament controller.
+   * Creates a new TournamentController.
    *
-   * @param tournamentService             the tournament service
+   * @param tournamentService the tournament service
    * @param tournamentRegistrationService the tournament registration service
+   * @param matchService the match service
+   * @param matchMapper the match mapper
    */
   public TournamentController(TournamentService tournamentService,
-      TournamentRegistrationService tournamentRegistrationService, MatchService matchService) {
+      TournamentRegistrationService tournamentRegistrationService, MatchService matchService,
+      MatchMapper matchMapper) {
     this.tournamentService = tournamentService;
     this.tournamentRegistrationService = tournamentRegistrationService;
     this.matchService = matchService;
+    this.matchMapper = matchMapper;
   }
 
   /**
@@ -57,20 +64,13 @@ public class TournamentController {
   @PostMapping("/{organizerId}")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @ResponseStatus(HttpStatus.CREATED)
-  public Tournament createTournament(@PathVariable long organizerId,
+  public TournamentResponseDto createTournament(@PathVariable long organizerId,
       @AuthenticationPrincipal Member currentMember, @RequestBody TournamentDto dto) {
-    if (currentMember.getId() != organizerId) {
+    if (!currentMember.getId().equals(organizerId)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN);
     }
-    try {
-      return tournamentService.createTournament(organizerId, dto);
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-    } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
-    } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
-    }
+
+    return tournamentService.createTournament(organizerId, dto);
   }
 
   /**
@@ -97,13 +97,7 @@ public class TournamentController {
   @PatchMapping("/{id}/publish")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   public TournamentResponseDto publishTournament(@PathVariable long id) {
-    try {
-      return tournamentService.publishTournament(id);
-    } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found", e);
-    } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "Tournament cannot be published", e);
-    }
+    return tournamentService.publishTournament(id);
   }
 
   /**
@@ -114,27 +108,27 @@ public class TournamentController {
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   public TournamentResponseDto updatePlanning(@PathVariable long id,
       @RequestBody PlanningRequest dto) {
-    try {
-      tournamentService.updatePlanning(id, dto);
-      return tournamentService.getTournamentById(id);
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament or team not found", e);
-    } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "Planning update conflict", e);
-    }
+    tournamentService.updatePlanning(id, dto);
+    return tournamentService.getTournamentById(id);
   }
-  /**
-   * Gets all matches of a tournament.
-   */
 
+  /**
+   * Gets all matches of a tournament to build the planification.
+   */
   @GetMapping("/{id}/matches")
   @PreAuthorize("isAuthenticated()")
-  public List<MatchResponseDto> getMatchesByTournament(@PathVariable long id) {
-    try {
-      return tournamentService.getMatchesByTournament(id);
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament matches not found", e);
-    }
+  public List<MatchResponseDto> getTournamentMatchesForPlanning(@PathVariable long id) {
+    return tournamentService.getMatchesByTournament(id);
+  }
+
+  /**
+   * Gets all matches of a tournament to build the bracket.
+   */
+  @GetMapping("/{id}/bracket")
+  public List<MatchBracketDto> getTournamentBracket(@PathVariable long id) {
+    return matchService.getMatchesByTournament(id).stream()
+        .map(matchMapper::toBracketDto)
+        .toList();
   }
 
   /**
@@ -162,11 +156,7 @@ public class TournamentController {
    */
   @GetMapping("/{id}")
   public TournamentResponseDto getTournamentById(@PathVariable long id) {
-    try {
-      return tournamentService.getTournamentById(id);
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found by id", e);
-    }
+    return tournamentService.getTournamentById(id);
   }
 
   /**
@@ -175,10 +165,8 @@ public class TournamentController {
   @PostMapping("/{idTournament}/teams/{idTeam}")
   @ResponseStatus(HttpStatus.CREATED)
   @PreAuthorize("isAuthenticated()")
-  public void registerTeam(@PathVariable Long idTournament,
-      @PathVariable Long idTeam, @AuthenticationPrincipal Member currentMember) {
-    tournamentRegistrationService.createRegistration(idTournament, idTeam,
-        currentMember.getId());
+  public void registerTeam(@PathVariable Long idTournament, @PathVariable Long idTeam,
+      @AuthenticationPrincipal Member currentMember) {
+    tournamentRegistrationService.createRegistration(idTournament, idTeam, currentMember.getId());
   }
-
 }

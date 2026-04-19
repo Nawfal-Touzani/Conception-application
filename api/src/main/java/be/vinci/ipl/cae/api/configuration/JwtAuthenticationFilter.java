@@ -82,8 +82,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // Role
     List<GrantedAuthority> authorities = new ArrayList<>();
     authorities.add(new SimpleGrantedAuthority("ROLE_MEMBER")); // EVERYONE has this basic role
+
     if (member.getIsAdmin()) {
       authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN")); // The admins ALSO have this role
+    }
+
+    if (authService.isResponsible(member)) {
+      authorities.add(new SimpleGrantedAuthority("ROLE_RESPONSIBLE"));
     }
 
     // Identity injection into the SecurityContext
