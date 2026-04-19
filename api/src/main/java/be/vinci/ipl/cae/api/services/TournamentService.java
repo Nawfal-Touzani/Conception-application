@@ -67,9 +67,9 @@ public class TournamentService {
    *
    * @param organizerId the organizer id
    * @param dto         the dto
-   * @return the tournament
+   * @return the tournament response DTO
    */
-  public Tournament createTournament(Long organizerId, TournamentDto dto) {
+  public TournamentResponseDto createTournament(Long organizerId, TournamentDto dto) {
     final Member organizer = memberRepository.findById(organizerId)
         .orElseThrow(() -> new NoSuchElementException("Organizer not found"));
 
@@ -92,7 +92,8 @@ public class TournamentService {
     tournament.setStatus(Status.PREPARATION);
     tournament.setOrganizer(organizer);
 
-    return tournamentRepository.save(tournament);
+    Tournament saved = tournamentRepository.save(tournament);
+    return toResponseDto(saved);
   }
 
   /**

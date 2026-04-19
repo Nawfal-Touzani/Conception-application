@@ -7,7 +7,6 @@ import be.vinci.ipl.cae.api.models.dtos.PlanningRequest;
 import be.vinci.ipl.cae.api.models.dtos.TournamentDto;
 import be.vinci.ipl.cae.api.models.dtos.TournamentResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
-import be.vinci.ipl.cae.api.models.entities.Tournament;
 import be.vinci.ipl.cae.api.models.mappers.MatchMapper;
 import be.vinci.ipl.cae.api.services.MatchService;
 import be.vinci.ipl.cae.api.services.TournamentRegistrationService;
@@ -65,21 +64,13 @@ public class TournamentController {
   @PostMapping("/{organizerId}")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @ResponseStatus(HttpStatus.CREATED)
-  public Tournament createTournament(@PathVariable long organizerId,
+  public TournamentResponseDto createTournament(@PathVariable long organizerId,
       @AuthenticationPrincipal Member currentMember, @RequestBody TournamentDto dto) {
     if (!currentMember.getId().equals(organizerId)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN);
     }
 
-    try {
-      return tournamentService.createTournament(organizerId, dto);
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-    } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
-    } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
-    }
+    return tournamentService.createTournament(organizerId, dto);
   }
 
   /**
