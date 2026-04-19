@@ -7,7 +7,6 @@ import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.models.mappers.NotificationMapper;
 import be.vinci.ipl.cae.api.services.NotificationService;
 import jakarta.validation.Valid;
-import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
