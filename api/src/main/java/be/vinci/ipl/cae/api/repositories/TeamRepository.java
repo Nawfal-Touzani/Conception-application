@@ -43,4 +43,20 @@ public interface TeamRepository extends CrudRepository<Team, Long> {
    * @return the team if found
    */
   Optional<Team> findByResponsible(Member responsible);
+
+  /**
+   * Checks whether a member is the main responsible of at least one team.
+   *
+   * @param responsible the member to check
+   * @return true if the member is responsible of at least one team
+   */
+  boolean existsByResponsible(Member responsible);
+
+  /**
+   * Checks whether a member is the second responsible of at least one team.
+   *
+   * @param secondResponsible the member to check
+   * @return true if the member is second responsible of at least one team
+   */
+  boolean existsBySecondResponsible(Member secondResponsible);
 }
