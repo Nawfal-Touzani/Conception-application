@@ -4,8 +4,6 @@ import be.vinci.ipl.cae.api.models.dtos.BanishMemberDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.services.BanishmentService;
 import jakarta.validation.Valid;
-import java.util.NoSuchElementException;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PathVariable;
