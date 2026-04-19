@@ -106,13 +106,7 @@ public class TournamentController {
   @PatchMapping("/{id}/publish")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   public TournamentResponseDto publishTournament(@PathVariable long id) {
-    try {
-      return tournamentService.publishTournament(id);
-    } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found", e);
-    } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "Tournament cannot be published", e);
-    }
+    return tournamentService.publishTournament(id);
   }
 
   /**
@@ -123,14 +117,8 @@ public class TournamentController {
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   public TournamentResponseDto updatePlanning(@PathVariable long id,
       @RequestBody PlanningRequest dto) {
-    try {
-      tournamentService.updatePlanning(id, dto);
-      return tournamentService.getTournamentById(id);
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament or team not found", e);
-    } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "Planning update conflict", e);
-    }
+    tournamentService.updatePlanning(id, dto);
+    return tournamentService.getTournamentById(id);
   }
 
   /**
@@ -139,11 +127,7 @@ public class TournamentController {
   @GetMapping("/{id}/matches")
   @PreAuthorize("isAuthenticated()")
   public List<MatchResponseDto> getTournamentMatchesForPlanning(@PathVariable long id) {
-    try {
-      return tournamentService.getMatchesByTournament(id);
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament matches not found", e);
-    }
+    return tournamentService.getMatchesByTournament(id);
   }
 
   /**
@@ -151,12 +135,9 @@ public class TournamentController {
    */
   @GetMapping("/{id}/bracket")
   public List<MatchBracketDto> getTournamentBracket(@PathVariable long id) {
-    try {
-      return matchService.getMatchesByTournament(id).stream().map(matchMapper::toBracketDto)
-          .toList();
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament bracket not found", e);
-    }
+    return matchService.getMatchesByTournament(id).stream()
+        .map(matchMapper::toBracketDto)
+        .toList();
   }
 
   /**
@@ -184,11 +165,7 @@ public class TournamentController {
    */
   @GetMapping("/{id}")
   public TournamentResponseDto getTournamentById(@PathVariable long id) {
-    try {
-      return tournamentService.getTournamentById(id);
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found by id", e);
-    }
+    return tournamentService.getTournamentById(id);
   }
 
   /**
@@ -201,5 +178,4 @@ public class TournamentController {
       @AuthenticationPrincipal Member currentMember) {
     tournamentRegistrationService.createRegistration(idTournament, idTeam, currentMember.getId());
   }
-
 }

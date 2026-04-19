@@ -5,7 +5,6 @@ import be.vinci.ipl.cae.api.models.dtos.TeamMemberDto;
 import be.vinci.ipl.cae.api.models.dtos.TeamResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.MembershipRequest;
-import be.vinci.ipl.cae.api.services.MembershipRequestService;
 import be.vinci.ipl.cae.api.services.TeamService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,18 +28,14 @@ import org.springframework.web.server.ResponseStatusException;
 public class TeamController {
 
   private final TeamService teamService;
-  private final MembershipRequestService membershipRequestService;
 
   /**
    * Instantiates a new Team controller.
    *
    * @param teamService              the team service
-   * @param membershipRequestService the membership request service
    */
-  public TeamController(TeamService teamService,
-      MembershipRequestService membershipRequestService) {
+  public TeamController(TeamService teamService) {
     this.teamService = teamService;
-    this.membershipRequestService = membershipRequestService;
   }
 
   /**
@@ -74,11 +69,7 @@ public class TeamController {
   @ResponseStatus(HttpStatus.CREATED)
   public MembershipRequest createRequest(@PathVariable long teamId,
       @AuthenticationPrincipal Member currentMember) {
-    try {
-      return teamService.createRequest(currentMember.getId(), teamId);
-    } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-    }
+    return teamService.createRequest(currentMember.getId(), teamId);
   }
 
   /**
@@ -89,11 +80,7 @@ public class TeamController {
    */
   @GetMapping("/members")
   public Iterable<TeamMemberDto> getTeamMembers(@AuthenticationPrincipal Member currentMember) {
-    try {
-      return teamService.getMembersOfMyTeam(currentMember.getId());
-    } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-    }
+    return teamService.getMembersOfMyTeam(currentMember.getId());
   }
 
   /**
@@ -114,11 +101,7 @@ public class TeamController {
    */
   @GetMapping("/my-team")
   public TeamResponseDto getMyTeam(@AuthenticationPrincipal Member currentMember) {
-    try {
-      return teamService.getTeamOfMemberAsDto(currentMember.getId());
-    } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-    }
+    return teamService.getTeamOfMemberAsDto(currentMember.getId());
   }
 
   /**

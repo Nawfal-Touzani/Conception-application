@@ -25,14 +25,26 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * Handle bad request string.
+   * Handle bad request (400) string.
    *
    * @param e the e
    * @return the string
    */
-  @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
+  @ExceptionHandler(IllegalArgumentException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public String handleBadRequest(RuntimeException e) {
+  public String handleBadRequest(IllegalArgumentException e) {
+    return e.getMessage();
+  }
+
+  /**
+   * Handle conflict (409) request string.
+   *
+   * @param e the e
+   * @return the string
+   */
+  @ExceptionHandler(IllegalStateException.class)
+  @ResponseStatus(HttpStatus.CONFLICT)
+  public String handleConflict(IllegalStateException e) {
     return e.getMessage();
   }
 }
