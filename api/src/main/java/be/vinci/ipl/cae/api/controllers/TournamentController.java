@@ -67,9 +67,10 @@ public class TournamentController {
   @ResponseStatus(HttpStatus.CREATED)
   public Tournament createTournament(@PathVariable long organizerId,
       @AuthenticationPrincipal Member currentMember, @RequestBody TournamentDto dto) {
-    if (currentMember.getId() != organizerId) {
+    if (!currentMember.getId().equals(organizerId)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN);
     }
+
     try {
       return tournamentService.createTournament(organizerId, dto);
     } catch (NoSuchElementException e) {
