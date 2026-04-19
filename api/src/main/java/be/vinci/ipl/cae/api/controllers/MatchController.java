@@ -2,6 +2,7 @@ package be.vinci.ipl.cae.api.controllers;
 
 import be.vinci.ipl.cae.api.models.dtos.MatchBracketDto;
 import be.vinci.ipl.cae.api.models.dtos.MatchDetailDto;
+import be.vinci.ipl.cae.api.models.dtos.MemberSelectionDto;
 import be.vinci.ipl.cae.api.models.dtos.ResultRequest;
 import be.vinci.ipl.cae.api.models.dtos.SelectionRequest;
 import be.vinci.ipl.cae.api.models.entities.Match;
@@ -45,13 +46,9 @@ public class MatchController {
   /**
    * Creates a new MatchController.
    */
-  public MatchController(
-      MatchService matchService,
-      MatchResultService matchResultService,
-      MatchSelectionService matchSelectionService,
-      MatchMapper matchMapper,
-      MemberService memberService,
-      TeamService teamService) {
+  public MatchController(MatchService matchService, MatchResultService matchResultService,
+      MatchSelectionService matchSelectionService, MatchMapper matchMapper,
+      MemberService memberService, TeamService teamService) {
     this.matchService = matchService;
     this.matchResultService = matchResultService;
     this.matchSelectionService = matchSelectionService;
@@ -63,8 +60,7 @@ public class MatchController {
   // PUBLIC
 
   /**
-   * Gets a match by its id.
-   * Returns the full detail view including lineups if result is VALIDATED.
+   * Gets a match by its id. Returns the full detail view including lineups if result is VALIDATED.
    *
    * @param idMatch the match id
    * @return the match detail DTO
@@ -85,9 +81,7 @@ public class MatchController {
   @GetMapping("/tournament/{idTournament}")
   @ResponseStatus(HttpStatus.OK)
   public List<MatchBracketDto> getMatchesByTournament(@PathVariable Long idTournament) {
-    return matchService.getMatchesByTournament(idTournament)
-        .stream()
-        .map(matchMapper::toBracketDto)
+    return matchService.getMatchesByTournament(idTournament).stream().map(matchMapper::toBracketDto)
         .toList();
   }
 
@@ -104,9 +98,7 @@ public class MatchController {
   @ResponseStatus(HttpStatus.OK)
   public List<MatchDetailDto> getUpcomingMatches(@AuthenticationPrincipal String email) {
     Member member = memberService.getByEmail(email);
-    return matchService.getUpcomingMatchesForMember(member)
-        .stream()
-        .map(matchMapper::toDetailDto)
+    return matchService.getUpcomingMatchesForMember(member).stream().map(matchMapper::toDetailDto)
         .toList();
   }
 
@@ -121,9 +113,7 @@ public class MatchController {
   @ResponseStatus(HttpStatus.OK)
   public List<MatchDetailDto> getPastMatches(@AuthenticationPrincipal String email) {
     Member member = memberService.getByEmail(email);
-    return matchService.getPastMatchesForMember(member)
-        .stream()
-        .map(matchMapper::toDetailDto)
+    return matchService.getPastMatchesForMember(member).stream().map(matchMapper::toDetailDto)
         .toList();
   }
 
@@ -140,10 +130,8 @@ public class MatchController {
   @PostMapping("/{idMatch}/selection")
   @PreAuthorize("hasRole('ROLE_RESPONSIBLE')")
   @ResponseStatus(HttpStatus.CREATED)
-  public MatchDetailDto submitSelection(
-      @PathVariable Long idMatch,
-      @RequestBody @Valid SelectionRequest payload,
-      @AuthenticationPrincipal String email) {
+  public MatchDetailDto submitSelection(@PathVariable Long idMatch,
+      @RequestBody @Valid SelectionRequest payload, @AuthenticationPrincipal String email) {
     Member responsible = memberService.getByEmail(email);
     Team team = teamService.getTeamByResponsible(responsible);
     matchSelectionService.submitSelection(idMatch, team, payload.memberIds());
@@ -161,10 +149,8 @@ public class MatchController {
   @PutMapping("/{idMatch}/selection")
   @PreAuthorize("hasRole('ROLE_RESPONSIBLE')")
   @ResponseStatus(HttpStatus.OK)
-  public MatchDetailDto modifySelection(
-      @PathVariable Long idMatch,
-      @RequestBody @Valid SelectionRequest payload,
-      @AuthenticationPrincipal String email) {
+  public MatchDetailDto modifySelection(@PathVariable Long idMatch,
+      @RequestBody @Valid SelectionRequest payload, @AuthenticationPrincipal String email) {
     Member responsible = memberService.getByEmail(email);
     Team team = teamService.getTeamByResponsible(responsible);
     matchSelectionService.modifySelection(idMatch, team, payload.memberIds());
@@ -181,8 +167,7 @@ public class MatchController {
   @PostMapping("/{idMatch}/validate")
   @PreAuthorize("hasRole('ROLE_RESPONSIBLE')")
   @ResponseStatus(HttpStatus.OK)
-  public MatchDetailDto validateResult(
-      @PathVariable Long idMatch,
+  public MatchDetailDto validateResult(@PathVariable Long idMatch,
       @AuthenticationPrincipal String email) {
     Member responsible = memberService.getByEmail(email);
     Team team = teamService.getTeamByResponsible(responsible);
@@ -200,8 +185,7 @@ public class MatchController {
   @PostMapping("/{idMatch}/contest")
   @PreAuthorize("hasRole('ROLE_RESPONSIBLE')")
   @ResponseStatus(HttpStatus.OK)
-  public MatchDetailDto contestResult(
-      @PathVariable Long idMatch,
+  public MatchDetailDto contestResult(@PathVariable Long idMatch,
       @AuthenticationPrincipal String email) {
     Member responsible = memberService.getByEmail(email);
     Team team = teamService.getTeamByResponsible(responsible);
@@ -219,15 +203,13 @@ public class MatchController {
   @PostMapping("/{idMatch}/forfeit")
   @PreAuthorize("hasRole('ROLE_RESPONSIBLE')")
   @ResponseStatus(HttpStatus.OK)
-  public MatchDetailDto declareForfeit(
-      @PathVariable Long idMatch,
+  public MatchDetailDto declareForfeit(@PathVariable Long idMatch,
       @AuthenticationPrincipal String email) {
     Member responsible = memberService.getByEmail(email);
     Team team = teamService.getTeamByResponsible(responsible);
     matchService.declareForfeit(idMatch, team);
     return matchMapper.toDetailDto(matchService.getMatchById(idMatch));
   }
-
 
   // ADMIN
 
@@ -241,9 +223,8 @@ public class MatchController {
   @PatchMapping("/{idMatch}/result")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @ResponseStatus(HttpStatus.OK)
-  public MatchDetailDto encodeResult(
-      @PathVariable Long idMatch,
-      @RequestBody ResultRequest payload) {
+  public MatchDetailDto encodeResult(@PathVariable Long idMatch,
+      @RequestBody @Valid ResultRequest payload) {
     Match match = matchResultService.encodingResult(idMatch, payload);
     return matchMapper.toDetailDto(match);
   }
@@ -258,10 +239,28 @@ public class MatchController {
   @PutMapping("/{idMatch}/result")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @ResponseStatus(HttpStatus.OK)
-  public MatchDetailDto correctResult(
-      @PathVariable Long idMatch,
-      @RequestBody ResultRequest payload) {
+  public MatchDetailDto correctResult(@PathVariable Long idMatch,
+      @RequestBody @Valid ResultRequest payload) {
     Match match = matchResultService.correctResult(idMatch, payload);
     return matchMapper.toDetailDto(match);
+  }
+
+  /**
+   * Gets the list of eligible members for a specific match. Returns all members of the
+   * authenticated responsible's team along with their availability status for the date of the
+   * match.
+   *
+   * @param idMatch the match id
+   * @param email   the authenticated responsible's email
+   * @return a list of member selection DTOs indicating availability
+   */
+  @GetMapping("/{idMatch}/selection/eligible")
+  @PreAuthorize("hasRole('ROLE_RESPONSIBLE')")
+  @ResponseStatus(HttpStatus.OK)
+  public List<MemberSelectionDto> getEligibleMembers(@PathVariable Long idMatch,
+      @AuthenticationPrincipal String email) {
+    Member responsible = memberService.getByEmail(email);
+    Team team = teamService.getTeamByResponsible(responsible);
+    return matchSelectionService.getEligibleMembers(idMatch, team);
   }
 }

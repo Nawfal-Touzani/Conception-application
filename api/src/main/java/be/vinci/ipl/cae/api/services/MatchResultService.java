@@ -18,8 +18,7 @@ import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 
 /**
- * Service handling all match result operations:
- * encoding, validation, contestation and correction.
+ * Service handling all match result operations: encoding, validation, contestation and correction.
  */
 @Service
 public class MatchResultService {
@@ -31,8 +30,7 @@ public class MatchResultService {
   /**
    * Creates a new MatchResultService.
    */
-  public MatchResultService(
-      MatchRepository matchRepository,
+  public MatchResultService(MatchRepository matchRepository,
       ValidationResultRepository validationResultRepository,
       NotificationService notificationService) {
     this.matchRepository = matchRepository;
@@ -51,15 +49,16 @@ public class MatchResultService {
     Match match = matchRepository.findById(idMatch)
         .orElseThrow(() -> new NoSuchElementException("Match not found"));
 
-    if (match.getState().equals(MatchState.CANCELED)
-        || match.getState().equals(MatchState.FORFEIT)) {
-      throw new IllegalStateException("the match is not played");
+    if (!match.getState().equals(MatchState.SCHEDULED)) {
+      throw new IllegalStateException(
+          "Cannot encode result: match must be SCHEDULED, was " + match.getState());
     }
 
     if (!match.getResultStatus().equals(ResultStatus.NOT_ENTERED)) {
       throw new IllegalStateException("the match result must be not entered");
     }
 
+    // double layer with entity?
     if (dto.scoreA() < 0 || dto.scoreB() < 0) {
       throw new IllegalArgumentException("the score cannot be negative");
     }
@@ -80,8 +79,8 @@ public class MatchResultService {
   }
 
   /**
-   * Validates a match result for a team.
-   * If both teams validate, the match is finalized automatically.
+   * Validates a match result for a team. If both teams validate, the match is finalized
+   * automatically.
    *
    * @param idMatch the match id
    * @param team    the team validating the result
@@ -102,8 +101,7 @@ public class MatchResultService {
   }
 
   /**
-   * Contests a match result for a team.
-   * A team can only contest once — the lock is irreversible.
+   * Contests a match result for a team. A team can only contest once — the lock is irreversible.
    *
    * @param idMatch the match id
    * @param team    the team contesting the result
@@ -112,9 +110,8 @@ public class MatchResultService {
   public void contestResult(Long idMatch, Team team) {
     Match match = fetchPendingMatch(idMatch, team);
 
-    boolean alreadyContested = team.equals(match.getTeamA())
-        ? match.isContestedByTeamA()
-        : match.isContestedByTeamB();
+    boolean alreadyContested =
+        team.equals(match.getTeamA()) ? match.isContestedByTeamA() : match.isContestedByTeamB();
 
     if (alreadyContested) {
       throw new IllegalStateException("This team has already used its contest right");
@@ -136,8 +133,7 @@ public class MatchResultService {
   }
 
   /**
-   * Corrects a contested match result.
-   * Can only be called by admin when result is REFUSED.
+   * Corrects a contested match result. Can only be called by admin when result is REFUSED.
    *
    * @param idMatch the match id
    * @param payload the corrected score
@@ -152,8 +148,9 @@ public class MatchResultService {
       throw new IllegalStateException("Correction can only be applied to a REFUSED result");
     }
 
+    // double layer with entity?
     if (payload.scoreA() < 0 || payload.scoreB() < 0) {
-      throw new IllegalArgumentException("Scores cannot be negative");
+      throw new IllegalArgumentException("the score cannot be negative");
     }
 
     if (payload.scoreA().equals(payload.scoreB())) {
@@ -164,8 +161,9 @@ public class MatchResultService {
     match.setScoreB(payload.scoreB());
     match.setWinner(payload.scoreA() > payload.scoreB() ? match.getTeamA() : match.getTeamB());
 
-    match.setResultStatus(ResultStatus.VALIDATED);
-    return matchRepository.save(match);
+    finalizeMatch(match);
+    return matchRepository.findById(match.getId())
+        .orElseThrow(() -> new NoSuchElementException("Match not found after save"));
   }
 
   // Private methods
@@ -184,21 +182,40 @@ public class MatchResultService {
     return match;
   }
 
-  void finalizeMatch(Match match) {
+  /**
+   * Advances the winner of the given match to the next round in the tournament bracket. This method
+   * identifies the next match in the tree and assigns the winner of the current match to the first
+   * available slot (Team A or Team B). If no next match exists (e.g., the final), no action is
+   * taken.
+   *
+   * @param match the current match from which the winner should advance
+   */
+  public void advanceWinner(Match match) {
+    Match nextMatch = match.getNextMatch();
+    if (nextMatch == null) {
+      return;
+    }
+
+    if (nextMatch.getTeamA() == null) {
+      nextMatch.setTeamA(match.getWinner());
+    } else {
+      nextMatch.setTeamB(match.getWinner());
+    }
+    matchRepository.save(nextMatch);
+  }
+
+  /**
+   * Finalizes a match after a standard result submission. This process marks the match as
+   * {@code VALIDATED}, persists the state, triggers the official validation notifications to
+   * relevant parties, and automatically advances the winner to the next round.
+   *
+   * @param match the match to be officially finalized
+   */
+  public void finalizeMatch(Match match) {
     match.setResultStatus(ResultStatus.VALIDATED);
     matchRepository.save(match);
-
     sendValidationNotifications(match);
-
-    Match nextMatch = match.getNextMatch();
-    if (nextMatch != null) {
-      if (nextMatch.getTeamA() == null) {
-        nextMatch.setTeamA(match.getWinner());
-      } else {
-        nextMatch.setTeamB(match.getWinner());
-      }
-      matchRepository.save(nextMatch);
-    }
+    advanceWinner(match);
   }
 
   private void sendPendingNotifications(Match match) {
@@ -213,11 +230,9 @@ public class MatchResultService {
     }
 
     for (Long recipientId : recipients) {
-      Notification notif = new Notification(
-          Type.RESULT_CONFIRMATION,
+      Notification notif = new Notification(Type.RESULT_CONFIRMATION,
           "Le résultat du match a été encodé. Veuillez le valider ou le contester.",
-          LocalDateTime.now()
-      );
+          LocalDateTime.now());
       notif.setMatch(match);
       notificationService.send(recipientId, notif);
     }
@@ -230,8 +245,7 @@ public class MatchResultService {
 
     sendToTeam(match, winner,
         "Félicitations ! Votre équipe a gagné avec un score de " + scoreInfo + ".");
-    sendToTeam(match, loser,
-        "Votre équipe a perdu le match avec un score de " + scoreInfo + ".");
+    sendToTeam(match, loser, "Votre équipe a perdu le match avec un score de " + scoreInfo + ".");
   }
 
   private void sendToTeam(Match match, Team team, String message) {

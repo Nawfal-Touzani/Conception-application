@@ -1,5 +1,6 @@
 package be.vinci.ipl.cae.api.services;
 
+import be.vinci.ipl.cae.api.models.dtos.MemberSelectionDto;
 import be.vinci.ipl.cae.api.models.entities.Match;
 import be.vinci.ipl.cae.api.models.entities.Match.MatchState;
 import be.vinci.ipl.cae.api.models.entities.Member;
@@ -48,9 +49,8 @@ public class MatchSelectionService {
   }
 
   /**
-   * Submits a player selection for a match.
-   * The responsible can only select players from their own team.
-   * All selected players must be available on the match date.
+   * Submits a player selection for a match. The responsible can only select players from their own
+   * team. All selected players must be available on the match date.
    *
    * @param idMatch   the match id
    * @param team      the team submitting (resolved from authenticated responsible)
@@ -76,12 +76,9 @@ public class MatchSelectionService {
       }
 
       LocalDate matchDate = match.getDateTime().toLocalDate();
-      if (unavailabilityRepository.existsByMemberAndStartDateBeforeAndEndDateAfter(
-          member,
-          matchDate.plusDays(1),
-          matchDate.minusDays(1))) {
-        throw new IllegalStateException(
-            "Member " + memberId + " is unavailable on match date");
+      if (unavailabilityRepository.existsByMemberAndStartDateBeforeAndEndDateAfter(member,
+          matchDate.plusDays(1), matchDate.minusDays(1))) {
+        throw new IllegalStateException("Member " + memberId + " is unavailable on match date");
       }
 
       selectedMembers.add(member);
@@ -99,8 +96,8 @@ public class MatchSelectionService {
   }
 
   /**
-   * Modifies the player selection for a match.
-   * Deletes the existing selection for the team and replaces it with the new one.
+   * Modifies the player selection for a match. Deletes the existing selection for the team and
+   * replaces it with the new one.
    *
    * @param idMatch   the match id
    * @param team      the team modifying the selection
@@ -121,8 +118,8 @@ public class MatchSelectionService {
   }
 
   /**
-   * Invalidates all future selections of a member when they leave their team.
-   * Only SCHEDULED matches are affected — past selections are kept for history.
+   * Invalidates all future selections of a member when they leave their team. Only SCHEDULED
+   * matches are affected — past selections are kept for history.
    *
    * @param member the member leaving their team
    */
@@ -131,14 +128,35 @@ public class MatchSelectionService {
     playersSelectionRepository.deleteByMemberAndMatchState(member, MatchState.SCHEDULED);
   }
 
+  /**
+   * Retrieves all members of a team and their availability for a specific match.
+   *
+   * @param idMatch the match id
+   * @param team    the team
+   * @return a list of MemberSelectionDto
+   */
+  public List<MemberSelectionDto> getEligibleMembers(Long idMatch, Team team) {
+    Match match = matchService.getScheduledMatchForTeam(idMatch, team);
+    LocalDate matchDate = match.getDateTime().toLocalDate();
+
+    return teamCompositionRepository.findAllByTeamId(team.getId()).stream().map(compo -> {
+      Member member = compo.getMember();
+
+      boolean isUnavailable = unavailabilityRepository
+          .existsByMemberAndStartDateBeforeAndEndDateAfter(
+          member, matchDate.plusDays(1), matchDate.minusDays(1));
+
+      return new MemberSelectionDto(member.getId(), member.getTag(), member.getImage().getUrl(),
+          !isUnavailable);
+    }).toList();
+  }
+
   // Private methods
   private void sendSelectionNotifications(Match match, List<Member> members) {
     for (Member member : members) {
-      Notification notif = new Notification(
-          Type.MATCH,
+      Notification notif = new Notification(Type.MATCH,
           "Vous avez été sélectionné pour un match le " + match.getDateTime() + ".",
-          LocalDateTime.now()
-      );
+          LocalDateTime.now());
       notif.setMatch(match);
       notificationService.send(member.getId(), notif);
     }

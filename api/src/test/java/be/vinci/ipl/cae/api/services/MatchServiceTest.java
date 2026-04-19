@@ -137,7 +137,9 @@ class MatchServiceTest {
 
     assertEquals(MatchState.FORFEIT, result.getState());
     assertEquals(teamB, result.getWinner());
-    verify(matchResultService).finalizeMatch(match);
+    assertEquals(0, result.getScoreA());
+    assertEquals(5, result.getScoreB());
+    verify(matchResultService).advanceWinner(match);
   }
 
   @Test
@@ -146,7 +148,11 @@ class MatchServiceTest {
 
     Match result = matchService.declareForfeit(1L, teamB);
 
+    assertEquals(MatchState.FORFEIT, result.getState());
     assertEquals(teamA, result.getWinner());
+    assertEquals(5, result.getScoreA());
+    assertEquals(0, result.getScoreB());
+    verify(matchResultService).advanceWinner(match);
   }
 
   @Test

@@ -4,7 +4,6 @@ import be.vinci.ipl.cae.api.models.entities.Match;
 import be.vinci.ipl.cae.api.models.entities.Team;
 import be.vinci.ipl.cae.api.models.entities.ValidationResult;
 import be.vinci.ipl.cae.api.models.entities.ValidationResultId;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.repository.ListCrudRepository;
@@ -38,14 +37,6 @@ public interface ValidationResultRepository extends
    * (which team contested, which team accepted) before correcting the score.
    */
   List<ValidationResult> findByMatch(Match match);
-
-  /**
-   * Deletes all validation entries for a match.
-   * Called when the admin corrects a contested result —
-   * resets the validation cycle so both teams can respond again.
-   */
-  @Transactional
-  void deleteByMatch(Match match);
 
   /**
    * Checks whether a team has already submitted a validation response for a match.

@@ -2,6 +2,7 @@ package be.vinci.ipl.cae.api.services;
 
 import be.vinci.ipl.cae.api.models.entities.Match;
 import be.vinci.ipl.cae.api.models.entities.Match.MatchState;
+import be.vinci.ipl.cae.api.models.entities.Match.ResultStatus;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.models.entities.Notification.Type;
@@ -102,12 +103,22 @@ public class MatchService {
 
     Team winner = team.equals(match.getTeamA()) ? match.getTeamB() : match.getTeamA();
 
+    if (winner.equals(match.getTeamA())) {
+      match.setScoreA(5);
+      match.setScoreB(0);
+    } else {
+      match.setScoreA(0);
+      match.setScoreB(5);
+    }
+
     match.setState(MatchState.FORFEIT);
     match.setWinner(winner);
+    match.setResultStatus(ResultStatus.VALIDATED);
+    matchRepository.save(match);
 
-    matchResultService.finalizeMatch(match);
+    matchResultService.advanceWinner(match);
+
     sendForfeitNotifications(match, team, winner);
-
     return match;
   }
 
