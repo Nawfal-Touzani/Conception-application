@@ -1,0 +1,165 @@
+package be.vinci.ipl.cae.api.services;
+
+import be.vinci.ipl.cae.api.models.entities.Match;
+import be.vinci.ipl.cae.api.models.entities.Match.MatchState;
+import be.vinci.ipl.cae.api.models.entities.Member;
+import be.vinci.ipl.cae.api.models.entities.Notification;
+import be.vinci.ipl.cae.api.models.entities.Notification.Type;
+import be.vinci.ipl.cae.api.models.entities.PlayersSelection;
+import be.vinci.ipl.cae.api.models.entities.Team;
+import be.vinci.ipl.cae.api.repositories.MatchRepository;
+import be.vinci.ipl.cae.api.repositories.MemberRepository;
+import be.vinci.ipl.cae.api.repositories.PlayersSelectionRepository;
+import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
+import be.vinci.ipl.cae.api.repositories.UnavailabilityRepository;
+import jakarta.transaction.Transactional;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import org.springframework.stereotype.Service;
+
+/**
+ * Service handling player selection for matches.
+ */
+@Service
+public class MatchSelectionService {
+
+  private final MatchRepository matchRepository;
+  private final PlayersSelectionRepository playersSelectionRepository;
+  private final MemberRepository memberRepository;
+  private final TeamCompositionRepository teamCompositionRepository;
+  private final UnavailabilityRepository unavailabilityRepository;
+  private final NotificationService notificationService;
+
+  /**
+   * Creates a new MatchSelectionService.
+   */
+  public MatchSelectionService(
+      MatchRepository matchRepository,
+      PlayersSelectionRepository playersSelectionRepository,
+      MemberRepository memberRepository,
+      TeamCompositionRepository teamCompositionRepository,
+      UnavailabilityRepository unavailabilityRepository,
+      NotificationService notificationService) {
+    this.matchRepository = matchRepository;
+    this.playersSelectionRepository = playersSelectionRepository;
+    this.memberRepository = memberRepository;
+    this.teamCompositionRepository = teamCompositionRepository;
+    this.unavailabilityRepository = unavailabilityRepository;
+    this.notificationService = notificationService;
+  }
+
+  /**
+   * Submits a player selection for a match.
+   * The responsible can only select players from their own team.
+   * All selected players must be available on the match date.
+   *
+   * @param idMatch   the match id
+   * @param team      the team submitting (resolved from authenticated responsible)
+   * @param memberIds exactly 4 member ids to select
+   * @return the list of created PlayersSelection entries
+   */
+  @Transactional
+  public List<PlayersSelection> submitSelection(Long idMatch, Team team, List<Long> memberIds) {
+    Match match = fetchScheduledMatchForTeam(idMatch, team);
+
+    if (memberIds.size() != 4) {
+      throw new IllegalArgumentException("Exactly 4 players must be selected");
+    }
+
+    List<Member> selectedMembers = new ArrayList<>();
+    for (Long memberId : memberIds) {
+      Member member = memberRepository.findById(memberId)
+          .orElseThrow(() -> new NoSuchElementException("Member not found with id " + memberId));
+
+      if (!teamCompositionRepository.existsByMemberAndTeamId(member, team.getId())) {
+        throw new IllegalStateException(
+            "Member " + memberId + " does not belong to the submitting team");
+      }
+
+      LocalDate matchDate = match.getDateTime().toLocalDate();
+      if (unavailabilityRepository.existsByMemberAndStartDateBeforeAndEndDateAfter(
+          member,
+          matchDate.plusDays(1),
+          matchDate.minusDays(1))) {
+        throw new IllegalStateException(
+            "Member " + memberId + " is unavailable on match date");
+      }
+
+      selectedMembers.add(member);
+    }
+
+    List<PlayersSelection> selections = new ArrayList<>();
+    for (Member member : selectedMembers) {
+      PlayersSelection ps = new PlayersSelection(member, match, team);
+      selections.add(playersSelectionRepository.save(ps));
+    }
+
+    sendSelectionNotifications(match, selectedMembers);
+
+    return selections;
+  }
+
+  /**
+   * Modifies the player selection for a match.
+   * Deletes the existing selection for the team and replaces it with the new one.
+   *
+   * @param idMatch   the match id
+   * @param team      the team modifying the selection
+   * @param memberIds exactly 4 member ids to select
+   * @return the list of new PlayersSelection entries
+   */
+  @Transactional
+  public List<PlayersSelection> modifySelection(Long idMatch, Team team, List<Long> memberIds) {
+    Match match = fetchScheduledMatchForTeam(idMatch, team);
+
+    if (playersSelectionRepository.countByMatchAndTeam(match, team) == 0) {
+      throw new IllegalStateException("No existing selection found for this team in this match");
+    }
+
+    playersSelectionRepository.deleteByMatchAndTeam(match, team);
+
+    return submitSelection(idMatch, team, memberIds);
+  }
+
+  /**
+   * Invalidates all future selections of a member when they leave their team.
+   * Only SCHEDULED matches are affected — past selections are kept for history.
+   *
+   * @param member the member leaving their team
+   */
+  @Transactional
+  public void invalidateSelectionsOnLeave(Member member) {
+    playersSelectionRepository.deleteByMemberAndMatchState(member, MatchState.SCHEDULED);
+  }
+
+  // Private methods
+  private Match fetchScheduledMatchForTeam(Long idMatch, Team team) {
+    Match match = matchRepository.findById(idMatch)
+        .orElseThrow(() -> new NoSuchElementException("Match not found with id " + idMatch));
+
+    if (!match.getState().equals(MatchState.SCHEDULED)) {
+      throw new IllegalStateException("Selection can only be submitted for a SCHEDULED match");
+    }
+
+    if (!team.equals(match.getTeamA()) && !team.equals(match.getTeamB())) {
+      throw new IllegalStateException("This team is not part of this match");
+    }
+
+    return match;
+  }
+
+  private void sendSelectionNotifications(Match match, List<Member> members) {
+    for (Member member : members) {
+      Notification notif = new Notification(
+          Type.MATCH,
+          "Vous avez été sélectionné pour un match le " + match.getDateTime() + ".",
+          LocalDateTime.now()
+      );
+      notif.setMatch(match);
+      notificationService.send(member.getId(), notif);
+    }
+  }
+}

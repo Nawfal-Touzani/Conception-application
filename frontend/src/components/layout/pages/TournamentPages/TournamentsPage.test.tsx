@@ -8,7 +8,15 @@ vi.mock('../../../../services/tournament/tournament.service', () => ({
   getTournaments: vi.fn(),
 }));
 
+vi.mock('../../../../services/tournament/tournament.service', () => ({
+  updateTournament: vi.fn(),
+  publishTournament: vi.fn(),
+  getTournaments: vi.fn(),
+}));
+
 import * as tournamentService from '../../../../services/tournament/tournament.service';
+
+// ─── Fixtures ─────────────────────────────────────────────────────────────────
 
 const mockAdmin = {
   id: 1,
@@ -42,7 +50,6 @@ const mockContextUser = {
   bannedError: null,
 };
 
-// ✅ deadline dans le futur pour que le filtre OPEN fonctionne
 const tournamentOpen = {
   id: 1,
   name: 'Vinci Easter Cup 2026',
@@ -120,6 +127,8 @@ const renderAsUser = () =>
 beforeEach(() => {
   vi.clearAllMocks();
 });
+
+// ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('TournamentsPage', () => {
   test('affiche le titre de la page', async () => {

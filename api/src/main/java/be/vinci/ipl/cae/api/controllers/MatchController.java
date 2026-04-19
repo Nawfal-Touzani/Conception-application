@@ -2,12 +2,14 @@ package be.vinci.ipl.cae.api.controllers;
 
 import be.vinci.ipl.cae.api.models.dtos.MatchBracketDto;
 import be.vinci.ipl.cae.api.models.dtos.MatchDetailDto;
-import be.vinci.ipl.cae.api.models.dtos.SelectionRequest;
 import be.vinci.ipl.cae.api.models.dtos.ResultRequest;
+import be.vinci.ipl.cae.api.models.dtos.SelectionRequest;
 import be.vinci.ipl.cae.api.models.entities.Match;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Team;
 import be.vinci.ipl.cae.api.models.mappers.MatchMapper;
+import be.vinci.ipl.cae.api.services.MatchResultService;
+import be.vinci.ipl.cae.api.services.MatchSelectionService;
 import be.vinci.ipl.cae.api.services.MatchService;
 import be.vinci.ipl.cae.api.services.MemberService;
 import be.vinci.ipl.cae.api.services.TeamService;
@@ -34,6 +36,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class MatchController {
 
   private final MatchService matchService;
+  private final MatchResultService matchResultService;
+  private final MatchSelectionService matchSelectionService;
   private final MatchMapper matchMapper;
   private final MemberService memberService;
   private final TeamService teamService;
@@ -41,17 +45,22 @@ public class MatchController {
   /**
    * Creates a new MatchController.
    */
-  public MatchController(MatchService matchService, MatchMapper matchMapper,
-      MemberService memberService, TeamService teamService) {
+  public MatchController(
+      MatchService matchService,
+      MatchResultService matchResultService,
+      MatchSelectionService matchSelectionService,
+      MatchMapper matchMapper,
+      MemberService memberService,
+      TeamService teamService) {
     this.matchService = matchService;
+    this.matchResultService = matchResultService;
+    this.matchSelectionService = matchSelectionService;
     this.matchMapper = matchMapper;
     this.memberService = memberService;
     this.teamService = teamService;
   }
 
-  // ─────────────────────────────────────────────
-  // PUBLIC — accessible à tous (visiteur inclus)
-  // ─────────────────────────────────────────────
+  // PUBLIC
 
   /**
    * Gets a match by its id.
@@ -82,9 +91,7 @@ public class MatchController {
         .toList();
   }
 
-  // ─────────────────────────────────────────────
-  // JOUEUR — matchs personnels
-  // ─────────────────────────────────────────────
+  // MEMBER
 
   /**
    * Gets upcoming matches for the authenticated member.
@@ -120,9 +127,7 @@ public class MatchController {
         .toList();
   }
 
-  // ─────────────────────────────────────────────
-  // RESPONSABLE — sélection et validation
-  // ─────────────────────────────────────────────
+  // RESPONSABLE
 
   /**
    * Submits a player selection for a match.
@@ -141,7 +146,7 @@ public class MatchController {
       @AuthenticationPrincipal String email) {
     Member responsible = memberService.getByEmail(email);
     Team team = teamService.getTeamByResponsible(responsible);
-    matchService.submitSelection(idMatch, team, payload.memberIds());
+    matchSelectionService.submitSelection(idMatch, team, payload.memberIds());
     return matchMapper.toDetailDto(matchService.getMatchById(idMatch));
   }
 
@@ -162,7 +167,7 @@ public class MatchController {
       @AuthenticationPrincipal String email) {
     Member responsible = memberService.getByEmail(email);
     Team team = teamService.getTeamByResponsible(responsible);
-    matchService.modifySelection(idMatch, team, payload.memberIds());
+    matchSelectionService.modifySelection(idMatch, team, payload.memberIds());
     return matchMapper.toDetailDto(matchService.getMatchById(idMatch));
   }
 
@@ -181,7 +186,7 @@ public class MatchController {
       @AuthenticationPrincipal String email) {
     Member responsible = memberService.getByEmail(email);
     Team team = teamService.getTeamByResponsible(responsible);
-    matchService.validateResult(idMatch, team);
+    matchResultService.validateResult(idMatch, team);
     return matchMapper.toDetailDto(matchService.getMatchById(idMatch));
   }
 
@@ -200,7 +205,7 @@ public class MatchController {
       @AuthenticationPrincipal String email) {
     Member responsible = memberService.getByEmail(email);
     Team team = teamService.getTeamByResponsible(responsible);
-    matchService.contestResult(idMatch, team);
+    matchResultService.contestResult(idMatch, team);
     return matchMapper.toDetailDto(matchService.getMatchById(idMatch));
   }
 
@@ -223,9 +228,8 @@ public class MatchController {
     return matchMapper.toDetailDto(matchService.getMatchById(idMatch));
   }
 
-  // ─────────────────────────────────────────────
-  // ADMIN — encodage et correction
-  // ─────────────────────────────────────────────
+
+  // ADMIN
 
   /**
    * Encodes a match result.
@@ -237,10 +241,10 @@ public class MatchController {
   @PatchMapping("/{idMatch}/result")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @ResponseStatus(HttpStatus.OK)
-  public MatchDetailDto encodeMatch(
+  public MatchDetailDto encodeResult(
       @PathVariable Long idMatch,
       @RequestBody ResultRequest payload) {
-    Match match = matchService.encodingResult(idMatch, payload);
+    Match match = matchResultService.encodingResult(idMatch, payload);
     return matchMapper.toDetailDto(match);
   }
 
@@ -257,7 +261,7 @@ public class MatchController {
   public MatchDetailDto correctResult(
       @PathVariable Long idMatch,
       @RequestBody ResultRequest payload) {
-    Match match = matchService.correctResult(idMatch, payload);
+    Match match = matchResultService.correctResult(idMatch, payload);
     return matchMapper.toDetailDto(match);
   }
 }
