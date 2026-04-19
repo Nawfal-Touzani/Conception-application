@@ -37,10 +37,6 @@ public class PublicController {
    */
   @GetMapping("/{id}")
   public PublicMemberDto getMemberPublicProfile(@PathVariable Long id) {
-    try {
-      return memberService.getPublicProfile(id);
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-    }
+    return memberService.getPublicProfile(id);
   }
 }

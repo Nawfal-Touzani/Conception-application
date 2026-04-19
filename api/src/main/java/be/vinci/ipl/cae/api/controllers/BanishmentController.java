@@ -50,18 +50,7 @@ public class BanishmentController {
       @PathVariable Long memberId,
       @RequestBody @Valid BanishMemberDto req,
       Authentication authentication) {
-
     Member admin = (Member) authentication.getPrincipal();
-
-    try {
-      banishmentService.banMember(memberId, admin.getId(), req.reason());
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-    } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
-    } catch (Exception e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error",
-          e);
-    }
+    banishmentService.banMember(memberId, admin.getId(), req.reason());
   }
 }

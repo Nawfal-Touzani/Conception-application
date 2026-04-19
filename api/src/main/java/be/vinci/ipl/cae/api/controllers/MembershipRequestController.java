@@ -43,15 +43,7 @@ public class MembershipRequestController {
   @PatchMapping("/{requestId}/approve")
   public ResponseEntity<Void> approveRequest(@PathVariable Long requestId,
       @AuthenticationPrincipal Member currentMember) {
-    try {
-      membershipRequestService.approveRequest(requestId, currentMember.getId());
-    } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          "Membership request approve error: " + e.getMessage(), e);
-    } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT,
-          "Membership request approve error: " + e.getMessage(), e);
-    }
+    membershipRequestService.approveRequest(requestId, currentMember.getId());
     return ResponseEntity.noContent().build();
   }
 
@@ -67,15 +59,7 @@ public class MembershipRequestController {
   public ResponseEntity<Void> refuseRequest(@PathVariable Long requestId,
       @RequestBody RefuseRequestDto body,
       @AuthenticationPrincipal Member currentMember) {
-    try {
-      membershipRequestService.refuseRequest(requestId, currentMember.getId(), body.getReason());
-    } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          "Membership request refuse error: " + e.getMessage(), e);
-    } catch (IllegalStateException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT,
-          "Membership request refuse error: " + e.getMessage(), e);
-    }
+    membershipRequestService.refuseRequest(requestId, currentMember.getId(), body.getReason());
     return ResponseEntity.noContent().build();
   }
 }
