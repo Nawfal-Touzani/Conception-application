@@ -1,12 +1,14 @@
 package be.vinci.ipl.cae.api.controllers;
 
 import be.vinci.ipl.cae.api.models.dtos.HomepageTournamentsDto;
+import be.vinci.ipl.cae.api.models.dtos.MatchBracketDto;
 import be.vinci.ipl.cae.api.models.dtos.MatchResponseDto;
 import be.vinci.ipl.cae.api.models.dtos.PlanningRequest;
 import be.vinci.ipl.cae.api.models.dtos.TournamentDto;
 import be.vinci.ipl.cae.api.models.dtos.TournamentResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Tournament;
+import be.vinci.ipl.cae.api.models.mappers.MatchMapper;
 import be.vinci.ipl.cae.api.services.MatchService;
 import be.vinci.ipl.cae.api.services.TournamentRegistrationService;
 import be.vinci.ipl.cae.api.services.TournamentService;
@@ -28,7 +30,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * The type Tournament controller.
+ * Controller for managing tournaments, including creation, publication,
+ * planning updates, registrations, and tournament match views.
  */
 @RestController
 @RequestMapping("/tournaments")
@@ -37,18 +40,23 @@ public class TournamentController {
   private final TournamentService tournamentService;
   private final TournamentRegistrationService tournamentRegistrationService;
   private final MatchService matchService;
+  private final MatchMapper matchMapper;
 
   /**
-   * Instantiates a new Tournament controller.
+   * Creates a new TournamentController.
    *
-   * @param tournamentService             the tournament service
+   * @param tournamentService the tournament service
    * @param tournamentRegistrationService the tournament registration service
+   * @param matchService the match service
+   * @param matchMapper the match mapper
    */
   public TournamentController(TournamentService tournamentService,
-      TournamentRegistrationService tournamentRegistrationService, MatchService matchService) {
+      TournamentRegistrationService tournamentRegistrationService, MatchService matchService,
+      MatchMapper matchMapper) {
     this.tournamentService = tournamentService;
     this.tournamentRegistrationService = tournamentRegistrationService;
     this.matchService = matchService;
+    this.matchMapper = matchMapper;
   }
 
   /**
@@ -123,17 +131,30 @@ public class TournamentController {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Planning update conflict", e);
     }
   }
-  /**
-   * Gets all matches of a tournament.
-   */
 
+  /**
+   * Gets all matches of a tournament to build the planification.
+   */
   @GetMapping("/{id}/matches")
   @PreAuthorize("isAuthenticated()")
-  public List<MatchResponseDto> getMatchesByTournament(@PathVariable long id) {
+  public List<MatchResponseDto> getTournamentMatchesForPlanning(@PathVariable long id) {
     try {
       return tournamentService.getMatchesByTournament(id);
     } catch (NoSuchElementException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament matches not found", e);
+    }
+  }
+
+  /**
+   * Gets all matches of a tournament to build the bracket.
+   */
+  @GetMapping("/{id}/bracket")
+  public List<MatchBracketDto> getTournamentBracket(@PathVariable long id) {
+    try {
+      return matchService.getMatchesByTournament(id).stream().map(matchMapper::toBracketDto)
+          .toList();
+    } catch (NoSuchElementException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament bracket not found", e);
     }
   }
 
@@ -175,10 +196,9 @@ public class TournamentController {
   @PostMapping("/{idTournament}/teams/{idTeam}")
   @ResponseStatus(HttpStatus.CREATED)
   @PreAuthorize("isAuthenticated()")
-  public void registerTeam(@PathVariable Long idTournament,
-      @PathVariable Long idTeam, @AuthenticationPrincipal Member currentMember) {
-    tournamentRegistrationService.createRegistration(idTournament, idTeam,
-        currentMember.getId());
+  public void registerTeam(@PathVariable Long idTournament, @PathVariable Long idTeam,
+      @AuthenticationPrincipal Member currentMember) {
+    tournamentRegistrationService.createRegistration(idTournament, idTeam, currentMember.getId());
   }
 
 }

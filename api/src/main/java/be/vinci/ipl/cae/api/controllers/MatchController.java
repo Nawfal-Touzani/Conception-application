@@ -1,6 +1,5 @@
 package be.vinci.ipl.cae.api.controllers;
 
-import be.vinci.ipl.cae.api.models.dtos.MatchBracketDto;
 import be.vinci.ipl.cae.api.models.dtos.MatchDetailDto;
 import be.vinci.ipl.cae.api.models.dtos.MemberSelectionDto;
 import be.vinci.ipl.cae.api.models.dtos.ResultRequest;
@@ -70,19 +69,6 @@ public class MatchController {
   public MatchDetailDto getMatch(@PathVariable Long idMatch) {
     Match match = matchService.getMatchById(idMatch);
     return matchMapper.toDetailDto(match);
-  }
-
-  /**
-   * Gets all matches of a tournament for the bracket tree view.
-   *
-   * @param idTournament the tournament id
-   * @return list of bracket DTOs ordered by round number
-   */
-  @GetMapping("/tournament/{idTournament}")
-  @ResponseStatus(HttpStatus.OK)
-  public List<MatchBracketDto> getMatchesByTournament(@PathVariable Long idTournament) {
-    return matchService.getMatchesByTournament(idTournament).stream().map(matchMapper::toBracketDto)
-        .toList();
   }
 
   // MEMBER
