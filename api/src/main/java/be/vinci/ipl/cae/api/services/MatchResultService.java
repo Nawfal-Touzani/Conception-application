@@ -86,7 +86,7 @@ public class MatchResultService {
    * @param team    the team validating the result
    */
   @Transactional
-  public void validateResult(Long idMatch, Team team) {
+  public Match validateResult(Long idMatch, Team team) {
     Match match = fetchPendingMatch(idMatch, team);
 
     ValidationResult vr = new ValidationResult(match, team);
@@ -98,6 +98,8 @@ public class MatchResultService {
     if (validatedCount == 2) {
       finalizeMatch(match);
     }
+
+    return match;
   }
 
   /**
@@ -107,7 +109,7 @@ public class MatchResultService {
    * @param team    the team contesting the result
    */
   @Transactional
-  public void contestResult(Long idMatch, Team team) {
+  public Match contestResult(Long idMatch, Team team) {
     Match match = fetchPendingMatch(idMatch, team);
 
     boolean alreadyContested =
@@ -129,7 +131,8 @@ public class MatchResultService {
       match.setContestedByTeamB(true);
     }
     match.setResultStatus(ResultStatus.REFUSED);
-    matchRepository.save(match);
+
+    return matchRepository.save(match);
   }
 
   /**

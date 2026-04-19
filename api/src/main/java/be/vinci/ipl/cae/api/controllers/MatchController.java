@@ -156,8 +156,8 @@ public class MatchController {
   public MatchDetailDto validateResult(@PathVariable Long idMatch,
       @AuthenticationPrincipal Member responsible) {
     Team team = resolveTeam(responsible);
-    matchResultService.validateResult(idMatch, team);
-    return matchMapper.toDetailDto(matchService.getMatchById(idMatch));
+    Match match = matchResultService.validateResult(idMatch, team);
+    return matchMapper.toDetailDto(match);
   }
 
   /**
@@ -173,8 +173,8 @@ public class MatchController {
   public MatchDetailDto contestResult(@PathVariable Long idMatch,
       @AuthenticationPrincipal Member responsible) {
     Team team = resolveTeam(responsible);
-    matchResultService.contestResult(idMatch, team);
-    return matchMapper.toDetailDto(matchService.getMatchById(idMatch));
+    Match match = matchResultService.contestResult(idMatch, team);
+    return matchMapper.toDetailDto(match);
   }
 
   /**
@@ -190,8 +190,8 @@ public class MatchController {
   public MatchDetailDto declareForfeit(@PathVariable Long idMatch,
       @AuthenticationPrincipal Member responsible) {
     Team team = resolveTeam(responsible);
-    matchService.declareForfeit(idMatch, team);
-    return matchMapper.toDetailDto(matchService.getMatchById(idMatch));
+    Match match = matchService.declareForfeit(idMatch, team);
+    return matchMapper.toDetailDto(match);
   }
 
   /**
