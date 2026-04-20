@@ -57,6 +57,8 @@ public class BanishmentService {
 
     validateBanishment(memberToBan);
 
+    handleTeamResponsibility(memberToBan);
+
     applyBanishment(memberToBan);
 
     Banishment banishment = new Banishment(memberToBan, admin, LocalDate.now(), reason);

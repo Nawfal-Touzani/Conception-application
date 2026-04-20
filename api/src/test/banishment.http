@@ -1,5 +1,5 @@
 @baseUrl = http://localhost:3000
-@adminToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoiYWRtaW5AdmluY2kuYmUiLCJpYXQiOjE3NzQ3MDcwMDksImV4cCI6MTc3NDc5MzQwOX0.lmfpcQyC6biOBqYYpLh0hUPEhb62bzLUC5_kIitrM-Y
+@adminToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoiYWRtaW5AdmluY2kuYmUiLCJpYXQiOjE3NzY3MDUxODEsImV4cCI6MTc3Njc5MTU4MX0.okWpfOcvA0zu9YymPQPiDlvmTPprv8ruiO3b0Q9XlgU
 @userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoibGVhQG1haWwuY29tIiwiaWF0IjoxNzc0NzA3MDg5LCJleHAiOjE3NzQ3OTM0ODl9.uQZzEgY2p3yHs2Vr5TAJEbPKqpwD8WebtF2OrJY6StY
 
 
@@ -60,4 +60,23 @@ Content-Type: application/json
 
 {
   "reason": "I am not an admin"
+}
+
+
+### Try to ban the responsible of TEAM_IOTA (OK - the second responsible becomes the new responsible)
+POST {{baseUrl}}/admin/banishments/8
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "reason": "Test ban responsable"
+}
+
+### Try to ban the responsible of TEAM_ALPHA (OK - the oldest member become the new responsible)
+POST {{baseUrl}}/admin/banishments/1
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "reason": "Test ban responsable"
 }
