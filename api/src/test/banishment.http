@@ -72,7 +72,7 @@ Content-Type: application/json
   "reason": "Test ban responsable"
 }
 
-### Try to ban the responsible of TEAM_ALPHA (OK - the oldest member become the new responsible)
+### Try to ban the responsible of TEAM_ALPHA (OK - the oldest member becomes the new responsible)
 POST {{baseUrl}}/admin/banishments/1
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json

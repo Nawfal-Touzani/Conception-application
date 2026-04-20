@@ -1,5 +1,7 @@
 package be.vinci.ipl.cae.api.services;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -8,8 +10,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import be.vinci.ipl.cae.api.models.entities.Member;
+import be.vinci.ipl.cae.api.models.entities.Team;
+import be.vinci.ipl.cae.api.models.entities.TeamComposition;
 import be.vinci.ipl.cae.api.repositories.BanishmentRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
+import be.vinci.ipl.cae.api.repositories.TeamCompositionRepository;
+import be.vinci.ipl.cae.api.repositories.TeamRepository;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,15 +39,18 @@ public class BanishmentServiceTest {
   @Mock
   private MemberRepository memberRepository;
 
+  @Mock
+  private TeamRepository teamRepository;
+
+  @Mock
+  private TeamCompositionRepository teamCompositionRepository;
+
   @InjectMocks
   private BanishmentService banishmentService;
 
   private Member admin;
   private Member member;
 
-  /**
-   * Sets up.
-   */
   @BeforeEach
   void setUp() {
     admin = new Member();
@@ -50,26 +61,22 @@ public class BanishmentServiceTest {
     member.setBan(false);
   }
 
-  /**
-   * Ban member 1.
-   */
   @Test
   @DisplayName("Should ban member and save banishment")
   void banMember1() {
     when(memberRepository.findById(456L)).thenReturn(Optional.of(member));
     when(memberRepository.findById(123L)).thenReturn(Optional.of(admin));
     when(banishmentRepository.existsByBannedMemberId(456L)).thenReturn(false);
+    when(teamRepository.findByResponsible(member)).thenReturn(Optional.empty());
+    when(teamCompositionRepository.findByMemberId(456L)).thenReturn(Optional.empty());
 
-    banishmentService.banMember(456L, 123L, "Cheating");
+    banishmentService.banMember(456L, 123L, "Triche");
 
     assertTrue(member.isBan());
     verify(memberRepository, times(1)).save(member);
     verify(banishmentRepository, times(1)).save(any());
   }
 
-  /**
-   * Ban member 2.
-   */
   @Test
   @DisplayName("Should throw exception when member is already ban")
   void banMember2() {
@@ -78,6 +85,55 @@ public class BanishmentServiceTest {
     when(banishmentRepository.existsByBannedMemberId(456L)).thenReturn(true);
 
     assertThrows(IllegalArgumentException.class,
-        () -> banishmentService.banMember(456L, 123L, "Raison"));
+        () -> banishmentService.banMember(456L, 123L, "Triche"));
+  }
+
+  @Test
+  @DisplayName("Should transfer responsibility to second responsible when first is banned")
+  void banResponsibleWithSecond() {
+    Member second = new Member();
+    second.setId(789L);
+    Team team = new Team("Alpha", true, LocalDateTime.now(), member, second);
+
+    when(memberRepository.findById(456L)).thenReturn(Optional.of(member));
+    when(memberRepository.findById(123L)).thenReturn(Optional.of(admin));
+    when(teamRepository.findByResponsible(member)).thenReturn(Optional.of(team));
+    when(teamCompositionRepository.findByMemberId(456L)).thenReturn(Optional.empty());
+
+    banishmentService.banMember(456L, 123L, "Triche");
+
+    assertEquals(second, team.getResponsible());
+    assertNull(team.getSecondResponsible());
+    verify(teamRepository).save(team);
+  }
+
+  @Test
+  @DisplayName("Should transfer responsibility to oldest member when no second responsible")
+  void banResponsibleOldestMember() {
+    Team team = new Team("Alpha", true, LocalDateTime.now(), member, null);
+    team.setId(1L);
+
+    Member oldest = new Member();
+    oldest.setId(10L);
+    Member newest = new Member();
+    newest.setId(11L);
+
+    TeamComposition comp1 = new TeamComposition(member, team, LocalDateTime.now().minusDays(10));
+    TeamComposition compOldest = new TeamComposition(oldest, team,
+        LocalDateTime.now().minusDays(5));
+    TeamComposition compNewest = new TeamComposition(newest, team,
+        LocalDateTime.now().minusDays(1));
+
+    when(memberRepository.findById(456L)).thenReturn(Optional.of(member));
+    when(memberRepository.findById(123L)).thenReturn(Optional.of(admin));
+    when(teamRepository.findByResponsible(member)).thenReturn(Optional.of(team));
+    when(teamCompositionRepository.findAllByTeamId(1L)).thenReturn(
+        List.of(comp1, compOldest, compNewest));
+    when(teamCompositionRepository.findByMemberId(456L)).thenReturn(Optional.of(comp1));
+
+    banishmentService.banMember(456L, 123L, "Triche");
+
+    assertEquals(oldest, team.getResponsible());
+    verify(teamCompositionRepository).delete(comp1);
   }
 }
