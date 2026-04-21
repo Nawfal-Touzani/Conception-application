@@ -309,6 +309,7 @@ const TournamentAdminPage = ({
               />
             )}
 
+            {tournament.isPublic && (
             <Button
               variant="contained"
               onClick={() =>
@@ -326,10 +327,12 @@ const TournamentAdminPage = ({
                 borderRadius: '8px',
                 '&:hover': { backgroundColor: '#27ae60' },
               }}
-            >
-              Encoder les résultats
-            </Button>
+              >
+                Encoder les résultats
+              </Button>
+              )}
 
+            {tournament.isPublic && (
             <Button
               variant="contained"
               onClick={() => onNavigateToPlanning(tournament.id)}
@@ -344,8 +347,9 @@ const TournamentAdminPage = ({
                 '&:hover': { backgroundColor: '#2f65b8' },
               }}
             >
-              Planifier les matchs
-            </Button>
+                Planifier les matchs
+              </Button>
+              )}
           </Box>
         </Box>
 

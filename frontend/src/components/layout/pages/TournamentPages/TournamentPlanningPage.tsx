@@ -187,28 +187,28 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
     });
   }, [tournamentId, token]);
 
-  const callPlanningApi = async (p: Phase) => {
-    const round1 = rounds[0] ?? [];
-    const res = await fetch(
-      `http://localhost:3000/tournaments/${tournamentId}/planning`,
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          phase: p,
-          rounds: [
-            {
-              matches: round1.map((m) => ({ team1: m.team1, team2: m.team2 })),
-            },
-          ],
-        }),
+ const callPlanningApi = async (p: Phase) => {
+  const res = await fetch(
+    `http://localhost:3000/tournaments/${tournamentId}/planning`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
       },
-    );
-    if (!res.ok) throw new Error('API error');
-  };
+      body: JSON.stringify({
+        phase: p,
+        rounds: rounds.map((round) => ({         
+          matches: round.map((m) => ({
+            team1: m.team1,
+            team2: m.team2,
+          })),
+        })),
+      }),
+    },
+  );
+  if (!res.ok) throw new Error('API error');
+};
 
   const handleTeamClick = (pos: TeamPos) => {
     if (phase !== 'draft') return;
