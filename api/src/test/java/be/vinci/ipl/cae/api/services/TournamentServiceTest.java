@@ -15,6 +15,7 @@ import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.models.entities.Tournament;
 import be.vinci.ipl.cae.api.models.entities.Tournament.Status;
+import be.vinci.ipl.cae.api.repositories.MatchRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.TournamentRegistrationRepository;
 import be.vinci.ipl.cae.api.repositories.TournamentRepository;
@@ -36,16 +37,25 @@ class TournamentServiceTest {
   Member organizer;
   TournamentDto validDto;
   Tournament savedTournament;
+
   @Mock
   TournamentResponseDto savedTournamentResponse;
+
+  @Mock
+  private MatchRepository matchRepository;
+
   @Mock
   private MemberRepository memberRepository;
+
   @Mock
   private TournamentRepository tournamentRepository;
+
   @Mock
   private TournamentRegistrationRepository registrationRepository;
+
   @Mock
   private NotificationService notificationService;
+
   @InjectMocks
   private TournamentService tournamentService;
 
@@ -458,6 +468,7 @@ class TournamentServiceTest {
     when(tournamentRepository.findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(
         Status.PREPARATION)).thenReturn(Optional.of(savedTournament));
     when(registrationRepository.findByTournamentId(Mockito.anyLong())).thenReturn(List.of());
+    when(matchRepository.findByTournamentOrderByRoundNumberAsc(inProgress)).thenReturn(List.of());
 
     HomepageTournamentsDto result = tournamentService.getHomepageTournaments();
 

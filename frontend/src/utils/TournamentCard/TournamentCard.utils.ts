@@ -62,7 +62,7 @@ export const getInfoValue = (tournament: TournamentDetails): string => {
   }
 
   if (tournament.status === 'IN_PROGRESS') {
-    return 'Inconnue';
+    return tournament.currentRoundLabel ?? 'En cours';
   }
 
   if (tournament.status === 'PREPARATION') {
