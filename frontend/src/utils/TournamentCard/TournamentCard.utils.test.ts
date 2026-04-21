@@ -112,10 +112,20 @@ describe('getInfoValue', () => {
     ).toBe('Non défini');
   });
 
-  test('returns "Inconnue" for IN_PROGRESS', () => {
+  test('returns "En cours" for IN_PROGRESS when currentRoundLabel is undefined', () => {
     expect(getInfoValue({ ...mockTournament, status: 'IN_PROGRESS' })).toBe(
-      'Inconnue',
+      'En cours',
     );
+  });
+
+  test('returns currentRoundLabel for IN_PROGRESS when defined', () => {
+    expect(
+      getInfoValue({
+        ...mockTournament,
+        status: 'IN_PROGRESS',
+        currentRoundLabel: 'Quarts',
+      }),
+    ).toBe('Quarts');
   });
 
   test('returns "Ouvertes" when registration is open for PREPARATION', () => {
