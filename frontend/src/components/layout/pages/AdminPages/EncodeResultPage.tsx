@@ -159,9 +159,12 @@ const ResultEncodingPage = () => {
             sx={{
               mb: 3,
               '& .MuiOutlinedInput-root': {
-                color: '#fff',
-                backgroundColor: 'rgba(255,255,255,0.05)',
+                color: '#ffffffff',
+                backgroundColor: '#1e2f50',
                 borderRadius: '8px',
+              },
+              '& .MuiInputBase-input.Mui-disabled': {
+                WebkitTextFillColor: '#ffffff',
               },
             }}
           />

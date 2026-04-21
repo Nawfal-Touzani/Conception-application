@@ -17,7 +17,6 @@ const TournamentsPage = () => {
   const { user } = useAuth();
   const token = user?.token ?? '';
 
-  // ✅ NOUVEAU — id du tournoi dont on gère le planning
   const [planningTournamentId, setPlanningTournamentId] = useState<
     number | null
   >(null);

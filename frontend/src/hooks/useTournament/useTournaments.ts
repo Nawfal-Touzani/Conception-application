@@ -88,33 +88,44 @@ export function useTournaments(token: string) {
   );
 
   const filtered = useMemo(() => {
-    return tournaments.filter((t) => {
-      if (
-        nameSearch.trim() &&
-        !t.name.toLowerCase().includes(nameSearch.toLowerCase())
-      )
-        return false;
-      if (startDate && t.startDate < startDate) return false;
-      if (endDate && t.endDate > endDate) return false;
-      if (statusFilter === 'OPEN') {
-        const deadlinePassed = new Date(t.registrationDeadline) < new Date();
-        const isFull = t.currentParticipants >= t.maxParticipants;
+    const STATUS_ORDER: Record<string, number> = {
+      PREPARATION: 0,
+      IN_PROGRESS: 1,
+      FINISHED: 2,
+      CANCELLED: 3,
+    };
+    return tournaments
+      .filter((t) => {
         if (
-          !(
-            t.isPublic &&
-            t.status === 'PREPARATION' &&
-            !deadlinePassed &&
-            !isFull
-          )
+          nameSearch.trim() &&
+          !t.name.toLowerCase().includes(nameSearch.toLowerCase())
         )
           return false;
-      } else if (statusFilter && t.status !== statusFilter) {
-        return false;
-      }
-      if (visibilityFilter === 'public' && !t.isPublic) return false;
-      if (visibilityFilter === 'private' && t.isPublic) return false;
-      return true;
-    });
+        if (startDate && t.startDate < startDate) return false;
+        if (endDate && t.endDate > endDate) return false;
+        if (statusFilter === 'OPEN') {
+          const deadlinePassed = new Date(t.registrationDeadline) < new Date();
+          const isFull = t.currentParticipants >= t.maxParticipants;
+          if (
+            !(
+              t.isPublic &&
+              t.status === 'PREPARATION' &&
+              !deadlinePassed &&
+              !isFull
+            )
+          )
+            return false;
+        } else if (statusFilter && t.status !== statusFilter) {
+          return false;
+        }
+        if (visibilityFilter === 'public' && !t.isPublic) return false;
+        if (visibilityFilter === 'private' && t.isPublic) return false;
+        return true;
+      })
+      .sort(
+        (a, b) =>
+          (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99),
+      );
   }, [
     tournaments,
     nameSearch,

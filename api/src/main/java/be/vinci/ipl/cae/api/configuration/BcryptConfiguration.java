@@ -346,7 +346,7 @@ public class BcryptConfiguration {
         tournamentRepository.save(buildTournament("Spring Battle Series 2026",
             "Série printanière avec élimination directe et forte participation",
             LocalDate.of(2026, 4, 4), LocalDate.of(2026, 4, 11), LocalDate.of(2026, 4, 1), 8,
-            Status.IN_PROGRESS, true, admin));
+            Status.FINISHED, true, admin));
       }
 
       // Tournois futurs (PREPARATION + isPublic = true)
@@ -445,7 +445,7 @@ public class BcryptConfiguration {
               teamFrost, teamEmber, teamSurge, teamCrypt, teamApex), tournamentRepository,
           registrationRepository);
 
-      setupTournament("Spring Battle Series 2026", null,
+      setupTournament("Spring Battle Series 2026", teamAlpha,
           List.of(teamAlpha, teamOmega, teamIota, teamNova, teamVoid, teamStorm, teamBlaze,
               teamFrost), tournamentRepository, registrationRepository);
 

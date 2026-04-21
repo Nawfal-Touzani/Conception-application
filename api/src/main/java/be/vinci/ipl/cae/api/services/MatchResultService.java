@@ -233,9 +233,16 @@ public class MatchResultService {
     }
 
     for (Long recipientId : recipients) {
-      Notification notif = new Notification(Type.RESULT_CONFIRMATION,
-          "Le résultat du match a été encodé. Veuillez le valider ou le contester.",
-          LocalDateTime.now());
+      Notification notif = new Notification(
+          Type.RESULT_CONFIRMATION,
+          "Le résultat du match a été encodé. Le score est de "
+              + match.getTeamA().getName() + " "
+              + match.getScoreA() + " - "
+              + match.getScoreB() + " "
+              + match.getTeamB().getName()
+              + ". Veuillez le valider ou le contester.",
+          LocalDateTime.now()
+      );
       notif.setMatch(match);
       notificationService.send(recipientId, notif);
     }
