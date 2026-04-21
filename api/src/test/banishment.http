@@ -80,3 +80,12 @@ Content-Type: application/json
 {
   "reason": "Test ban responsable"
 }
+
+### Try to ban an administrator (OK - should lose admin rights and be banned)
+POST {{baseUrl}}/admin/banishments/1
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "reason": "Test ban admin"
+}

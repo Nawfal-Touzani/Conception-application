@@ -59,6 +59,8 @@ public class BanishmentService {
 
     handleTeamResponsibility(memberToBan);
 
+    banAdmin(memberToBan);
+
     applyBanishment(memberToBan);
 
     Banishment banishment = new Banishment(memberToBan, admin, LocalDate.now(), reason);
@@ -137,6 +139,12 @@ public class BanishmentService {
     } else {
       return oldestMembers.get(new Random().nextInt(oldestMembers.size()));
     }
+  }
+
+  private void banAdmin(Member member) {
+    member.setIsAdmin(false);
+
+    memberRepository.save(member);
   }
 }
 

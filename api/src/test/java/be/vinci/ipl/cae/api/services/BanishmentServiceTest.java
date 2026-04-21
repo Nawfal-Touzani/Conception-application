@@ -1,6 +1,7 @@
 package be.vinci.ipl.cae.api.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -135,5 +136,23 @@ public class BanishmentServiceTest {
 
     assertEquals(oldest, team.getResponsible());
     verify(teamCompositionRepository).delete(comp1);
+  }
+
+  @Test
+  @DisplayName("Should revoke admin privileges when an admin is banned")
+  void banAdminMember() {
+    member.setIsAdmin(true);
+
+    when(memberRepository.findById(456L)).thenReturn(Optional.of(member));
+    when(memberRepository.findById(123L)).thenReturn(Optional.of(admin));
+    when(banishmentRepository.existsByBannedMemberId(456L)).thenReturn(false);
+    when(teamRepository.findByResponsible(member)).thenReturn(Optional.empty());
+    when(teamCompositionRepository.findByMemberId(456L)).thenReturn(Optional.empty());
+
+    banishmentService.banMember(456L, 123L, "Abus de pouvoir");
+
+    assertFalse(member.getIsAdmin());
+    assertTrue(member.isBan());
+    verify(memberRepository, times(2)).save(member);
   }
 }
