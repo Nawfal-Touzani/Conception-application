@@ -80,7 +80,6 @@ public class BanishmentService {
 
   private void applyBanishment(Member member) {
     member.setBan(true);
-    memberRepository.save(member);
   }
 
   private void handleTeamResponsibility(Member memberToBan) {
@@ -143,8 +142,6 @@ public class BanishmentService {
 
   private void banAdmin(Member member) {
     member.setIsAdmin(false);
-
-    memberRepository.save(member);
   }
 }
 

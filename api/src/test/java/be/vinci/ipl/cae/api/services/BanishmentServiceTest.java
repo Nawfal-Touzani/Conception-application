@@ -74,7 +74,6 @@ public class BanishmentServiceTest {
     banishmentService.banMember(456L, 123L, "Triche");
 
     assertTrue(member.isBan());
-    verify(memberRepository, times(1)).save(member);
     verify(banishmentRepository, times(1)).save(any());
   }
 
@@ -145,7 +144,6 @@ public class BanishmentServiceTest {
 
     when(memberRepository.findById(456L)).thenReturn(Optional.of(member));
     when(memberRepository.findById(123L)).thenReturn(Optional.of(admin));
-    when(banishmentRepository.existsByBannedMemberId(456L)).thenReturn(false);
     when(teamRepository.findByResponsible(member)).thenReturn(Optional.empty());
     when(teamCompositionRepository.findByMemberId(456L)).thenReturn(Optional.empty());
 
@@ -153,6 +151,6 @@ public class BanishmentServiceTest {
 
     assertFalse(member.getIsAdmin());
     assertTrue(member.isBan());
-    verify(memberRepository, times(2)).save(member);
+    verify(banishmentRepository).save(any());
   }
 }
