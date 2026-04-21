@@ -16,7 +16,7 @@ import { useParams, useLocation } from 'react-router-dom';
 import { encodeResult } from '../../../../services/match/encode-result';
 import { MatchResponseDto } from '../../../../types/match.types';
 import { validateEncoding } from '../../../../utils/EncodeValidation/EncodeValidation';
-import { getMatchesByTournament } from '../../../../services/match/match-service';
+import { getMatchesByTournament } from '../../../../services/match/match.service';
 const ResultEncodingPage = () => {
   const { user } = useAuth();
   const token = user?.token ?? '';
