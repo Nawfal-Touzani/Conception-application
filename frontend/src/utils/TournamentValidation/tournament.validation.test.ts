@@ -45,7 +45,9 @@ describe('validateTournament', () => {
 
   test('retourne erreur si maxParticipants vide', () => {
     const errors = validateTournament({ ...validData, maxParticipants: '' });
-    expect(errors).toContain('Le nombre de participants est requis.');
+    expect(errors).toContain(
+      'Le nombre de participants doit être au minimum 3.',
+    );
   });
 
   test('retourne erreur si date de début dans le passé', () => {
