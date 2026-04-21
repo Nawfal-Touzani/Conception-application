@@ -8,6 +8,11 @@ import {
   approveRequest,
   refuseRequest,
 } from '../../../../services/membership-request.service';
+
+import {
+  validateResult,
+  contestResult,
+} from '../../../../services/match/encode-result';
 import { Notification } from '../../../../types/notifications.types';
 
 import NotificationList from './NotificationList';
@@ -48,6 +53,20 @@ const NotificationPage = () => {
     if (!user) return;
     await refuseRequest(membershipRequestId, reason, user.token);
     // Refresh the list after action
+    const data = await getNotifications(user.id, user.token, filter);
+    setNotifications(data);
+  };
+
+  const handleValidateResult = async (matchId: number) => {
+    if (!user) return;
+    await validateResult(matchId, user.token);
+    const data = await getNotifications(user.id, user.token, filter);
+    setNotifications(data);
+  };
+
+  const handleContestResult = async (matchId: number) => {
+    if (!user) return;
+    await contestResult(matchId, user.token);
     const data = await getNotifications(user.id, user.token, filter);
     setNotifications(data);
   };
@@ -98,6 +117,8 @@ const NotificationPage = () => {
               onMarkAsRead={handleMarkAsRead}
               onApprove={handleApprove}
               onRefuse={handleRefuse}
+              onValidateResult={handleValidateResult}
+              onContestResult={handleContestResult}
             />
           )}
         </Box>

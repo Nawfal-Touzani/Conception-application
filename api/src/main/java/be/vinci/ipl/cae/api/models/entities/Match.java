@@ -114,6 +114,9 @@ public class Match {
   @Column(name = "score_B")
   private Integer scoreB;
 
+  @Column(name = "result_encoded_date")
+  private LocalDateTime resultEncodedDate;
+
   @Enumerated(EnumType.STRING)
   @Column(name = "result_status", nullable = false)
   private ResultStatus resultStatus = ResultStatus.NOT_ENTERED;
