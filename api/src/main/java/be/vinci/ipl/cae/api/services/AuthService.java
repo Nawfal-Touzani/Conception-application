@@ -104,7 +104,7 @@ public class AuthService {
 
     // If banned, can't login
     if (member.isBan()) {
-      throw new IllegalStateException("Votre compte a été banni.");
+      throw new SecurityException("Votre compte a été banni.");
     }
 
     return createJwtToken(member);
