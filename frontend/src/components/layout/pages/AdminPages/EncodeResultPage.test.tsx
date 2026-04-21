@@ -16,7 +16,7 @@ vi.mock('../../../../services/match/encode-result', () => ({
   encodeResult: vi.fn(),
 }));
 
-vi.mock('../../../../services/match/match-service', () => ({
+vi.mock('../../../../services/match/match.service', () => ({
   getMatchesByTournament: vi.fn(),
 }));
 
