@@ -3,7 +3,7 @@ import { describe, test, expect, vi, beforeEach } from 'vitest';
 import ResultEncodingPage from './EncodeResultPage';
 import { useAuth } from '../../../../contexts/useAuth';
 import * as encodeResultService from '../../../../services/match/encode-result';
-import * as matchService from '../../../../services/match/match-service';
+import * as matchService from '../../../../services/match/match.service';
 import type { MatchResponseDto } from '../../../../types/match.types';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
