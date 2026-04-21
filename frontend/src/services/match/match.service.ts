@@ -1,4 +1,5 @@
 import { MatchResponseDto } from '../../types/match.types';
+
 export const getMatchesByTournament = async (
   tournamentId: number,
   token: string,
