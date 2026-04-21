@@ -36,7 +36,7 @@ public class NotificationController {
    * Creates a new NotificationController.
    *
    * @param notificationService the notification service
-   * @param notificationMapper the dto mapper
+   * @param notificationMapper  the dto mapper
    */
   public NotificationController(NotificationService notificationService,
       NotificationMapper notificationMapper) {
@@ -114,7 +114,8 @@ public class NotificationController {
     }
 
     try {
-      return notificationMapper.toDto(notificationService.markNotificationRead(idNotification));    } catch (NoSuchElementException e) {
+      return notificationMapper.toDto(notificationService.markNotificationRead(idNotification));
+    } catch (NoSuchElementException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }

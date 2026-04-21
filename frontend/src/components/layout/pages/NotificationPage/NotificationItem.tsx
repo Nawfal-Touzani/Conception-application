@@ -59,7 +59,8 @@ const NotificationItem = ({
     notification.type === 'MEMBERSHIP_REQUEST' &&
     notification.membershipRequestId;
 
-  const isResultConfirmation = notification.type === 'RESULT_CONFIRMATION';
+  const isResultConfirmation =
+    notification.type === 'RESULT_CONFIRMATION' && !notification.read;
 
   return (
     <>
@@ -154,6 +155,7 @@ const NotificationItem = ({
                   size="small"
                   onClick={() => {
                     onValidateResult?.(notification.matchId!);
+                    onMarkAsRead(notification.id);
                     setResultAction('validated');
                   }}
                 >
@@ -165,6 +167,7 @@ const NotificationItem = ({
                   size="small"
                   onClick={() => {
                     onContestResult?.(notification.matchId!);
+                    onMarkAsRead(notification.id);
                     setResultAction('contested');
                   }}
                 >

@@ -4,11 +4,14 @@ import be.vinci.ipl.cae.api.models.dtos.ResultRequest;
 import be.vinci.ipl.cae.api.models.entities.Match;
 import be.vinci.ipl.cae.api.models.entities.Match.MatchState;
 import be.vinci.ipl.cae.api.models.entities.Match.ResultStatus;
+import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.models.entities.Notification.Type;
 import be.vinci.ipl.cae.api.models.entities.Team;
 import be.vinci.ipl.cae.api.models.entities.ValidationResult;
 import be.vinci.ipl.cae.api.repositories.MatchRepository;
+import be.vinci.ipl.cae.api.repositories.MemberRepository;
+import be.vinci.ipl.cae.api.repositories.NotificationRepository;
 import be.vinci.ipl.cae.api.repositories.ValidationResultRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -26,16 +29,21 @@ public class MatchResultService {
   private final MatchRepository matchRepository;
   private final ValidationResultRepository validationResultRepository;
   private final NotificationService notificationService;
+  private final MemberRepository memberRepository;
+  private final NotificationRepository notificationRepository;
 
   /**
    * Creates a new MatchResultService.
    */
   public MatchResultService(MatchRepository matchRepository,
       ValidationResultRepository validationResultRepository,
-      NotificationService notificationService) {
+      NotificationService notificationService, MemberRepository memberRepository,
+      NotificationRepository notificationRepository) {
     this.matchRepository = matchRepository;
     this.validationResultRepository = validationResultRepository;
     this.notificationService = notificationService;
+    this.memberRepository = memberRepository;
+    this.notificationRepository = notificationRepository;
   }
 
   /**
@@ -72,6 +80,7 @@ public class MatchResultService {
     match.setScoreB(dto.scoreB());
     match.setState(MatchState.PLAYED);
     match.setResultStatus(ResultStatus.PENDING);
+    match.setResultEncodedDate(LocalDateTime.now());
 
     sendPendingNotifications(match);
 
@@ -93,6 +102,7 @@ public class MatchResultService {
     vr.setValidated(true);
     vr.setValidationDate(LocalDateTime.now());
     validationResultRepository.save(vr);
+    markConfirmationNotificationsAsRead(match, team);
 
     long validatedCount = validationResultRepository.countByMatchAndValidated(match, true);
     if (validatedCount == 2) {
@@ -124,6 +134,7 @@ public class MatchResultService {
     vr.setHasAlreadyContested(true);
     vr.setValidationDate(LocalDateTime.now());
     validationResultRepository.save(vr);
+    markConfirmationNotificationsAsRead(match, team);
 
     if (team.equals(match.getTeamA())) {
       match.setContestedByTeamA(true);
@@ -196,6 +207,11 @@ public class MatchResultService {
   public void advanceWinner(Match match) {
     Match nextMatch = match.getNextMatch();
     if (nextMatch == null) {
+      /*/ Finale — mettre à jour le gagnant du tournoi
+      Tournament tournament = match.getTournament();
+      tournament.setWinnerTeam(match.getWinner());
+      tournament.setStatus(Tournament.Status.FINISHED);
+      tournamentRepository.save(tournament);*/
       return;
     }
 
@@ -249,21 +265,38 @@ public class MatchResultService {
   }
 
   private void sendValidationNotifications(Match match) {
-    String scoreInfo = match.getScoreA() + " - " + match.getScoreB();
-    Team winner = match.getWinner();
-    Team loser = match.getTeamA().equals(winner) ? match.getTeamB() : match.getTeamA();
+    List<Member> allMembers = memberRepository.findAll();
 
-    sendToTeam(match, winner,
-        "Félicitations ! Votre équipe a gagné avec un score de " + scoreInfo + ".");
-    sendToTeam(match, loser, "Votre équipe a perdu le match avec un score de " + scoreInfo + ".");
-  }
+    for (Member member : allMembers) {
+      String message = match.getTournament().getName() + " | "
+          + match.getTeamA().getName()
+          + " " + match.getScoreA()
+          + " - "
+          + match.getScoreB() + " "
+          + match.getTeamB().getName()
+          + " — Résultat officiel et public";
 
-  private void sendToTeam(Match match, Team team, String message) {
-    Notification notif = new Notification(Type.RESULT, message, LocalDateTime.now());
-    notif.setMatch(match);
-    notificationService.send(team.getResponsible().getId(), notif);
-    if (team.getSecondResponsible() != null) {
-      notificationService.send(team.getSecondResponsible().getId(), notif);
+      Notification notif = new Notification(Type.RESULT, message, LocalDateTime.now());
+      notif.setMatch(match);
+      notificationService.send(member.getId(), notif);
     }
   }
+
+  private void markConfirmationNotificationsAsRead(Match match, Team team) {
+    List<Member> members = new ArrayList<>();
+    members.add(team.getResponsible());
+    if (team.getSecondResponsible() != null) {
+      members.add(team.getSecondResponsible());
+    }
+
+    members.forEach(member ->
+        notificationRepository.findByMemberAndMatchAndType(
+                member, match, Notification.Type.RESULT_CONFIRMATION)
+            .ifPresent(notif -> {
+              notif.setRead(true);
+              notificationRepository.save(notif);
+            })
+    );
+  }
+
 }
