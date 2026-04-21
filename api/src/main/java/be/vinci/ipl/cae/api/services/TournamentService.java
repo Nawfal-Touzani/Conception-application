@@ -356,9 +356,6 @@ public class TournamentService {
     if (dto.registrationDeadline().isAfter(dto.startDate())) {
       throw new IllegalArgumentException("Registration deadline must be before start date");
     }
-    if (!isPowerOfTwo(dto.maxParticipant())) {
-      throw new IllegalArgumentException("Max participants must be a power of two");
-    }
   }
 
   private void applyDtoToTournament(Tournament tournament, TournamentDto dto) {
@@ -368,10 +365,6 @@ public class TournamentService {
     tournament.setEndDate(dto.endDate());
     tournament.setRegistrationDeadline(dto.registrationDeadline());
     tournament.setMaxParticipants(dto.maxParticipant());
-  }
-
-  private boolean isPowerOfTwo(int n) {
-    return n > 0 && (n & (n - 1)) == 0;
   }
 
   private TournamentResponseDto toResponseDto(Tournament t) {
