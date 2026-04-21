@@ -5,18 +5,17 @@ import {
   Button,
   Alert,
   Paper,
-  Select,
-  MenuItem,
 } from '@mui/material';
 import { useAuth } from '../../../../contexts/useAuth';
 import * as tournamentService from '../../../../services/tournament/tournament.service';
 import { useTournamentForm } from '../../../../hooks/useTournamentForm/useTournamentForm';
-
-const NUMBER_OF_TEAM = [2, 4, 8, 16, 32, 64, 128];
+import { useNavigate } from 'react-router-dom';
 
 const CreateTournamentPage = () => {
   const { user } = useAuth();
   const token = user?.token ?? '';
+  const navigate = useNavigate();
+
   const {
     name,
     setName,
@@ -58,6 +57,7 @@ const CreateTournamentPage = () => {
         token,
       );
       setSuccess(`Le tournoi "${name}" a été créé avec succès !`);
+      setTimeout(() => navigate('/tournaments'), 1500);
 
       setName('');
       setDescription('');
@@ -204,37 +204,18 @@ const CreateTournamentPage = () => {
 
             <Box>
               <Label text="Nombre maximum d'équipes :" />
-              <Select
+              <TextField
+                placeholder="Ex: 8"
+                type="number"
                 value={maxParticipants}
                 onChange={(e) =>
                   setMaxParticipants(
                     e.target.value === '' ? '' : Number(e.target.value),
                   )
                 }
-                displayEmpty
                 fullWidth
-                renderValue={(selected) => {
-                  if (!selected) {
-                    return (
-                      <span style={{ color: '#999' }}>
-                        Choisir le nombre d'équipes
-                      </span>
-                    );
-                  }
-                  return selected;
-                }}
-                sx={{
-                  backgroundColor: '#fff',
-                  borderRadius: '6px',
-                  '& .MuiSelect-select': { py: '16.5px' },
-                }}
-              >
-                {NUMBER_OF_TEAM.map((val) => (
-                  <MenuItem key={val} value={val}>
-                    {val} équipes
-                  </MenuItem>
-                ))}
-              </Select>
+                sx={inputSx}
+              />
             </Box>
           </Box>
         </Box>
