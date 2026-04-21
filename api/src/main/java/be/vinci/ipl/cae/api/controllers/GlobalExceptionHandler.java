@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
   /**
-   * Handle not found string.
+   * Handle not found (404) string.
    *
    * @param e the e
    * @return the string
@@ -45,6 +45,18 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(IllegalStateException.class)
   @ResponseStatus(HttpStatus.CONFLICT)
   public String handleConflict(IllegalStateException e) {
+    return e.getMessage();
+  }
+
+  /**
+   * Handle forbidden (403) request string.
+   *
+   * @param e the e
+   * @return the string
+   */
+  @ExceptionHandler(SecurityException.class)
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  public String handleForbidden(SecurityException e) {
     return e.getMessage();
   }
 }
