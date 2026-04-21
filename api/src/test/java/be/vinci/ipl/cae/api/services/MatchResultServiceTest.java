@@ -20,6 +20,8 @@ import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.models.entities.Team;
 import be.vinci.ipl.cae.api.models.entities.Tournament;
 import be.vinci.ipl.cae.api.repositories.MatchRepository;
+import be.vinci.ipl.cae.api.repositories.MemberRepository;
+import be.vinci.ipl.cae.api.repositories.NotificationRepository;
 import be.vinci.ipl.cae.api.repositories.ValidationResultRepository;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
@@ -47,6 +49,11 @@ class MatchResultServiceTest {
   private ValidationResultRepository validationResultRepository;
   @Mock
   private NotificationService notificationService;
+  @Mock
+  private NotificationRepository notificationRepository;
+  @Mock  // Garder les 2 mocks meme inutilisé poir que l'inject mock de matchResultService fonctionne
+  private MemberRepository memberRepository;
+
   @InjectMocks
   private MatchResultService matchResultService;
 

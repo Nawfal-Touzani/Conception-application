@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class NotificationMapper {
+
   /**
    * Maps a single Notification to NotificationResponseDto.
    */
@@ -21,7 +22,9 @@ public class NotificationMapper {
         notif.getSendDate(),
         notif.isRead(),
         notif.getMembershipRequest() != null ? notif.getMembershipRequest().getId() : null,
-        notif.getMembershipRequest() != null ? notif.getMembershipRequest().getState().name() : null
+        notif.getMembershipRequest() != null ? notif.getMembershipRequest().getState().name()
+            : null,
+        notif.getMatch() != null ? notif.getMatch().getId() : null
     );
   }
 
