@@ -120,7 +120,7 @@ public class MemberService {
    *
    * @param memberId the ID of the member to promote
    * @throws NoSuchElementException if no member exists with the given ID
-   * @throws IllegalStateException if the member is already an administrator
+   * @throws IllegalStateException  if the member is already an administrator
    */
   public void promoteToAdmin(Long memberId) {
     Member member = memberRepository.findById(memberId)
@@ -139,8 +139,8 @@ public class MemberService {
    *
    * @param memberId the ID of the member to demote
    * @throws NoSuchElementException if no member exists with the given ID
-   * @throws IllegalStateException if the member is not an administrator
-   * @throws IllegalStateException if the member is the last remaining administrator
+   * @throws IllegalStateException  if the member is not an administrator
+   * @throws IllegalStateException  if the member is the last remaining administrator
    */
   public void demoteFromAdmin(Long memberId) {
     Member member = memberRepository.findById(memberId)
@@ -228,8 +228,9 @@ public class MemberService {
 
   private boolean isMemberAvailable(Member member) {
     LocalDate today = LocalDate.now();
-    boolean isUnavailable = unavailabilityRepository.existsByMemberAndStartDateBeforeAndEndDateAfter(
-        member, today.plusDays(1), today.minusDays(1));
+    boolean isUnavailable = unavailabilityRepository
+        .existsByMemberAndStartDateBeforeAndEndDateAfter(
+            member, today.plusDays(1), today.minusDays(1));
     return !isUnavailable;
   }
 

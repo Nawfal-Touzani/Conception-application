@@ -24,3 +24,25 @@ export const encodeResult = async (
 
   return response.json();
 };
+
+export const validateResult = async (
+  matchId: number,
+  token: string,
+): Promise<void> => {
+  const response = await fetch(`${API_URL}/${matchId}/validate`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error(`Error ${response.status}`);
+};
+
+export const contestResult = async (
+  matchId: number,
+  token: string,
+): Promise<void> => {
+  const response = await fetch(`${API_URL}/${matchId}/contest`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error(`Error ${response.status}`);
+};
