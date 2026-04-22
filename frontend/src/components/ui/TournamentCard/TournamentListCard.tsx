@@ -19,15 +19,9 @@ const formatDateFull = (dateStr: string) =>
     month: '2-digit',
     year: 'numeric',
   });
-
 function getStateLabel(tournament: TournamentDetails): string {
   if (tournament.status === 'PREPARATION') {
-    if (!tournament.isPublic) return 'En préparation';
-    const deadlinePassed =
-      new Date(tournament.registrationDeadline) < new Date();
-    const isFull = tournament.currentParticipants >= tournament.maxParticipants;
-    if (deadlinePassed || isFull) return 'En préparation';
-    return 'Inscriptions ouvertes';
+    return tournament.isPublic ? 'Inscriptions ouvertes' : 'En préparation';
   }
   if (tournament.status === 'IN_PROGRESS') return 'En cours';
   if (tournament.status === 'FINISHED') return 'Terminé';
