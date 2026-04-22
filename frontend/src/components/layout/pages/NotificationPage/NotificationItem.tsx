@@ -208,6 +208,7 @@ const NotificationItem = ({
         {!notification.read && (
           <Tooltip title="Marquer comme lu">
             <IconButton
+              aria-label="Marquer comme lu"
               onClick={() => onMarkAsRead(notification.id)}
               sx={{
                 color: '#fff',

@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, useNavigate } from 'react-router-dom';
 import { describe, test, expect, vi } from 'vitest';
-import NotificationsPage from './NotificationsPage';
+import NotificationPage from './NotificationsPage';
 import { useAuth } from '../../../../contexts/useAuth';
 import * as notificationService from '../../../../services/notifications.service';
 import * as membershipRequestService from '../../../../services/membership-request.service';
@@ -78,7 +78,7 @@ const mockMembershipNotification = {
 };
 
 describe('NotificationsPage', () => {
-  test('displays "Aucune notification." when list is empty', async () => {
+  test('displays "Aucune notification" when list is empty', async () => {
     const navigateMock = vi.fn();
     vi.mocked(useNavigate).mockReturnValue(navigateMock);
 
@@ -94,12 +94,12 @@ describe('NotificationsPage', () => {
 
     render(
       <MemoryRouter>
-        <NotificationsPage />
+        <NotificationPage />
       </MemoryRouter>,
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Aucune notification.')).toBeTruthy();
+      expect(screen.getByText('Aucune notification')).toBeTruthy();
     });
   });
 
@@ -121,7 +121,7 @@ describe('NotificationsPage', () => {
 
     render(
       <MemoryRouter>
-        <NotificationsPage />
+        <NotificationPage />
       </MemoryRouter>,
     );
 
@@ -157,7 +157,7 @@ describe('NotificationsPage', () => {
 
     render(
       <MemoryRouter>
-        <NotificationsPage />
+        <NotificationPage />
       </MemoryRouter>,
     );
 
@@ -194,15 +194,17 @@ describe('NotificationsPage', () => {
 
     render(
       <MemoryRouter>
-        <NotificationsPage />
+        <NotificationPage />
       </MemoryRouter>,
     );
 
     await waitFor(() => {
-      expect(screen.getByAltText('Marquer comme lu')).toBeTruthy();
+      expect(
+        screen.getByRole('button', { name: 'Marquer comme lu' }),
+      ).toBeTruthy();
     });
 
-    fireEvent.click(screen.getByAltText('Marquer comme lu'));
+    fireEvent.click(screen.getByRole('button', { name: 'Marquer comme lu' }));
 
     await waitFor(() => {
       expect(notificationService.markAsRead).toHaveBeenCalledWith(
@@ -228,7 +230,7 @@ describe('NotificationsPage', () => {
 
     render(
       <MemoryRouter>
-        <NotificationsPage />
+        <NotificationPage />
       </MemoryRouter>,
     );
 
@@ -255,7 +257,7 @@ describe('NotificationsPage', () => {
 
     render(
       <MemoryRouter>
-        <NotificationsPage />
+        <NotificationPage />
       </MemoryRouter>,
     );
 
@@ -285,7 +287,7 @@ describe('NotificationsPage', () => {
 
     render(
       <MemoryRouter>
-        <NotificationsPage />
+        <NotificationPage />
       </MemoryRouter>,
     );
 
@@ -316,18 +318,22 @@ describe('NotificationsPage', () => {
 
     render(
       <MemoryRouter>
-        <NotificationsPage />
+        <NotificationPage />
       </MemoryRouter>,
     );
 
     await waitFor(() => {
-      expect(screen.getByAltText('Marquer comme lu')).toBeTruthy();
+      expect(
+        screen.getByRole('button', { name: 'Marquer comme lu' }),
+      ).toBeTruthy();
     });
 
-    fireEvent.click(screen.getByAltText('Marquer comme lu'));
+    fireEvent.click(screen.getByRole('button', { name: 'Marquer comme lu' }));
 
     await waitFor(() => {
-      expect(screen.queryByAltText('Marquer comme lu')).toBeFalsy();
+      expect(
+        screen.queryByRole('button', { name: 'Marquer comme lu' }),
+      ).toBeFalsy();
     });
   });
 
@@ -349,7 +355,7 @@ describe('NotificationsPage', () => {
 
     render(
       <MemoryRouter>
-        <NotificationsPage />
+        <NotificationPage />
       </MemoryRouter>,
     );
 
@@ -380,7 +386,7 @@ describe('NotificationsPage', () => {
 
     render(
       <MemoryRouter>
-        <NotificationsPage />
+        <NotificationPage />
       </MemoryRouter>,
     );
 
@@ -416,7 +422,7 @@ describe('NotificationsPage', () => {
 
     render(
       <MemoryRouter>
-        <NotificationsPage />
+        <NotificationPage />
       </MemoryRouter>,
     );
 
@@ -452,7 +458,7 @@ describe('NotificationsPage', () => {
 
     render(
       <MemoryRouter>
-        <NotificationsPage />
+        <NotificationPage />
       </MemoryRouter>,
     );
 
@@ -499,7 +505,7 @@ describe('NotificationsPage', () => {
 
     render(
       <MemoryRouter>
-        <NotificationsPage />
+        <NotificationPage />
       </MemoryRouter>,
     );
 
