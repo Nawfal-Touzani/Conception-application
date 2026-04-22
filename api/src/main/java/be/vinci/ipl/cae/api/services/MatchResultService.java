@@ -238,21 +238,21 @@ public class MatchResultService {
    * @param match the current match from which the winner should advance
    */
   public void advanceWinner(Match match) {
+
     Match nextMatch = match.getNextMatch();
+
     if (nextMatch == null) {
-      /*/ Finale — mettre à jour le gagnant du tournoi
-      Tournament tournament = match.getTournament();
-      tournament.setWinnerTeam(match.getWinner());
-      tournament.setStatus(Tournament.Status.FINISHED);
-      tournamentRepository.save(tournament);*/
       return;
     }
 
     if (nextMatch.getTeamA() == null) {
       nextMatch.setTeamA(match.getWinner());
-    } else {
+    } else if (nextMatch.getTeamB() == null) {
       nextMatch.setTeamB(match.getWinner());
+    } else {
+      throw new IllegalStateException("Next match already full");
     }
+
     matchRepository.save(nextMatch);
   }
 

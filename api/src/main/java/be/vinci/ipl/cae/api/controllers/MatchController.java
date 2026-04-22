@@ -237,7 +237,7 @@ public class MatchController {
    * @param payload the corrected score
    * @return the updated match detail DTO
    */
-  @PutMapping("/{idMatch}/result")
+  @PutMapping("/{idMatch}/result/correction")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @ResponseStatus(HttpStatus.OK)
   public MatchDetailDto correctResult(@PathVariable Long idMatch,
