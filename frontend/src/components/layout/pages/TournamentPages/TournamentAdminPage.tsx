@@ -152,12 +152,13 @@ const TournamentAdminPage = ({
         sx={{
           width: '100%',
           maxWidth: 800,
-          backgroundColor: '#243060',
+          backgroundColor: '#1e2f50',
           borderRadius: '16px',
           p: 4,
           display: 'flex',
           flexDirection: 'column',
           gap: 3,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
         }}
       >
         <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
