@@ -67,6 +67,9 @@ const NavBar = ({
                 textTransform: 'none',
                 fontWeight: 'bold',
                 px: 5,
+                '&:hover': {
+                  backgroundColor: isTeamPage ? '#c38d54' : '#151e32',
+                },
               }}
             >
               Mon équipe
@@ -206,6 +209,9 @@ const NavBar = ({
                   textTransform: 'none',
                   fontWeight: 'bold',
                   px: 4,
+                  '&:hover': {
+                    backgroundColor: '#dedddd',
+                  },
                 }}
               >
                 Se connecter
@@ -222,6 +228,9 @@ const NavBar = ({
                   textTransform: 'none',
                   fontWeight: 'bold',
                   px: 4,
+                  '&:hover': {
+                    backgroundColor: '#151e32',
+                  },
                 }}
               >
                 S'inscrire
