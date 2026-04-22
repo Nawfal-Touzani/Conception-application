@@ -165,7 +165,7 @@ const TournamentFilters = ({
           mb: 0.5,
         }}
       >
-        Statut
+        État
       </Typography>
       <RadioGroup
         value={statusFilter}
@@ -175,7 +175,7 @@ const TournamentFilters = ({
       >
         {[
           { value: 'OPEN', label: 'Inscriptions ouvertes' },
-          { value: 'IN_PROGRESS', label: 'En Cours' },
+          { value: 'IN_PROGRESS', label: 'En cours' },
           { value: 'FINISHED', label: 'Terminés' },
         ].map((opt) => (
           <FormControlLabel

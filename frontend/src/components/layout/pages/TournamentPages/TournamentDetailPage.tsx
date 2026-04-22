@@ -202,7 +202,7 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
                   textAlign: 'right',
                 }}
               >
-                Etat
+                État
               </Typography>
             </Box>
             <Divider sx={{ mb: 1 }} />

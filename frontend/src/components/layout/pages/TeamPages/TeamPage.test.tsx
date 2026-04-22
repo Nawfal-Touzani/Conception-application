@@ -201,9 +201,7 @@ describe('TeamPage — avec équipe', () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: false,
       status: 409,
-      json: async () => ({
-        message: 'Désignez un second responsable avant de quitter.',
-      }),
+      text: async () => 'Désignez un second responsable avant de quitter.',
     });
 
     fireEvent.click(screen.getByText('Confirmer'));

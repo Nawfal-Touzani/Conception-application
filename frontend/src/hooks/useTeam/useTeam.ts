@@ -61,9 +61,9 @@ export function useTeam() {
     try {
       const res = await teamService.leaveTeam(token);
       if (res.status === 409) {
-        const body = await res.json();
+        const text = await res.text();
         setLeaveError(
-          body.message || 'Désignez un second responsable avant de quitter.',
+          text || 'Désignez un second responsable avant de quitter.',
         );
         setConfirmOpen(false);
         return;
