@@ -237,7 +237,7 @@ public class TournamentService {
     Tournament t = tournamentRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
 
-    if ("confirmed".equals(dto.getPhase()) || "published".equals(dto.getPhase())) {
+    if ("published".equals(dto.getPhase())) {
 
       // Supprime les anciens matchs pour éviter les doublons si re-confirmation
       matchRepository.deleteByTournament(t);
@@ -255,7 +255,7 @@ public class TournamentService {
           }
 
           for (int m = 0; m < round.getMatches().size(); m++) {
-            PlanningRequest.MatchDto matchDto = round.getMatches().get(m);
+            final PlanningRequest.MatchDto matchDto = round.getMatches().get(m);
 
             Match match = new Match();
             match.setTournament(t);

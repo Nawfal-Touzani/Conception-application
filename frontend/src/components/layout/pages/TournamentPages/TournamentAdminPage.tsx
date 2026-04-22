@@ -1,4 +1,4 @@
-import { useState , useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -55,9 +55,9 @@ const TournamentAdminPage = ({
   const isLocked = tournament.isPublic;
 
   const maxParticipantsError =
-  maxParticipants < tournament.currentParticipants
-    ? 'Impossible de mettre moins que les équipes déjà inscrites.'
-    : '';
+    maxParticipants < tournament.currentParticipants
+      ? 'Impossible de mettre moins que les équipes déjà inscrites.'
+      : '';
 
   const handleUpdate = async () => {
     setErrorMsg(null);
@@ -103,19 +103,18 @@ const TournamentAdminPage = ({
   const canPublish =
     tournament.status === 'PREPARATION' && !tournament.isPublic;
 
-const [planningPublished, setPlanningPublished] = useState(false);
+  const [planningPublished, setPlanningPublished] = useState(false);
 
-
-useEffect(() => {
-  fetch(`http://localhost:3000/tournaments/${tournament.id}/matches`, {
-    headers: { Authorization: `Bearer ${token}` },
-  })
-    .then((res) => (res.ok ? res.json() : []))
-    .then((matches) => {
-      setPlanningPublished(matches.length > 0);
+  useEffect(() => {
+    fetch(`http://localhost:3000/tournaments/${tournament.id}/matches`, {
+      headers: { Authorization: `Bearer ${token}` },
     })
-    .catch(() => setPlanningPublished(false));
-}, [tournament.id, token]);
+      .then((res) => (res.ok ? res.json() : []))
+      .then((matches) => {
+        setPlanningPublished(matches.length > 0);
+      })
+      .catch(() => setPlanningPublished(false));
+  }, [tournament.id, token]);
   return (
     <Box
       sx={{
@@ -160,7 +159,8 @@ useEffect(() => {
 
       {isLocked && (
         <Alert severity="info" sx={{ mb: 3, maxWidth: 800, width: '100%' }}>
-          Le tournoi est public, les informations ne peuvent plus être modifiées.
+          Le tournoi est public, les informations ne peuvent plus être
+          modifiées.
         </Alert>
       )}
 

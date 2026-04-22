@@ -23,13 +23,11 @@ function buildBracket(teams: string[]): Round[] {
   const rounds: Round[] = [];
   let current = shuffleArray(teams);
 
-  // Round 1 : on apparie les équipes, les impairs passent en bye
   const round1: Match[] = [];
   const nextSlots: string[] = [];
 
   for (let i = 0; i < current.length; i += 2) {
     if (current[i + 1] === undefined) {
-      // bye : passe directement au round suivant
       nextSlots.push(current[i]);
     } else {
       round1.push({ team1: current[i], team2: current[i + 1] });
@@ -39,7 +37,6 @@ function buildBracket(teams: string[]): Round[] {
   rounds.push(round1);
   current = nextSlots;
 
-  // Rounds suivants : tout en "?" sauf les byes connus
   while (current.length > 1) {
     const round: Match[] = [];
     const next: string[] = [];
@@ -66,7 +63,6 @@ function buildFullBracketFromBackend(
     teamA: string | null;
     teamB: string | null;
   }[],
-  _allTeams: string[],
 ): Round[] {
   const maxRound = Math.max(...backendMatches.map((m) => m.roundNumber));
   const rounds: Round[] = [];
@@ -135,6 +131,9 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
       const teamNames = t.registeredTeamNames ?? [];
       setTeams(teamNames);
 
+      const savedBracket = sessionStorage.getItem(`bracket_${tournamentId}`);
+      const savedPhase = sessionStorage.getItem(`phase_${tournamentId}`);
+
       fetch(`http://localhost:3000/tournaments/${tournamentId}/matches`, {
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -147,46 +146,63 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
               teamB: string | null;
             }[],
           ) => {
-            if (matches.length === 0) {
-              setRounds(buildBracket(teamNames));
-              setPhase('draft');
-            } else {
-              const full = buildFullBracketFromBackend(matches, teamNames);
+            if (matches.length > 0) {
+              // Published → données viennent du backend
+              const full = buildFullBracketFromBackend(matches);
               setRounds(full);
               setConfirmedRounds(full);
+              setPhase('published');
+              sessionStorage.removeItem(`bracket_${tournamentId}`);
+              sessionStorage.removeItem(`phase_${tournamentId}`);
+            } else if (savedBracket && savedPhase === 'confirmed') {
+              // Confirmed → données viennent du sessionStorage
+              const parsed = JSON.parse(savedBracket);
+              setRounds(parsed);
+              setConfirmedRounds(parsed);
               setPhase('confirmed');
+            } else {
+              // Draft → génère un nouveau bracket
+              setRounds(buildBracket(teamNames));
+              setPhase('draft');
             }
           },
         )
         .catch(() => {
-          setRounds(buildBracket(teamNames));
-          setPhase('draft');
+          if (savedBracket && savedPhase === 'confirmed') {
+            const parsed = JSON.parse(savedBracket);
+            setRounds(parsed);
+            setConfirmedRounds(parsed);
+            setPhase('confirmed');
+          } else {
+            setRounds(buildBracket(teamNames));
+            setPhase('draft');
+          }
         });
     });
   }, [tournamentId, token]);
 
- const callPlanningApi = async (p: Phase) => {
-  const res = await fetch(
-    `http://localhost:3000/tournaments/${tournamentId}/planning`,
-    {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        phase: p,
-        rounds: rounds.map((round) => ({         
-          matches: round.map((m) => ({
-            team1: m.team1,
-            team2: m.team2,
+  const callPlanningApi = async (p: Phase) => {
+    const res = await fetch(
+      `http://localhost:3000/tournaments/${tournamentId}/planning`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          phase: p,
+          rounds: rounds.map((round) => ({
+            matches: round.map((m) => ({
+              team1: m.team1,
+              team2: m.team2,
+            })),
           })),
-        })),
-      }),
-    },
-  );
-  if (!res.ok) throw new Error('API error');
-};
+        }),
+      },
+    );
+    if (!res.ok) throw new Error('API error');
+  };
 
   const handleTeamClick = (pos: TeamPos) => {
     if (phase !== 'draft') return;
@@ -215,6 +231,9 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
       setConfirmedRounds(rounds);
       setSelected(null);
       setPhase('confirmed');
+      // Mémorise le bracket confirmé dans le sessionStorage
+      sessionStorage.setItem(`bracket_${tournamentId}`, JSON.stringify(rounds));
+      sessionStorage.setItem(`phase_${tournamentId}`, 'confirmed');
       setMessage({ text: 'Planning confirmé !', type: 'success' });
     } catch {
       setMessage({ text: 'Erreur lors de la confirmation.', type: 'warn' });
@@ -226,6 +245,8 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
     setConfirmedRounds([]);
     setSelected(null);
     setPhase('draft');
+    sessionStorage.removeItem(`bracket_${tournamentId}`);
+    sessionStorage.removeItem(`phase_${tournamentId}`);
   };
 
   const doDraft = () => {
@@ -237,6 +258,9 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
   const confirmPublish = async () => {
     try {
       await callPlanningApi('published');
+      // Nettoie le sessionStorage à la publication
+      sessionStorage.removeItem(`bracket_${tournamentId}`);
+      sessionStorage.removeItem(`phase_${tournamentId}`);
       setShowConfirmModal(false);
       setPhase('published');
       setMessage({ text: '', type: '' });
