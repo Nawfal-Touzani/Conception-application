@@ -203,7 +203,11 @@ describe('ResultEncodingPage', () => {
     fireEvent.click(screen.getByText('Valider'));
 
     await waitFor(() => {
-      expect(screen.getByText('Résultat enregistré : 3 - 1')).toBeTruthy();
+      expect(
+        screen.getByText(
+          'Résultat enregistré : Nom équipe 1 3 - 1 Nom équipe 2',
+        ),
+      ).toBeTruthy();
     });
   });
 
@@ -229,7 +233,7 @@ describe('ResultEncodingPage', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Erreur lors de l'enregistrement du score."),
+        screen.getByText('Vous avez déja encoder ce résultat'),
       ).toBeTruthy();
     });
   });
