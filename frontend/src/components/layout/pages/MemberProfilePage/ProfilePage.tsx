@@ -2,7 +2,14 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../../../../contexts/useAuth';
 import { MemberProfile } from '../../../../types/member';
 import * as memberService from '../../../../services/member/member.service';
-import { Container, Divider, Grid2, Paper, Typography } from '@mui/material';
+import {
+  Box,
+  Container,
+  Divider,
+  Grid2,
+  Paper,
+  Typography,
+} from '@mui/material';
 import { ProfileSidebar } from './ProfileSidebar';
 import { MemberInfoForm } from './MemberInfoForm';
 import { ActionSidebar } from './ActionsSideBar';
@@ -81,15 +88,30 @@ export const ProfilePage = () => {
   }
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 2, bgcolor: '#1e2a44', p: 2 }}>
-      <Typography
-        variant="h4"
-        color="white"
-        align="center"
-        sx={{ mb: 4, fontWeight: 'bold' }}
-      >
-        Profil
-      </Typography>
+    <Container maxWidth="xl" sx={{ mt: 2, bgcolor: '#1e2a44', p: 2 }}>
+      <Box sx={{ mb: 3, textAlign: 'center' }}>
+        <Typography
+          variant="h4"
+          sx={{
+            color: 'white',
+            fontWeight: 900,
+            textAlign: 'center',
+            textTransform: 'uppercase',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 2,
+            '&::before, &::after': {
+              content: '""',
+              height: '3px',
+              width: '50px',
+              backgroundColor: 'white',
+            },
+          }}
+        >
+          Profil
+        </Typography>
+      </Box>
 
       <Grid2 container spacing={3}>
         <Grid2 size={{ xs: 12, lg: 6 }}>

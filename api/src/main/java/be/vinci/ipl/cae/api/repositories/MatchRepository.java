@@ -48,11 +48,11 @@ public interface MatchRepository extends ListCrudRepository<Match, Long> {
    */
   @Query(
       """
-          SELECT m FROM Match m
-          JOIN m.playersSelections ps
-          WHERE ps.member = :member
-            AND m.state = :state
-          """
+              SELECT m FROM Match m
+              JOIN m.playersSelections ps
+              WHERE ps.member = :member
+                AND m.state = :state
+      """
   )
   List<Match> findBySelectedMemberAndState(
       @Param("member") Member member,

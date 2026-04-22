@@ -22,7 +22,7 @@ describe('ActionSidebar', () => {
       </MemoryRouter>,
     );
 
-    const teamButton = screen.getByText(/Créer\/Rejoindre une team/i);
+    const teamButton = screen.getByText(/Rejoindre une team/i);
     expect(teamButton).toBeTruthy();
 
     fireEvent.click(teamButton);

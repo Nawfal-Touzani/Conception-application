@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+
 /**
  * Controller for managing matches.
  */
@@ -223,8 +224,9 @@ public class MatchController {
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @ResponseStatus(HttpStatus.OK)
   public MatchDetailDto encodeResult(@PathVariable Long idMatch,
-      @RequestBody @Valid ResultRequest payload) {
-    Match match = matchResultService.encodingResult(idMatch, payload);
+      @RequestBody @Valid ResultRequest payload, @AuthenticationPrincipal Member currentMember) {
+
+    Match match = matchResultService.encodingResult(idMatch, payload, currentMember);
     return matchMapper.toDetailDto(match);
   }
 
@@ -235,7 +237,7 @@ public class MatchController {
    * @param payload the corrected score
    * @return the updated match detail DTO
    */
-  @PutMapping("/{idMatch}/result")
+  @PutMapping("/{idMatch}/result/correction")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @ResponseStatus(HttpStatus.OK)
   public MatchDetailDto correctResult(@PathVariable Long idMatch,

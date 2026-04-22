@@ -7,6 +7,7 @@ type Snack = {
   open: boolean;
   msg: string;
   severity: 'success' | 'error';
+  section: 'join' | 'create' | null;
 };
 
 export function useJoinOrCreateTeam(onTeamCreated: () => void) {
@@ -22,6 +23,7 @@ export function useJoinOrCreateTeam(onTeamCreated: () => void) {
     open: false,
     msg: '',
     severity: 'success',
+    section: null,
   });
 
   useEffect(() => {
@@ -47,7 +49,6 @@ export function useJoinOrCreateTeam(onTeamCreated: () => void) {
         ),
       );
     }
-    setSelectedTeamId('');
   }, [search, teams]);
 
   const closeSnack = () => setSnack((s) => ({ ...s, open: false }));
@@ -63,18 +64,21 @@ export function useJoinOrCreateTeam(onTeamCreated: () => void) {
           open: true,
           msg: "Ce nom d'équipe existe déjà.",
           severity: 'error',
+          section: 'create',
         });
       } else if (res.status === 400) {
         setSnack({
           open: true,
           msg: "Nom d'équipe invalide.",
           severity: 'error',
+          section: 'create',
         });
       } else {
         setSnack({
           open: true,
           msg: 'Erreur lors de la création.',
           severity: 'error',
+          section: 'create',
         });
       }
     } catch {
@@ -82,6 +86,7 @@ export function useJoinOrCreateTeam(onTeamCreated: () => void) {
         open: true,
         msg: 'Impossible de joindre le serveur.',
         severity: 'error',
+        section: 'create',
       });
     }
   };
@@ -95,6 +100,7 @@ export function useJoinOrCreateTeam(onTeamCreated: () => void) {
           open: true,
           msg: 'Demande envoyée avec succès !',
           severity: 'success',
+          section: 'join',
         });
         setSelectedTeamId('');
       } else {
@@ -102,6 +108,7 @@ export function useJoinOrCreateTeam(onTeamCreated: () => void) {
           open: true,
           msg: "Erreur lors de l'envoi.",
           severity: 'error',
+          section: 'join',
         });
       }
     } catch {
@@ -109,6 +116,7 @@ export function useJoinOrCreateTeam(onTeamCreated: () => void) {
         open: true,
         msg: 'Impossible de joindre le serveur.',
         severity: 'error',
+        section: 'join',
       });
     }
   };
