@@ -41,12 +41,29 @@ const MembersListPage = () => {
       }}
     >
       <Box sx={{ width: '100%', maxWidth: 1200 }}>
-        <Typography
-          variant="h4"
-          sx={{ color: '#fff', fontWeight: 800, mb: 4, textAlign: 'center' }}
-        >
-          Gestion des membres
-        </Typography>
+        <Box sx={{ mb: 2, textAlign: 'center' }}>
+          <Typography
+            variant="h4"
+            sx={{
+              color: 'white',
+              fontWeight: 900,
+              textAlign: 'center',
+              textTransform: 'uppercase',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 2,
+              '&::before, &::after': {
+                content: '""',
+                height: '3px',
+                width: '50px',
+                backgroundColor: 'white',
+              },
+            }}
+          >
+            Membres
+          </Typography>
+        </Box>
 
         <Button
           onClick={() => navigate('/admin')}

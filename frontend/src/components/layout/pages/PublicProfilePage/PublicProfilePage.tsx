@@ -46,15 +46,14 @@ const PublicProfilePage = () => {
           borderColor: '#d8a46b',
           color: '#d8a46b',
           fontWeight: 700,
-          textTransform: 'none',
-          borderRadius: '8px',
           ml: 7,
+          mt: 2,
           '&:hover': {
             backgroundColor: 'rgba(216,164,107,0.1)',
           },
         }}
       >
-        ←
+        ← Retour
       </Button>
 
       <Box

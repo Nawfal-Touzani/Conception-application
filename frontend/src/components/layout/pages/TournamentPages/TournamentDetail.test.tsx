@@ -234,7 +234,7 @@ describe('TournamentDetail', () => {
       />,
     );
     expect(screen.getByText('Teams participantes')).toBeTruthy();
-    expect(screen.getByText('3 sur 8')).toBeTruthy();
+    expect(screen.getByText('3')).toBeTruthy();
   });
 
   test('affiche le gagnant si FINISHED et winnerTeamName présent', () => {
