@@ -73,9 +73,29 @@ const NotificationPage = () => {
 
   return (
     <Box sx={{ mt: 4, mx: 'auto', maxWidth: 1200, px: 3 }}>
-      <Typography variant="h4" mb={3} sx={{ color: 'white' }}>
-        Mes notifications
-      </Typography>
+      <Box sx={{ mb: 5, textAlign: 'center' }}>
+        <Typography
+          variant="h4"
+          sx={{
+            color: 'white',
+            fontWeight: 900,
+            textAlign: 'center',
+            textTransform: 'uppercase',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 2,
+            '&::before, &::after': {
+              content: '""',
+              height: '3px',
+              width: '50px',
+              backgroundColor: 'white',
+            },
+          }}
+        >
+          Mes notifications
+        </Typography>
+      </Box>
 
       <Box sx={{ display: 'flex', gap: 4 }}>
         <Box

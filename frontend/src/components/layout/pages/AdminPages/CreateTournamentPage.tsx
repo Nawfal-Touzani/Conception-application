@@ -94,12 +94,36 @@ const CreateTournamentPage = () => {
         minHeight: '100vh',
         backgroundColor: '#1a2744',
         display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'flex-start',
+        flexDirection: 'column',
+        alignItems: 'center',
         pt: 6,
         px: 2,
       }}
     >
+      <Box sx={{ mb: 4, textAlign: 'center', width: '100%', maxWidth: 720 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            color: 'white',
+            fontWeight: 900,
+            textTransform: 'uppercase',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 2,
+            '&::before, &::after': {
+              content: '""',
+              height: '3px',
+              flex: 1,
+              maxWidth: '50px',
+              backgroundColor: 'white',
+            },
+          }}
+        >
+          Créer un tournoi
+        </Typography>
+      </Box>
+
       <Paper
         sx={{
           width: '100%',
@@ -107,15 +131,9 @@ const CreateTournamentPage = () => {
           backgroundColor: '#1e2f50',
           borderRadius: '12px',
           p: 4,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
         }}
       >
-        <Typography
-          variant="h5"
-          sx={{ color: '#fff', fontWeight: 700, textAlign: 'center', mb: 4 }}
-        >
-          Créer un tournoi
-        </Typography>
-
         {errors.length > 0 && (
           <Alert
             onClose={() => setErrors([])}
