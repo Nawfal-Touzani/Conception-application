@@ -43,6 +43,8 @@ class MatchResultServiceTest {
   Member responsibleB;
   Member secondResponsibleA;
   Member secondResponsibleB;
+  Member admin;
+  Member otherAdmin;
   @Mock
   private MatchRepository matchRepository;
   @Mock
@@ -59,6 +61,12 @@ class MatchResultServiceTest {
 
   @BeforeEach
   void setUp() {
+    admin = new Member();
+    admin.setId(50L);
+
+    otherAdmin = new Member();
+    otherAdmin.setId(51L);
+
     responsibleA = new Member();
     responsibleA.setId(10L);
 
@@ -104,10 +112,11 @@ class MatchResultServiceTest {
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
     when(matchRepository.save(any(Match.class))).thenReturn(match);
 
-    Match result = matchResultService.encodingResult(1L, dto);
+    Match result = matchResultService.encodingResult(1L, dto,admin);
 
     assertEquals(MatchState.PLAYED, result.getState());
     assertEquals(ResultStatus.PENDING, result.getResultStatus());
+    assertEquals(admin, result.getResponsibleAdmin());
     assertEquals(5, result.getScoreA());
     assertEquals(3, result.getScoreB());
     assertEquals(teamA, result.getWinner());
@@ -121,7 +130,7 @@ class MatchResultServiceTest {
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
     when(matchRepository.save(any(Match.class))).thenReturn(match);
 
-    Match result = matchResultService.encodingResult(1L, dto);
+    Match result = matchResultService.encodingResult(1L, dto,admin);
 
     assertEquals(teamB, result.getWinner());
     assertEquals(MatchState.PLAYED, result.getState());
@@ -138,7 +147,7 @@ class MatchResultServiceTest {
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
     when(matchRepository.save(any(Match.class))).thenReturn(match);
 
-    matchResultService.encodingResult(1L, dto);
+    matchResultService.encodingResult(1L, dto,admin);
 
     verify(notificationService, times(4)).send(anyLong(), any(Notification.class));
   }
@@ -150,7 +159,7 @@ class MatchResultServiceTest {
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
     when(matchRepository.save(any(Match.class))).thenReturn(match);
 
-    matchResultService.encodingResult(1L, dto);
+    matchResultService.encodingResult(1L, dto,admin);
 
     verify(notificationService, times(3)).send(anyLong(), any(Notification.class));
   }
@@ -160,7 +169,7 @@ class MatchResultServiceTest {
     when(matchRepository.findById(99L)).thenReturn(Optional.empty());
 
     assertThrows(NoSuchElementException.class,
-        () -> matchResultService.encodingResult(99L, new ResultRequest(3, 1)));
+        () -> matchResultService.encodingResult(99L, new ResultRequest(3, 1),admin));
 
     verify(matchRepository, never()).save(any());
     verify(notificationService, never()).send(anyLong(), any());
@@ -172,7 +181,7 @@ class MatchResultServiceTest {
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
 
     assertThrows(IllegalStateException.class,
-        () -> matchResultService.encodingResult(1L, new ResultRequest(3, 1)));
+        () -> matchResultService.encodingResult(1L, new ResultRequest(3, 1),admin));
 
     verify(matchRepository, never()).save(any());
   }
@@ -183,7 +192,7 @@ class MatchResultServiceTest {
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
 
     assertThrows(IllegalStateException.class,
-        () -> matchResultService.encodingResult(1L, new ResultRequest(3, 1)));
+        () -> matchResultService.encodingResult(1L, new ResultRequest(3, 1),admin));
 
     verify(matchRepository, never()).save(any());
   }
@@ -194,7 +203,7 @@ class MatchResultServiceTest {
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
 
     assertThrows(IllegalStateException.class,
-        () -> matchResultService.encodingResult(1L, new ResultRequest(3, 1)));
+        () -> matchResultService.encodingResult(1L, new ResultRequest(3, 1),admin));
 
     verify(matchRepository, never()).save(any());
   }
@@ -204,7 +213,7 @@ class MatchResultServiceTest {
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
 
     assertThrows(IllegalArgumentException.class,
-        () -> matchResultService.encodingResult(1L, new ResultRequest(-1, 3)));
+        () -> matchResultService.encodingResult(1L, new ResultRequest(-1, 3),admin));
 
     verify(matchRepository, never()).save(any());
   }
@@ -214,7 +223,7 @@ class MatchResultServiceTest {
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
 
     assertThrows(IllegalStateException.class,
-        () -> matchResultService.encodingResult(1L, new ResultRequest(3, 3)));
+        () -> matchResultService.encodingResult(1L, new ResultRequest(3, 3),admin));
 
     verify(matchRepository, never()).save(any());
   }
@@ -324,6 +333,7 @@ class MatchResultServiceTest {
   void contestResultShouldSetRefusedWhenValid() {
     match.setResultStatus(ResultStatus.PENDING);
     match.setContestedByTeamA(false);
+    match.setResponsibleAdmin(admin);
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
     when(validationResultRepository.existsByMatchAndTeam(match, teamA)).thenReturn(false);
     when(validationResultRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
