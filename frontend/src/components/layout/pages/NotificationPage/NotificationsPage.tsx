@@ -72,8 +72,8 @@ const NotificationPage = () => {
   };
 
   return (
-    <Box sx={{ mt: 4, mx: 'auto', maxWidth: 1200, px: 3 }}>
-      <Box sx={{ mb: 5, textAlign: 'center' }}>
+    <Box sx={{ mt: 4, mx: 'auto', maxWidth: 1200, px: 3, width: '100%' }}>
+      <Box sx={{ mb: 9, textAlign: 'center' }}>
         <Typography
           variant="h4"
           sx={{
@@ -97,30 +97,69 @@ const NotificationPage = () => {
         </Typography>
       </Box>
 
-      <Box sx={{ display: 'flex', gap: 4 }}>
+      <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
         <Box
           sx={{
             display: 'flex',
             flexDirection: 'column',
             gap: 2,
-            minWidth: 200,
+            width: 250,
+            flexShrink: 0,
           }}
         >
           <Button
-            variant={filter === undefined ? 'contained' : 'outlined'}
+            variant="outlined"
             onClick={() => setFilter(undefined)}
+            sx={{
+              color: filter === undefined ? '#d8a46b' : 'white',
+              borderColor:
+                filter === undefined
+                  ? '#d8a46b !important'
+                  : 'white !important',
+              textTransform: 'none',
+              fontWeight: 'bold',
+              borderWidth: '2px !important',
+              '&:hover': {
+                borderColor: '#d8a46b !important',
+                backgroundColor: 'rgba(216, 164, 107, 0.1)',
+              },
+            }}
           >
             Toutes
           </Button>
           <Button
-            variant={filter === false ? 'contained' : 'outlined'}
+            variant="outlined"
             onClick={() => setFilter(false)}
+            sx={{
+              color: filter === false ? '#d8a46b' : 'white',
+              borderColor:
+                filter === false ? '#d8a46b !important' : 'white !important',
+              textTransform: 'none',
+              fontWeight: 'bold',
+              borderWidth: '2px !important',
+              '&:hover': {
+                borderColor: '#d8a46b !important',
+                backgroundColor: 'rgba(216, 164, 107, 0.1)',
+              },
+            }}
           >
             Non lues
           </Button>
           <Button
-            variant={filter === true ? 'contained' : 'outlined'}
+            variant="outlined"
             onClick={() => setFilter(true)}
+            sx={{
+              color: filter === true ? '#d8a46b' : 'white',
+              borderColor:
+                filter === true ? '#d8a46b !important' : 'white !important',
+              textTransform: 'none',
+              fontWeight: 'bold',
+              borderWidth: '2px !important',
+              '&:hover': {
+                borderColor: '#d8a46b !important',
+                backgroundColor: 'rgba(216, 164, 107, 0.1)',
+              },
+            }}
           >
             Lues
           </Button>
@@ -128,8 +167,15 @@ const NotificationPage = () => {
 
         <Box sx={{ flex: 1 }}>
           {notifications.length === 0 ? (
-            <Typography sx={{ color: 'white' }}>
-              Aucune notification.
+            <Typography
+              sx={{
+                color: 'rgba(255, 255, 255, 0.6)',
+                py: 4,
+                pl: 20,
+                fontStyle: 'italic',
+              }}
+            >
+              Aucune notification
             </Typography>
           ) : (
             <NotificationList

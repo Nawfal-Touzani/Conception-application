@@ -9,11 +9,13 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  Tooltip,
+  IconButton,
 } from '@mui/material';
 import { useState } from 'react';
 
 import { Notification } from '../../../../types/notifications.types';
-import markRead from '../../../../assets/images/notifImage.p.jpg';
+import { Check } from '@mui/icons-material';
 
 interface NotificationItemProps {
   notification: Notification;
@@ -204,12 +206,23 @@ const NotificationItem = ({
           />
         )}
         {!notification.read && (
-          <img
-            src={markRead}
-            alt="Marquer comme lu"
-            style={{ height: '24px', cursor: 'pointer' }}
-            onClick={() => onMarkAsRead(notification.id)}
-          />
+          <Tooltip title="Marquer comme lu">
+            <IconButton
+              onClick={() => onMarkAsRead(notification.id)}
+              sx={{
+                color: '#fff',
+                border: '1px solid #fff',
+                ml: 1,
+                mr: 1.2,
+                '&:hover': {
+                  borderColor: '#1c6f3e',
+                  color: '#1c6f3e',
+                },
+              }}
+            >
+              <Check sx={{ fontSize: '15px' }} />
+            </IconButton>
+          </Tooltip>
         )}
       </ListItem>
       <Dialog open={refuseOpen} onClose={() => setRefuseOpen(false)}>
