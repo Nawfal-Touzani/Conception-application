@@ -40,14 +40,19 @@ const AdminPage = () => {
   const loadAdmins = useCallback(() => {
     adminService
       .getAdmins(token)
-      .then((data) => setAdmins(data.filter((m) => m.tag !== user?.tag)))
+      .then((data) => {
+        const filtered = data.filter((m) => !m.isBan && m.tag !== user?.tag);
+        setAdmins(filtered);
+      })
       .catch(() => setError('Erreur lors du chargement des administrateurs.'));
   }, [token, user?.tag]);
 
   const loadAllMembers = useCallback(() => {
     adminService
       .getAllMembers(token)
-      .then((data) => setAllMembers(data.filter((m) => !m.isAdmin && !m.admin)))
+      .then((data) =>
+        setAllMembers(data.filter((m) => !m.isAdmin && !m.admin && !m.isBan)),
+      )
       .catch(() => setError('Erreur lors du chargement des membres.'));
   }, [token]);
 

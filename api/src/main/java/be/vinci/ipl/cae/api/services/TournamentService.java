@@ -356,9 +356,6 @@ public class TournamentService {
     if (dto.registrationDeadline().isAfter(dto.startDate())) {
       throw new IllegalArgumentException("Registration deadline must be before start date");
     }
-    if (!isPowerOfTwo(dto.maxParticipant())) {
-      throw new IllegalArgumentException("Max participants must be a power of two");
-    }
   }
 
   private void applyDtoToTournament(Tournament tournament, TournamentDto dto) {
@@ -370,15 +367,25 @@ public class TournamentService {
     tournament.setMaxParticipants(dto.maxParticipant());
   }
 
-  private boolean isPowerOfTwo(int n) {
-    return n > 0 && (n & (n - 1)) == 0;
-  }
-
   private TournamentResponseDto toResponseDto(Tournament t) {
     List<String> teamNames = registrationRepository.findByTournamentId(t.getId())
         .stream()
         .map(r -> r.getTeam().getName())
         .toList();
+
+    String currentRoundLabel = null;
+    if (t.getStatus() == Status.IN_PROGRESS) {
+      List<Match> matches = matchRepository.findByTournamentOrderByRoundNumberAsc(t);
+      int totalRounds = matches.stream().mapToInt(Match::getRoundNumber).max().orElse(1);
+      currentRoundLabel = matches.stream()
+          .filter(m -> m.getState() == Match.MatchState.SCHEDULED)
+          .mapToInt(Match::getRoundNumber)
+          .min()
+          .stream()
+          .mapToObj(r -> getRoundLabel(r, totalRounds))
+          .findFirst()
+          .orElse(null);
+    }
 
     return new TournamentResponseDto(
         t.getId(), t.getName(), t.getDescription(),
@@ -387,7 +394,18 @@ public class TournamentService {
         teamNames.size(),
         t.getStatus(), t.getOrganizer().getTag(), t.isPublic(),
         t.getWinnerTeam() != null ? t.getWinnerTeam().getName() : null,
-        teamNames
+        teamNames,
+        currentRoundLabel
     );
+  }
+
+  private String getRoundLabel(int roundNumber, int totalRounds) {
+    return switch (totalRounds - roundNumber) {
+      case 0 -> "Finale";
+      case 1 -> "Demi-finales";
+      case 2 -> "Quarts de finale";
+      case 3 -> "Huitièmes de finale";
+      default -> "Tour " + roundNumber;
+    };
   }
 }

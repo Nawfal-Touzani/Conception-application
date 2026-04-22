@@ -6,4 +6,6 @@ export interface Notification {
   read: boolean;
   membershipRequestId?: number;
   requestState?: string;
+  matchId?: number;
+  teamId?: number;
 }

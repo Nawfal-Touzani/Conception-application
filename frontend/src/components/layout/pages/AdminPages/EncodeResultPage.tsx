@@ -77,10 +77,12 @@ const ResultEncodingPage = () => {
         Number(score2),
         token,
       );
-      setSuccess(`Résultat enregistré : ${score1} - ${score2}`);
+      setSuccess(
+        `Résultat enregistré : ${selectedMatch!.teamA} ${score1} - ${score2} ${selectedMatch!.teamB}`,
+      );
       setSelectedMatch(null);
     } catch (err) {
-      setError("Erreur lors de l'enregistrement du score.");
+      setError('Vous avez déja encoder ce résultat');
     }
   };
 
@@ -135,21 +137,6 @@ const ResultEncodingPage = () => {
         </Typography>
 
         <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.1)', mb: 4 }} />
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-            {error}
-          </Alert>
-        )}
-        {success && (
-          <Alert
-            severity="success"
-            sx={{ mb: 2 }}
-            onClose={() => setSuccess(null)}
-          >
-            {success}
-          </Alert>
-        )}
 
         <Box sx={{ mb: 4 }}>
           <TextField
@@ -221,6 +208,21 @@ const ResultEncodingPage = () => {
             )}
           </Box>
         </Box>
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        )}
+        {success && (
+          <Alert
+            severity="success"
+            sx={{ mb: 2 }}
+            onClose={() => setSuccess(null)}
+          >
+            {success}
+          </Alert>
+        )}
 
         {selectedMatch && (
           <Box

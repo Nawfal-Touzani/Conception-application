@@ -30,6 +30,7 @@ export interface TournamentDetails {
   winnerTeamName?: string | null;
   registeredTeamNames?: string[];
   teams?: string[];
+  currentRoundLabel?: string | null;
 }
 
 export interface HomepageTournaments {

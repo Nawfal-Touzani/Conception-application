@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { isPowerOfTwo, validateTournament } from './tournamentValidation';
+import { validateTournament } from './tournamentValidation';
 
 const validData = {
   name: 'Tournoi Test',
@@ -9,17 +9,6 @@ const validData = {
   registrationDeadline: '2099-06-05',
   maxParticipants: 8 as number | '',
 };
-
-describe('isPowerOfTwo', () => {
-  test('retourne true pour 2', () => expect(isPowerOfTwo(2)).toBe(true));
-  test('retourne true pour 4', () => expect(isPowerOfTwo(4)).toBe(true));
-  test('retourne true pour 8', () => expect(isPowerOfTwo(8)).toBe(true));
-  test('retourne true pour 16', () => expect(isPowerOfTwo(16)).toBe(true));
-  test('retourne false pour 3', () => expect(isPowerOfTwo(3)).toBe(false));
-  test('retourne false pour 5', () => expect(isPowerOfTwo(5)).toBe(false));
-  test('retourne false pour 1', () => expect(isPowerOfTwo(1)).toBe(false));
-  test('retourne false pour 0', () => expect(isPowerOfTwo(0)).toBe(false));
-});
 
 describe('validateTournament', () => {
   test('retourne aucune erreur pour des données valides', () => {
@@ -56,7 +45,9 @@ describe('validateTournament', () => {
 
   test('retourne erreur si maxParticipants vide', () => {
     const errors = validateTournament({ ...validData, maxParticipants: '' });
-    expect(errors).toContain('Le nombre de participants est requis.');
+    expect(errors).toContain(
+      'Le nombre de participants doit être au minimum 3.',
+    );
   });
 
   test('retourne erreur si date de début dans le passé', () => {
@@ -88,11 +79,16 @@ describe('validateTournament', () => {
     );
   });
 
-  test('retourne erreur si maxParticipants pas puissance de 2', () => {
-    const errors = validateTournament({ ...validData, maxParticipants: 5 });
+  test('retourne erreur si maxParticipants inférieur à 3', () => {
+    const errors = validateTournament({ ...validData, maxParticipants: 2 });
     expect(errors).toContain(
-      'Le nombre de participants doit être une puissance de 2.',
+      'Le nombre de participants doit être au minimum 3.',
     );
+  });
+
+  test('accepte maxParticipants non puissance de 2 si >= 3', () => {
+    const errors = validateTournament({ ...validData, maxParticipants: 5 });
+    expect(errors).toHaveLength(0);
   });
 
   test('retourne plusieurs erreurs si plusieurs champs invalides', () => {

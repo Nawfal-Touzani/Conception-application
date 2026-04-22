@@ -20,6 +20,8 @@ interface NotificationItemProps {
   onMarkAsRead: (notificationId: number) => void;
   onApprove?: (membershipRequestId: number) => void;
   onRefuse?: (membershipRequestId: number, reason: string) => void;
+  onValidateResult?: (matchId: number) => void;
+  onContestResult?: (matchId: number) => void;
 }
 
 const NotificationItem = ({
@@ -27,6 +29,8 @@ const NotificationItem = ({
   onMarkAsRead,
   onApprove,
   onRefuse,
+  onValidateResult,
+  onContestResult,
 }: NotificationItemProps) => {
   const [refuseOpen, setRefuseOpen] = useState(false);
   const [reason, setReason] = useState('');
@@ -37,6 +41,10 @@ const NotificationItem = ({
         ? 'refused'
         : null,
   );
+
+  const [resultAction, setResultAction] = useState<
+    'validated' | 'contested' | null
+  >(null);
 
   const handleRefuseConfirm = () => {
     if (notification.membershipRequestId && onRefuse) {
@@ -50,6 +58,9 @@ const NotificationItem = ({
   const isMembershipRequest =
     notification.type === 'MEMBERSHIP_REQUEST' &&
     notification.membershipRequestId;
+
+  const isResultConfirmation =
+    notification.type === 'RESULT_CONFIRMATION' && !notification.read;
 
   return (
     <>
@@ -80,6 +91,8 @@ const NotificationItem = ({
             </Typography>
           }
         />
+
+        {/* ── Membership request ── */}
         {isMembershipRequest && (
           <>
             {actionDone === null && (
@@ -130,6 +143,60 @@ const NotificationItem = ({
           </>
         )}
 
+        {/* ── Result confirmation ── */}
+
+        {isResultConfirmation && (
+          <>
+            {resultAction === null && (
+              <>
+                <Button
+                  variant="contained"
+                  color="success"
+                  size="small"
+                  onClick={() => {
+                    onValidateResult?.(notification.matchId!);
+                    onMarkAsRead(notification.id);
+                    setResultAction('validated');
+                  }}
+                >
+                  Valider
+                </Button>
+                <Button
+                  variant="contained"
+                  color="error"
+                  size="small"
+                  onClick={() => {
+                    onContestResult?.(notification.matchId!);
+                    onMarkAsRead(notification.id);
+                    setResultAction('contested');
+                  }}
+                >
+                  Contester
+                </Button>
+              </>
+            )}
+            {resultAction === 'validated' && (
+              <Chip
+                label="Validé ✓"
+                sx={{
+                  backgroundColor: '#e8f5e9',
+                  color: '#2e7d32',
+                  fontWeight: 600,
+                }}
+              />
+            )}
+            {resultAction === 'contested' && (
+              <Chip
+                label="Contesté ✗"
+                sx={{
+                  backgroundColor: '#fce4ec',
+                  color: '#b71c1c',
+                  fontWeight: 600,
+                }}
+              />
+            )}
+          </>
+        )}
         {notification.read && (
           <Chip
             label="Lu"
