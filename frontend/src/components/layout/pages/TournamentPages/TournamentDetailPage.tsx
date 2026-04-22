@@ -202,7 +202,7 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
                   textAlign: 'right',
                 }}
               >
-                Etat
+                État
               </Typography>
             </Box>
             <Divider sx={{ mb: 1 }} />
@@ -263,8 +263,7 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
               <Typography
                 sx={{ fontWeight: 700, color: '#1a2744', fontSize: '1rem' }}
               >
-                {tournament.currentParticipants} sur{' '}
-                {tournament.maxParticipants}
+                {tournament.currentParticipants}
               </Typography>
             </Box>
             <Divider sx={{ mb: 1.5 }} />

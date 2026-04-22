@@ -121,18 +121,30 @@ const AdminPage = () => {
     >
       <Box sx={{ width: '100%', maxWidth: 760 }}>
         <Box sx={{ width: '100%', maxWidth: 760 }}>
-          <Typography
-            variant="h4"
-            sx={{
-              color: '#fff',
-              fontWeight: 800,
-              textAlign: 'center',
-              mb: 4,
-              mt: 2,
-            }}
-          >
-            Gestion des administrateurs
-          </Typography>
+          <Box sx={{ mb: 5, textAlign: 'center' }}>
+            <Typography
+              variant="h4"
+              sx={{
+                color: 'white',
+                fontWeight: 700,
+                textAlign: 'center',
+                textTransform: 'uppercase',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mb: 4,
+                gap: 2,
+                '&::before, &::after': {
+                  content: '""',
+                  height: '3px',
+                  width: '50px',
+                  backgroundColor: 'white',
+                },
+              }}
+            >
+              Gestion des administrateurs
+            </Typography>
+          </Box>
 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 4 }}>
             <Button

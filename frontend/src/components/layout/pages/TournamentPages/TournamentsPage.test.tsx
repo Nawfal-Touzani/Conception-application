@@ -241,14 +241,14 @@ describe('TournamentsPage', () => {
     });
   });
 
-  test('filtre par statut "En Cours"', async () => {
+  test('filtre par statut "En cours"', async () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
     ).mockResolvedValue([tournamentOpen, tournamentInProgress]);
     renderAsUser();
     await screen.findByText('Spring Battle Series 2026');
 
-    fireEvent.click(screen.getByLabelText('En Cours'));
+    fireEvent.click(screen.getByLabelText('En cours'));
 
     await waitFor(() => {
       expect(screen.queryByText('Spring Battle Series 2026')).toBeTruthy();

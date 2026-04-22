@@ -17,7 +17,7 @@ export const ActionSidebar = ({ profile }: { profile: MemberProfile }) => {
   ];
 
   if (!profile.teamName) {
-    actions.push({ text: 'Créer/Rejoindre une team', path: '/team' });
+    actions.push({ text: 'Rejoindre une team', path: '/team' });
   }
 
   return (

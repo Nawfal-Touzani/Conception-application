@@ -86,7 +86,7 @@ describe('PublicProfilePage', () => {
 
     renderComponent();
 
-    const backButton = await screen.findByText('←');
+    const backButton = await screen.findByText('← Retour');
     fireEvent.click(backButton);
 
     expect(mockNavigate).toHaveBeenCalledWith(-1);
