@@ -47,7 +47,6 @@ export function useJoinOrCreateTeam(onTeamCreated: () => void) {
         ),
       );
     }
-    setSelectedTeamId('');
   }, [search, teams]);
 
   const closeSnack = () => setSnack((s) => ({ ...s, open: false }));
