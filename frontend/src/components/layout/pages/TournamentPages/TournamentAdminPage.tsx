@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -49,18 +49,15 @@ const TournamentAdminPage = ({
   const [maxParticipants, setMaxParticipants] = useState(
     tournament.maxParticipants,
   );
-
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const isPowerOfTwo = (n: number) => n > 0 && (n & (n - 1)) === 0;
+  const isLocked = tournament.isPublic;
 
   const maxParticipantsError =
     maxParticipants < tournament.currentParticipants
       ? 'Impossible de mettre moins que les équipes déjà inscrites.'
-      : !isPowerOfTwo(maxParticipants)
-        ? 'Le nombre de teams doit être une puissance de 2.'
-        : '';
+      : '';
 
   const handleUpdate = async () => {
     setErrorMsg(null);
@@ -106,6 +103,18 @@ const TournamentAdminPage = ({
   const canPublish =
     tournament.status === 'PREPARATION' && !tournament.isPublic;
 
+  const [planningPublished, setPlanningPublished] = useState(false);
+
+  useEffect(() => {
+    fetch(`http://localhost:3000/tournaments/${tournament.id}/matches`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => (res.ok ? res.json() : []))
+      .then((matches) => {
+        setPlanningPublished(matches.length > 0);
+      })
+      .catch(() => setPlanningPublished(false));
+  }, [tournament.id, token]);
   return (
     <Box
       sx={{
@@ -127,7 +136,7 @@ const TournamentAdminPage = ({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          mb: 4,
+          mb: 2,
         }}
       >
         <Typography
@@ -147,6 +156,13 @@ const TournamentAdminPage = ({
           }}
         />
       </Box>
+
+      {isLocked && (
+        <Alert severity="info" sx={{ mb: 3, maxWidth: 800, width: '100%' }}>
+          Le tournoi est public, les informations ne peuvent plus être
+          modifiées.
+        </Alert>
+      )}
 
       <Box
         sx={{
@@ -181,6 +197,7 @@ const TournamentAdminPage = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               size="small"
+              disabled={isLocked}
               sx={inputSx}
             />
             <TextField
@@ -191,6 +208,7 @@ const TournamentAdminPage = ({
               size="small"
               multiline
               rows={2}
+              disabled={isLocked}
               sx={inputSx}
             />
             <Typography
@@ -204,6 +222,7 @@ const TournamentAdminPage = ({
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
               size="small"
+              disabled={isLocked}
               sx={inputSx}
             />
             <Typography
@@ -217,6 +236,7 @@ const TournamentAdminPage = ({
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               size="small"
+              disabled={isLocked}
               sx={inputSx}
             />
           </Box>
@@ -241,9 +261,9 @@ const TournamentAdminPage = ({
               value={registrationDeadline}
               onChange={(e) => setRegistrationDeadline(e.target.value)}
               size="small"
+              disabled={isLocked}
               sx={inputSx}
             />
-
             <Typography
               sx={{ color: '#fff', fontWeight: 600, fontSize: '0.9rem' }}
             >
@@ -255,6 +275,7 @@ const TournamentAdminPage = ({
               value={maxParticipants}
               onChange={(e) => setMaxParticipants(Number(e.target.value))}
               size="small"
+              disabled={isLocked}
               error={!!maxParticipantsError}
               helperText={
                 maxParticipantsError ||
@@ -271,13 +292,11 @@ const TournamentAdminPage = ({
                 },
               }}
             />
-
             <Typography
               sx={{ color: '#fff', fontWeight: 600, fontSize: '0.9rem', mt: 2 }}
             >
               Actions
             </Typography>
-
             {canPublish && (
               <Button
                 variant="contained"
@@ -296,7 +315,6 @@ const TournamentAdminPage = ({
                 Rendre public
               </Button>
             )}
-
             {!canPublish && tournament.status === 'PREPARATION' && (
               <Chip
                 label="Déjà public"
@@ -308,44 +326,46 @@ const TournamentAdminPage = ({
                 }}
               />
             )}
-
-            <Button
-              variant="contained"
-              onClick={() =>
-                navigate(`/encode/result/${tournament.id}`, {
-                  state: { tournamentName: tournament.name },
-                })
-              }
-              fullWidth
-              sx={{
-                backgroundColor: '#2ecc71',
-                color: '#fff',
-                textTransform: 'none',
-                fontWeight: 700,
-                fontSize: '0.95rem',
-                borderRadius: '8px',
-                '&:hover': { backgroundColor: '#27ae60' },
-              }}
-            >
-              Encoder les résultats
-            </Button>
-
-            <Button
-              variant="contained"
-              onClick={() => onNavigateToPlanning(tournament.id)}
-              fullWidth
-              sx={{
-                backgroundColor: '#3a7bd5',
-                color: '#fff',
-                textTransform: 'none',
-                fontWeight: 700,
-                fontSize: '0.95rem',
-                borderRadius: '8px',
-                '&:hover': { backgroundColor: '#2f65b8' },
-              }}
-            >
-              Planifier les matchs
-            </Button>
+            {tournament.isPublic && (
+              <Button
+                variant="contained"
+                onClick={() =>
+                  navigate(`/encode/result/${tournament.id}`, {
+                    state: { tournamentName: tournament.name },
+                  })
+                }
+                fullWidth
+                sx={{
+                  backgroundColor: '#2ecc71',
+                  color: '#fff',
+                  textTransform: 'none',
+                  fontWeight: 700,
+                  fontSize: '0.95rem',
+                  borderRadius: '8px',
+                  '&:hover': { backgroundColor: '#27ae60' },
+                }}
+              >
+                Encoder les résultats
+              </Button>
+            )}
+            {tournament.isPublic && !planningPublished && (
+              <Button
+                variant="contained"
+                onClick={() => onNavigateToPlanning(tournament.id)}
+                fullWidth
+                sx={{
+                  backgroundColor: '#3a7bd5',
+                  color: '#fff',
+                  textTransform: 'none',
+                  fontWeight: 700,
+                  fontSize: '0.95rem',
+                  borderRadius: '8px',
+                  '&:hover': { backgroundColor: '#2f65b8' },
+                }}
+              >
+                Planifier les matchs
+              </Button>
+            )}
           </Box>
         </Box>
 
@@ -353,7 +373,7 @@ const TournamentAdminPage = ({
           <Button
             variant="contained"
             onClick={handleUpdate}
-            disabled={!!maxParticipantsError}
+            disabled={!!maxParticipantsError || isLocked}
             sx={{
               backgroundColor: '#fff',
               color: '#1a2744',
