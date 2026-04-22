@@ -91,7 +91,7 @@ const MatchCard: React.FC<{ match: MatchDetail; onClick: () => void }> = ({
       {/* Tournoi + round */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
         <Typography
-          color="rgba(255,255,255,0.4)"
+          color="rgba(0,0,0,1)"
           fontSize="0.72rem"
           noWrap
           sx={{ maxWidth: '60%' }}
@@ -124,9 +124,7 @@ const MatchCard: React.FC<{ match: MatchDetail; onClick: () => void }> = ({
               >
                 {match.scoreA}
               </Typography>
-              <Typography
-                sx={{ fontSize: '1.1rem', color: 'rgba(255,255,255,0.3)' }}
-              >
+              <Typography sx={{ fontSize: '1.1rem', color: 'rgba(0,0,0,1)' }}>
                 –
               </Typography>
               <Typography
@@ -145,7 +143,7 @@ const MatchCard: React.FC<{ match: MatchDetail; onClick: () => void }> = ({
             <Typography
               sx={{
                 fontSize: '0.82rem',
-                color: 'rgba(255,255,255,0.3)',
+                color: 'rgba(0,0,0,1)',
                 fontStyle: 'italic',
               }}
             >
@@ -168,7 +166,7 @@ const MatchCard: React.FC<{ match: MatchDetail; onClick: () => void }> = ({
           alignItems: 'center',
         }}
       >
-        <Typography color="rgba(255,255,255,0.35)" fontSize="0.72rem">
+        <Typography color="rgba(0,0,0,1)" fontSize="0.72rem">
           {formatMatchDateTime(match.dateTime)}
         </Typography>
         <Box
@@ -190,7 +188,7 @@ const EmptyCard: React.FC<{ message: string }> = ({ message }) => (
   <Paper elevation={0} sx={s.emptyCard}>
     <Typography
       sx={{
-        color: 'rgba(255,255,255,0.25)',
+        color: 'rgba(0,0,0,1)',
         fontSize: '0.85rem',
         fontStyle: 'italic',
         textAlign: 'center',
@@ -242,7 +240,7 @@ const s = {
   colLabel: {
     display: 'flex',
     alignItems: 'center',
-    color: 'rgba(255,255,255,0.4)',
+    color: 'rgba(0, 0, 0, 1)',
     fontSize: '0.72rem',
     textTransform: 'uppercase' as const,
     letterSpacing: 1,
@@ -254,11 +252,11 @@ const s = {
     py: 1.5,
     backgroundColor: '#243060',
     cursor: 'pointer',
-    border: '1px solid rgba(255,255,255,0.06)',
+    border: '1px solid rgba(0,0,0,1)',
     transition: 'all 0.15s',
     '&:hover': {
       backgroundColor: '#2d3c75',
-      borderColor: 'rgba(255,255,255,0.15)',
+      borderColor: 'rgba(0,0,0,1)',
     },
   },
   scoreCenter: {
@@ -272,8 +270,8 @@ const s = {
     borderRadius: '10px',
     px: 2,
     py: 3,
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    border: '1px dashed rgba(255,255,255,0.1)',
+    backgroundColor: 'rgba(4, 19, 40, 0.1)',
+    border: '1.5px solid #082247',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
