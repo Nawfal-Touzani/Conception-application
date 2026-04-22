@@ -117,7 +117,7 @@ const MatchDetailPage: React.FC<Props> = ({
             pb: 0.5,
           }}
         >
-          {['Date et heure', 'Phase', 'Status'].map((label) => (
+          {['Date et heure', 'Phase', 'État'].map((label) => (
             <Typography
               key={label}
               sx={{
