@@ -1,5 +1,5 @@
 @baseUrl = http://localhost:3000
-@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoiYWRtaW5AdmluY2kuYmUiLCJpYXQiOjE3NzY1MTI4NjMsImV4cCI6MTc3NjU5OTI2M30.45Ci22EmOUpcz_jbX--eBglStGeRUFzqAZ2bRrRCi28
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsImVtYWlsIjoiYWRtaW5AdmluY2kuYmUiLCJpYXQiOjE3NzY3NTUxOTAsImV4cCI6MTc3Njg0MTU5MH0.O9m0nS4yN15KciAN28NFR8czIbqzCn7Aa_Sq9ZA8HIM
 @userToken = ejcnjenjce
 
 ### Login admin (copie le token dans @adminToken)
