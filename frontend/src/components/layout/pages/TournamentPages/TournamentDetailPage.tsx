@@ -141,6 +141,7 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
           <TournamentBracket
             tournamentId={tournament.id}
             onMatchClick={handleMatchClick}
+            isResponsible={isResponsible}
           />
         </Box>
 

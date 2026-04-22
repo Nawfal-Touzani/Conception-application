@@ -2,6 +2,7 @@ package be.vinci.ipl.cae.api.services;
 
 import be.vinci.ipl.cae.api.models.dtos.HomepageTournamentsDto;
 import be.vinci.ipl.cae.api.models.dtos.MatchResponseDto;
+import be.vinci.ipl.cae.api.models.dtos.MatchSelectionStatusDto;
 import be.vinci.ipl.cae.api.models.dtos.PlanningRequest;
 import be.vinci.ipl.cae.api.models.dtos.TournamentDto;
 import be.vinci.ipl.cae.api.models.dtos.TournamentResponseDto;
@@ -309,6 +310,30 @@ public class TournamentService {
             m.getWinner() != null ? m.getWinner().getName() : null)).toList();
   }
 
+  /**
+   * Returns the lineup selection status for each match of a tournament. Used by the admin to know
+   * if both teams have submitted their lineups before encoding results.
+   *
+   * @param tournamentId the tournament id
+   * @return list of MatchSelectionStatusDto
+   */
+  public List<MatchSelectionStatusDto> getMatchSelectionStatuses(long tournamentId) {
+    Tournament tournament = tournamentRepository.findById(tournamentId)
+        .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
+
+    return matchRepository.findByTournamentOrderByRoundNumberAsc(tournament).stream().map(m -> {
+      boolean firstTeamReady = m.getTeamA() != null && m.getPlayersSelections().stream()
+          .filter(ps -> ps.getTeam().getId().equals(m.getTeamA().getId())).count() == 4;
+
+      boolean secondTeamReady = m.getTeamB() != null && m.getPlayersSelections().stream()
+          .filter(ps -> ps.getTeam().getId().equals(m.getTeamB().getId())).count() == 4;
+
+      return new MatchSelectionStatusDto(m.getId(), m.getRoundNumber(), firstTeamReady,
+          secondTeamReady);
+    }).toList();
+  }
+
+  // privates
   private Tournament getTournamentEditable(Long id) {
     Tournament tournament = tournamentRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("Tournament not found"));

@@ -3,6 +3,7 @@ package be.vinci.ipl.cae.api.controllers;
 import be.vinci.ipl.cae.api.models.dtos.HomepageTournamentsDto;
 import be.vinci.ipl.cae.api.models.dtos.MatchBracketDto;
 import be.vinci.ipl.cae.api.models.dtos.MatchResponseDto;
+import be.vinci.ipl.cae.api.models.dtos.MatchSelectionStatusDto;
 import be.vinci.ipl.cae.api.models.dtos.PlanningRequest;
 import be.vinci.ipl.cae.api.models.dtos.TournamentDto;
 import be.vinci.ipl.cae.api.models.dtos.TournamentResponseDto;
@@ -29,8 +30,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Controller for managing tournaments, including creation, publication,
- * planning updates, registrations, and tournament match views.
+ * Controller for managing tournaments, including creation, publication, planning updates,
+ * registrations, and tournament match views.
  */
 @RestController
 @RequestMapping("/tournaments")
@@ -44,10 +45,10 @@ public class TournamentController {
   /**
    * Creates a new TournamentController.
    *
-   * @param tournamentService the tournament service
+   * @param tournamentService             the tournament service
    * @param tournamentRegistrationService the tournament registration service
-   * @param matchService the match service
-   * @param matchMapper the match mapper
+   * @param matchService                  the match service
+   * @param matchMapper                   the match mapper
    */
   public TournamentController(TournamentService tournamentService,
       TournamentRegistrationService tournamentRegistrationService, MatchService matchService,
@@ -126,9 +127,7 @@ public class TournamentController {
    */
   @GetMapping("/{id}/bracket")
   public List<MatchBracketDto> getTournamentBracket(@PathVariable long id) {
-    return matchService.getMatchesByTournament(id).stream()
-        .map(matchMapper::toBracketDto)
-        .toList();
+    return matchService.getMatchesByTournament(id).stream().map(matchMapper::toBracketDto).toList();
   }
 
   /**
@@ -168,5 +167,15 @@ public class TournamentController {
   public void registerTeam(@PathVariable Long idTournament, @PathVariable Long idTeam,
       @AuthenticationPrincipal Member currentMember) {
     tournamentRegistrationService.createRegistration(idTournament, idTeam, currentMember.getId());
+  }
+
+  /**
+   * Gets the lineup selection status for each match of a tournament. Used by the admin to check if
+   * both teams are ready before encoding results.
+   */
+  @GetMapping("/{id}/selections/status")
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  public List<MatchSelectionStatusDto> getMatchSelectionStatuses(@PathVariable long id) {
+    return tournamentService.getMatchSelectionStatuses(id);
   }
 }
