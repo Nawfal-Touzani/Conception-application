@@ -49,10 +49,8 @@ public class TournamentService {
    * @param teamRepository         the team repository
    */
   public TournamentService(TournamentRepository tournamentRepository,
-      TournamentRegistrationRepository registrationRepository,
-      MemberRepository memberRepository,
-      NotificationService notificationService,
-      MatchRepository matchRepository,    // AJOUT
+      TournamentRegistrationRepository registrationRepository, MemberRepository memberRepository,
+      NotificationService notificationService, MatchRepository matchRepository,    // AJOUT
       TeamRepository teamRepository) {    // AJOUT
     this.tournamentRepository = tournamentRepository;
     this.registrationRepository = registrationRepository;
@@ -113,12 +111,11 @@ public class TournamentService {
     }
 
     validateTournamentDto(dto);
-    Tournament tournament = getTournamentInPreparation(id);
+    Tournament tournament = getTournamentEditable(id);
     int currentParticipants = registrationRepository.findByTournamentId(tournament.getId()).size();
     if (dto.maxParticipant() < currentParticipants) {
       throw new IllegalArgumentException(
-          "Max participants cannot be lower than the number of registered teams"
-      );
+          "Max participants cannot be lower than the number of registered teams");
     }
     applyDtoToTournament(tournament, dto);
     Tournament saved = tournamentRepository.save(tournament);
@@ -132,17 +129,15 @@ public class TournamentService {
    * @return the tournament
    */
   public TournamentResponseDto publishTournament(Long id) {
-    Tournament tournament = getTournamentInPreparation(id);
+    Tournament tournament = getTournamentEditable(id);
     tournament.setPublic(true);
     Tournament saved = tournamentRepository.save(tournament);
 
     List<Member> allMembers = memberRepository.findAll();
     for (Member member : allMembers) {
-      Notification notif = new Notification(
-          Notification.Type.TOURNAMENT,
+      Notification notif = new Notification(Notification.Type.TOURNAMENT,
           "Le tournoi \"" + saved.getName() + "\" est maintenant disponible !",
-          LocalDateTime.now()
-      );
+          LocalDateTime.now());
       notif.setTournament(saved);
       notificationService.send(member.getId(), notif);
     }
@@ -163,32 +158,23 @@ public class TournamentService {
     List<Tournament> tournaments;
 
     if (teamName != null && !teamName.isBlank()) {
-      List<Long> ids = registrationRepository
-          .findByTeamNameContainingIgnoreCase(teamName)
-          .stream()
-          .map(r -> r.getTournament().getId())
-          .distinct()
-          .toList();
+      List<Long> ids = registrationRepository.findByTeamNameContainingIgnoreCase(teamName).stream()
+          .map(r -> r.getTournament().getId()).distinct().toList();
       tournaments = tournamentRepository.findByIdIn(ids);
 
     } else if (memberTag != null && !memberTag.isBlank()) {
       String tagLower = memberTag.toLowerCase(Locale.ROOT);
-      tournaments = tournamentRepository.findAll().stream()
-          .filter(t -> registrationRepository.findByTournamentId(t.getId())
-              .stream()
-              .anyMatch(r -> r.getTeam().getTeamCompositions()
-                  .stream()
-                  .anyMatch(tc -> tc.getMember().getTag()
-                      .toLowerCase(Locale.ROOT).contains(tagLower))))
+      tournaments = tournamentRepository.findAll().stream().filter(
+              t -> registrationRepository.findByTournamentId(t.getId()).stream().anyMatch(
+                  r -> r.getTeam().getTeamCompositions().stream().anyMatch(
+                      tc -> tc.getMember().getTag().toLowerCase(Locale.ROOT).contains(tagLower))))
           .toList();
 
     } else {
       tournaments = tournamentRepository.findAll();
     }
 
-    return tournaments.stream()
-        .filter(t -> isAdmin || t.isPublic())
-        .map(this::toResponseDto)
+    return tournaments.stream().filter(t -> isAdmin || t.isPublic()).map(this::toResponseDto)
         .toList();
   }
 
@@ -210,17 +196,15 @@ public class TournamentService {
    * @return the homepage tournaments
    */
   public HomepageTournamentsDto getHomepageTournaments() {
-    TournamentResponseDto lastFinished = tournamentRepository
-        .findTopByStatusOrderByEndDateDesc(Status.FINISHED)
-        .map(this::toResponseDto).orElse(null);
+    TournamentResponseDto lastFinished = tournamentRepository.findTopByStatusOrderByEndDateDesc(
+        Status.FINISHED).map(this::toResponseDto).orElse(null);
 
-    TournamentResponseDto inProgress = tournamentRepository
-        .findFirstByStatus(Status.IN_PROGRESS)
+    TournamentResponseDto inProgress = tournamentRepository.findFirstByStatus(Status.IN_PROGRESS)
         .map(this::toResponseDto).orElse(null);
 
     TournamentResponseDto nextUpcoming = tournamentRepository
-        .findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(Status.PREPARATION)
-        .map(this::toResponseDto).orElse(null);
+        .findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(
+        Status.PREPARATION).map(this::toResponseDto).orElse(null);
 
     return new HomepageTournamentsDto(lastFinished, inProgress, nextUpcoming);
   }
@@ -266,16 +250,14 @@ public class TournamentService {
 
             // Si une équipe est connue on la set, sinon on laisse null
             if (!"?".equals(matchDto.getTeam1())) {
-              Team teamA = teamRepository.findByName(matchDto.getTeam1())
-                  .orElseThrow(() -> new NoSuchElementException(
-                      "Team not found: " + matchDto.getTeam1()));
+              Team teamA = teamRepository.findByName(matchDto.getTeam1()).orElseThrow(
+                  () -> new NoSuchElementException("Team not found: " + matchDto.getTeam1()));
               match.setTeamA(teamA);
             }
 
             if (!"?".equals(matchDto.getTeam2())) {
-              Team teamB = teamRepository.findByName(matchDto.getTeam2())
-                  .orElseThrow(() -> new NoSuchElementException(
-                      "Team not found: " + matchDto.getTeam2()));
+              Team teamB = teamRepository.findByName(matchDto.getTeam2()).orElseThrow(
+                  () -> new NoSuchElementException("Team not found: " + matchDto.getTeam2()));
               match.setTeamB(teamB);
             }
             savedMatchesInRound.add(matchRepository.save(match));
@@ -302,6 +284,8 @@ public class TournamentService {
           }
         }
       }
+
+      t.setStatus(Status.IN_PROGRESS);
     }
 
     return tournamentRepository.save(t);
@@ -317,28 +301,22 @@ public class TournamentService {
     Tournament tournament = tournamentRepository.findById(tournamentId)
         .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
 
-    return matchRepository.findByTournamentOrderByRoundNumberAsc(tournament)
-        .stream()
-        .map(m -> new MatchResponseDto(
-            m.getId(),
-            m.getRoundNumber(),
+    return matchRepository.findByTournamentOrderByRoundNumberAsc(tournament).stream().map(
+        m -> new MatchResponseDto(m.getId(), m.getRoundNumber(),
             m.getTeamA() != null ? m.getTeamA().getName() : null,
-            m.getTeamB() != null ? m.getTeamB().getName() : null,
-            m.getScoreA(),
-            m.getScoreB(),
-            m.getState(),
-            m.getResultStatus(),
-            m.getWinner() != null ? m.getWinner().getName() : null
-        ))
-        .toList();
+            m.getTeamB() != null ? m.getTeamB().getName() : null, m.getScoreA(), m.getScoreB(),
+            m.getState(), m.getResultStatus(),
+            m.getWinner() != null ? m.getWinner().getName() : null)).toList();
   }
 
-  private Tournament getTournamentInPreparation(Long id) {
+  private Tournament getTournamentEditable(Long id) {
     Tournament tournament = tournamentRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
-    if (tournament.getStatus() != Status.PREPARATION) {
-      throw new IllegalStateException("Tournament must be in PREPARATION status");
+
+    if (tournament.getStatus() != Status.PREPARATION && tournament.getStatus() != Status.UPCOMING) {
+      throw new IllegalStateException("Tournament must be in PREPARATION or UPCOMING status");
     }
+
     return tournament;
   }
 
@@ -349,7 +327,7 @@ public class TournamentService {
     if (dto.registrationDeadline().isAfter(dto.startDate())) {
       throw new IllegalArgumentException("Registration deadline must be before start date");
     }
-    if(dto.maxParticipant() < 2) {
+    if (dto.maxParticipant() < 2) {
       throw new IllegalArgumentException("Max participants must be at least 2");
     }
   }
@@ -364,35 +342,23 @@ public class TournamentService {
   }
 
   private TournamentResponseDto toResponseDto(Tournament t) {
-    List<String> teamNames = registrationRepository.findByTournamentId(t.getId())
-        .stream()
-        .map(r -> r.getTeam().getName())
-        .toList();
+    List<String> teamNames = registrationRepository.findByTournamentId(t.getId()).stream()
+        .map(r -> r.getTeam().getName()).toList();
 
     String currentRoundLabel = null;
     if (t.getStatus() == Status.IN_PROGRESS) {
       List<Match> matches = matchRepository.findByTournamentOrderByRoundNumberAsc(t);
       int totalRounds = matches.stream().mapToInt(Match::getRoundNumber).max().orElse(1);
-      currentRoundLabel = matches.stream()
-          .filter(m -> m.getState() == Match.MatchState.SCHEDULED)
-          .mapToInt(Match::getRoundNumber)
-          .min()
-          .stream()
-          .mapToObj(r -> getRoundLabel(r, totalRounds))
-          .findFirst()
-          .orElse(null);
+      currentRoundLabel = matches.stream().filter(m -> m.getState() == Match.MatchState.SCHEDULED)
+          .mapToInt(Match::getRoundNumber).min().stream()
+          .mapToObj(r -> getRoundLabel(r, totalRounds)).findFirst().orElse(null);
     }
 
-    return new TournamentResponseDto(
-        t.getId(), t.getName(), t.getDescription(),
-        t.getStartDate(), t.getEndDate(), t.getRegistrationDeadline(),
-        t.getMaxParticipants(),
-        teamNames.size(),
+    return new TournamentResponseDto(t.getId(), t.getName(), t.getDescription(), t.getStartDate(),
+        t.getEndDate(), t.getRegistrationDeadline(), t.getMaxParticipants(), teamNames.size(),
         t.getStatus(), t.getOrganizer().getTag(), t.isPublic(),
-        t.getWinnerTeam() != null ? t.getWinnerTeam().getName() : null,
-        teamNames,
-        currentRoundLabel
-    );
+        t.getWinnerTeam() != null ? t.getWinnerTeam().getName() : null, teamNames,
+        currentRoundLabel);
   }
 
   private String getRoundLabel(int roundNumber, int totalRounds) {

@@ -44,6 +44,10 @@ public class Tournament {
      */
     PREPARATION,
     /**
+     * Inscriptions fermees, en attente de la plannification.
+     */
+    UPCOMING,
+    /**
      * In progress status.
      */
     IN_PROGRESS,
@@ -108,7 +112,7 @@ public class Tournament {
   private List<TournamentRegistration> registrations = new ArrayList<>();
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "winner_team_id", nullable = true)
+  @JoinColumn(name = "winner_team_id")
   @JsonManagedReference("team-winner")
   private Team winnerTeam;
 

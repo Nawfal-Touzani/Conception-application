@@ -5,7 +5,6 @@ import {
   getInfoValue,
   getStateLabel,
   getTeamsValue,
-  isRegistrationOpen,
   statusLabel,
 } from './TournamentCard.utils';
 import { TournamentDetails } from '../../types/tournament.types';
@@ -28,6 +27,7 @@ const mockTournament: TournamentDetails = {
 describe('statusLabel', () => {
   test('maps each status to its readable label', () => {
     expect(statusLabel['PREPARATION']).toBe('Prochain');
+    expect(statusLabel['UPCOMING']).toBe('Complet');
     expect(statusLabel['IN_PROGRESS']).toBe('À la une');
     expect(statusLabel['FINISHED']).toBe('Dernier');
     expect(statusLabel['CANCELLED']).toBe('Annulé');
@@ -42,6 +42,12 @@ describe('formatDate', () => {
 });
 
 describe('getInfoLabel', () => {
+  test('returns INSCRIPTIONS for UPCOMING', () => {
+    expect(getInfoLabel({ ...mockTournament, status: 'UPCOMING' })).toBe(
+      'INSCRIPTIONS',
+    );
+  });
+
   test('returns VAINQUEUR for FINISHED', () => {
     expect(getInfoLabel({ ...mockTournament, status: 'FINISHED' })).toBe(
       'VAINQUEUR',
@@ -66,6 +72,12 @@ describe('getInfoLabel', () => {
 });
 
 describe('getStateLabel', () => {
+  test('returns "À venir" for UPCOMING', () => {
+    expect(getStateLabel({ ...mockTournament, status: 'UPCOMING' })).toBe(
+      'À venir',
+    );
+  });
+
   test('returns "À venir" for PREPARATION', () => {
     expect(getStateLabel({ ...mockTournament, status: 'PREPARATION' })).toBe(
       'À venir',
@@ -128,97 +140,37 @@ describe('getInfoValue', () => {
     ).toBe('Quarts');
   });
 
-  test('returns "Ouvertes" when registration is open for PREPARATION', () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    expect(
-      getInfoValue({
-        ...mockTournament,
-        status: 'PREPARATION',
-        isPublic: true,
-        registrationDeadline: tomorrow.toISOString().split('T')[0],
-        currentParticipants: 3,
-        maxParticipants: 8,
-      }),
-    ).toBe('Ouvertes');
-  });
-
-  test('returns "Fermées" when deadline has passed for PREPARATION', () => {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    expect(
-      getInfoValue({
-        ...mockTournament,
-        status: 'PREPARATION',
-        registrationDeadline: yesterday.toISOString().split('T')[0],
-      }),
-    ).toBe('Fermées');
-  });
-
   test('returns "Inconnue" as fallback for CANCELLED', () => {
     expect(getInfoValue({ ...mockTournament, status: 'CANCELLED' })).toBe(
       'Inconnue',
     );
   });
-});
 
-describe('isRegistrationOpen', () => {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const deadlineOpen = tomorrow.toISOString().split('T')[0];
-
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const deadlinePassed = yesterday.toISOString().split('T')[0];
-
-  test('returns true when public, deadline not passed and not full', () => {
-    expect(
-      isRegistrationOpen({
-        ...mockTournament,
-        isPublic: true,
-        registrationDeadline: deadlineOpen,
-        currentParticipants: 3,
-        maxParticipants: 8,
-      }),
-    ).toBe(true);
+  test('returns "Ouvertes" for PREPARATION', () => {
+    expect(getInfoValue({ ...mockTournament, status: 'PREPARATION' })).toBe(
+      'Ouvertes',
+    );
   });
 
-  test('returns false when not public', () => {
-    expect(
-      isRegistrationOpen({
-        ...mockTournament,
-        isPublic: false,
-        registrationDeadline: deadlineOpen,
-      }),
-    ).toBe(false);
-  });
-
-  test('returns false when deadline has passed', () => {
-    expect(
-      isRegistrationOpen({
-        ...mockTournament,
-        isPublic: true,
-        registrationDeadline: deadlinePassed,
-      }),
-    ).toBe(false);
-  });
-
-  test('returns false when tournament is full', () => {
-    expect(
-      isRegistrationOpen({
-        ...mockTournament,
-        isPublic: true,
-        registrationDeadline: deadlineOpen,
-        currentParticipants: 8,
-        maxParticipants: 8,
-      }),
-    ).toBe(false);
+  test('returns "Fermées" for UPCOMING', () => {
+    expect(getInfoValue({ ...mockTournament, status: 'UPCOMING' })).toBe(
+      'Fermées',
+    );
   });
 });
 
 describe('getTeamsValue', () => {
+  test('returns "current/max" for UPCOMING', () => {
+    expect(
+      getTeamsValue({
+        ...mockTournament,
+        status: 'UPCOMING',
+        currentParticipants: 8,
+        maxParticipants: 8,
+      }),
+    ).toBe('8/8');
+  });
+
   test('returns "current/max" for PREPARATION', () => {
     expect(
       getTeamsValue({

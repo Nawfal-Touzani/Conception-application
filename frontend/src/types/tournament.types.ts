@@ -1,5 +1,6 @@
 export type TournamentStatus =
   | 'PREPARATION'
+  | 'UPCOMING'
   | 'IN_PROGRESS'
   | 'FINISHED'
   | 'CANCELLED';
