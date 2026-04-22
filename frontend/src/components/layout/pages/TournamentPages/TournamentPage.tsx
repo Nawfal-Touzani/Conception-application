@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Button, IconButton, Typography } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useAuth } from '../../../../contexts/useAuth';
@@ -9,6 +9,7 @@ import TournamentDetail from './TournamentDetailPage';
 import TournamentAdminPage from './TournamentAdminPage';
 import TournamentPlanningPage from './../TournamentPages/TournamentPlanningPage';
 import { colors } from '../../../../styles/tournament.styles';
+import { useLocation } from 'react-router-dom';
 
 const CARD_WIDTH = 320;
 const GAP = 24;
@@ -16,6 +17,7 @@ const GAP = 24;
 const TournamentsPage = () => {
   const { user } = useAuth();
   const token = user?.token ?? '';
+  const location = useLocation();
 
   const [planningTournamentId, setPlanningTournamentId] = useState<
     number | null
@@ -34,6 +36,15 @@ const TournamentsPage = () => {
     reset,
     filters,
   } = useTournaments(token);
+
+  useEffect(() => {
+    const selectedId = location.state?.selectedId;
+    if (!selectedId) return;
+    const allTournaments = rows.flat();
+    if (allTournaments.length === 0) return;
+    const found = allTournaments.find((t) => t.id === selectedId);
+    if (found) setSelectedTournament(found);
+  }, [rows, location.state, setSelectedTournament]);
 
   if (planningTournamentId !== null) {
     return (
@@ -83,7 +94,7 @@ const TournamentsPage = () => {
               prev.map((t) => (t.id === updated.id ? updated : t)),
             );
           }}
-          onNavigateToPlanning={(id) => setPlanningTournamentId(id)} // ✅
+          onNavigateToPlanning={(id) => setPlanningTournamentId(id)}
         />
       </Box>
     );

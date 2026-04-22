@@ -356,6 +356,9 @@ public class TournamentService {
     if (dto.registrationDeadline().isAfter(dto.startDate())) {
       throw new IllegalArgumentException("Registration deadline must be before start date");
     }
+    if(dto.maxParticipant() < 2) {
+      throw new IllegalArgumentException("Max participants must be at least 2");
+    }
   }
 
   private void applyDtoToTournament(Tournament tournament, TournamentDto dto) {

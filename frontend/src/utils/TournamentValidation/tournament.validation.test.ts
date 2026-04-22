@@ -46,7 +46,7 @@ describe('validateTournament', () => {
   test('retourne erreur si maxParticipants vide', () => {
     const errors = validateTournament({ ...validData, maxParticipants: '' });
     expect(errors).toContain(
-      'Le nombre de participants doit être au minimum 3.',
+      'Le nombre de participants doit être au minimum 2.',
     );
   });
 
@@ -79,10 +79,10 @@ describe('validateTournament', () => {
     );
   });
 
-  test('retourne erreur si maxParticipants inférieur à 3', () => {
-    const errors = validateTournament({ ...validData, maxParticipants: 2 });
+  test('retourne erreur si maxParticipants inférieur à 2', () => {
+    const errors = validateTournament({ ...validData, maxParticipants: 1 });
     expect(errors).toContain(
-      'Le nombre de participants doit être au minimum 3.',
+      'Le nombre de participants doit être au minimum 2.',
     );
   });
 

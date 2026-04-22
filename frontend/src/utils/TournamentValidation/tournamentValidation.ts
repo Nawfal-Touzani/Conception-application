@@ -18,8 +18,8 @@ export const validateTournament = (data: {
   if (!data.endDate) errors.push('La date de fin est requise.');
   if (!data.registrationDeadline)
     errors.push("La date limite d'inscription est requise.");
-  if (!data.maxParticipants || Number(data.maxParticipants) < 3)
-    errors.push('Le nombre de participants doit être au minimum 3.');
+  if (!data.maxParticipants || Number(data.maxParticipants) < 2)
+    errors.push('Le nombre de participants doit être au minimum 2.');
 
   if (data.startDate && new Date(data.startDate) < new Date()) {
     errors.push('La date de début ne peut pas être dans le passé.');
