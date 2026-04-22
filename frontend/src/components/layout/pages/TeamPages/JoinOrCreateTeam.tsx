@@ -100,13 +100,11 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
             <Box sx={joinOrCreateTeamSx.divider} />
 
             {/* Error message in the left box */}
-            {snack.open &&
-              (snack.msg.toLowerCase().includes('demande') ||
-                snack.msg.toLowerCase().includes('rejoindre')) && (
-                <Alert severity={snack.severity} onClose={closeSnack}>
-                  {snack.msg}
-                </Alert>
-              )}
+            {snack.open && snack.section === 'join' && (
+              <Alert severity={snack.severity} onClose={closeSnack}>
+                {snack.msg}
+              </Alert>
+            )}
 
             <Autocomplete
               fullWidth
@@ -181,13 +179,11 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
             <Box sx={joinOrCreateTeamSx.divider} />
 
             {/* Error message in the right box */}
-            {snack.open &&
-              (snack.msg.toLowerCase().includes('créé') ||
-                snack.msg.toLowerCase().includes('nom')) && (
-                <Alert severity={snack.severity} onClose={closeSnack}>
-                  {snack.msg}
-                </Alert>
-              )}
+            {snack.open && snack.section === 'create' && (
+              <Alert severity={snack.severity} onClose={closeSnack}>
+                {snack.msg}
+              </Alert>
+            )}
 
             <Typography
               sx={{

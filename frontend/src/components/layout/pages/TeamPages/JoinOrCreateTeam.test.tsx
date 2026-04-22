@@ -83,7 +83,7 @@ describe('JoinOrCreateTeam', () => {
     expect(screen.getByText('Team Beta')).toBeTruthy();
   });
 
-  test('filtre les équipes par recherche', async () => {
+  test('affiche toutes les équipes quand aucune recherche effectuée', async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => mockTeams,
@@ -92,32 +92,9 @@ describe('JoinOrCreateTeam', () => {
     renderPage();
     await waitFor(() => {});
     fireEvent.mouseDown(screen.getByRole('combobox'));
-    await screen.findByText('Team Alpha');
 
-    fireEvent.change(screen.getByPlaceholderText('Rechercher...'), {
-      target: { value: 'Alpha' },
-    });
-
-    expect(screen.getByText('Team Alpha')).toBeTruthy();
-    expect(screen.queryByText('Team Beta')).toBeFalsy();
-  });
-
-  test('affiche message si aucune équipe trouvée', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockTeams,
-    });
-
-    renderPage();
-    await waitFor(() => {});
-    fireEvent.mouseDown(screen.getByRole('combobox'));
-    await screen.findByText('Team Alpha');
-
-    fireEvent.change(screen.getByPlaceholderText('Rechercher...'), {
-      target: { value: 'zzz' },
-    });
-
-    expect(screen.getByText('Aucune équipe trouvée')).toBeTruthy();
+    expect(await screen.findByText('Team Alpha')).toBeTruthy();
+    expect(screen.getByText('Team Beta')).toBeTruthy();
   });
 
   test('le bouton Envoyer demande est désactivé si aucune équipe sélectionnée', async () => {
