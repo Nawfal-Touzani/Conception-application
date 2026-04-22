@@ -70,12 +70,11 @@ public interface MatchRepository extends ListCrudRepository<Match, Long> {
   void deleteByTournament(Tournament tournament);
 
   /**
-   * Finds all matches with a given result status and whose result encoding date is before a given
-   * deadline.
+   * Find by result status and result encoded date before list.
    *
-   * @param status   the result status to filter matches
-   * @param deadline the upper bound date for the result encoding date
-   * @return a list of matches
+   * @param status   the status
+   * @param deadline the deadline
+   * @return the list
    */
   List<Match> findByResultStatusAndResultEncodedDateBefore(
       ResultStatus status, LocalDateTime deadline

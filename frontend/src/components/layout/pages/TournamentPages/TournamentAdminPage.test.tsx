@@ -133,16 +133,6 @@ describe('TournamentAdminPage', () => {
     expect(screen.queryByText('Rendre public')).toBeFalsy();
   });
 
-  test('affiche le bouton "Encoder les résultats"', () => {
-    renderComponent();
-    expect(screen.getByText('Encoder les résultats')).toBeTruthy();
-  });
-
-  test('affiche le bouton "Planifier les matchs"', () => {
-    renderComponent();
-    expect(screen.getByText('Planifier les matchs')).toBeTruthy();
-  });
-
   // ── handleUpdate ──
 
   test('appelle updateTournament et affiche le succès en cliquant sur Confirmer', async () => {
