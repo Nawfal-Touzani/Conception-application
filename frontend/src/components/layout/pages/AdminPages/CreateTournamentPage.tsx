@@ -44,7 +44,7 @@ const CreateTournamentPage = () => {
     if (!validate()) return;
 
     try {
-      await tournamentService.createTournament(
+      const result = await tournamentService.createTournament(
         user!.id,
         {
           name,
@@ -57,7 +57,7 @@ const CreateTournamentPage = () => {
         token,
       );
       setSuccess(`Le tournoi "${name}" a été créé avec succès !`);
-      setTimeout(() => navigate('/tournaments'), 1500);
+      setTimeout(() => navigate(`/tournaments/${result.id}`), 1500);
 
       setName('');
       setDescription('');
