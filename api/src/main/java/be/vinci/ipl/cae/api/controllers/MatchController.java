@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Controller for managing matches.
@@ -223,8 +224,9 @@ public class MatchController {
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @ResponseStatus(HttpStatus.OK)
   public MatchDetailDto encodeResult(@PathVariable Long idMatch,
-      @RequestBody @Valid ResultRequest payload) {
-    Match match = matchResultService.encodingResult(idMatch, payload);
+      @RequestBody @Valid ResultRequest payload, @AuthenticationPrincipal Member currentMember) {
+
+    Match match = matchResultService.encodingResult(idMatch, payload, currentMember);
     return matchMapper.toDetailDto(match);
   }
 

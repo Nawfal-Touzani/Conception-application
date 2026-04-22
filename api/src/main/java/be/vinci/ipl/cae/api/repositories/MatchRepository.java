@@ -48,11 +48,11 @@ public interface MatchRepository extends ListCrudRepository<Match, Long> {
    */
   @Query(
       """
-          SELECT m FROM Match m
-          JOIN m.playersSelections ps
-          WHERE ps.member = :member
-            AND m.state = :state
-          """
+              SELECT m FROM Match m
+              JOIN m.playersSelections ps
+              WHERE ps.member = :member
+                AND m.state = :state
+      """
   )
   List<Match> findBySelectedMemberAndState(
       @Param("member") Member member,
@@ -69,6 +69,14 @@ public interface MatchRepository extends ListCrudRepository<Match, Long> {
   @Transactional
   void deleteByTournament(Tournament tournament);
 
+  /**
+   * Finds all matches with a given result status and whose result encoding date is before a given
+   * deadline.
+   *
+   * @param status   the result status to filter matches
+   * @param deadline the upper bound date for the result encoding date
+   * @return a list of matches
+   */
   List<Match> findByResultStatusAndResultEncodedDateBefore(
       ResultStatus status, LocalDateTime deadline
   );
