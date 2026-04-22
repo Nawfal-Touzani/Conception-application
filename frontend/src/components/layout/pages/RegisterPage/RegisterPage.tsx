@@ -67,7 +67,7 @@ const RegisterPage: React.FC = () => {
             display="flex"
             flexDirection={{ xs: 'column', md: 'row' }}
             gap={4}
-            alignItems="flex-start"
+            alignItems="stretch"
           >
             {/* Left card — text inputs */}
             <Paper
