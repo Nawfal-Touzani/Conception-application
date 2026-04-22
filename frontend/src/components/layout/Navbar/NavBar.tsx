@@ -202,7 +202,7 @@ const NavBar = ({
                   backgroundColor: 'white',
                   color: '#1e2a44',
                   border: '1px solid #1e2a44',
-                  borderRadius: '10px',
+                  borderRadius: '6px',
                   textTransform: 'none',
                   fontWeight: 'bold',
                   px: 4,
@@ -217,10 +217,11 @@ const NavBar = ({
                 sx={{
                   backgroundColor: '#1e2a44',
                   color: 'white',
-                  borderRadius: '10px',
+                  borderRadius: '6px',
+                  border: '1px solid #1e2a44',
                   textTransform: 'none',
                   fontWeight: 'bold',
-                  px: 5,
+                  px: 4,
                 }}
               >
                 S'inscrire
