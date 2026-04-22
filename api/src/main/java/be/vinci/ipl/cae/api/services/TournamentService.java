@@ -203,8 +203,7 @@ public class TournamentService {
     TournamentResponseDto inProgress = tournamentRepository.findFirstByStatus(Status.IN_PROGRESS)
         .map(this::toResponseDto).orElse(null);
 
-    TournamentResponseDto nextUpcoming = tournamentRepository
-        .findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(
+    TournamentResponseDto nextUpcoming = tournamentRepository.findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(
         Status.PREPARATION).map(this::toResponseDto).orElse(null);
 
     return new HomepageTournamentsDto(lastFinished, inProgress, nextUpcoming);
@@ -299,10 +298,7 @@ public class TournamentService {
    * @return the matches by tournament
    */
   public List<MatchResponseDto> getMatchesByTournament(long tournamentId) {
-    Tournament tournament = tournamentRepository.findById(tournamentId)
-        .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
-
-    return matchRepository.findByTournamentOrderByRoundNumberAsc(tournament).stream().map(
+    return getMatchesForTournament(tournamentId).stream().map(
         m -> new MatchResponseDto(m.getId(), m.getRoundNumber(),
             m.getTeamA() != null ? m.getTeamA().getName() : null,
             m.getTeamB() != null ? m.getTeamB().getName() : null, m.getScoreA(), m.getScoreB(),
@@ -318,10 +314,7 @@ public class TournamentService {
    * @return list of MatchSelectionStatusDto
    */
   public List<MatchSelectionStatusDto> getMatchSelectionStatuses(long tournamentId) {
-    Tournament tournament = tournamentRepository.findById(tournamentId)
-        .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
-
-    return matchRepository.findByTournamentOrderByRoundNumberAsc(tournament).stream().map(m -> {
+    return getMatchesForTournament(tournamentId).stream().map(m -> {
       boolean firstTeamReady = m.getTeamA() != null && m.getPlayersSelections().stream()
           .filter(ps -> ps.getTeam().getId().equals(m.getTeamA().getId())).count() == 4;
 
@@ -394,5 +387,11 @@ public class TournamentService {
       case 3 -> "Huitièmes de finale";
       default -> "Tour " + roundNumber;
     };
+  }
+
+  private List<Match> getMatchesForTournament(long tournamentId) {
+    Tournament tournament = tournamentRepository.findById(tournamentId)
+        .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
+    return matchRepository.findByTournamentOrderByRoundNumberAsc(tournament);
   }
 }
