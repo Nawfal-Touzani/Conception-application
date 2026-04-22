@@ -57,7 +57,10 @@ const CreateTournamentPage = () => {
         token,
       );
       setSuccess(`Le tournoi "${name}" a été créé avec succès !`);
-      setTimeout(() => navigate(`/tournaments/${result.id}`), 1500);
+      setTimeout(
+        () => navigate('/tournaments', { state: { selectedId: result.id } }),
+        1500,
+      );
 
       setName('');
       setDescription('');
