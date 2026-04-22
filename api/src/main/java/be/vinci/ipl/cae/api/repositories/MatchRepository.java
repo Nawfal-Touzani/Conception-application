@@ -69,6 +69,13 @@ public interface MatchRepository extends ListCrudRepository<Match, Long> {
   @Transactional
   void deleteByTournament(Tournament tournament);
 
+  /**
+   * Find by result status and result encoded date before list.
+   *
+   * @param status   the status
+   * @param deadline the deadline
+   * @return the list
+   */
   List<Match> findByResultStatusAndResultEncodedDateBefore(
       ResultStatus status, LocalDateTime deadline
   );
