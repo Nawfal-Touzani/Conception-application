@@ -353,9 +353,19 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
             >
               Inscriptions
             </Typography>
-            <Typography sx={{ color: '#555', fontSize: '0.95rem', mb: 1.5 }}>
-              Date limite le {formatDate(tournament.registrationDeadline)}
-            </Typography>
+
+            {tournament.status === 'PREPARATION' && (
+              <Typography sx={{ color: '#555', fontSize: '0.95rem', mb: 1.5 }}>
+                Date limite le {formatDate(tournament.registrationDeadline)}
+              </Typography>
+            )}
+
+            {tournament.status === 'UPCOMING' && (
+              <Typography sx={{ color: '#555', fontSize: '0.95rem', mb: 1.5 }}>
+                Tournoi complet — inscriptions fermées
+              </Typography>
+            )}
+
             <Divider sx={{ mb: 1.5 }} />
             <Typography
               sx={{

@@ -24,6 +24,7 @@ function statusLabel(tournament: TournamentDetails): string {
   if (tournament.status === 'PREPARATION') {
     return tournament.isPublic ? 'Inscriptions ouvertes' : 'En préparation';
   }
+  if (tournament.status === 'UPCOMING') return 'Complet';
   if (tournament.status === 'IN_PROGRESS') return 'En cours';
   if (tournament.status === 'FINISHED') return 'Terminé';
   return 'Annulé';
@@ -326,7 +327,7 @@ const TournamentAdminPage = ({
                 }}
               />
             )}
-            {tournament.isPublic && (
+            {tournament.status === 'IN_PROGRESS' && (
               <Button
                 variant="contained"
                 onClick={() =>
@@ -348,7 +349,7 @@ const TournamentAdminPage = ({
                 Encoder les résultats
               </Button>
             )}
-            {tournament.isPublic && !planningPublished && (
+            {tournament.status === 'UPCOMING' && !planningPublished && (
               <Button
                 variant="contained"
                 onClick={() => onNavigateToPlanning(tournament.id)}

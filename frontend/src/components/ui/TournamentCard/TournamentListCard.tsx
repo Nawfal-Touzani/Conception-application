@@ -19,10 +19,19 @@ const formatDateFull = (dateStr: string) =>
     month: '2-digit',
     year: 'numeric',
   });
+
 function getStateLabel(tournament: TournamentDetails): string {
   if (tournament.status === 'PREPARATION') {
-    return tournament.isPublic ? 'Inscriptions ouvertes' : 'En préparation';
+    if (!tournament.isPublic) return 'En préparation';
+    const deadlinePassed =
+      new Date(tournament.registrationDeadline) < new Date();
+    const isFull = tournament.currentParticipants >= tournament.maxParticipants;
+    if (deadlinePassed || isFull) return 'En préparation';
+    return 'Inscriptions ouvertes';
   }
+
+  if (tournament.status === 'UPCOMING') return 'Complet';
+
   if (tournament.status === 'IN_PROGRESS') return 'En cours';
   if (tournament.status === 'FINISHED') return 'Terminé';
   return 'Annulé';
@@ -74,15 +83,31 @@ export default function TournamentListCard({ tournament, onSelect }: Props) {
         <Typography variant="body1" fontWeight="bold" mb={1} fontSize="1.1rem">
           {getStateLabel(tournament)}
         </Typography>
-        <Typography
-          variant="caption"
-          display="block"
-          mb={1}
-          fontSize="0.8rem"
-          sx={{ color: 'rgba(255,255,255,0.7)' }}
-        >
-          Clôture le {formatDateFull(tournament.registrationDeadline)}
-        </Typography>
+
+        {tournament.status === 'PREPARATION' && (
+          <Typography
+            variant="caption"
+            display="block"
+            mb={1}
+            fontSize="0.8rem"
+            sx={{ color: 'rgba(255,255,255,1)' }}
+          >
+            Clôture le {formatDateFull(tournament.registrationDeadline)}
+          </Typography>
+        )}
+
+        {tournament.status === 'UPCOMING' && (
+          <Typography
+            variant="caption"
+            display="block"
+            mb={1}
+            fontSize="0.8rem"
+            sx={{ color: 'rgba(255,255,255,1)' }}
+          >
+            Inscriptions fermées
+          </Typography>
+        )}
+
         {tournament.description && (
           <Typography
             variant="caption"
@@ -90,7 +115,7 @@ export default function TournamentListCard({ tournament, onSelect }: Props) {
             mb={1}
             fontSize="0.85rem"
             sx={{
-              color: 'rgba(255,255,255,0.7)',
+              color: 'rgba(255,255,255,1)',
               overflow: 'hidden',
               display: '-webkit-box',
               WebkitLineClamp: 2,
@@ -101,12 +126,19 @@ export default function TournamentListCard({ tournament, onSelect }: Props) {
             {tournament.description}
           </Typography>
         )}
+
         <Typography variant="caption" display="block">
           TEAMS
         </Typography>
+
         <Typography variant="body2" fontWeight="bold" fontSize="1rem" mb={1}>
-          {tournament.currentParticipants}/{tournament.maxParticipants}
+          {/* Affiche "current/max" pour PREPARATION et UPCOMING, sinon juste "current" */}
+          {tournament.status === 'PREPARATION' ||
+          tournament.status === 'UPCOMING'
+            ? `${tournament.currentParticipants}/${tournament.maxParticipants}`
+            : `${tournament.currentParticipants}`}
         </Typography>
+
         <Box sx={{ mt: 'auto', pt: 1 }}>
           <IconButton
             onClick={onSelect}
