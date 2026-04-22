@@ -23,23 +23,38 @@ function buildBracket(teams: string[]): Round[] {
   const rounds: Round[] = [];
   let current = shuffleArray(teams);
 
+  // Round 1 : on apparie les équipes, les impairs passent en bye
+  const round1: Match[] = [];
+  const nextSlots: string[] = [];
+
+  for (let i = 0; i < current.length; i += 2) {
+    if (current[i + 1] === undefined) {
+      // bye : passe directement au round suivant
+      nextSlots.push(current[i]);
+    } else {
+      round1.push({ team1: current[i], team2: current[i + 1] });
+      nextSlots.push('?');
+    }
+  }
+  rounds.push(round1);
+  current = nextSlots;
+
+  // Rounds suivants : tout en "?" sauf les byes connus
   while (current.length > 1) {
     const round: Match[] = [];
-    const nextRoundSlots: string[] = [];
+    const next: string[] = [];
 
     for (let i = 0; i < current.length; i += 2) {
-      const team1 = current[i];
-      const team2 = current[i + 1];
-      if (team2 === undefined) {
-        nextRoundSlots.push(team1);
+      if (current[i + 1] === undefined) {
+        next.push(current[i]);
       } else {
-        round.push({ team1, team2 });
-        nextRoundSlots.push('?');
+        round.push({ team1: current[i], team2: current[i + 1] });
+        next.push('?');
       }
     }
 
     if (round.length > 0) rounds.push(round);
-    current = nextRoundSlots;
+    current = next;
   }
 
   return rounds;
@@ -51,53 +66,16 @@ function buildFullBracketFromBackend(
     teamA: string | null;
     teamB: string | null;
   }[],
-  allTeams: string[],
+  _allTeams: string[],
 ): Round[] {
-  const round1Matches = backendMatches
-    .filter((m) => m.roundNumber === 1)
-    .map((m) => ({ team1: m.teamA ?? '?', team2: m.teamB ?? '?' }));
+  const maxRound = Math.max(...backendMatches.map((m) => m.roundNumber));
+  const rounds: Round[] = [];
 
-  if (round1Matches.length === 0) return buildBracket(allTeams);
-
-  const teamsInMatches = new Set<string>();
-  round1Matches.forEach((m) => {
-    if (m.team1 !== '?') teamsInMatches.add(m.team1);
-    if (m.team2 !== '?') teamsInMatches.add(m.team2);
-  });
-  const byeTeams = allTeams.filter((t) => !teamsInMatches.has(t));
-
-  const rounds: Round[] = [round1Matches];
-
-  // Round suivant : paires de winners + bye teams directement visibles
-  const nextRound: Match[] = [];
-
-  // Chaque paire de 2 matchs → 1 match TBD vs TBD
-  for (let i = 0; i + 1 < round1Matches.length; i += 2) {
-    nextRound.push({ team1: '?', team2: '?' });
-  }
-
-  // S'il reste 1 match impair, il s'apparie avec la première bye team
-  if (round1Matches.length % 2 === 1 && byeTeams.length > 0) {
-    nextRound.push({ team1: '?', team2: byeTeams.shift()! });
-  }
-
-  // Bye teams restantes : chacune directement qualifiée vs TBD
-  byeTeams.forEach((bye) => {
-    nextRound.push({ team1: bye, team2: '?' });
-  });
-
-  if (nextRound.length > 0) rounds.push(nextRound);
-
-  // Rounds suivants tout TBD
-  let prev = nextRound;
-  while (prev.length > 1) {
-    const count = Math.ceil(prev.length / 2);
-    const r: Match[] = Array.from({ length: count }, () => ({
-      team1: '?',
-      team2: '?',
-    }));
-    rounds.push(r);
-    prev = r;
+  for (let r = 1; r <= maxRound; r++) {
+    const roundMatches = backendMatches
+      .filter((m) => m.roundNumber === r)
+      .map((m) => ({ team1: m.teamA ?? '?', team2: m.teamB ?? '?' }));
+    rounds.push(roundMatches);
   }
 
   return rounds;
@@ -176,7 +154,7 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
               const full = buildFullBracketFromBackend(matches, teamNames);
               setRounds(full);
               setConfirmedRounds(full);
-              setPhase(t.status === 'IN_PROGRESS' ? 'published' : 'confirmed');
+              setPhase('confirmed');
             }
           },
         )

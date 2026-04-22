@@ -237,11 +237,6 @@ public class TournamentService {
     Tournament t = tournamentRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
 
-    // "published" → on pase le tournoi IN_PROGRESS
-    if ("published".equals(dto.getPhase())) {
-      t.setStatus(Tournament.Status.IN_PROGRESS);
-    }
-
     if ("confirmed".equals(dto.getPhase()) || "published".equals(dto.getPhase())) {
 
       // Supprime les anciens matchs pour éviter les doublons si re-confirmation
@@ -262,31 +257,29 @@ public class TournamentService {
           for (int m = 0; m < round.getMatches().size(); m++) {
             PlanningRequest.MatchDto matchDto = round.getMatches().get(m);
 
-            // Skip les placeholders "?" (vainqueurs pas encore connus)
-            if ("?".equals(matchDto.getTeam1()) || "?".equals(matchDto.getTeam2())) {
-              savedMatchesInRound.add(null);
-              continue;
-            }
-
-            Team teamA = teamRepository.findByName(matchDto.getTeam1())
-                .orElseThrow(() -> new NoSuchElementException(
-                    "Team not found: " + matchDto.getTeam1()));
-            Team teamB = teamRepository.findByName(matchDto.getTeam2())
-                .orElseThrow(() -> new NoSuchElementException(
-                    "Team not found: " + matchDto.getTeam2()));
-
             Match match = new Match();
             match.setTournament(t);
             match.setRoundNumber(r + 1);
-            match.setTeamA(teamA);
-            match.setTeamB(teamB);
             match.setState(Match.MatchState.SCHEDULED);
             match.setResultStatus(Match.ResultStatus.NOT_ENTERED);
             match.setDateTime(LocalDateTime.now());
 
+            // Si une équipe est connue on la set, sinon on laisse null
+            if (!"?".equals(matchDto.getTeam1())) {
+              Team teamA = teamRepository.findByName(matchDto.getTeam1())
+                  .orElseThrow(() -> new NoSuchElementException(
+                      "Team not found: " + matchDto.getTeam1()));
+              match.setTeamA(teamA);
+            }
+
+            if (!"?".equals(matchDto.getTeam2())) {
+              Team teamB = teamRepository.findByName(matchDto.getTeam2())
+                  .orElseThrow(() -> new NoSuchElementException(
+                      "Team not found: " + matchDto.getTeam2()));
+              match.setTeamB(teamB);
+            }
             savedMatchesInRound.add(matchRepository.save(match));
           }
-
           savedRounds.add(savedMatchesInRound);
         }
 
