@@ -8,9 +8,9 @@ import {
   Badge,
 } from '@mui/material';
 import logo from '../../../assets/images/logo.png';
-import member from '../../../assets/images/member.png';
 import notifLogo from '../../../assets/images/notif-logo.png';
 import { NavBarProps } from '../../../types/navbar.types';
+import { AccountCircle } from '@mui/icons-material';
 
 const NavBar = ({
   user,
@@ -26,23 +26,25 @@ const NavBar = ({
   return (
     <AppBar position="static" sx={{ backgroundColor: '#ffffff', boxShadow: 1 }}>
       <Toolbar sx={{ justifyContent: 'space-between' }}>
-        {/* Logo and buttons */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          {/* Logo */}
+        {/* Logo */}
+        <Box sx={{ flex: 1, display: 'flex', alignItems: 'center' }}>
           <img
             src={logo}
             alt="Logo site"
             style={{ height: '40px', cursor: 'pointer' }}
             onClick={() => onNavigate('/')}
           />
+        </Box>
 
+        {/* Navigation button */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {/* Tournois */}
           <Button
             onClick={() => onNavigate('/tournaments')}
             sx={{
               backgroundColor: isTournamentsPage ? '#d8a46b' : '#1e2a44',
               color: 'white',
-              borderRadius: '10px',
+              borderRadius: '6px',
               textTransform: 'none',
               fontWeight: 'bold',
               px: 5,
@@ -61,10 +63,13 @@ const NavBar = ({
               sx={{
                 backgroundColor: isTeamPage ? '#e2ab73' : '#1e2a44',
                 color: 'white',
-                borderRadius: '10px',
+                borderRadius: '6px',
                 textTransform: 'none',
                 fontWeight: 'bold',
                 px: 5,
+                '&:hover': {
+                  backgroundColor: isTeamPage ? '#c38d54' : '#151e32',
+                },
               }}
             >
               Mon équipe
@@ -77,7 +82,7 @@ const NavBar = ({
               sx={{
                 backgroundColor: isAdminPage ? '#d8a46b' : '#1e2a44',
                 color: 'white',
-                borderRadius: '10px',
+                borderRadius: '6px',
                 textTransform: 'none',
                 fontWeight: 'bold',
                 px: 5,
@@ -96,7 +101,7 @@ const NavBar = ({
               sx={{
                 backgroundColor: isCreateTournamentPage ? '#d8a46b' : '#1e2a44',
                 color: 'white',
-                borderRadius: '10px',
+                borderRadius: '6px',
                 textTransform: 'none',
                 fontWeight: 'bold',
                 px: 5,
@@ -112,8 +117,16 @@ const NavBar = ({
           )}
         </Box>
 
-        {/* Auth buttons or User info */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        {/* Left contener (Auth / User)*/}
+        <Box
+          sx={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            gap: 2,
+          }}
+        >
           {user ? (
             <>
               {/* Notifications logo + counter */}
@@ -130,56 +143,53 @@ const NavBar = ({
                 </Badge>
               </IconButton>
 
-              {/* Tag */}
-              <Typography
-                variant="body1"
-                sx={{ color: '#1e2a44', fontWeight: 'bold', px: 3 }}
-              >
-                {user.tag}
-              </Typography>
-
-              {/* Profile (only if not on profile page) */}
-              {!isProfilePage && (
-                <Box
+              {/* Profile + Logout */}
+              {!isProfilePage ? (
+                <Button
                   onClick={() => onNavigate('/members/me')}
+                  variant="outlined"
                   sx={{
+                    color: '#1e2a44',
+                    borderColor: '#1e2a44',
+                    borderWidth: '2px',
+                    borderRadius: '80px',
+                    textTransform: 'none',
+                    fontWeight: 'bold',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    border: '2px solid transparent',
-                    transition: 'all 0.2s ease-in-out',
+                    gap: 1,
+                    px: 1.5,
                     '&:hover': {
+                      backgroundColor: '#1e2a44',
+                      color: '#fff',
                       borderColor: '#1e2a44',
                     },
                   }}
                 >
-                  <img
-                    src={member}
-                    alt="Profile picture"
-                    style={{
-                      height: '40px',
-                      width: '40px',
-                      borderRadius: '50%',
-                      objectFit: 'cover',
-                      display: 'block',
-                    }}
-                  />
-                </Box>
-              )}
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 'bold', color: 'inherit' }}
+                  >
+                    {user.tag}
+                  </Typography>
 
-              {/* Log out (only if on profile page) */}
-              {isProfilePage && (
+                  <AccountCircle sx={{ fontSize: 32 }} />
+                </Button>
+              ) : (
                 <Button
                   onClick={onLogout}
+                  variant="outlined"
                   sx={{
-                    backgroundColor: '#d32f2f',
-                    color: 'white',
-                    borderRadius: '10px',
+                    borderColor: '#d32f2f',
+                    borderWidth: '2px',
+                    color: 'black',
+                    borderRadius: '6px',
                     textTransform: 'none',
                     fontWeight: 'bold',
-                    px: 4,
+                    px: 3,
+                    '&:hover': {
+                      backgroundColor: '#b71c1c',
+                    },
                   }}
                 >
                   Se déconnecter
@@ -195,10 +205,13 @@ const NavBar = ({
                   backgroundColor: 'white',
                   color: '#1e2a44',
                   border: '1px solid #1e2a44',
-                  borderRadius: '10px',
+                  borderRadius: '6px',
                   textTransform: 'none',
                   fontWeight: 'bold',
                   px: 4,
+                  '&:hover': {
+                    backgroundColor: '#dedddd',
+                  },
                 }}
               >
                 Se connecter
@@ -210,10 +223,14 @@ const NavBar = ({
                 sx={{
                   backgroundColor: '#1e2a44',
                   color: 'white',
-                  borderRadius: '10px',
+                  borderRadius: '6px',
+                  border: '1px solid #1e2a44',
                   textTransform: 'none',
                   fontWeight: 'bold',
-                  px: 5,
+                  px: 4,
+                  '&:hover': {
+                    backgroundColor: '#151e32',
+                  },
                 }}
               >
                 S'inscrire

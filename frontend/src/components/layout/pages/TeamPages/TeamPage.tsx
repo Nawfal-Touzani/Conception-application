@@ -67,9 +67,30 @@ const TeamPage = () => {
 
   return (
     <Box sx={teamPageSx.root}>
-      <Typography variant="h4" sx={{ color: '#fff', fontWeight: 800, mb: 4 }}>
-        Mon équipe
-      </Typography>
+      <Box sx={{ mb: 5, textAlign: 'center' }}>
+        <Typography
+          variant="h4"
+          sx={{
+            color: 'white',
+            fontWeight: 900,
+            textAlign: 'center',
+            textTransform: 'uppercase',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            mb: 4,
+            gap: 2,
+            '&::before, &::after': {
+              content: '""',
+              height: '3px',
+              width: '50px',
+              backgroundColor: 'white',
+            },
+          }}
+        >
+          Mon équipe
+        </Typography>
+      </Box>
 
       <Box sx={teamPageSx.layout}>
         {/* ── Colonne 1 : Infos équipe ── */}
