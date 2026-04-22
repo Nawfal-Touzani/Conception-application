@@ -7,9 +7,14 @@ import { useAuth } from '../../../../contexts/useAuth';
 type Props = {
   tournamentId: number;
   onMatchClick?: (matchId: number) => void;
+  isResponsible?: boolean;
 };
 
-const TournamentBracket: React.FC<Props> = ({ tournamentId, onMatchClick }) => {
+const TournamentBracket: React.FC<Props> = ({
+  tournamentId,
+  onMatchClick,
+  isResponsible = false,
+}) => {
   const { user } = useAuth();
   const token = user?.token ?? '';
 
@@ -105,6 +110,7 @@ const TournamentBracket: React.FC<Props> = ({ tournamentId, onMatchClick }) => {
               <BracketMatchCard
                 key={match.id}
                 match={match}
+                isResponsible={isResponsible}
                 onClick={
                   onMatchClick ? () => onMatchClick(match.id) : undefined
                 }
@@ -117,15 +123,17 @@ const TournamentBracket: React.FC<Props> = ({ tournamentId, onMatchClick }) => {
   );
 };
 
-// ── Bracket match card ───────────────────────────────────────────────
-
+// Bracket match card
 const BracketMatchCard: React.FC<{
   match: MatchBracket;
   onClick?: () => void;
-}> = ({ match, onClick }) => {
+  isResponsible?: boolean;
+}> = ({ match, onClick, isResponsible = false }) => {
   const scorePublic = match.scoreA !== null && match.scoreB !== null;
   const isDone = match.state === 'PLAYED' || match.state === 'FORFEIT';
-  const isClickable = isDone && !!onClick;
+  const isScheduled = match.state === 'SCHEDULED';
+
+  const isClickable = (isDone || (isScheduled && isResponsible)) && !!onClick;
 
   return (
     <Paper

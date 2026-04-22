@@ -1,17 +1,10 @@
 import React from 'react';
-import {
-  Box,
-  Typography,
-  Button,
-  CircularProgress,
-  Paper,
-} from '@mui/material';
+import { Box, Typography, CircularProgress, Paper } from '@mui/material';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import SportsIcon from '@mui/icons-material/Sports';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import { MatchDetail } from '../../../../../types/match.types';
-import {
-  usePersonalMatches,
-  MatchView,
-} from '../../../../../hooks/useMatch/usePersonalMatches';
+import { usePersonalMatches } from '../../../../../hooks/useMatch/usePersonalMatches';
 import {
   formatMatchDateTime,
   getStateColor,
@@ -23,79 +16,61 @@ type Props = {
 };
 
 const PersonalMatchesSection: React.FC<Props> = ({ token, onMatchClick }) => {
-  const { upcoming, past, loading, error, activeView, setActiveView } =
-    usePersonalMatches(token);
+  const { upcoming, past, loading, error } = usePersonalMatches(token);
 
-  const displayed = activeView === 'upcoming' ? upcoming : past;
+  const lastMatch = past.length > 0 ? past[0] : null;
+  const nextMatch = upcoming.length > 0 ? upcoming[0] : null;
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+        <CircularProgress sx={{ color: '#e8b84b' }} />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Typography sx={{ color: '#e74c3c', textAlign: 'center', py: 3 }}>
+        {error}
+      </Typography>
+    );
+  }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {/* Tabs */}
-      <Box sx={{ display: 'flex', gap: 1 }}>
-        {(['upcoming', 'past'] as MatchView[]).map((view) => (
-          <Button
-            key={view}
-            variant={activeView === view ? 'contained' : 'text'}
-            onClick={() => setActiveView(view)}
-            sx={{
-              textTransform: 'none',
-              fontWeight: 'bold',
-              fontSize: '0.88rem',
-              borderRadius: '8px',
-              px: 2,
-              py: 0.75,
-              backgroundColor: activeView === view ? '#e8b84b' : 'transparent',
-              color: activeView === view ? '#1a2744' : 'rgba(255,255,255,0.5)',
-              '&:hover': {
-                backgroundColor:
-                  activeView === view ? '#d4a73a' : 'rgba(255,255,255,0.08)',
-              },
-            }}
-          >
-            {view === 'upcoming' ? 'Matchs à venir' : 'Matchs disputés'}
-          </Button>
-        ))}
+    <Box sx={{ display: 'flex', gap: 2 }}>
+      {/* ── Dernier match joué ── */}
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <Typography sx={s.colLabel}>
+          <SportsIcon sx={{ fontSize: 14, mr: 0.5 }} />
+          Dernier match
+        </Typography>
+
+        {lastMatch ? (
+          <MatchCard
+            match={lastMatch}
+            onClick={() => onMatchClick(lastMatch)}
+          />
+        ) : (
+          <EmptyCard message="Aucun match disputé." />
+        )}
       </Box>
 
-      {/* Loading */}
-      {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-          <CircularProgress sx={{ color: '#e8b84b' }} />
-        </Box>
-      )}
-
-      {/* Erreur */}
-      {error && (
-        <Typography sx={{ color: '#e74c3c', textAlign: 'center', py: 3 }}>
-          {error}
+      {/* ── Prochain match ── */}
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <Typography sx={s.colLabel}>
+          <HourglassEmptyIcon sx={{ fontSize: 14, mr: 0.5 }} />
+          Prochain match
         </Typography>
-      )}
 
-      {/* Liste vide */}
-      {!loading && displayed.length === 0 && (
-        <Typography
-          sx={{
-            color: 'rgba(255,255,255,0.35)',
-            textAlign: 'center',
-            py: 4,
-            fontStyle: 'italic',
-          }}
-        >
-          {activeView === 'upcoming'
-            ? 'Aucun match à venir.'
-            : 'Aucun match disputé.'}
-        </Typography>
-      )}
-
-      {/* Liste des matchs */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
-        {displayed.map((match) => (
+        {nextMatch ? (
           <MatchCard
-            key={match.id}
-            match={match}
-            onClick={() => onMatchClick(match)}
+            match={nextMatch}
+            onClick={() => onMatchClick(nextMatch)}
           />
-        ))}
+        ) : (
+          <EmptyCard message="Aucun match à venir." />
+        )}
       </Box>
     </Box>
   );
@@ -112,29 +87,18 @@ const MatchCard: React.FC<{ match: MatchDetail; onClick: () => void }> = ({
   const teamBWon = match.winnerId === match.teamB?.id;
 
   return (
-    <Paper
-      elevation={3}
-      onClick={onClick}
-      sx={{
-        borderRadius: '10px',
-        px: 2.5,
-        py: 2,
-        backgroundColor: '#243060',
-        cursor: 'pointer',
-        border: '1px solid rgba(255,255,255,0.06)',
-        transition: 'all 0.15s',
-        '&:hover': {
-          backgroundColor: '#2d3c75',
-          borderColor: 'rgba(255,255,255,0.15)',
-        },
-      }}
-    >
+    <Paper elevation={3} onClick={onClick} sx={s.card}>
       {/* Tournoi + round */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-        <Typography color="rgba(255,255,255,0.4)" fontSize="0.75rem">
+        <Typography
+          color="rgba(0,0,0,1)"
+          fontSize="0.72rem"
+          noWrap
+          sx={{ maxWidth: '60%' }}
+        >
           {match.tournamentName}
         </Typography>
-        <Typography color="#e8b84b" fontSize="0.75rem" fontWeight="bold">
+        <Typography color="#e8b84b" fontSize="0.72rem" fontWeight="bold">
           {match.roundLabel}
         </Typography>
       </Box>
@@ -146,39 +110,29 @@ const MatchCard: React.FC<{ match: MatchDetail; onClick: () => void }> = ({
           isWinner={teamAWon}
           align="left"
         />
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 0.5,
-            minWidth: 90,
-            justifyContent: 'center',
-          }}
-        >
+        <Box sx={s.scoreCenter}>
           {scorePublic ? (
             <>
               <Typography
                 sx={{
-                  fontSize: '1.5rem',
+                  fontSize: '1.4rem',
                   fontWeight: 800,
                   color: teamAWon ? '#2ecc71' : '#e74c3c',
-                  minWidth: 28,
+                  minWidth: 24,
                   textAlign: 'center',
                 }}
               >
                 {match.scoreA}
               </Typography>
-              <Typography
-                sx={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.3)' }}
-              >
+              <Typography sx={{ fontSize: '1.1rem', color: 'rgba(0,0,0,1)' }}>
                 –
               </Typography>
               <Typography
                 sx={{
-                  fontSize: '1.5rem',
+                  fontSize: '1.4rem',
                   fontWeight: 800,
                   color: teamBWon ? '#2ecc71' : '#e74c3c',
-                  minWidth: 28,
+                  minWidth: 24,
                   textAlign: 'center',
                 }}
               >
@@ -188,8 +142,8 @@ const MatchCard: React.FC<{ match: MatchDetail; onClick: () => void }> = ({
           ) : (
             <Typography
               sx={{
-                fontSize: '0.9rem',
-                color: 'rgba(255,255,255,0.3)',
+                fontSize: '0.82rem',
+                color: 'rgba(0,0,0,1)',
                 fontStyle: 'italic',
               }}
             >
@@ -204,7 +158,7 @@ const MatchCard: React.FC<{ match: MatchDetail; onClick: () => void }> = ({
         />
       </Box>
 
-      {/* Date + point d'état */}
+      {/* Date + dot état */}
       <Box
         sx={{
           display: 'flex',
@@ -212,13 +166,13 @@ const MatchCard: React.FC<{ match: MatchDetail; onClick: () => void }> = ({
           alignItems: 'center',
         }}
       >
-        <Typography color="rgba(255,255,255,0.35)" fontSize="0.75rem">
+        <Typography color="rgba(0,0,0,1)" fontSize="0.72rem">
           {formatMatchDateTime(match.dateTime)}
         </Typography>
         <Box
           sx={{
-            width: 8,
-            height: 8,
+            width: 7,
+            height: 7,
             borderRadius: '50%',
             backgroundColor: getStateColor(match.state),
           }}
@@ -228,7 +182,24 @@ const MatchCard: React.FC<{ match: MatchDetail; onClick: () => void }> = ({
   );
 };
 
-// ── Sous-composants ──────────────────────────────────────────────────
+// ── Placeholder quand pas de match ───────────────────────────────────
+
+const EmptyCard: React.FC<{ message: string }> = ({ message }) => (
+  <Paper elevation={0} sx={s.emptyCard}>
+    <Typography
+      sx={{
+        color: 'rgba(0,0,0,1)',
+        fontSize: '0.85rem',
+        fontStyle: 'italic',
+        textAlign: 'center',
+      }}
+    >
+      {message}
+    </Typography>
+  </Paper>
+);
+
+// ── TeamBlock ────────────────────────────────────────────────────────
 
 const TeamBlock: React.FC<{
   name: string;
@@ -245,21 +216,67 @@ const TeamBlock: React.FC<{
     }}
   >
     {isWinner && align === 'left' && (
-      <EmojiEventsIcon sx={{ fontSize: 14, color: '#e8b84b' }} />
+      <EmojiEventsIcon sx={{ fontSize: 13, color: '#e8b84b' }} />
     )}
     <Typography
       sx={{
         fontWeight: isWinner ? 'bold' : 500,
         color: isWinner ? '#e8b84b' : '#fff',
-        fontSize: '0.92rem',
+        fontSize: '0.85rem',
       }}
+      noWrap
     >
       {name}
     </Typography>
     {isWinner && align === 'right' && (
-      <EmojiEventsIcon sx={{ fontSize: 14, color: '#e8b84b' }} />
+      <EmojiEventsIcon sx={{ fontSize: 13, color: '#e8b84b' }} />
     )}
   </Box>
 );
+
+// ── Styles ───────────────────────────────────────────────────────────
+
+const s = {
+  colLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    color: 'rgba(0, 0, 0, 1)',
+    fontSize: '0.72rem',
+    textTransform: 'uppercase' as const,
+    letterSpacing: 1,
+    mb: 0.5,
+  },
+  card: {
+    borderRadius: '10px',
+    px: 2,
+    py: 1.5,
+    backgroundColor: '#243060',
+    cursor: 'pointer',
+    border: '1px solid rgba(0,0,0,1)',
+    transition: 'all 0.15s',
+    '&:hover': {
+      backgroundColor: '#2d3c75',
+      borderColor: 'rgba(0,0,0,1)',
+    },
+  },
+  scoreCenter: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 0.5,
+    minWidth: 70,
+    justifyContent: 'center',
+  },
+  emptyCard: {
+    borderRadius: '10px',
+    px: 2,
+    py: 3,
+    backgroundColor: 'rgba(4, 19, 40, 0.1)',
+    border: '1.5px solid #082247',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 100,
+  },
+};
 
 export default PersonalMatchesSection;

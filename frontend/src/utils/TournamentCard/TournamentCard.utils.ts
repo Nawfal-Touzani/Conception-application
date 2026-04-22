@@ -3,6 +3,7 @@ import { TournamentDetails } from '../../types/tournament.types';
 // Enum to a readable
 export const statusLabel: Record<string, string> = {
   PREPARATION: 'Prochain',
+  UPCOMING: 'Complet',
   IN_PROGRESS: 'À la une',
   FINISHED: 'Dernier',
   CANCELLED: 'Annulé',
@@ -15,14 +16,6 @@ export const formatDate = (dateStr: string): string =>
     month: 'short',
   });
 
-// Checks if registration is open
-export const isRegistrationOpen = (tournament: TournamentDetails): boolean => {
-  if (!tournament.isPublic) return false;
-  const deadlinePassed = new Date(tournament.registrationDeadline) < new Date();
-  const isFull = tournament.currentParticipants >= tournament.maxParticipants;
-  return !deadlinePassed && !isFull;
-};
-
 // Differents display possible for a tournament card
 export const getInfoLabel = (tournament: TournamentDetails): string => {
   if (tournament.status === 'FINISHED') {
@@ -33,7 +26,7 @@ export const getInfoLabel = (tournament: TournamentDetails): string => {
     return 'PHASE';
   }
 
-  if (tournament.status === 'PREPARATION') {
+  if (tournament.status === 'PREPARATION' || tournament.status === 'UPCOMING') {
     return 'INSCRIPTIONS';
   }
 
@@ -41,7 +34,7 @@ export const getInfoLabel = (tournament: TournamentDetails): string => {
 };
 
 export const getStateLabel = (tournament: TournamentDetails): string => {
-  if (tournament.status === 'PREPARATION') {
+  if (tournament.status === 'PREPARATION' || tournament.status === 'UPCOMING') {
     return 'À venir';
   }
 
@@ -66,14 +59,18 @@ export const getInfoValue = (tournament: TournamentDetails): string => {
   }
 
   if (tournament.status === 'PREPARATION') {
-    return isRegistrationOpen(tournament) ? 'Ouvertes' : 'Fermées';
+    return 'Ouvertes';
+  }
+
+  if (tournament.status === 'UPCOMING') {
+    return 'Fermées';
   }
 
   return 'Inconnue';
 };
 
 export const getTeamsValue = (tournament: TournamentDetails): string => {
-  if (tournament.status === 'PREPARATION') {
+  if (tournament.status === 'PREPARATION' || tournament.status === 'UPCOMING') {
     return `${tournament.currentParticipants}/${tournament.maxParticipants}`;
   }
 

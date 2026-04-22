@@ -83,3 +83,10 @@ export interface MatchBracket {
   winnerId: number | null;
   state: MatchState;
 }
+
+export interface MatchSelectionStatus {
+  id: number;
+  roundNumber: number;
+  teamAReady: boolean;
+  teamBReady: boolean;
+}

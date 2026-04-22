@@ -24,6 +24,7 @@ export function formatStatus(tournament: TournamentDetails): string {
   if (tournament.status === 'PREPARATION') {
     return tournament.isPublic ? 'Inscriptions ouvertes' : 'En préparation';
   }
+  if (tournament.status === 'UPCOMING') return 'Complet';
   if (tournament.status === 'IN_PROGRESS') return 'En cours';
   if (tournament.status === 'FINISHED') return 'Terminé';
   return 'Annulé';
@@ -38,6 +39,7 @@ export function getStateLabel(tournament: TournamentDetails): string {
     if (deadlinePassed || isFull) return 'En préparation';
     return 'Inscriptions ouvertes';
   }
+  if (tournament.status === 'UPCOMING') return 'Complet';
   if (tournament.status === 'IN_PROGRESS') return 'En cours';
   if (tournament.status === 'FINISHED') return 'Terminé';
   return 'Annulé';

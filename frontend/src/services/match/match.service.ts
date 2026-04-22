@@ -3,6 +3,7 @@ import {
   MatchBracket,
   MatchDetail,
   MemberSelectionDto,
+  MatchSelectionStatus,
 } from '../../types/match.types';
 
 const API_URL = 'http://localhost:3000';
@@ -215,5 +216,17 @@ export const declareForfeit = async (
     throw new Error('Erreur lors de la déclaration de forfait.');
   }
 
+  return response.json();
+};
+
+export const getMatchSelectionStatuses = async (
+  tournamentId: number,
+  token: string,
+): Promise<MatchSelectionStatus[]> => {
+  const response = await fetch(
+    `${API_URL}/tournaments/${tournamentId}/selections/status`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  if (!response.ok) throw new Error('Erreur lors du chargement des statuts.');
   return response.json();
 };
