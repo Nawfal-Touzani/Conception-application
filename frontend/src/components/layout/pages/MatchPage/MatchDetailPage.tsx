@@ -8,10 +8,8 @@ import {
   Avatar,
   CircularProgress,
   Divider,
-  IconButton,
   Paper,
 } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LockIcon from '@mui/icons-material/Lock';
 import {
   MatchDetail,
@@ -36,7 +34,6 @@ type Props = {
 
 const MatchDetailPage: React.FC<Props> = ({
   match: initialMatch,
-  onBack,
   isResponsible = false,
   userTeamId = null,
   onNavigateToSelection,
@@ -73,10 +70,11 @@ const MatchDetailPage: React.FC<Props> = ({
   const hasExistingSelection = myTeam?.lineupStatus !== 'NOT_SELECTED';
 
   return (
+    // ✅ Correction scroll : flexGrow:1 + overflow:hidden pour ne pas dépasser le layout parent
     <Box
       sx={{
         flexGrow: 1,
-        backgroundColor: '#1e2a44',
+        backgroundColor: '#1a2540',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -84,166 +82,240 @@ const MatchDetailPage: React.FC<Props> = ({
         gap: 3,
       }}
     >
-      {/* Header */}
-      <Box
+      {/* ✅ Plus de IconButton ArrowBack ici — la navbar parent s'en charge */}
+
+      {/* ✅ Titre centré, grand, sans marge négative */}
+      <Typography
         sx={{
-          display: 'flex',
-          alignItems: 'flex-start',
-          gap: 1.5,
-          width: '100%',
-          maxWidth: 600,
+          color: '#fff',
+          fontWeight: 'bold',
+          fontSize: '2.2rem',
+          textAlign: 'center',
         }}
       >
-        <IconButton onClick={onBack} sx={{ color: '#fff', p: 0.5 }}>
-          <ArrowBackIcon />
-        </IconButton>
-        <Box sx={{ flex: 1 }}>
-          <Typography color="rgba(255,255,255,0.5)" fontSize="0.82rem">
-            {match.tournamentName}
-          </Typography>
-          <Typography color="white" fontWeight="bold" fontSize="1.2rem">
-            {match.roundLabel}
-          </Typography>
+        {match.tournamentName}
+      </Typography>
+
+      {/* Bloc infos match */}
+      <Paper
+        elevation={0}
+        sx={{
+          width: '100%',
+          maxWidth: 700,
+          borderRadius: '12px',
+          backgroundColor: '#ffffff',
+          overflow: 'hidden',
+        }}
+      >
+        {/* ✅ Labels centrés sur leur colonne */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr 1fr',
+            px: 3,
+            pt: 2,
+            pb: 0.5,
+          }}
+        >
+          {['Date et heure', 'Phase', 'État'].map((label) => (
+            <Typography
+              key={label}
+              sx={{
+                fontSize: '0.8rem',
+                color: 'rgba(0,0,0,0.45)',
+                fontWeight: 500,
+                textAlign: 'center', // ✅ centré par rapport à la valeur en dessous
+              }}
+            >
+              {label}
+            </Typography>
+          ))}
+        </Box>
+
+        <Divider sx={{ mx: 3, borderColor: 'rgba(0,0,0,0.08)' }} />
+
+        {/* Valeurs — également centrées */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr 1fr',
+            px: 3,
+            py: 1.5,
+          }}
+        >
           <Typography
-            color="rgba(255,255,255,0.45)"
-            fontSize="0.87rem"
-            mt={0.5}
+            sx={{
+              fontSize: '0.92rem',
+              color: '#1a2540',
+              fontWeight: 500,
+              textAlign: 'center',
+            }}
           >
             {formatMatchDateTime(match.dateTime)}
           </Typography>
+          <Typography
+            sx={{
+              fontSize: '0.92rem',
+              color: '#1a2540',
+              fontWeight: 500,
+              textAlign: 'center',
+            }}
+          >
+            {match.roundLabel}
+          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Chip
+              label={formatMatchState(match.state)}
+              size="small"
+              sx={{
+                backgroundColor: getStateColor(match.state),
+                color: '#fff',
+                fontWeight: 'bold',
+                fontSize: '0.75rem',
+                borderRadius: '6px',
+              }}
+            />
+          </Box>
         </Box>
-        <Chip
-          label={formatMatchState(match.state)}
-          sx={{
-            backgroundColor: getStateColor(match.state),
-            color: '#fff',
-            fontWeight: 'bold',
-            fontSize: '0.8rem',
-            borderRadius: '8px',
-          }}
-        />
-      </Box>
+      </Paper>
 
-      {/* Score banner */}
+      {/* Carte principale : Score + Lineups */}
       <Paper
         elevation={4}
         sx={{
           width: '100%',
-          maxWidth: 600,
-          borderRadius: '10px',
-          backgroundColor: '#243060',
-          p: 3,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 2,
+          maxWidth: 700,
+          borderRadius: '12px',
+          backgroundColor: '#ffffff',
+          overflow: 'hidden',
         }}
       >
-        <Typography
-          sx={{
-            flex: 1,
-            fontWeight: 'bold',
-            fontSize: '1.05rem',
-            textAlign: 'right',
-            color: '#fff',
-          }}
-        >
-          {match.teamA?.name ?? '?'}
-        </Typography>
-
+        {/* Ligne score */}
         <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
-            gap: 1,
-            minWidth: 150,
-            justifyContent: 'center',
+            justifyContent: 'space-between',
+            px: 4,
+            py: 2.5,
           }}
         >
-          {scorePublic ? (
-            <>
+          <Typography
+            sx={{
+              fontWeight: 'bold',
+              fontSize: '1.15rem',
+              color: '#1a2540',
+              flex: 1,
+            }}
+          >
+            {match.teamA?.name ?? '?'}
+          </Typography>
+
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5,
+              minWidth: 140,
+              justifyContent: 'center',
+            }}
+          >
+            {scorePublic ? (
+              <>
+                <Typography
+                  sx={{
+                    fontSize: '1.5rem',
+                    fontWeight: 800,
+                    color:
+                      match.winnerId === match.teamA?.id
+                        ? '#2ecc71'
+                        : '#e67e22',
+                  }}
+                >
+                  {match.scoreA}
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: '1.3rem',
+                    fontWeight: 700,
+                    color: '#1a2540',
+                    mx: 0.5,
+                  }}
+                >
+                  :
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: '1.5rem',
+                    fontWeight: 800,
+                    color:
+                      match.winnerId === match.teamB?.id
+                        ? '#2ecc71'
+                        : '#e67e22',
+                  }}
+                >
+                  {match.scoreB}
+                </Typography>
+              </>
+            ) : (
               <Typography
                 sx={{
-                  fontSize: '2.6rem',
-                  fontWeight: 800,
-                  color:
-                    match.winnerId === match.teamA?.id ? '#2ecc71' : '#e74c3c',
-                  minWidth: 48,
+                  fontSize: '0.85rem',
+                  color: 'rgba(0,0,0,0.35)',
+                  fontStyle: 'italic',
                   textAlign: 'center',
                 }}
               >
-                {match.scoreA}
+                {isPending ? 'En attente de validation' : 'VS'}
               </Typography>
-              <Typography
-                sx={{ fontSize: '2rem', color: 'rgba(255,255,255,0.35)' }}
-              >
-                –
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: '2.6rem',
-                  fontWeight: 800,
-                  color:
-                    match.winnerId === match.teamB?.id ? '#2ecc71' : '#e74c3c',
-                  minWidth: 48,
-                  textAlign: 'center',
-                }}
-              >
-                {match.scoreB}
-              </Typography>
-            </>
-          ) : (
-            <Typography
-              sx={{
-                fontSize: '0.85rem',
-                color: 'rgba(255,255,255,0.35)',
-                fontStyle: 'italic',
-                textAlign: 'center',
-              }}
-            >
-              {isPending ? 'En attente de validation' : 'VS'}
-            </Typography>
-          )}
+            )}
+          </Box>
+
+          <Typography
+            sx={{
+              fontWeight: 'bold',
+              fontSize: '1.15rem',
+              color: '#1a2540',
+              flex: 1,
+              textAlign: 'right',
+            }}
+          >
+            {match.teamB?.name ?? '?'}
+          </Typography>
         </Box>
 
+        <Divider sx={{ borderColor: 'rgba(0,0,0,0.08)' }} />
+
+        {/* Titre Lineups */}
         <Typography
           sx={{
-            flex: 1,
+            textAlign: 'center',
             fontWeight: 'bold',
-            fontSize: '1.05rem',
-            color: '#fff',
+            fontSize: '1rem',
+            color: '#1a2540',
+            py: 1.5,
           }}
         >
-          {match.teamB?.name ?? '?'}
+          Lineups
         </Typography>
-      </Paper>
 
-      {/* Lineups */}
-      <Paper
-        elevation={4}
-        sx={{
-          width: '100%',
-          maxWidth: 600,
-          borderRadius: '10px',
-          backgroundColor: '#243060',
-          p: 2,
-          display: 'flex',
-          gap: 0,
-        }}
-      >
-        <LineupColumn team={match.teamA} />
-        <Divider
-          orientation="vertical"
-          flexItem
-          sx={{ borderColor: 'rgba(255,255,255,0.08)' }}
-        />
-        <LineupColumn team={match.teamB} align="right" />
+        {/* Colonnes joueurs */}
+        <Box sx={{ display: 'flex', px: 2, pb: 2.5 }}>
+          <LineupColumn team={match.teamA} align="left" />
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{ borderColor: 'rgba(0,0,0,0.1)', mx: 1 }}
+          />
+          <LineupColumn team={match.teamB} align="right" />
+        </Box>
       </Paper>
 
       {/* Feedback */}
       {errorMsg && (
         <Alert
           severity="error"
-          sx={{ width: '100%', maxWidth: 600, borderRadius: '10px' }}
+          sx={{ width: '100%', maxWidth: 700, borderRadius: '10px' }}
         >
           {errorMsg}
         </Alert>
@@ -251,13 +323,13 @@ const MatchDetailPage: React.FC<Props> = ({
       {successMsg && (
         <Alert
           severity="success"
-          sx={{ width: '100%', maxWidth: 600, borderRadius: '10px' }}
+          sx={{ width: '100%', maxWidth: 700, borderRadius: '10px' }}
         >
           {successMsg}
         </Alert>
       )}
 
-      {/* Responsible actions */}
+      {/* Actions responsable */}
       {isResponsible && (
         <Box
           sx={{
@@ -265,7 +337,7 @@ const MatchDetailPage: React.FC<Props> = ({
             flexDirection: 'column',
             gap: 2,
             width: '100%',
-            maxWidth: 600,
+            maxWidth: 700,
           }}
         >
           {isScheduled && onNavigateToSelection && (
@@ -360,175 +432,37 @@ const MatchDetailPage: React.FC<Props> = ({
 
       {/* Modal forfait */}
       {showForfeitConfirm && (
-        <Box
-          onClick={() => setShowForfeitConfirm(false)}
-          sx={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.65)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 200,
-          }}
-        >
-          <Paper
-            elevation={10}
-            onClick={(e) => e.stopPropagation()}
-            sx={{
-              borderRadius: '10px',
-              p: 4,
-              maxWidth: 340,
-              width: '90%',
-              textAlign: 'center',
-              backgroundColor: '#1e2f5a',
-            }}
-          >
-            <Typography
-              color="white"
-              fontWeight="bold"
-              fontSize="1rem"
-              mb={1.5}
-            >
-              Déclarer forfait ?
-            </Typography>
-            <Typography
-              color="rgba(255,255,255,0.55)"
-              fontSize="0.84rem"
-              lineHeight={1.55}
-              mb={3}
-            >
-              Votre équipe perd automatiquement ce match (0 – 5). Action
-              irréversible.
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-              <Button
-                variant="contained"
-                onClick={() => setShowForfeitConfirm(false)}
-                sx={{
-                  backgroundColor: 'rgba(255,255,255,0.12)',
-                  color: 'white',
-                  borderRadius: '10px',
-                  textTransform: 'none',
-                  fontWeight: 'bold',
-                  '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)' },
-                }}
-              >
-                Annuler
-              </Button>
-              <Button
-                variant="contained"
-                onClick={handleForfeit}
-                disabled={loading}
-                sx={{
-                  backgroundColor: '#e74c3c',
-                  color: 'white',
-                  borderRadius: '10px',
-                  textTransform: 'none',
-                  fontWeight: 'bold',
-                  '&:hover': { backgroundColor: '#c0392b' },
-                  '&.Mui-disabled': { opacity: 0.4 },
-                }}
-              >
-                {loading ? (
-                  <CircularProgress size={16} color="inherit" />
-                ) : (
-                  'Confirmer le forfait'
-                )}
-              </Button>
-            </Box>
-          </Paper>
-        </Box>
+        <ConfirmModal
+          title="Déclarer forfait ?"
+          description="Votre équipe perd automatiquement ce match (0 – 5). Action irréversible."
+          confirmLabel="Confirmer le forfait"
+          confirmColor="#e74c3c"
+          confirmHover="#c0392b"
+          loading={loading}
+          onCancel={() => setShowForfeitConfirm(false)}
+          onConfirm={handleForfeit}
+        />
       )}
 
       {/* Modal contestation */}
       {showContestConfirm && (
-        <Box
-          onClick={() => setShowContestConfirm(false)}
-          sx={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.65)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 200,
-          }}
-        >
-          <Paper
-            elevation={10}
-            onClick={(e) => e.stopPropagation()}
-            sx={{
-              borderRadius: '10px',
-              p: 4,
-              maxWidth: 340,
-              width: '90%',
-              textAlign: 'center',
-              backgroundColor: '#1e2f5a',
-            }}
-          >
-            <Typography
-              color="white"
-              fontWeight="bold"
-              fontSize="1rem"
-              mb={1.5}
-            >
-              Contester le résultat ?
-            </Typography>
-            <Typography
-              color="rgba(255,255,255,0.55)"
-              fontSize="0.84rem"
-              lineHeight={1.55}
-              mb={3}
-            >
-              Vous ne pouvez contester qu'une seule fois. Un administrateur
-              visionnera le match et rendra son verdict. Le résultat restera
-              masqué en attendant.
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-              <Button
-                variant="contained"
-                onClick={() => setShowContestConfirm(false)}
-                sx={{
-                  backgroundColor: 'rgba(255,255,255,0.12)',
-                  color: 'white',
-                  borderRadius: '10px',
-                  textTransform: 'none',
-                  fontWeight: 'bold',
-                  '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)' },
-                }}
-              >
-                Annuler
-              </Button>
-              <Button
-                variant="contained"
-                onClick={handleContest}
-                disabled={loading}
-                sx={{
-                  backgroundColor: '#e67e22',
-                  color: 'white',
-                  borderRadius: '10px',
-                  textTransform: 'none',
-                  fontWeight: 'bold',
-                  '&:hover': { backgroundColor: '#d35400' },
-                  '&.Mui-disabled': { opacity: 0.4 },
-                }}
-              >
-                {loading ? (
-                  <CircularProgress size={16} color="inherit" />
-                ) : (
-                  'Confirmer la contestation'
-                )}
-              </Button>
-            </Box>
-          </Paper>
-        </Box>
+        <ConfirmModal
+          title="Contester le résultat ?"
+          description="Vous ne pouvez contester qu'une seule fois. Un administrateur visionnera le match et rendra son verdict. Le résultat restera masqué en attendant."
+          confirmLabel="Confirmer la contestation"
+          confirmColor="#e67e22"
+          confirmHover="#d35400"
+          loading={loading}
+          onCancel={() => setShowContestConfirm(false)}
+          onConfirm={handleContest}
+        />
       )}
     </Box>
   );
 };
 
-// Sous-composants
+// ─── Sous-composants ────────────────────────────────────────────────────────
+
 type LineupColumnProps = {
   team: TeamMatchDto | null;
   align?: 'left' | 'right';
@@ -548,26 +482,14 @@ const LineupColumn: React.FC<LineupColumnProps> = ({
         display: 'flex',
         flexDirection: 'column',
         alignItems: isRight ? 'flex-end' : 'flex-start',
-        px: 2,
+        px: 1.5,
       }}
     >
-      <Typography
-        sx={{
-          color: 'rgba(255,255,255,0.45)',
-          fontSize: '0.72rem',
-          textTransform: 'uppercase',
-          letterSpacing: 1,
-          mb: 1,
-        }}
-      >
-        {team.name}
-      </Typography>
-
       {team.lineupStatus === 'NOT_SELECTED' && (
         <Typography
           sx={{
-            color: 'rgba(255,255,255,0.3)',
-            fontSize: '0.88rem',
+            color: 'rgba(0,0,0,0.3)',
+            fontSize: '0.85rem',
             fontStyle: 'italic',
           }}
         >
@@ -576,7 +498,7 @@ const LineupColumn: React.FC<LineupColumnProps> = ({
       )}
 
       {team.lineupStatus === 'HIDDEN' && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.2 }}>
           {[0, 1, 2, 3].map((i) => (
             <Box
               key={i}
@@ -586,6 +508,7 @@ const LineupColumn: React.FC<LineupColumnProps> = ({
                 gap: 1,
                 filter: 'blur(7px)',
                 userSelect: 'none',
+                flexDirection: isRight ? 'row-reverse' : 'row',
               }}
             >
               <Box
@@ -593,7 +516,7 @@ const LineupColumn: React.FC<LineupColumnProps> = ({
                   width: 32,
                   height: 32,
                   borderRadius: '50%',
-                  bgcolor: 'rgba(255,255,255,0.25)',
+                  bgcolor: 'rgba(0,0,0,0.15)',
                 }}
               />
               <Box
@@ -601,18 +524,24 @@ const LineupColumn: React.FC<LineupColumnProps> = ({
                   width: 72,
                   height: 13,
                   borderRadius: 4,
-                  bgcolor: 'rgba(255,255,255,0.25)',
+                  bgcolor: 'rgba(0,0,0,0.15)',
                 }}
               />
             </Box>
           ))}
           <Box
-            sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5,
+              mt: 0.5,
+              flexDirection: isRight ? 'row-reverse' : 'row',
+            }}
           >
-            <LockIcon sx={{ fontSize: 13, color: 'rgba(255,255,255,0.35)' }} />
+            <LockIcon sx={{ fontSize: 13, color: 'rgba(0,0,0,0.3)' }} />
             <Typography
               sx={{
-                color: 'rgba(255,255,255,0.3)',
+                color: 'rgba(0,0,0,0.3)',
                 fontSize: '0.72rem',
                 fontStyle: 'italic',
               }}
@@ -624,7 +553,7 @@ const LineupColumn: React.FC<LineupColumnProps> = ({
       )}
 
       {team.lineupStatus === 'VISIBLE' && team.lineup && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.2 }}>
           {team.lineup.map((p) => (
             <PlayerRow key={p.id} player={p} reverse={isRight} />
           ))}
@@ -646,10 +575,110 @@ const PlayerRow: React.FC<{ player: PlayerSelectionDto; reverse: boolean }> = ({
       gap: 1,
     }}
   >
-    <Avatar src={player.imageUrl} sx={{ width: 30, height: 30 }} />
-    <Typography sx={{ fontSize: '0.9rem', fontWeight: 500, color: '#fff' }}>
+    <Avatar src={player.imageUrl} sx={{ width: 32, height: 32 }} />
+    <Typography sx={{ fontSize: '0.9rem', fontWeight: 500, color: '#1a2540' }}>
       {player.tag}
     </Typography>
+  </Box>
+);
+
+type ConfirmModalProps = {
+  title: string;
+  description: string;
+  confirmLabel: string;
+  confirmColor: string;
+  confirmHover: string;
+  loading: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+};
+
+const ConfirmModal: React.FC<ConfirmModalProps> = ({
+  title,
+  description,
+  confirmLabel,
+  confirmColor,
+  confirmHover,
+  loading,
+  onCancel,
+  onConfirm,
+}) => (
+  <Box
+    onClick={onCancel}
+    sx={{
+      position: 'fixed',
+      inset: 0,
+      background: 'rgba(0,0,0,0.65)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 200,
+    }}
+  >
+    <Paper
+      elevation={10}
+      onClick={(e) => e.stopPropagation()}
+      sx={{
+        borderRadius: '12px',
+        p: 4,
+        maxWidth: 340,
+        width: '90%',
+        textAlign: 'center',
+        backgroundColor: '#fff',
+      }}
+    >
+      <Typography color="#1a2540" fontWeight="bold" fontSize="1rem" mb={1.5}>
+        {title}
+      </Typography>
+      <Typography
+        color="rgba(0,0,0,0.5)"
+        fontSize="0.84rem"
+        lineHeight={1.55}
+        mb={3}
+      >
+        {description}
+      </Typography>
+      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+        <Button
+          variant="contained"
+          onClick={onCancel}
+          sx={{
+            backgroundColor: 'rgba(0,0,0,0.08)',
+            color: '#1a2540',
+            borderRadius: '10px',
+            textTransform: 'none',
+            fontWeight: 'bold',
+            boxShadow: 'none',
+            '&:hover': {
+              backgroundColor: 'rgba(0,0,0,0.14)',
+              boxShadow: 'none',
+            },
+          }}
+        >
+          Annuler
+        </Button>
+        <Button
+          variant="contained"
+          onClick={onConfirm}
+          disabled={loading}
+          sx={{
+            backgroundColor: confirmColor,
+            color: 'white',
+            borderRadius: '10px',
+            textTransform: 'none',
+            fontWeight: 'bold',
+            '&:hover': { backgroundColor: confirmHover },
+            '&.Mui-disabled': { opacity: 0.4 },
+          }}
+        >
+          {loading ? (
+            <CircularProgress size={16} color="inherit" />
+          ) : (
+            confirmLabel
+          )}
+        </Button>
+      </Box>
+    </Paper>
   </Box>
 );
 
