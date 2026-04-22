@@ -3,6 +3,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import TournamentsPage from './TournamentPage';
 import { AuthContext } from '../../../../contexts/AuthContext';
+import * as matchService from '../../../../services/match/match.service';
 
 vi.mock('../../../../services/tournament/tournament.service', () => ({
   getTournaments: vi.fn(),
@@ -12,6 +13,11 @@ vi.mock('../../../../services/tournament/tournament.service', () => ({
   updateTournament: vi.fn(),
   publishTournament: vi.fn(),
   getTournaments: vi.fn(),
+}));
+
+vi.mock('../../../../services/match/match.service', () => ({
+  getBracketByTournament: vi.fn(),
+  getMatchById: vi.fn(),
 }));
 
 import * as tournamentService from '../../../../services/tournament/tournament.service';
@@ -324,6 +330,23 @@ describe('TournamentsPage', () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
     ).mockResolvedValue([tournamentOpen]);
+
+    (
+      matchService.getBracketByTournament as ReturnType<typeof vi.fn>
+    ).mockResolvedValue([
+      {
+        id: 10,
+        roundNumber: 1,
+        roundLabel: 'Quarts',
+        teamA: { id: 1, name: 'Team A' },
+        teamB: { id: 2, name: 'Team B' },
+        scoreA: null,
+        scoreB: null,
+        winnerId: null,
+        state: 'SCHEDULED',
+      },
+    ]);
+
     renderAsUser();
     await screen.findByText('Vinci Easter Cup 2026');
 

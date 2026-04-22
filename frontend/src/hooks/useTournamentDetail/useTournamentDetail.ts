@@ -82,6 +82,7 @@ export function useTournamentDetail(
   }, [myTeam, token, tournament.id, onRegister]);
 
   return {
+    myTeam,
     isResponsible,
     isAlreadyRegistered,
     registrationOpen,

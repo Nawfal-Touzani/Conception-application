@@ -373,6 +373,20 @@ public class TournamentService {
         .map(r -> r.getTeam().getName())
         .toList();
 
+    String currentRoundLabel = null;
+    if (t.getStatus() == Status.IN_PROGRESS) {
+      List<Match> matches = matchRepository.findByTournamentOrderByRoundNumberAsc(t);
+      int totalRounds = matches.stream().mapToInt(Match::getRoundNumber).max().orElse(1);
+      currentRoundLabel = matches.stream()
+          .filter(m -> m.getState() == Match.MatchState.SCHEDULED)
+          .mapToInt(Match::getRoundNumber)
+          .min()
+          .stream()
+          .mapToObj(r -> getRoundLabel(r, totalRounds))
+          .findFirst()
+          .orElse(null);
+    }
+
     return new TournamentResponseDto(
         t.getId(), t.getName(), t.getDescription(),
         t.getStartDate(), t.getEndDate(), t.getRegistrationDeadline(),
@@ -380,7 +394,18 @@ public class TournamentService {
         teamNames.size(),
         t.getStatus(), t.getOrganizer().getTag(), t.isPublic(),
         t.getWinnerTeam() != null ? t.getWinnerTeam().getName() : null,
-        teamNames
+        teamNames,
+        currentRoundLabel
     );
+  }
+
+  private String getRoundLabel(int roundNumber, int totalRounds) {
+    return switch (totalRounds - roundNumber) {
+      case 0 -> "Finale";
+      case 1 -> "Demi-finales";
+      case 2 -> "Quarts de finale";
+      case 3 -> "Huitièmes de finale";
+      default -> "Tour " + roundNumber;
+    };
   }
 }

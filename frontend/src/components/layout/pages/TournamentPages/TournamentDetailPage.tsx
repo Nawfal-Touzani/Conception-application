@@ -1,74 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Box, Button, Divider, Paper, Typography } from '@mui/material';
 import { TournamentDetails } from '../../../../types/tournament.types';
 import { useTournamentDetail } from '../../../../hooks/useTournamentDetail/useTournamentDetail';
-import BracketSVG from '../../../ui/BracketSVG/BracketSVG';
 import {
   formatDate,
   formatStatus,
 } from '../../../../utils/TournamentFormat/tournament.utils';
+import TournamentBracket from './TournamentBracket';
+import MatchDetailPage from '../MatchPage/MatchDetailPage';
+import MatchSelectionPage from '../MatchPage/MatchSelectionPage';
+import { getMatchById } from '../../../../services/match/match.service';
+import { MatchDetail } from '../../../../types/match.types';
 import { useAuth } from '../../../../contexts/useAuth';
-
-type Match = { team1: string; team2: string };
-type Round = Match[];
-
-type BackendMatch = {
-  roundNumber: number;
-  teamA: string | null;
-  teamB: string | null;
-};
-
-function buildBracketFromMatches(
-  matches: BackendMatch[],
-  allTeams: string[],
-): Round[] {
-  const round1 = matches.filter((m) => m.roundNumber === 1);
-  if (round1.length === 0) return [];
-
-  const realMatches: Match[] = round1.map((m) => ({
-    team1: m.teamA ?? '?',
-    team2: m.teamB ?? '?',
-  }));
-
-  // Trouver les bye teams : équipes inscrites mais absentes des matchs
-  const teamsInMatches = new Set<string>();
-  round1.forEach((m) => {
-    if (m.teamA) teamsInMatches.add(m.teamA);
-    if (m.teamB) teamsInMatches.add(m.teamB);
-  });
-  const byeTeams = allTeams.filter((t) => !teamsInMatches.has(t));
-
-  const rounds: Round[] = [realMatches];
-
-  // Round suivant : paires de winners + bye teams directement
-  const nextRound: Match[] = [];
-
-  for (let i = 0; i + 1 < realMatches.length; i += 2) {
-    nextRound.push({ team1: '?', team2: '?' });
-  }
-
-  if (realMatches.length % 2 === 1 && byeTeams.length > 0) {
-    nextRound.push({ team1: '?', team2: byeTeams.shift()! });
-  }
-
-  byeTeams.forEach((bye) => {
-    nextRound.push({ team1: bye, team2: '?' });
-  });
-
-  if (nextRound.length > 0) rounds.push(nextRound);
-
-  let prev = nextRound;
-  while (prev.length > 1) {
-    const count = Math.ceil(prev.length / 2);
-    const r: Match[] = Array.from({ length: count }, () => ({
-      team1: '?',
-      team2: '?',
-    }));
-    rounds.push(r);
-    prev = r;
-  }
-  return rounds;
-}
 
 type Props = {
   tournament: TournamentDetails;
@@ -80,6 +23,7 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
   const token = user?.token ?? '';
 
   const {
+    myTeam,
     isResponsible,
     isAlreadyRegistered,
     registrationOpen,
@@ -88,24 +32,56 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
     handleRegister,
   } = useTournamentDetail(tournament, onRegister);
 
-  const [bracketRounds, setBracketRounds] = useState<Round[]>([]);
+  const userTeamId = myTeam?.id ?? null;
 
-  useEffect(() => {
-    if (tournament.status !== 'IN_PROGRESS' && tournament.status !== 'FINISHED')
-      return;
+  const [view, setView] = useState<'detail' | 'matchDetail' | 'matchSelection'>(
+    'detail',
+  );
+  const [selectedMatch, setSelectedMatch] = useState<MatchDetail | null>(null);
+  const [hasExistingSelection, setHasExistingSelection] = useState(false);
+  const [loadingMatch, setLoadingMatch] = useState(false);
 
-    fetch(`http://localhost:3000/tournaments/${tournament.id}/matches`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => (res.ok ? res.json() : []))
-      .then((matches: BackendMatch[]) => {
-        if (matches && matches.length > 0) {
-          const allTeams = tournament.registeredTeamNames ?? [];
-          setBracketRounds(buildBracketFromMatches(matches, allTeams));
-        }
-      })
-      .catch(() => {});
-  }, [tournament.id, token, tournament.status, tournament.registeredTeamNames]);
+  const handleMatchClick = async (matchId: number) => {
+    setLoadingMatch(true);
+    try {
+      const match = await getMatchById(matchId, token);
+      setSelectedMatch(match);
+      setView('matchDetail');
+    } catch {
+      // silencieux
+    } finally {
+      setLoadingMatch(false);
+    }
+  };
+
+  if (view === 'matchDetail' && selectedMatch) {
+    return (
+      <MatchDetailPage
+        match={selectedMatch}
+        onBack={() => setView('detail')}
+        isResponsible={isResponsible}
+        userTeamId={userTeamId}
+        onNavigateToSelection={(m, hasExisting) => {
+          setSelectedMatch(m);
+          setHasExistingSelection(hasExisting);
+          setView('matchSelection');
+        }}
+      />
+    );
+  }
+
+  if (view === 'matchSelection' && selectedMatch) {
+    return (
+      <MatchSelectionPage
+        match={selectedMatch}
+        hasExistingSelection={hasExistingSelection}
+        onBack={(updated) => {
+          if (updated) setSelectedMatch(updated);
+          setView('matchDetail');
+        }}
+      />
+    );
+  }
 
   return (
     <Box
@@ -151,9 +127,20 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
       >
         {/* ── Bracket ── */}
         <Box sx={{ flex: 1, overflowX: 'auto' }}>
-          <BracketSVG
-            rounds={bracketRounds.length > 0 ? bracketRounds : undefined}
-            teamCount={tournament.maxParticipants}
+          {loadingMatch && (
+            <Typography
+              sx={{
+                color: 'rgba(255,255,255,0.5)',
+                textAlign: 'center',
+                mb: 2,
+              }}
+            >
+              Chargement du match...
+            </Typography>
+          )}
+          <TournamentBracket
+            tournamentId={tournament.id}
+            onMatchClick={handleMatchClick}
           />
         </Box>
 
