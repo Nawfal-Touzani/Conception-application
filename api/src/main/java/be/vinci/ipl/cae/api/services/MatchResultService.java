@@ -53,9 +53,15 @@ public class MatchResultService {
    * @param dto     the scores
    * @return the updated match
    */
-  public Match encodingResult(Long idMatch, ResultRequest dto) {
+  public Match encodingResult(Long idMatch, ResultRequest dto, Member admin) {
     Match match = matchRepository.findById(idMatch)
         .orElseThrow(() -> new NoSuchElementException("Match not found"));
+
+    if (match.getResponsibleAdmin() == null) {
+      match.setResponsibleAdmin(admin); // premier admin = responsable
+    } else if (!match.getResponsibleAdmin().getId().equals(admin.getId())) {
+      throw new IllegalStateException("Another admin is already responsible for this match");
+    }
 
     if (!match.getState().equals(MatchState.SCHEDULED)) {
       throw new IllegalStateException(
@@ -122,8 +128,13 @@ public class MatchResultService {
   public Match contestResult(Long idMatch, Team team) {
     Match match = fetchPendingMatch(idMatch, team);
 
+    boolean isTeamA = team.getId().equals(match.getTeamA().getId());
+
     boolean alreadyContested =
-        team.equals(match.getTeamA()) ? match.isContestedByTeamA() : match.isContestedByTeamB();
+        isTeamA ? match.isContestedByTeamA() : match.isContestedByTeamB();
+
+    final boolean noContestYet =
+        !match.isContestedByTeamA() && !match.isContestedByTeamB();
 
     if (alreadyContested) {
       throw new IllegalStateException("This team has already used its contest right");
@@ -136,14 +147,38 @@ public class MatchResultService {
     validationResultRepository.save(vr);
     markConfirmationNotificationsAsRead(match, team);
 
-    if (team.equals(match.getTeamA())) {
+    // Mise à jour de l'état du match
+    if (team.getId().equals(match.getTeamA().getId())) {
       match.setContestedByTeamA(true);
     } else {
       match.setContestedByTeamB(true);
     }
     match.setResultStatus(ResultStatus.REFUSED);
 
+    if (noContestYet) {
+      sendContestToResponsible(match);
+    }
+
     return matchRepository.save(match);
+  }
+
+  private void sendContestToResponsible(Match match) {
+
+    String message =
+        "Le résultat du match "
+            + match.getTeamA().getName() + " " + match.getScoreA() + " - "
+            + match.getTeamB().getName() + " " + match.getScoreB()
+            + " a été contesté. Veuillez vérifier.";
+
+    Notification notif = new Notification(
+        Type.RESULT,
+        message,
+        LocalDateTime.now()
+    );
+
+    notificationService.send(match.getResponsibleAdmin().getId(), notif);
+
+
   }
 
   /**
@@ -176,8 +211,7 @@ public class MatchResultService {
     match.setWinner(payload.scoreA() > payload.scoreB() ? match.getTeamA() : match.getTeamB());
 
     finalizeMatch(match);
-    return matchRepository.findById(match.getId())
-        .orElseThrow(() -> new NoSuchElementException("Match not found after save"));
+    return match;
   }
 
   // Private methods
@@ -188,7 +222,6 @@ public class MatchResultService {
     if (!match.getResultStatus().equals(ResultStatus.PENDING)) {
       throw new IllegalStateException("Result is not pending validation");
     }
-
     if (validationResultRepository.existsByMatchAndTeam(match, team)) {
       throw new IllegalStateException("This team has already responded to this result");
     }
@@ -205,21 +238,21 @@ public class MatchResultService {
    * @param match the current match from which the winner should advance
    */
   public void advanceWinner(Match match) {
+
     Match nextMatch = match.getNextMatch();
+
     if (nextMatch == null) {
-      /*/ Finale — mettre à jour le gagnant du tournoi
-      Tournament tournament = match.getTournament();
-      tournament.setWinnerTeam(match.getWinner());
-      tournament.setStatus(Tournament.Status.FINISHED);
-      tournamentRepository.save(tournament);*/
       return;
     }
 
     if (nextMatch.getTeamA() == null) {
       nextMatch.setTeamA(match.getWinner());
-    } else {
+    } else if (nextMatch.getTeamB() == null) {
       nextMatch.setTeamB(match.getWinner());
+    } else {
+      throw new IllegalStateException("Next match already full");
     }
+
     matchRepository.save(nextMatch);
   }
 

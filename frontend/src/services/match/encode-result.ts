@@ -41,8 +41,27 @@ export const contestResult = async (
   token: string,
 ): Promise<void> => {
   const response = await fetch(`${API_URL}/${matchId}/contest`, {
-    method: 'PATCH',
+    method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!response.ok) throw new Error(`Error ${response.status}`);
+};
+
+export const correctResult = async (
+  matchId: number,
+  payload: { scoreA: number; scoreB: number },
+  token: string,
+): Promise<void> => {
+  const response = await fetch(`${API_URL}/${matchId}/result/correction`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error ${response.status}`);
+  }
 };
