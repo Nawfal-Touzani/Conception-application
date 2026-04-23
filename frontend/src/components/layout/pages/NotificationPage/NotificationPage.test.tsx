@@ -5,6 +5,8 @@ import NotificationPage from './NotificationsPage';
 import { useAuth } from '../../../../contexts/useAuth';
 import * as notificationService from '../../../../services/notifications.service';
 import * as membershipRequestService from '../../../../services/membership-request.service';
+import * as encodeResultService from '../../../../services/match/encode-result';
+import { Notification } from '../../../../types/notifications.types';
 
 // Mock useNavigate
 vi.mock('react-router-dom', async () => {
@@ -36,6 +38,13 @@ vi.mock('../../../../services/membership-request.service', () => ({
   refuseRequest: vi.fn(),
 }));
 
+// Mock encode result service
+vi.mock('../../../../services/match/encode-result', () => ({
+  validateResult: vi.fn(),
+  contestResult: vi.fn(),
+  correctResult: vi.fn(),
+}));
+
 // Mock user
 const mockUser = {
   id: 1,
@@ -46,7 +55,7 @@ const mockUser = {
 };
 
 // Mock notifications
-const mockNotifications = [
+const mockNotifications: Notification[] = [
   {
     id: 1,
     type: 'MEMBERSHIP_REQUEST',
@@ -67,7 +76,7 @@ const mockNotifications = [
 ];
 
 // Mock membership notification
-const mockMembershipNotification = {
+const mockMembershipNotification: Notification = {
   id: 3,
   type: 'MEMBERSHIP_REQUEST',
   message: 'Un utilisateur veut rejoindre votre team !',
@@ -75,6 +84,17 @@ const mockMembershipNotification = {
   read: false,
   membershipRequestId: 5,
   requestState: 'PENDING',
+};
+
+// Mock result refused notification
+const mockResultRefusedNotification: Notification = {
+  id: 10,
+  type: 'RESULT_REFUSED',
+  message:
+    'Le résultat du match TEAM_IOTA 1 - TEAM_ALPHA 3 a été contesté. Veuillez vérifier.',
+  sendDate: '2026-04-23T22:30:00',
+  read: false,
+  matchId: 42,
 };
 
 describe('NotificationsPage', () => {
@@ -512,6 +532,225 @@ describe('NotificationsPage', () => {
     await waitFor(() => {
       expect(screen.queryByText('Accepter')).toBeFalsy();
       expect(screen.queryByText('Refuser')).toBeFalsy();
+    });
+  });
+
+  // ── correctResult ──
+
+  test('displays Corriger button for RESULT_REFUSED notification', async () => {
+    vi.mocked(useNavigate).mockReturnValue(vi.fn());
+    vi.mocked(useAuth).mockReturnValue({
+      user: mockUser,
+      login: vi.fn(),
+      register: vi.fn(),
+      logout: vi.fn(),
+      bannedError: null,
+    });
+
+    vi.mocked(notificationService.getNotifications).mockResolvedValue([
+      mockResultRefusedNotification,
+    ]);
+
+    render(
+      <MemoryRouter>
+        <NotificationPage />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Corriger')).toBeTruthy();
+    });
+  });
+
+  test('does not display Corriger button for other notification types', async () => {
+    vi.mocked(useNavigate).mockReturnValue(vi.fn());
+    vi.mocked(useAuth).mockReturnValue({
+      user: mockUser,
+      login: vi.fn(),
+      register: vi.fn(),
+      logout: vi.fn(),
+      bannedError: null,
+    });
+
+    vi.mocked(notificationService.getNotifications).mockResolvedValue([
+      mockMembershipNotification,
+    ]);
+
+    render(
+      <MemoryRouter>
+        <NotificationPage />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByText('Corriger')).toBeFalsy();
+    });
+  });
+
+  test('shows correction dialog when clicking Corriger', async () => {
+    vi.mocked(useNavigate).mockReturnValue(vi.fn());
+    vi.mocked(useAuth).mockReturnValue({
+      user: mockUser,
+      login: vi.fn(),
+      register: vi.fn(),
+      logout: vi.fn(),
+      bannedError: null,
+    });
+
+    vi.mocked(notificationService.getNotifications).mockResolvedValue([
+      mockResultRefusedNotification,
+    ]);
+
+    render(
+      <MemoryRouter>
+        <NotificationPage />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Corriger')).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByText('Corriger'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Corriger le résultat')).toBeTruthy();
+    });
+  });
+
+  test('calls correctResult with scores when confirming correction', async () => {
+    vi.mocked(useNavigate).mockReturnValue(vi.fn());
+    vi.mocked(useAuth).mockReturnValue({
+      user: mockUser,
+      login: vi.fn(),
+      register: vi.fn(),
+      logout: vi.fn(),
+      bannedError: null,
+    });
+
+    vi.mocked(notificationService.getNotifications).mockResolvedValue([
+      mockResultRefusedNotification,
+    ]);
+    vi.mocked(encodeResultService.correctResult).mockResolvedValue(undefined);
+
+    render(
+      <MemoryRouter>
+        <NotificationPage />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Corriger')).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByText('Corriger'));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Score équipe A')).toBeTruthy();
+    });
+
+    fireEvent.change(screen.getByLabelText('Score équipe A'), {
+      target: { value: '3' },
+    });
+    fireEvent.change(screen.getByLabelText('Score équipe B'), {
+      target: { value: '1' },
+    });
+
+    fireEvent.click(screen.getByText('Confirmer la correction'));
+
+    await waitFor(() => {
+      expect(encodeResultService.correctResult).toHaveBeenCalledWith(
+        42,
+        { scoreA: 3, scoreB: 1 },
+        mockUser.token,
+      );
+    });
+  });
+
+  test('confirm correction button is disabled when scores are equal', async () => {
+    vi.mocked(useNavigate).mockReturnValue(vi.fn());
+    vi.mocked(useAuth).mockReturnValue({
+      user: mockUser,
+      login: vi.fn(),
+      register: vi.fn(),
+      logout: vi.fn(),
+      bannedError: null,
+    });
+
+    vi.mocked(notificationService.getNotifications).mockResolvedValue([
+      mockResultRefusedNotification,
+    ]);
+
+    render(
+      <MemoryRouter>
+        <NotificationPage />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Corriger')).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByText('Corriger'));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Score équipe A')).toBeTruthy();
+    });
+
+    fireEvent.change(screen.getByLabelText('Score équipe A'), {
+      target: { value: '2' },
+    });
+    fireEvent.change(screen.getByLabelText('Score équipe B'), {
+      target: { value: '2' },
+    });
+
+    const confirmButton = screen.getByText('Confirmer la correction');
+    expect(confirmButton.closest('button')).toHaveProperty('disabled', true);
+  });
+
+  test('shows Corrigé chip after successful correction', async () => {
+    vi.mocked(useNavigate).mockReturnValue(vi.fn());
+    vi.mocked(useAuth).mockReturnValue({
+      user: mockUser,
+      login: vi.fn(),
+      register: vi.fn(),
+      logout: vi.fn(),
+      bannedError: null,
+    });
+
+    vi.mocked(notificationService.getNotifications).mockResolvedValue([
+      mockResultRefusedNotification,
+    ]);
+    vi.mocked(encodeResultService.correctResult).mockResolvedValue(undefined);
+
+    render(
+      <MemoryRouter>
+        <NotificationPage />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Corriger')).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByText('Corriger'));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Score équipe A')).toBeTruthy();
+    });
+
+    fireEvent.change(screen.getByLabelText('Score équipe A'), {
+      target: { value: '3' },
+    });
+    fireEvent.change(screen.getByLabelText('Score équipe B'), {
+      target: { value: '1' },
+    });
+
+    fireEvent.click(screen.getByText('Confirmer la correction'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Corrigé ✓')).toBeTruthy();
+      expect(screen.queryByText('Corriger')).toBeFalsy();
     });
   });
 });

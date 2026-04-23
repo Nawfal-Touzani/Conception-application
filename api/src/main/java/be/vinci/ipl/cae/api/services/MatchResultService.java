@@ -176,15 +176,43 @@ public class MatchResultService {
             + " a été contesté. Veuillez vérifier.";
 
     Notification notif = new Notification(
-        Type.RESULT,
+        Type.RESULT_REFUSED,
         message,
         LocalDateTime.now()
     );
+
+    notif.setMatch(match);
 
     notificationService.send(match.getResponsibleAdmin().getId(), notif);
 
 
   }
+
+  private void sendCorrectionNotification(Match match) {
+    String message = "Suite à la contestation, le nouveau score officiel est : "
+        + match.getTeamA().getName() + " " + match.getScoreA()
+        + " - " + match.getScoreB() + " " + match.getTeamB().getName();
+
+    for (Long recipientId : getTeamsResponsibleIds(match)) {
+      Notification notif = new Notification(Type.RESULT, message, LocalDateTime.now());
+      notif.setMatch(match);
+      notificationService.send(recipientId, notif);
+    }
+  }
+
+  private List<Long> getTeamsResponsibleIds(Match match) {
+    List<Long> recipients = new ArrayList<>();
+    recipients.add(match.getTeamA().getResponsible().getId());
+    recipients.add(match.getTeamB().getResponsible().getId());
+    if (match.getTeamA().getSecondResponsible() != null) {
+      recipients.add(match.getTeamA().getSecondResponsible().getId());
+    }
+    if (match.getTeamB().getSecondResponsible() != null) {
+      recipients.add(match.getTeamB().getSecondResponsible().getId());
+    }
+    return recipients;
+  }
+
 
   /**
    * Corrects a contested match result. Can only be called by admin when result is REFUSED.
@@ -214,7 +242,7 @@ public class MatchResultService {
     match.setScoreA(payload.scoreA());
     match.setScoreB(payload.scoreB());
     match.setWinner(payload.scoreA() > payload.scoreB() ? match.getTeamA() : match.getTeamB());
-
+    sendCorrectionNotification(match);
     finalizeMatch(match);
     return match;
   }
@@ -290,27 +318,13 @@ public class MatchResultService {
   }
 
   private void sendPendingNotifications(Match match) {
-    List<Long> recipients = new ArrayList<>();
-    recipients.add(match.getTeamA().getResponsible().getId());
-    recipients.add(match.getTeamB().getResponsible().getId());
-    if (match.getTeamA().getSecondResponsible() != null) {
-      recipients.add(match.getTeamA().getSecondResponsible().getId());
-    }
-    if (match.getTeamB().getSecondResponsible() != null) {
-      recipients.add(match.getTeamB().getSecondResponsible().getId());
-    }
+    String message = "Le résultat du match a été encodé. Le score est de "
+        + match.getTeamA().getName() + " " + match.getScoreA()
+        + " - " + match.getScoreB() + " " + match.getTeamB().getName()
+        + ". Veuillez le valider ou le contester.";
 
-    for (Long recipientId : recipients) {
-      Notification notif = new Notification(
-          Type.RESULT_CONFIRMATION,
-          "Le résultat du match a été encodé. Le score est de "
-              + match.getTeamA().getName() + " "
-              + match.getScoreA() + " - "
-              + match.getScoreB() + " "
-              + match.getTeamB().getName()
-              + ". Veuillez le valider ou le contester.",
-          LocalDateTime.now()
-      );
+    for (Long recipientId : getTeamsResponsibleIds(match)) {
+      Notification notif = new Notification(Type.RESULT_CONFIRMATION, message, LocalDateTime.now());
       notif.setMatch(match);
       notificationService.send(recipientId, notif);
     }

@@ -34,9 +34,15 @@ const NotificationItem = ({
   onRefuse,
   onValidateResult,
   onContestResult,
+  onCorrectResult,
 }: NotificationItemProps) => {
   const [refuseOpen, setRefuseOpen] = useState(false);
   const [reason, setReason] = useState('');
+  const [correctOpen, setCorrectOpen] = useState(false);
+  const [correctDone, setCorrectDone] = useState(false);
+  const [scoreA, setScoreA] = useState('');
+  const [scoreB, setScoreB] = useState('');
+
   const [actionDone, setActionDone] = useState<'approved' | 'refused' | null>(
     notification.requestState === 'ACCEPTED'
       ? 'approved'
@@ -56,6 +62,15 @@ const NotificationItem = ({
     }
     setRefuseOpen(false);
     setReason('');
+  };
+
+  const handleCorrectConfirm = () => {
+    const a = parseInt(scoreA);
+    const b = parseInt(scoreB);
+    if (isNaN(a) || isNaN(b) || a < 0 || b < 0 || a === b) return;
+    onCorrectResult?.(notification.matchId!, a, b);
+    setCorrectDone(true);
+    setCorrectOpen(false);
   };
 
   const isMembershipRequest =
@@ -139,6 +154,31 @@ const NotificationItem = ({
                 sx={{
                   backgroundColor: '#fce4ec',
                   color: '#b71c1c',
+                  fontWeight: 600,
+                }}
+              />
+            )}
+          </>
+        )}
+
+        {notification.type === 'RESULT_REFUSED' && notification.matchId && (
+          <>
+            {!correctDone && (
+              <Button
+                variant="contained"
+                color="warning"
+                size="small"
+                onClick={() => setCorrectOpen(true)}
+              >
+                Corriger
+              </Button>
+            )}
+            {correctDone && (
+              <Chip
+                label="Corrigé ✓"
+                sx={{
+                  backgroundColor: '#fff3e0',
+                  color: '#e65100',
                   fontWeight: 600,
                 }}
               />
@@ -250,6 +290,43 @@ const NotificationItem = ({
             disabled={!reason.trim()}
           >
             Confirmer le refus
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={correctOpen} onClose={() => setCorrectOpen(false)}>
+        <DialogTitle>Corriger le résultat</DialogTitle>
+        <DialogContent sx={{ display: 'flex', gap: 2, pt: 2 }}>
+          <TextField
+            label="Score équipe A"
+            type="number"
+            value={scoreA}
+            onChange={(e) => setScoreA(e.target.value)}
+            inputProps={{ min: 0 }}
+          />
+          <TextField
+            label="Score équipe B"
+            type="number"
+            value={scoreB}
+            onChange={(e) => setScoreB(e.target.value)}
+            inputProps={{ min: 0 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCorrectOpen(false)}>Annuler</Button>
+          <Button
+            onClick={handleCorrectConfirm}
+            color="warning"
+            variant="contained"
+            disabled={
+              !scoreA.trim() ||
+              !scoreB.trim() ||
+              parseInt(scoreA) < 0 ||
+              parseInt(scoreB) < 0 ||
+              parseInt(scoreA) === parseInt(scoreB)
+            }
+          >
+            Confirmer la correction
           </Button>
         </DialogActions>
       </Dialog>
