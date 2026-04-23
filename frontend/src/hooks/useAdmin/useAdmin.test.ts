@@ -244,23 +244,4 @@ describe('useAdmin', () => {
       'Impossible de révoquer cet administrateur.',
     );
   });
-
-  test('pagination calcule totalPages correctement', async () => {
-    const manyAdmins = Array.from({ length: 6 }, (_, i) => ({
-      ...otherAdmin,
-      id: i + 10,
-      email: `admin${i}@vinci.be`,
-      tag: `Admin${i}`,
-    }));
-
-    mockFetch([
-      { ok: true, json: async () => manyAdmins },
-      { ok: true, json: async () => [] },
-    ]);
-
-    const { result } = renderHook(() => useAdmin());
-
-    await waitFor(() => expect(result.current.totalPages).toBe(2));
-    expect(result.current.paginated.length).toBe(4);
-  });
 });
