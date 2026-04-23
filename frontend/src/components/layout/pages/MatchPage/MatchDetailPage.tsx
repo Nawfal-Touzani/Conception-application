@@ -67,10 +67,10 @@ const MatchDetailPage: React.FC<Props> = ({
           ? match.teamB
           : null
       : null;
+
   const hasExistingSelection = myTeam?.lineupStatus !== 'NOT_SELECTED';
 
   return (
-    // ✅ Correction scroll : flexGrow:1 + overflow:hidden pour ne pas dépasser le layout parent
     <Box
       sx={{
         flexGrow: 1,
@@ -82,9 +82,6 @@ const MatchDetailPage: React.FC<Props> = ({
         gap: 3,
       }}
     >
-      {/* ✅ Plus de IconButton ArrowBack ici — la navbar parent s'en charge */}
-
-      {/* ✅ Titre centré, grand, sans marge négative */}
       <Typography
         sx={{
           color: '#fff',
@@ -96,7 +93,6 @@ const MatchDetailPage: React.FC<Props> = ({
         {match.tournamentName}
       </Typography>
 
-      {/* Bloc infos match */}
       <Paper
         elevation={0}
         sx={{
@@ -107,7 +103,6 @@ const MatchDetailPage: React.FC<Props> = ({
           overflow: 'hidden',
         }}
       >
-        {/* ✅ Labels centrés sur leur colonne */}
         <Box
           sx={{
             display: 'grid',
@@ -124,7 +119,7 @@ const MatchDetailPage: React.FC<Props> = ({
                 fontSize: '0.8rem',
                 color: 'rgba(0,0,0,0.45)',
                 fontWeight: 500,
-                textAlign: 'center', // ✅ centré par rapport à la valeur en dessous
+                textAlign: 'center',
               }}
             >
               {label}
@@ -134,7 +129,6 @@ const MatchDetailPage: React.FC<Props> = ({
 
         <Divider sx={{ mx: 3, borderColor: 'rgba(0,0,0,0.08)' }} />
 
-        {/* Valeurs — également centrées */}
         <Box
           sx={{
             display: 'grid',
@@ -153,6 +147,7 @@ const MatchDetailPage: React.FC<Props> = ({
           >
             {formatMatchDateTime(match.dateTime)}
           </Typography>
+
           <Typography
             sx={{
               fontSize: '0.92rem',
@@ -163,6 +158,7 @@ const MatchDetailPage: React.FC<Props> = ({
           >
             {match.roundLabel}
           </Typography>
+
           <Box sx={{ display: 'flex', justifyContent: 'center' }}>
             <Chip
               label={formatMatchState(match.state)}
@@ -179,7 +175,6 @@ const MatchDetailPage: React.FC<Props> = ({
         </Box>
       </Paper>
 
-      {/* Carte principale : Score + Lineups */}
       <Paper
         elevation={4}
         sx={{
@@ -190,7 +185,6 @@ const MatchDetailPage: React.FC<Props> = ({
           overflow: 'hidden',
         }}
       >
-        {/* Ligne score */}
         <Box
           sx={{
             display: 'flex',
@@ -234,6 +228,7 @@ const MatchDetailPage: React.FC<Props> = ({
                 >
                   {match.scoreA}
                 </Typography>
+
                 <Typography
                   sx={{
                     fontSize: '1.3rem',
@@ -244,6 +239,7 @@ const MatchDetailPage: React.FC<Props> = ({
                 >
                   :
                 </Typography>
+
                 <Typography
                   sx={{
                     fontSize: '1.5rem',
@@ -286,7 +282,6 @@ const MatchDetailPage: React.FC<Props> = ({
 
         <Divider sx={{ borderColor: 'rgba(0,0,0,0.08)' }} />
 
-        {/* Titre Lineups */}
         <Typography
           sx={{
             textAlign: 'center',
@@ -299,19 +294,25 @@ const MatchDetailPage: React.FC<Props> = ({
           Lineups
         </Typography>
 
-        {/* Colonnes joueurs */}
         <Box sx={{ display: 'flex', px: 2, pb: 2.5 }}>
-          <LineupColumn team={match.teamA} align="left" />
+          <LineupColumn
+            team={match.teamA}
+            align="left"
+            userTeamId={userTeamId}
+          />
           <Divider
             orientation="vertical"
             flexItem
             sx={{ borderColor: 'rgba(0,0,0,0.1)', mx: 1 }}
           />
-          <LineupColumn team={match.teamB} align="right" />
+          <LineupColumn
+            team={match.teamB}
+            align="right"
+            userTeamId={userTeamId}
+          />
         </Box>
       </Paper>
 
-      {/* Feedback */}
       {errorMsg && (
         <Alert
           severity="error"
@@ -320,6 +321,7 @@ const MatchDetailPage: React.FC<Props> = ({
           {errorMsg}
         </Alert>
       )}
+
       {successMsg && (
         <Alert
           severity="success"
@@ -329,7 +331,6 @@ const MatchDetailPage: React.FC<Props> = ({
         </Alert>
       )}
 
-      {/* Actions responsable */}
       {isResponsible && (
         <Box
           sx={{
@@ -405,6 +406,7 @@ const MatchDetailPage: React.FC<Props> = ({
                   'Valider le résultat'
                 )}
               </Button>
+
               <Button
                 variant="outlined"
                 onClick={() => setShowContestConfirm(true)}
@@ -430,7 +432,6 @@ const MatchDetailPage: React.FC<Props> = ({
         </Box>
       )}
 
-      {/* Modal forfait */}
       {showForfeitConfirm && (
         <ConfirmModal
           title="Déclarer forfait ?"
@@ -444,7 +445,6 @@ const MatchDetailPage: React.FC<Props> = ({
         />
       )}
 
-      {/* Modal contestation */}
       {showContestConfirm && (
         <ConfirmModal
           title="Contester le résultat ?"
@@ -461,19 +461,25 @@ const MatchDetailPage: React.FC<Props> = ({
   );
 };
 
-// ─── Sous-composants ────────────────────────────────────────────────────────
+const BASE_URL = 'http://localhost:3000';
 
 type LineupColumnProps = {
   team: TeamMatchDto | null;
   align?: 'left' | 'right';
+  userTeamId?: number | null;
 };
 
 const LineupColumn: React.FC<LineupColumnProps> = ({
   team,
   align = 'left',
+  userTeamId = null,
 }) => {
   if (!team) return <Box sx={{ flex: 1 }} />;
+
   const isRight = align === 'right';
+  const isMyTeam = team.id === userTeamId;
+  const hasLineup = !!team.lineup && team.lineup.length > 0;
+  const shouldBlur = team.lineupStatus === 'HIDDEN' && !isMyTeam;
 
   return (
     <Box
@@ -497,7 +503,7 @@ const LineupColumn: React.FC<LineupColumnProps> = ({
         </Typography>
       )}
 
-      {team.lineupStatus === 'HIDDEN' && (
+      {shouldBlur && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.2 }}>
           {[0, 1, 2, 3].map((i) => (
             <Box
@@ -529,6 +535,7 @@ const LineupColumn: React.FC<LineupColumnProps> = ({
               />
             </Box>
           ))}
+
           <Box
             sx={{
               display: 'flex',
@@ -552,12 +559,25 @@ const LineupColumn: React.FC<LineupColumnProps> = ({
         </Box>
       )}
 
-      {team.lineupStatus === 'VISIBLE' && team.lineup && (
+      {!shouldBlur && hasLineup && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.2 }}>
-          {team.lineup.map((p) => (
+          {team.lineup!.map((p) => (
             <PlayerRow key={p.id} player={p} reverse={isRight} />
           ))}
         </Box>
+      )}
+
+      {!shouldBlur && !hasLineup && team.lineupStatus !== 'NOT_SELECTED' && (
+        <Typography
+          sx={{
+            color: 'rgba(0,0,0,0.35)',
+            fontSize: '0.8rem',
+            fontStyle: 'italic',
+            textAlign: isRight ? 'right' : 'left',
+          }}
+        >
+          Composition indisponible
+        </Typography>
       )}
     </Box>
   );
@@ -575,7 +595,14 @@ const PlayerRow: React.FC<{ player: PlayerSelectionDto; reverse: boolean }> = ({
       gap: 1,
     }}
   >
-    <Avatar src={player.imageUrl} sx={{ width: 32, height: 32 }} />
+    <Avatar
+      src={
+        player.imageUrl?.startsWith('/')
+          ? `${BASE_URL}${player.imageUrl}`
+          : player.imageUrl
+      }
+      sx={{ width: 32, height: 32 }}
+    />
     <Typography sx={{ fontSize: '0.9rem', fontWeight: 500, color: '#1a2540' }}>
       {player.tag}
     </Typography>

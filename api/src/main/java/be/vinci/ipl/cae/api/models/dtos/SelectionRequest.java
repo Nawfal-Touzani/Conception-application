@@ -1,7 +1,6 @@
 package be.vinci.ipl.cae.api.models.dtos;
 
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import java.util.List;
 
 /**
@@ -11,6 +10,6 @@ import java.util.List;
  * and are available for the match date.
  */
 public record SelectionRequest(
-    @NotNull @Size(min = 4, max = 4, message = "Exactly 4 players must be selected")
+    @NotNull
     List<Long> memberIds
 ) {}

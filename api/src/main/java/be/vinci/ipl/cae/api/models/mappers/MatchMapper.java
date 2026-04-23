@@ -8,6 +8,7 @@ import be.vinci.ipl.cae.api.models.dtos.TeamMatchDto;
 import be.vinci.ipl.cae.api.models.dtos.TeamMatchDto.LineupStatus;
 import be.vinci.ipl.cae.api.models.entities.Match;
 import be.vinci.ipl.cae.api.models.entities.Match.ResultStatus;
+import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.PlayersSelection;
 import be.vinci.ipl.cae.api.models.entities.Team;
 import java.util.List;
@@ -28,58 +29,55 @@ public class MatchMapper {
   public MatchBracketDto toBracketDto(Match match) {
     PublicScoreInfo scores = getPublicScoreInfo(match);
 
-    return new MatchBracketDto(
-        match.getId(),
-        match.getRoundNumber(),
+    return new MatchBracketDto(match.getId(), match.getRoundNumber(),
         buildRoundLabel(match.getRoundNumber(), match.getTournament().getMaxParticipants()),
-        match.getTeamA() != null ? new TeamBracketDto(
-            match.getTeamA().getId(),
-            match.getTeamA().getName()
-        ) : null,
-        match.getTeamB() != null ? new TeamBracketDto(
-            match.getTeamB().getId(),
-            match.getTeamB().getName()
-        ) : null,
-        scores.scoreA(),
-        scores.scoreB(),
-        scores.winnerId(),
-        match.getState().name()
-    );
+        match.getTeamA() != null ? new TeamBracketDto(match.getTeamA().getId(),
+            match.getTeamA().getName()) : null,
+        match.getTeamB() != null ? new TeamBracketDto(match.getTeamB().getId(),
+            match.getTeamB().getName()) : null, scores.scoreA(), scores.scoreB(), scores.winnerId(),
+        match.getState().name());
   }
 
   /**
    * Maps a Match to a MatchDetailDto for the match detail view.
    *
+   * @param match       the match
+   * @param currentUser the authenticated member, can be null
+   * @return the detail DTO
+   */
+  public MatchDetailDto toDetailDto(Match match, Member currentUser) {
+    PublicScoreInfo scores = getPublicScoreInfo(match);
+
+    return new MatchDetailDto(match.getId(), match.getTournament().getId(),
+        match.getTournament().getName(),
+        buildRoundLabel(match.getRoundNumber(), match.getTournament().getMaxParticipants()),
+        match.getDateTime(), match.getState().name(), match.getResultStatus().name(),
+        match.getTeamA() != null ? toTeamMatchDto(match, match.getTeamA(), currentUser) : null,
+        match.getTeamB() != null ? toTeamMatchDto(match, match.getTeamB(), currentUser) : null,
+        scores.scoreA(), scores.scoreB(), scores.winnerId());
+  }
+
+  /**
+   * Optional overload for public or legacy calls.
+   *
    * @param match the match
    * @return the detail DTO
    */
   public MatchDetailDto toDetailDto(Match match) {
-    PublicScoreInfo scores = getPublicScoreInfo(match);
-
-    return new MatchDetailDto(
-        match.getId(),
-        match.getTournament().getId(),
-        match.getTournament().getName(),
-        buildRoundLabel(match.getRoundNumber(), match.getTournament().getMaxParticipants()),
-        match.getDateTime(),
-        match.getState().name(),
-        match.getResultStatus().name(),
-        match.getTeamA() != null ? toTeamMatchDto(match, match.getTeamA()) : null,
-        match.getTeamB() != null ? toTeamMatchDto(match, match.getTeamB()) : null,
-        scores.scoreA(),
-        scores.scoreB(),
-        scores.winnerId()
-    );
+    return toDetailDto(match, null);
   }
 
-  private TeamMatchDto toTeamMatchDto(Match match, Team team) {
+  private TeamMatchDto toTeamMatchDto(Match match, Team team, Member currentUser) {
     List<PlayersSelection> teamSelections = match.getPlayersSelections().stream()
-        .filter(ps -> ps.getTeam().getId().equals(team.getId()))
-        .toList();
+        .filter(ps -> ps.getTeam().getId().equals(team.getId())).toList();
 
-    boolean hasSelection = teamSelections.size() == 4;
-
+    boolean hasSelection = !teamSelections.isEmpty();
     boolean lineupVisible = !match.getResultStatus().equals(ResultStatus.NOT_ENTERED);
+
+    boolean isResponsibleOfTeam =
+        currentUser != null && (team.getResponsible().getId().equals(currentUser.getId()) || (
+            team.getSecondResponsible() != null && team.getSecondResponsible().getId()
+                .equals(currentUser.getId())));
 
     LineupStatus status;
     List<PlayerSelectionDto> lineup = null;
@@ -88,23 +86,20 @@ public class MatchMapper {
       status = LineupStatus.NOT_SELECTED;
     } else if (!lineupVisible) {
       status = LineupStatus.HIDDEN;
+
+      if (isResponsibleOfTeam) {
+        lineup = toPlayerSelectionDtos(teamSelections);
+      }
     } else {
       status = LineupStatus.VISIBLE;
 
-      lineup = teamSelections.stream()
-          .map(ps -> new PlayerSelectionDto(
-              ps.getMember().getId(),
-              ps.getMember().getTag(),
-              ps.getMember().getImage().getUrl()
-          ))
-          .toList();
+      lineup = toPlayerSelectionDtos(teamSelections);
     }
 
     return new TeamMatchDto(team.getId(), team.getName(), status, lineup);
   }
 
   private String buildRoundLabel(int roundNumber, int maxParticipants) {
-    // totalRounds = log2(maxParticipants)
     int totalRounds = (int) (Math.log(maxParticipants) / Math.log(2));
     int roundFromFinal = totalRounds - roundNumber + 1;
 
@@ -117,12 +112,6 @@ public class MatchMapper {
     };
   }
 
-  // Helpers privates
-  /**
-   * Helper record to hold masked public scores.
-   */
-  private record PublicScoreInfo(Integer scoreA, Integer scoreB, Long winnerId) {}
-
   /**
    * Extracts and masks the scores based on the match validation status.
    *
@@ -131,10 +120,25 @@ public class MatchMapper {
    */
   private PublicScoreInfo getPublicScoreInfo(Match match) {
     boolean isPublic = match.getResultStatus().equals(ResultStatus.VALIDATED);
-    return new PublicScoreInfo(
-        isPublic ? match.getScoreA() : null,
+    return new PublicScoreInfo(isPublic ? match.getScoreA() : null,
         isPublic ? match.getScoreB() : null,
-        isPublic && match.getWinner() != null ? match.getWinner().getId() : null
-    );
+        isPublic && match.getWinner() != null ? match.getWinner().getId() : null);
+  }
+
+  /**
+   * Helper record to hold masked public scores.
+   */
+  private record PublicScoreInfo(Integer scoreA, Integer scoreB, Long winnerId) {
+
+  }
+
+  private List<PlayerSelectionDto> toPlayerSelectionDtos(List<PlayersSelection> teamSelections) {
+    return teamSelections.stream()
+        .map(ps -> new PlayerSelectionDto(
+            ps.getMember().getId(),
+            ps.getMember().getTag(),
+            ps.getMember().getImage().getUrl()
+        ))
+        .toList();
   }
 }

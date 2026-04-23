@@ -80,11 +80,13 @@ export function useTournaments(token: string) {
         setTournaments((prev) =>
           prev.map((t) => (t.id === updated.id ? updated : t)),
         );
-      } catch {
-        // silently fail
+      } catch (err) {
+        console.error('Erreur lors du rafraîchissement du tournoi :', err);
+        // recharger toute la liste comme fallback
+        loadTournaments();
       }
     },
-    [token],
+    [token, loadTournaments],
   );
 
   const filtered = useMemo(() => {

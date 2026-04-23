@@ -1,11 +1,24 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
-import TeamPage from './TeamPage';
-import { AuthContext } from '../../../../contexts/AuthContext';
+import { useTeam } from '../../../../hooks/useTeam/useTeam';
+import { useAuth } from '../../../../contexts/useAuth';
+import type { TournamentDetails } from '../../../../types/tournament.types';
+import * as teamService from '../../../../services/team/team.service';
+import * as tournamentService from '../../../../services/tournament/tournament.service';
+
+vi.mock('../../../../contexts/useAuth', () => ({
+  useAuth: vi.fn(),
+}));
+
+vi.mock('../../../../services/team/team.service', () => ({
+  getMyTeamMembers: vi.fn(),
+  getMyTeam: vi.fn(),
+  leaveTeam: vi.fn(),
+  nominateSecondaryManager: vi.fn(),
+}));
 
 vi.mock('../../../../services/tournament/tournament.service', () => ({
-  getTournaments: vi.fn().mockResolvedValue([]),
+  getTournaments: vi.fn(),
 }));
 
 const mockUser = {
@@ -39,267 +52,412 @@ const mockTeam = {
   creationDate: '2026-03-12T00:00:00',
 };
 
-const mockContextValue = {
-  user: mockUser,
-  login: vi.fn(),
-  register: vi.fn(),
-  logout: vi.fn(),
-  bannedError: null,
-};
-
-const renderTeamPage = () =>
-  render(
-    <MemoryRouter>
-      <AuthContext.Provider value={mockContextValue}>
-        <TeamPage />
-      </AuthContext.Provider>
-    </MemoryRouter>,
-  );
-
-// Mock les fetches initiaux : membres + équipe
-const mockInitialFetches = () => {
-  (global.fetch as ReturnType<typeof vi.fn>)
-    .mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => mockMembers,
-    })
-    .mockResolvedValueOnce({ ok: true, json: async () => mockTeam });
-};
-
-// Mock un reload complet (après action)
-const mockReload = () => {
-  (global.fetch as ReturnType<typeof vi.fn>)
-    .mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => mockMembers,
-    })
-    .mockResolvedValueOnce({ ok: true, json: async () => mockTeam });
-};
+const mockTournaments: TournamentDetails[] = [
+  {
+    id: 100,
+    name: 'Spring Cup',
+    description: 'Tournoi de printemps',
+    startDate: '2026-04-01',
+    endDate: '2026-04-10',
+    registrationDeadline: '2026-03-25',
+    maxParticipants: 16,
+    currentParticipants: 8,
+    organizerTag: 'Admin',
+    status: 'IN_PROGRESS',
+    isPublic: true,
+  },
+  {
+    id: 101,
+    name: 'Summer Cup',
+    description: 'Tournoi d’été',
+    startDate: '2026-05-01',
+    endDate: '2026-05-10',
+    registrationDeadline: '2026-04-20',
+    maxParticipants: 32,
+    currentParticipants: 12,
+    organizerTag: 'Admin',
+    status: 'PREPARATION',
+    isPublic: true,
+  },
+  {
+    id: 102,
+    name: 'Private Cup',
+    description: 'Tournoi privé',
+    startDate: '2026-06-01',
+    endDate: '2026-06-10',
+    registrationDeadline: '2026-05-20',
+    maxParticipants: 8,
+    currentParticipants: 4,
+    organizerTag: 'Admin',
+    status: 'PREPARATION',
+    isPublic: false,
+  },
+];
 
 beforeEach(() => {
   vi.clearAllMocks();
-  global.fetch = vi.fn();
+
+  vi.mocked(useAuth).mockReturnValue({
+    user: mockUser,
+    login: vi.fn(),
+    register: vi.fn(),
+    logout: vi.fn(),
+    bannedError: null,
+  });
+
+  vi.mocked(teamService.getMyTeamMembers).mockResolvedValue(mockMembers);
+  vi.mocked(teamService.getMyTeam).mockResolvedValue(mockTeam);
+  vi.mocked(tournamentService.getTournaments).mockResolvedValue(
+    mockTournaments,
+  );
 });
 
-describe('TeamPage — avec équipe', () => {
-  test('affiche le titre de la page', async () => {
-    mockInitialFetches();
-    renderTeamPage();
-    expect(await screen.findByText('Mon équipe')).toBeTruthy();
-  });
+describe('useTeam', () => {
+  test('charge les données de l’équipe au montage', async () => {
+    const { result } = renderHook(() => useTeam());
 
-  test("affiche le nom de l'équipe", async () => {
-    mockInitialFetches();
-    renderTeamPage();
-    expect(await screen.findByText('TEAM_ALPHA')).toBeTruthy();
-  });
-
-  test("affiche les membres de l'équipe", async () => {
-    mockInitialFetches();
-    renderTeamPage();
-    expect((await screen.findAllByText('Lynx')).length).toBeGreaterThan(0);
-    expect(await screen.findByText('Rogue')).toBeTruthy();
-  });
-
-  test('affiche le responsable dans la section infos', async () => {
-    mockInitialFetches();
-    renderTeamPage();
-    await screen.findByText('TEAM_ALPHA');
-    const lynxElements = screen.getAllByText('Lynx');
-    expect(lynxElements.length).toBeGreaterThanOrEqual(2);
-  });
-
-  test('affiche le bouton Quitter', async () => {
-    mockInitialFetches();
-    renderTeamPage();
-    expect(await screen.findByText('Quitter')).toBeTruthy();
-  });
-
-  test('affiche la date de création', async () => {
-    mockInitialFetches();
-    renderTeamPage();
-    expect(await screen.findByText('12/03/2026')).toBeTruthy();
-  });
-
-  test('affiche la légende disponible/indisponible', async () => {
-    mockInitialFetches();
-    renderTeamPage();
-    expect(await screen.findByText('Disponible')).toBeTruthy();
-    expect(await screen.findByText('Indisponible')).toBeTruthy();
-  });
-
-  test('ouvre le dialog de confirmation quitter', async () => {
-    mockInitialFetches();
-    renderTeamPage();
-    await screen.findByText('Quitter');
-    fireEvent.click(screen.getByText('Quitter'));
-    expect(await screen.findByText("Quitter l'équipe")).toBeTruthy();
-    expect(
-      await screen.findByText(/Es-tu sûr de vouloir quitter l'équipe/),
-    ).toBeTruthy();
-  });
-
-  test('ferme le dialog quand on annule', async () => {
-    mockInitialFetches();
-    renderTeamPage();
-    await screen.findByText('Quitter');
-    fireEvent.click(screen.getByText('Quitter'));
-    await screen.findByText("Quitter l'équipe");
-    fireEvent.click(screen.getByText('Annuler'));
     await waitFor(() => {
-      expect(screen.queryByText("Quitter l'équipe")).toBeFalsy();
-    });
-  });
-
-  test("quitte l'équipe avec succès", async () => {
-    mockInitialFetches();
-    renderTeamPage();
-    await screen.findByText('Quitter');
-    fireEvent.click(screen.getByText('Quitter'));
-    await screen.findByText("Quitter l'équipe");
-
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, status: 200 })
-      .mockResolvedValueOnce({
-        ok: false,
-        status: 404,
-        json: async () => ({}),
-      });
-
-    fireEvent.click(screen.getByText('Confirmer'));
-    await waitFor(() => {
-      expect(screen.queryByText("Quitter l'équipe")).toBeFalsy();
-    });
-  });
-
-  test('affiche erreur générique si leave échoue', async () => {
-    mockInitialFetches();
-    renderTeamPage();
-    await screen.findByText('Quitter');
-    fireEvent.click(screen.getByText('Quitter'));
-    await screen.findByText("Quitter l'équipe");
-
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-      ok: false,
-      status: 500,
-      json: async () => ({}),
+      expect(result.current.hasTeam).toBe(true);
     });
 
-    fireEvent.click(screen.getByText('Confirmer'));
-    expect(await screen.findByText('Une erreur est survenue.')).toBeTruthy();
-  });
-
-  test('affiche erreur 409 quand le responsable quitte sans second', async () => {
-    mockInitialFetches();
-    renderTeamPage();
-    await screen.findByText('Quitter');
-    fireEvent.click(screen.getByText('Quitter'));
-    await screen.findByText("Quitter l'équipe");
-
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-      ok: false,
-      status: 409,
-      text: async () => 'Désignez un second responsable avant de quitter.',
-    });
-
-    fireEvent.click(screen.getByText('Confirmer'));
-    expect(
-      await screen.findByText(
-        'Désignez un second responsable avant de quitter.',
-      ),
-    ).toBeTruthy();
-  });
-
-  test('affiche erreur réseau lors du leave', async () => {
-    mockInitialFetches();
-    renderTeamPage();
-    await screen.findByText('Quitter');
-    fireEvent.click(screen.getByText('Quitter'));
-    await screen.findByText("Quitter l'équipe");
-
-    (global.fetch as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
-      new Error('network'),
+    expect(teamService.getMyTeamMembers).toHaveBeenCalledWith('fake-token');
+    expect(teamService.getMyTeam).toHaveBeenCalledWith('fake-token');
+    expect(tournamentService.getTournaments).toHaveBeenCalledWith(
+      'fake-token',
+      'TEAM_ALPHA',
     );
 
-    fireEvent.click(screen.getByText('Confirmer'));
-    expect(await screen.findByText('Erreur réseau.')).toBeTruthy();
+    expect(result.current.team).toEqual(mockTeam);
+    expect(result.current.members).toEqual(mockMembers);
   });
 
-  test('affiche le bouton Nommer pour le responsable sur les autres membres', async () => {
-    mockInitialFetches();
-    renderTeamPage();
-    expect(await screen.findByText('Nommer')).toBeTruthy();
-  });
+  test('met hasTeam à false si getMyTeamMembers échoue', async () => {
+    vi.mocked(teamService.getMyTeamMembers).mockRejectedValueOnce(
+      new Error('boom'),
+    );
 
-  test('nomme un second responsable avec succès', async () => {
-    mockInitialFetches();
-    renderTeamPage();
-    await screen.findByText('Nommer');
+    const { result } = renderHook(() => useTeam());
 
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-      ok: true,
-    });
-    mockReload();
-
-    fireEvent.click(screen.getByText('Nommer'));
-    expect(
-      await screen.findByText('Second responsable nommé avec succès.'),
-    ).toBeTruthy();
-  });
-
-  test('affiche erreur si la nomination échoue', async () => {
-    mockInitialFetches();
-    renderTeamPage();
-    expect(await screen.findByText('Nommer')).toBeTruthy();
-
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-      ok: false,
+    await waitFor(() => {
+      expect(result.current.hasTeam).toBe(false);
     });
 
-    fireEvent.click(screen.getByText('Nommer'));
-    expect(
-      await screen.findByText('Impossible de nommer ce membre.'),
-    ).toBeTruthy();
+    expect(result.current.team).toBeNull();
+    expect(result.current.members).toEqual([]);
   });
 
-  test('affiche les onglets Tournois', async () => {
-    mockInitialFetches();
-    renderTeamPage();
-    await screen.findByText('Mon équipe');
-    expect(await screen.findByText(/En cours/)).toBeTruthy();
-    expect(await screen.findByText(/À venir/)).toBeTruthy();
+  test('calcule isSolo à true si un seul membre', async () => {
+    vi.mocked(teamService.getMyTeamMembers).mockResolvedValueOnce([
+      mockMembers[0],
+    ]);
+
+    const { result } = renderHook(() => useTeam());
+
+    await waitFor(() => {
+      expect(result.current.hasTeam).toBe(true);
+    });
+
+    expect(result.current.isSolo).toBe(true);
   });
-});
 
-describe('TeamPage — sans équipe', () => {
-  test("affiche JoinOrCreateTeam si pas d'équipe", async () => {
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: false, status: 404, json: async () => ({}) })
-      .mockResolvedValueOnce({ ok: true, json: async () => [] });
+  test('calcule isResponsible à true si user est responsable principal', async () => {
+    const { result } = renderHook(() => useTeam());
 
-    renderTeamPage();
-    expect(await screen.findByText('Rejoindre une team')).toBeTruthy();
-    expect(await screen.findByText('Créer une team')).toBeTruthy();
+    await waitFor(() => {
+      expect(result.current.team).not.toBeNull();
+    });
+
+    expect(result.current.isResponsible).toBe(true);
   });
-});
 
-describe('TeamPage — dernier membre', () => {
-  test("affiche message suppression d'équipe si solo", async () => {
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => [mockMembers[0]],
-      })
-      .mockResolvedValueOnce({ ok: true, json: async () => mockTeam });
+  test('calcule isResponsible à true si user est second responsable', async () => {
+    vi.mocked(teamService.getMyTeam).mockResolvedValueOnce({
+      ...mockTeam,
+      responsibleTag: 'Other',
+      secondResponsibleTag: 'Lynx',
+    });
 
-    renderTeamPage();
-    expect(await screen.findByText('Quitter')).toBeTruthy();
-    fireEvent.click(screen.getByText('Quitter'));
-    expect(
-      await screen.findByText(/Quitter supprimera définitivement l'équipe/),
-    ).toBeTruthy();
+    const { result } = renderHook(() => useTeam());
+
+    await waitFor(() => {
+      expect(result.current.team).not.toBeNull();
+    });
+
+    expect(result.current.isResponsible).toBe(true);
+  });
+
+  test('calcule isResponsible à false si user n’est pas responsable', async () => {
+    vi.mocked(teamService.getMyTeam).mockResolvedValueOnce({
+      ...mockTeam,
+      responsibleTag: 'Other',
+      secondResponsibleTag: 'Another',
+    });
+
+    const { result } = renderHook(() => useTeam());
+
+    await waitFor(() => {
+      expect(result.current.team).not.toBeNull();
+    });
+
+    expect(result.current.isResponsible).toBe(false);
+  });
+
+  test('filtre correctement les tournois en cours et à venir', async () => {
+    const { result } = renderHook(() => useTeam());
+
+    await waitFor(() => {
+      expect(result.current.hasTeam).toBe(true);
+    });
+
+    expect(result.current.tournamentsInProgress).toHaveLength(1);
+    expect(result.current.tournamentsInProgress[0].name).toBe('Spring Cup');
+
+    expect(result.current.tournamentsUpcoming).toHaveLength(1);
+    expect(result.current.tournamentsUpcoming[0].name).toBe('Summer Cup');
+  });
+
+  test('handleLeave appelle leaveTeam puis recharge les données', async () => {
+    vi.mocked(teamService.leaveTeam).mockResolvedValueOnce(undefined);
+
+    const { result } = renderHook(() => useTeam());
+
+    await waitFor(() => {
+      expect(result.current.hasTeam).toBe(true);
+    });
+
+    await act(async () => {
+      await result.current.handleLeave();
+    });
+
+    expect(teamService.leaveTeam).toHaveBeenCalledWith('fake-token');
+    expect(teamService.getMyTeamMembers).toHaveBeenCalledTimes(2);
+    expect(teamService.getMyTeam).toHaveBeenCalledTimes(2);
+  });
+
+  test('handleLeave ferme la popup après succès', async () => {
+    vi.mocked(teamService.leaveTeam).mockResolvedValueOnce(undefined);
+
+    const { result } = renderHook(() => useTeam());
+
+    await waitFor(() => {
+      expect(result.current.hasTeam).toBe(true);
+    });
+
+    act(() => {
+      result.current.setConfirmOpen(true);
+    });
+
+    expect(result.current.confirmOpen).toBe(true);
+
+    await act(async () => {
+      await result.current.handleLeave();
+    });
+
+    expect(result.current.confirmOpen).toBe(false);
+  });
+
+  test('handleLeave stocke le message d’erreur si leaveTeam échoue avec Error', async () => {
+    vi.mocked(teamService.leaveTeam).mockRejectedValueOnce(
+      new Error('Désignez un second responsable avant de quitter.'),
+    );
+
+    const { result } = renderHook(() => useTeam());
+
+    await waitFor(() => {
+      expect(result.current.hasTeam).toBe(true);
+    });
+
+    await act(async () => {
+      await result.current.handleLeave();
+    });
+
+    expect(result.current.leaveError).toBe(
+      'Désignez un second responsable avant de quitter.',
+    );
+    expect(result.current.confirmOpen).toBe(false);
+    expect(result.current.leaveLoading).toBe(false);
+  });
+
+  test('handleLeave stocke une erreur générique si rejet non Error', async () => {
+    vi.mocked(teamService.leaveTeam).mockRejectedValueOnce('fail');
+
+    const { result } = renderHook(() => useTeam());
+
+    await waitFor(() => {
+      expect(result.current.hasTeam).toBe(true);
+    });
+
+    await act(async () => {
+      await result.current.handleLeave();
+    });
+
+    expect(result.current.leaveError).toBe('Une erreur est survenue.');
+  });
+
+  test('handleNominate nomme un second responsable avec succès', async () => {
+    vi.mocked(teamService.nominateSecondaryManager).mockResolvedValueOnce(
+      undefined,
+    );
+
+    const { result } = renderHook(() => useTeam());
+
+    await waitFor(() => {
+      expect(result.current.team).not.toBeNull();
+    });
+
+    await act(async () => {
+      await result.current.handleNominate(2);
+    });
+
+    expect(teamService.nominateSecondaryManager).toHaveBeenCalledWith(
+      'fake-token',
+      10,
+      2,
+    );
+    expect(result.current.nominateSuccess).toBe(
+      'Second responsable nommé avec succès.',
+    );
+    expect(result.current.nominateError).toBeNull();
+    expect(teamService.getMyTeamMembers).toHaveBeenCalledTimes(2);
+  });
+
+  test('handleNominate stocke une erreur si la nomination échoue avec Error', async () => {
+    vi.mocked(teamService.nominateSecondaryManager).mockRejectedValueOnce(
+      new Error('Impossible de nommer ce membre.'),
+    );
+
+    const { result } = renderHook(() => useTeam());
+
+    await waitFor(() => {
+      expect(result.current.team).not.toBeNull();
+    });
+
+    await act(async () => {
+      await result.current.handleNominate(2);
+    });
+
+    expect(result.current.nominateError).toBe(
+      'Impossible de nommer ce membre.',
+    );
+    expect(result.current.nominateSuccess).toBeNull();
+  });
+
+  test('handleNominate stocke "Erreur réseau." si rejet non Error', async () => {
+    vi.mocked(teamService.nominateSecondaryManager).mockRejectedValueOnce(
+      'fail',
+    );
+
+    const { result } = renderHook(() => useTeam());
+
+    await waitFor(() => {
+      expect(result.current.team).not.toBeNull();
+    });
+
+    await act(async () => {
+      await result.current.handleNominate(2);
+    });
+
+    expect(result.current.nominateError).toBe('Erreur réseau.');
+  });
+
+  test('handleNominate ne fait rien si team est null', async () => {
+    vi.mocked(teamService.getMyTeamMembers).mockResolvedValueOnce(mockMembers);
+    vi.mocked(teamService.getMyTeam).mockImplementationOnce(
+      () => new Promise(() => {}),
+    );
+
+    const { result } = renderHook(() => useTeam());
+
+    await waitFor(() => {
+      expect(result.current.members).toEqual(mockMembers);
+    });
+
+    await act(async () => {
+      await result.current.handleNominate(2);
+    });
+
+    expect(teamService.nominateSecondaryManager).not.toHaveBeenCalled();
+  });
+
+  test('ne charge rien si user est null', () => {
+    vi.mocked(useAuth).mockReturnValue({
+      user: null,
+      login: vi.fn(),
+      register: vi.fn(),
+      logout: vi.fn(),
+      bannedError: null,
+    });
+
+    renderHook(() => useTeam());
+
+    expect(teamService.getMyTeamMembers).not.toHaveBeenCalled();
+    expect(teamService.getMyTeam).not.toHaveBeenCalled();
+    expect(tournamentService.getTournaments).not.toHaveBeenCalled();
+  });
+
+  test('permet de changer tabIndex', async () => {
+    const { result } = renderHook(() => useTeam());
+
+    await waitFor(() => {
+      expect(result.current.hasTeam).toBe(true);
+    });
+
+    act(() => {
+      result.current.setTabIndex(1);
+    });
+
+    expect(result.current.tabIndex).toBe(1);
+  });
+
+  test('permet de reset leaveError', async () => {
+    vi.mocked(teamService.leaveTeam).mockRejectedValueOnce(
+      new Error('Erreur leave'),
+    );
+
+    const { result } = renderHook(() => useTeam());
+
+    await waitFor(() => {
+      expect(result.current.hasTeam).toBe(true);
+    });
+
+    await act(async () => {
+      await result.current.handleLeave();
+    });
+
+    expect(result.current.leaveError).toBe('Erreur leave');
+
+    act(() => {
+      result.current.setLeaveError(null);
+    });
+
+    expect(result.current.leaveError).toBeNull();
+  });
+
+  test('permet de reset nominateError et nominateSuccess', async () => {
+    vi.mocked(teamService.nominateSecondaryManager).mockResolvedValueOnce(
+      undefined,
+    );
+
+    const { result } = renderHook(() => useTeam());
+
+    await waitFor(() => {
+      expect(result.current.team).not.toBeNull();
+    });
+
+    await act(async () => {
+      await result.current.handleNominate(2);
+    });
+
+    expect(result.current.nominateSuccess).toBe(
+      'Second responsable nommé avec succès.',
+    );
+
+    act(() => {
+      result.current.setNominateSuccess(null);
+      result.current.setNominateError(null);
+    });
+
+    expect(result.current.nominateSuccess).toBeNull();
+    expect(result.current.nominateError).toBeNull();
   });
 });

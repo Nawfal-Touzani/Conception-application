@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-
 /**
  * Controller for managing matches.
  */
@@ -61,60 +60,62 @@ public class MatchController {
     return teamService.getTeamByResponsible(responsible);
   }
 
-  // PUBLIC
+  // public
 
   /**
-   * Gets a match by its id. Returns the full detail view including lineups if result is VALIDATED.
+   * Gets a match by its id.
    *
    * @param idMatch the match id
+   * @param member  the authenticated member if present
    * @return the match detail DTO
    */
   @GetMapping("/{idMatch}")
   @ResponseStatus(HttpStatus.OK)
-  public MatchDetailDto getMatch(@PathVariable Long idMatch) {
+  public MatchDetailDto getMatch(@PathVariable Long idMatch,
+      @AuthenticationPrincipal Member member) {
     Match match = matchService.getMatchById(idMatch);
-    return matchMapper.toDetailDto(match);
+    return matchMapper.toDetailDto(match, member);
   }
 
-  // MEMBER
+  // member
 
   /**
    * Gets upcoming matches for the authenticated member.
    *
-   * @param member the authenticated member (from JWT)
+   * @param member the authenticated member
    * @return list of upcoming match detail DTOs
    */
   @GetMapping("/upcoming")
   @PreAuthorize("isAuthenticated()")
   @ResponseStatus(HttpStatus.OK)
   public List<MatchDetailDto> getUpcomingMatches(@AuthenticationPrincipal Member member) {
-    return matchService.getUpcomingMatchesForMember(member).stream().map(matchMapper::toDetailDto)
-        .toList();
+    return matchService.getUpcomingMatchesForMember(member).stream()
+        .map(match -> matchMapper.toDetailDto(match, member)).toList();
   }
 
   /**
    * Gets past matches for the authenticated member.
    *
-   * @param member the authenticated member (from JWT)
+   * @param member the authenticated member
    * @return list of past match detail DTOs
    */
   @GetMapping("/past")
   @PreAuthorize("isAuthenticated()")
   @ResponseStatus(HttpStatus.OK)
   public List<MatchDetailDto> getPastMatches(@AuthenticationPrincipal Member member) {
-    return matchService.getPastMatchesForMember(member).stream().map(matchMapper::toDetailDto)
-        .toList();
+    return matchService.getPastMatchesForMember(member).stream()
+        .map(match -> matchMapper.toDetailDto(match, member)).toList();
   }
 
-  // RESPONSABLE
+  // responsable
 
   /**
    * Submits a player selection for a match.
    *
    * @param idMatch     the match id
-   * @param payload     the selection request with 4 member ids
+   * @param payload     the selection request
    * @param responsible the authenticated responsible
-   * @return the match detail DTO with updated lineup status
+   * @return the updated match detail DTO
    */
   @PostMapping("/{idMatch}/selection")
   @PreAuthorize("hasRole('ROLE_RESPONSIBLE')")
@@ -123,16 +124,16 @@ public class MatchController {
       @RequestBody @Valid SelectionRequest payload, @AuthenticationPrincipal Member responsible) {
     Team team = resolveTeam(responsible);
     matchSelectionService.submitSelection(idMatch, team, payload.memberIds());
-    return matchMapper.toDetailDto(matchService.getMatchById(idMatch));
+    return matchMapper.toDetailDto(matchService.getMatchById(idMatch), responsible);
   }
 
   /**
    * Modifies the player selection for a match.
    *
    * @param idMatch     the match id
-   * @param payload     the new selection with 4 member ids
+   * @param payload     the new selection request
    * @param responsible the authenticated responsible
-   * @return the match detail DTO with updated lineup status
+   * @return the updated match detail DTO
    */
   @PutMapping("/{idMatch}/selection")
   @PreAuthorize("hasRole('ROLE_RESPONSIBLE')")
@@ -141,7 +142,7 @@ public class MatchController {
       @RequestBody @Valid SelectionRequest payload, @AuthenticationPrincipal Member responsible) {
     Team team = resolveTeam(responsible);
     matchSelectionService.modifySelection(idMatch, team, payload.memberIds());
-    return matchMapper.toDetailDto(matchService.getMatchById(idMatch));
+    return matchMapper.toDetailDto(matchService.getMatchById(idMatch), responsible);
   }
 
   /**
@@ -158,7 +159,7 @@ public class MatchController {
       @AuthenticationPrincipal Member responsible) {
     Team team = resolveTeam(responsible);
     Match match = matchResultService.validateResult(idMatch, team);
-    return matchMapper.toDetailDto(match);
+    return matchMapper.toDetailDto(match, responsible);
   }
 
   /**
@@ -175,7 +176,7 @@ public class MatchController {
       @AuthenticationPrincipal Member responsible) {
     Team team = resolveTeam(responsible);
     Match match = matchResultService.contestResult(idMatch, team);
-    return matchMapper.toDetailDto(match);
+    return matchMapper.toDetailDto(match, responsible);
   }
 
   /**
@@ -192,7 +193,7 @@ public class MatchController {
       @AuthenticationPrincipal Member responsible) {
     Team team = resolveTeam(responsible);
     Match match = matchService.declareForfeit(idMatch, team);
-    return matchMapper.toDetailDto(match);
+    return matchMapper.toDetailDto(match, responsible);
   }
 
   /**
@@ -200,7 +201,7 @@ public class MatchController {
    *
    * @param idMatch     the match id
    * @param responsible the authenticated responsible
-   * @return a list of member selection DTOs indicating availability
+   * @return a list of eligible members
    */
   @GetMapping("/{idMatch}/selection/eligible")
   @PreAuthorize("hasRole('ROLE_RESPONSIBLE')")
@@ -211,13 +212,14 @@ public class MatchController {
     return matchSelectionService.getEligibleMembers(idMatch, team);
   }
 
-  // ADMIN
+  // admin
 
   /**
    * Encodes a match result.
    *
-   * @param idMatch the match id
-   * @param payload the score
+   * @param idMatch       the match id
+   * @param payload       the score
+   * @param currentMember the authenticated admin
    * @return the updated match detail DTO
    */
   @PatchMapping("/{idMatch}/result")
@@ -225,24 +227,24 @@ public class MatchController {
   @ResponseStatus(HttpStatus.OK)
   public MatchDetailDto encodeResult(@PathVariable Long idMatch,
       @RequestBody @Valid ResultRequest payload, @AuthenticationPrincipal Member currentMember) {
-
     Match match = matchResultService.encodingResult(idMatch, payload, currentMember);
-    return matchMapper.toDetailDto(match);
+    return matchMapper.toDetailDto(match, currentMember);
   }
 
   /**
    * Corrects a contested match result.
    *
-   * @param idMatch the match id
-   * @param payload the corrected score
+   * @param idMatch       the match id
+   * @param payload       the corrected score
+   * @param currentMember the authenticated admin
    * @return the updated match detail DTO
    */
   @PutMapping("/{idMatch}/result/correction")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @ResponseStatus(HttpStatus.OK)
   public MatchDetailDto correctResult(@PathVariable Long idMatch,
-      @RequestBody @Valid ResultRequest payload) {
+      @RequestBody @Valid ResultRequest payload, @AuthenticationPrincipal Member currentMember) {
     Match match = matchResultService.correctResult(idMatch, payload);
-    return matchMapper.toDetailDto(match);
+    return matchMapper.toDetailDto(match, currentMember);
   }
 }
