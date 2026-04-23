@@ -125,6 +125,32 @@ public class MatchSelectionService {
    */
   @Transactional
   public void invalidateSelectionsOnLeave(Member member) {
+    List<PlayersSelection> affectedSelections = playersSelectionRepository
+        .findByMemberAndMatchState(
+        member, MatchState.SCHEDULED);
+
+    // notifier les responsables des equipes concernees
+    for (PlayersSelection ps : affectedSelections) {
+      Team team = ps.getTeam();
+      Notification notif = new Notification(Type.MATCH,
+          "Le joueur " + member.getTag() + " a quitté l'équipe. "
+              + "Votre sélection pour le match du " + ps.getMatch().getDateTime()
+              + " a été modifiée, vérifiez votre composition.", LocalDateTime.now());
+      notif.setMatch(ps.getMatch());
+
+      notificationService.send(team.getResponsible().getId(), notif);
+      if (team.getSecondResponsible() != null) {
+        Notification notif2 = new Notification(Type.MATCH,
+            "Le joueur " + member.getTag() + " a quitté l'équipe. "
+                + "Votre sélection pour le match du " + ps.getMatch().getDateTime()
+                + " a été modifiée, vérifiez votre composition.",
+            LocalDateTime.now());
+        notif2.setMatch(ps.getMatch());
+        notificationService.send(team.getSecondResponsible().getId(), notif2);
+      }
+    }
+
+    // supprimer apres avoir notifie
     playersSelectionRepository.deleteByMemberAndMatchState(member, MatchState.SCHEDULED);
   }
 
