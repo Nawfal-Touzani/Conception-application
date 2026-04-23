@@ -61,6 +61,11 @@ public class MatchSelectionService {
   public List<PlayersSelection> submitSelection(Long idMatch, Team team, List<Long> memberIds) {
     Match match = matchService.getScheduledMatchForTeam(idMatch, team);
 
+    if (playersSelectionRepository.countByMatchAndTeam(match, team) > 0) {
+      throw new IllegalStateException(
+          "Une sélection existe déjà pour cette équipe. Utilisez PUT pour la modifier.");
+    }
+
     if (memberIds.size() != 4) {
       throw new IllegalArgumentException("Exactly 4 players must be selected");
     }
