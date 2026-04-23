@@ -91,8 +91,9 @@ export function useTournaments(token: string) {
     const STATUS_ORDER: Record<string, number> = {
       PREPARATION: 0,
       IN_PROGRESS: 1,
-      FINISHED: 2,
-      CANCELLED: 3,
+      UPCOMING: 2,
+      FINISHED: 3,
+      CANCELLED: 4,
     };
     return tournaments
       .filter((t) => {
