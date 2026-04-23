@@ -1,5 +1,7 @@
 package be.vinci.ipl.cae.api.services;
 
+import static be.vinci.ipl.cae.api.models.entities.Tournament.Status.FINISHED;
+
 import be.vinci.ipl.cae.api.models.entities.Match;
 import be.vinci.ipl.cae.api.models.entities.Match.MatchState;
 import be.vinci.ipl.cae.api.models.entities.Match.ResultStatus;
@@ -91,7 +93,8 @@ public class MatchService {
 
   /**
    * Declares a forfeit for a team in a match.
-   * The opposing team wins automatically and is placed in the next bracket match.
+   * The opposing team wins automatically (5-0), result is VALIDATED, and winner advances.
+   * If winner reaches final and wins, tournament is marked FINISHED with winner.
    *
    * @param idMatch the match id
    * @param team the team declaring forfeit
@@ -103,6 +106,7 @@ public class MatchService {
 
     Team winner = team.equals(match.getTeamA()) ? match.getTeamB() : match.getTeamA();
 
+    // Score 5-0 pour l'equipe adverse
     if (winner.equals(match.getTeamA())) {
       match.setScoreA(5);
       match.setScoreB(0);
@@ -116,7 +120,11 @@ public class MatchService {
     match.setResultStatus(ResultStatus.VALIDATED);
     matchRepository.save(match);
 
+    // Avancer le gagnant
     matchResultService.advanceWinner(match);
+
+    // Vérifier victoire tournoi si finale
+    checkTournamentVictory(match);
 
     sendForfeitNotifications(match, team, winner);
     return match;
@@ -135,6 +143,8 @@ public class MatchService {
   public Match getScheduledMatchForTeam(Long idMatch, Team team) {
     return fetchScheduledMatchForTeam(idMatch, team);
   }
+
+  // privates
 
   /**
    * Retrieves a match only if it exists, is scheduled, and belongs to the given team.
@@ -190,5 +200,30 @@ public class MatchService {
       notif.setMatch(match);
       notificationService.send(recipient.getId(), notif);
     }
+  }
+
+  /**
+   * Checks if the winner of this match has reached and won the tournament final.
+   * Marks tournament as FINISHED and sets winner if applicable.
+   *
+   * @param match the completed match (forfeit or normal)
+   */
+  private void checkTournamentVictory(Match match) {
+    Tournament tournament = match.getTournament();
+
+    // Est-ce la finale ?
+    if (match.getNextMatch() != null) {
+      return; // Pas la finale
+    }
+
+    // Est-ce que ce match a une équipe gagnante définitive ?
+    if (match.getWinner() == null) {
+      return; // Pas encore de gagnant
+    }
+
+    // Finale terminée : marquer tournoi FINISHED
+    tournament.setStatus(FINISHED);
+    tournament.setWinnerTeam(match.getWinner());
+    tournamentRepository.save(tournament);
   }
 }

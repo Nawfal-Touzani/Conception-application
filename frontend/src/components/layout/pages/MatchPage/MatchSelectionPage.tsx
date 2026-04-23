@@ -17,6 +17,8 @@ import { useMatchSelection } from '../../../../hooks/useMatch/useMatchSelection'
 import { useAuth } from '../../../../contexts/useAuth';
 import { formatMatchDateTime } from '../../../../utils/match/match.utils';
 
+const BASE_URL = 'http://localhost:3000';
+
 type Props = {
   match: MatchDetail;
   hasExistingSelection: boolean;
@@ -111,7 +113,11 @@ const MatchSelectionPage: React.FC<Props> = ({
             return member ? (
               <Avatar
                 key={id}
-                src={member.imageUrl}
+                src={
+                  member.imageUrl?.startsWith('/')
+                    ? `${BASE_URL}${member.imageUrl}`
+                    : member.imageUrl
+                }
                 sx={{ width: 32, height: 32, border: '2px solid #e8b84b' }}
               />
             ) : null;
@@ -138,6 +144,7 @@ const MatchSelectionPage: React.FC<Props> = ({
             const isSelected = selectedIds.includes(member.id);
             const isDisabled =
               !member.available || (!isSelected && selectedIds.length >= 4);
+            const isUnavailable = !member.available;
 
             return (
               <Paper
@@ -163,12 +170,33 @@ const MatchSelectionPage: React.FC<Props> = ({
                   transition: 'all 0.15s',
                 }}
               >
-                <Avatar src={member.imageUrl} sx={{ width: 38, height: 38 }} />
+                {/* BOULE VERTE/ROUGE */}
+                <Box
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    backgroundColor: member.available ? '#2ecc71' : '#e74c3c',
+                    boxShadow: '0 0 0 2px rgba(255,255,255,0.2)',
+                    flexShrink: 0,
+                  }}
+                />
+
+                <Avatar
+                  src={
+                    member.imageUrl?.startsWith('/')
+                      ? `${BASE_URL}${member.imageUrl}`
+                      : member.imageUrl
+                  }
+                  sx={{ width: 38, height: 38 }}
+                />
+
                 <Box sx={{ flex: 1 }}>
                   <Typography color="white" fontWeight={500} fontSize="0.95rem">
                     {member.tag}
                   </Typography>
-                  {!member.available && (
+                  {/* Chip indisponible seulement si vraiment indispo */}
+                  {isUnavailable && (
                     <Chip
                       label="Indisponible"
                       size="small"
@@ -182,6 +210,8 @@ const MatchSelectionPage: React.FC<Props> = ({
                     />
                   )}
                 </Box>
+
+                {/* Checkbox bloqué si indispo OU limite atteinte */}
                 <Checkbox
                   checked={isSelected}
                   disabled={isDisabled}
@@ -190,7 +220,9 @@ const MatchSelectionPage: React.FC<Props> = ({
                   sx={{
                     color: 'rgba(255,255,255,0.3)',
                     '&.Mui-checked': { color: '#e8b84b' },
-                    '&.Mui-disabled': { color: '#333' },
+                    '&.Mui-disabled': {
+                      color: isUnavailable ? '#555' : 'rgba(255,255,255,0.3)',
+                    },
                   }}
                 />
               </Paper>

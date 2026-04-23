@@ -4,6 +4,20 @@ import * as teamService from '../../services/team/team.service';
 import { TournamentDetails } from '../../types/tournament.types';
 import { TeamDto } from '../../types/team.types';
 
+const ERROR_MAP: Record<string, string> = {
+  '4 member required': 'Votre équipe doit avoir au moins 4 membres.',
+  'deadline passed': "La date limite d'inscription est dépassée.",
+  'tournament is full': 'Le tournoi est complet.',
+  'not public yet': "Le tournoi n'est pas encore ouvert aux inscriptions.",
+  'not in preparation': "Le tournoi n'est plus en phase d'inscription.",
+  'not responsible':
+    'Seul le responsable ou second responsable peut inscrire la team.',
+};
+
+function mapErrorMessage(msg: string): string {
+  return ERROR_MAP[msg] ?? msg;
+}
+
 export function useTournamentDetail(
   tournament: TournamentDetails,
   onRegister: () => Promise<void>,
@@ -47,17 +61,19 @@ export function useTournamentDetail(
         const body = await response.json().catch(() => ({ message: null }));
         const msg: string = body.message ?? '';
 
-        if (response.status === 409) {
-          // déjà inscrit = rafraîchir silencieusement
+        if (msg.toLowerCase().includes('already')) {
           await onRegister();
           return;
         }
         if (response.status === 403) {
-          setRegisterError('Seul le responsable peut inscrire la team.');
+          setRegisterError(
+            'Seul le responsable ou second responsable peut inscrire la team.',
+          );
           return;
         }
-        // message backend direct pour les 400
-        setRegisterError(msg || "Erreur lors de l'inscription.");
+        setRegisterError(
+          mapErrorMessage(msg) || "Erreur lors de l'inscription.",
+        );
       } else {
         setRegisterSuccess(true);
         await onRegister();

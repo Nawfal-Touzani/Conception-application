@@ -5,18 +5,28 @@ export const getTeams = async (token: string): Promise<TeamDto[]> => {
   const response = await fetch('/api/teams', {
     headers: { Authorization: `Bearer ${token}` },
   });
-  if (!response.ok) throw new Error('Erreur lors du chargement des équipes.');
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || 'Erreur lors du chargement des équipes.');
+  }
+
   return response.json();
 };
 
-// return les membres de lequipe du joueur avec ce token
+// retourne les membres de l'équipe du joueur avec ce token
 export const getMyTeamMembers = async (
   token: string,
 ): Promise<TeamMember[]> => {
   const response = await fetch('/api/teams/members', {
     headers: { Authorization: `Bearer ${token}` },
   });
-  if (!response.ok) throw new Error('Aucune équipe trouvée.');
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || 'Aucune équipe trouvée.');
+  }
+
   return response.json();
 };
 
@@ -24,7 +34,12 @@ export const getMyTeam = async (token: string): Promise<TeamDto> => {
   const response = await fetch('/api/teams/my-team', {
     headers: { Authorization: `Bearer ${token}` },
   });
-  if (!response.ok) throw new Error("Erreur lors du chargement de l'équipe.");
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Erreur lors du chargement de l'équipe.");
+  }
+
   return response.json();
 };
 
@@ -40,9 +55,10 @@ export const createTeam = async (
     },
     body: JSON.stringify({ name }),
   });
+
   if (!response.ok) {
-    const body = await response.json().catch(() => ({ message: null }));
-    throw new Error(body.message ?? "Erreur lors de la création de l'équipe.");
+    const errorText = await response.text();
+    throw new Error(errorText || "Erreur lors de la création de l'équipe.");
   }
 };
 
@@ -54,9 +70,10 @@ export const sendJoinRequest = async (
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
   });
+
   if (!response.ok) {
-    const body = await response.json().catch(() => ({ message: null }));
-    throw new Error(body.message ?? "Erreur lors de l'envoi de la demande.");
+    const errorText = await response.text();
+    throw new Error(errorText || "Erreur lors de l'envoi de la demande.");
   }
 };
 
@@ -65,9 +82,10 @@ export const leaveTeam = async (token: string): Promise<void> => {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` },
   });
+
   if (!response.ok) {
-    const body = await response.json().catch(() => ({ message: null }));
-    throw new Error(body.message ?? "Erreur lors du départ de l'équipe.");
+    const errorText = await response.text();
+    throw new Error(errorText || "Erreur lors du départ de l'équipe.");
   }
 };
 
@@ -83,8 +101,9 @@ export const nominateSecondaryManager = async (
       headers: { Authorization: `Bearer ${token}` },
     },
   );
+
   if (!response.ok) {
-    const body = await response.json().catch(() => ({ message: null }));
-    throw new Error(body.message ?? 'Impossible de nommer ce membre.');
+    const errorText = await response.text();
+    throw new Error(errorText || 'Impossible de nommer ce membre.');
   }
 };

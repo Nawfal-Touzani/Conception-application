@@ -67,10 +67,8 @@ public class MatchSelectionService {
     }
 
     List<PlayersSelection> selections = buildAndSaveSelections(memberIds, team, match);
-    sendSelectionNotifications(match, selections
-        .stream()
-        .map(PlayersSelection::getMember)
-        .toList());
+    sendSelectionNotifications(match,
+        selections.stream().map(PlayersSelection::getMember).toList());
 
     return selections;
   }
@@ -89,23 +87,18 @@ public class MatchSelectionService {
     Match match = matchService.getScheduledMatchForTeam(idMatch, team);
 
     if (playersSelectionRepository.countByMatchAndTeam(match, team) == 0) {
-      throw new IllegalStateException(
-          "No existing selection found for this team in this match");
+      throw new IllegalStateException("No existing selection found for this team in this match");
     }
 
-    List<Long> previousIds = playersSelectionRepository.findByMatchAndTeam(match, team)
-        .stream()
-        .map(ps -> ps.getMember().getId())
-        .toList();
+    List<Long> previousIds = playersSelectionRepository.findByMatchAndTeam(match, team).stream()
+        .map(ps -> ps.getMember().getId()).toList();
 
     playersSelectionRepository.deleteByMatchAndTeam(match, team);
 
     List<PlayersSelection> selections = buildAndSaveSelections(memberIds, team, match);
 
-    List<Member> newMembers = selections.stream()
-        .map(PlayersSelection::getMember)
-        .filter(m -> !previousIds.contains(m.getId()))
-        .toList();
+    List<Member> newMembers = selections.stream().map(PlayersSelection::getMember)
+        .filter(m -> !previousIds.contains(m.getId())).toList();
 
     sendSelectionNotifications(match, newMembers);
 
@@ -138,8 +131,7 @@ public class MatchSelectionService {
         Notification notif2 = new Notification(Type.MATCH,
             "Le joueur " + member.getTag() + " a quitté l'équipe. "
                 + "Votre sélection pour le match du " + ps.getMatch().getDateTime()
-                + " a été modifiée, vérifiez votre composition.",
-            LocalDateTime.now());
+                + " a été modifiée, vérifiez votre composition.", LocalDateTime.now());
         notif2.setMatch(ps.getMatch());
         notificationService.send(team.getSecondResponsible().getId(), notif2);
       }
@@ -211,7 +203,8 @@ public class MatchSelectionService {
     return resolved;
   }
 
-  private List<PlayersSelection> buildAndSaveSelections(List<Long> memberIds, Team team, Match match) {
+  private List<PlayersSelection> buildAndSaveSelections(List<Long> memberIds, Team team,
+      Match match) {
     List<Member> selectedMembers = validateAndResolveMembers(memberIds, team, match);
 
     List<PlayersSelection> selections = new ArrayList<>();
