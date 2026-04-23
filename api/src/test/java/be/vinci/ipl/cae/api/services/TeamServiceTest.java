@@ -49,6 +49,7 @@ class TeamServiceTest {
   @Mock private NotificationService notificationService;
   @Mock private MemberRepository memberRepository;
   @Mock private MembershipRequestRepository membershipRequestRepository;
+  @Mock private MatchSelectionService matchSelectionService;
 
   @InjectMocks
   private TeamService teamService;

@@ -66,14 +66,12 @@ public class MatchSelectionService {
           "Une sélection existe déjà pour cette équipe. Utilisez PUT pour la modifier.");
     }
 
-    List<Member> selectedMembers = validateAndResolveMembers(memberIds, team, match);
+    List<PlayersSelection> selections = buildAndSaveSelections(memberIds, team, match);
+    sendSelectionNotifications(match, selections
+        .stream()
+        .map(PlayersSelection::getMember)
+        .toList());
 
-    List<PlayersSelection> selections = new ArrayList<>();
-    for (Member member : selectedMembers) {
-      selections.add(playersSelectionRepository.save(new PlayersSelection(member, match, team)));
-    }
-
-    sendSelectionNotifications(match, selectedMembers);
     return selections;
   }
 
@@ -102,16 +100,13 @@ public class MatchSelectionService {
 
     playersSelectionRepository.deleteByMatchAndTeam(match, team);
 
-    List<Member> selectedMembers = validateAndResolveMembers(memberIds, team, match);
+    List<PlayersSelection> selections = buildAndSaveSelections(memberIds, team, match);
 
-    List<PlayersSelection> selections = new ArrayList<>();
-    for (Member member : selectedMembers) {
-      selections.add(playersSelectionRepository.save(new PlayersSelection(member, match, team)));
-    }
-
-    List<Member> newMembers = selectedMembers.stream()
+    List<Member> newMembers = selections.stream()
+        .map(PlayersSelection::getMember)
         .filter(m -> !previousIds.contains(m.getId()))
         .toList();
+
     sendSelectionNotifications(match, newMembers);
 
     return selections;
@@ -214,5 +209,16 @@ public class MatchSelectionService {
     }
 
     return resolved;
+  }
+
+  private List<PlayersSelection> buildAndSaveSelections(List<Long> memberIds, Team team, Match match) {
+    List<Member> selectedMembers = validateAndResolveMembers(memberIds, team, match);
+
+    List<PlayersSelection> selections = new ArrayList<>();
+    for (Member member : selectedMembers) {
+      selections.add(playersSelectionRepository.save(new PlayersSelection(member, match, team)));
+    }
+
+    return selections;
   }
 }
