@@ -1,6 +1,10 @@
 export interface Notification {
   id: number;
-  type: string;
+  type:
+    | 'RESULT'
+    | 'RESULT_CONFIRMATION'
+    | 'RESULT_REFUSED'
+    | 'MEMBERSHIP_REQUEST';
   message: string;
   sendDate: string;
   read: boolean;

@@ -10,6 +10,7 @@ interface NotificationListProps {
   onRefuse?: (membershipRequestId: number, reason: string) => void;
   onValidateResult?: (matchId: number) => void;
   onContestResult?: (matchId: number) => void;
+  onCorrectResult?: (matchId: number, scoreA: number, scoreB: number) => void;
 }
 
 const NotificationList = ({
@@ -19,6 +20,7 @@ const NotificationList = ({
   onRefuse,
   onValidateResult,
   onContestResult,
+  onCorrectResult,
 }: NotificationListProps) => {
   return (
     <List>
@@ -31,6 +33,7 @@ const NotificationList = ({
           onRefuse={onRefuse}
           onValidateResult={onValidateResult}
           onContestResult={onContestResult}
+          onCorrectResult={onCorrectResult}
         />
       ))}
     </List>
