@@ -31,8 +31,8 @@ export const getMyTeam = async (token: string): Promise<TeamDto> => {
 export const createTeam = async (
   token: string,
   name: string,
-): Promise<Response> => {
-  return fetch('/api/teams', {
+): Promise<void> => {
+  const response = await fetch('/api/teams', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -40,23 +40,35 @@ export const createTeam = async (
     },
     body: JSON.stringify({ name }),
   });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({ message: null }));
+    throw new Error(body.message ?? "Erreur lors de la création de l'équipe.");
+  }
 };
 
 export const sendJoinRequest = async (
   token: string,
   teamId: number,
-): Promise<Response> => {
-  return fetch(`/api/teams/${teamId}/membership-requests`, {
+): Promise<void> => {
+  const response = await fetch(`/api/teams/${teamId}/membership-requests`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
   });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({ message: null }));
+    throw new Error(body.message ?? "Erreur lors de l'envoi de la demande.");
+  }
 };
 
-export const leaveTeam = async (token: string): Promise<Response> => {
-  return fetch('/api/teams/leave', {
+export const leaveTeam = async (token: string): Promise<void> => {
+  const response = await fetch('/api/teams/leave', {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` },
   });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({ message: null }));
+    throw new Error(body.message ?? "Erreur lors du départ de l'équipe.");
+  }
 };
 
 export const nominateSecondaryManager = async (

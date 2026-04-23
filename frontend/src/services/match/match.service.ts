@@ -126,9 +126,9 @@ export const submitSelection = async (
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
+    const body = await response.json().catch(() => ({ message: null }));
     throw new Error(
-      errorText || 'Erreur lors de la soumission de la composition.',
+      body.message || 'Erreur lors de la soumission de la composition.',
     );
   }
 
@@ -151,9 +151,9 @@ export const modifySelection = async (
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
+    const body = await response.json().catch(() => ({ message: null }));
     throw new Error(
-      errorText || 'Erreur lors de la modification de la composition.',
+      body.message || 'Erreur lors de la soumission de la composition.',
     );
   }
 
