@@ -77,7 +77,7 @@ public class MatchMapper {
         .filter(ps -> ps.getTeam().getId().equals(team.getId()))
         .toList();
 
-    boolean hasSelection = teamSelections.size() == 4;
+    boolean hasSelection = !teamSelections.isEmpty();
 
     boolean lineupVisible = !match.getResultStatus().equals(ResultStatus.NOT_ENTERED);
 
