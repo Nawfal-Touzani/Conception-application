@@ -24,6 +24,7 @@ import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.NotificationRepository;
 import be.vinci.ipl.cae.api.repositories.ValidationResultRepository;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +46,7 @@ class MatchResultServiceTest {
   Member secondResponsibleB;
   Member admin;
   Member otherAdmin;
+
   @Mock
   private MatchRepository matchRepository;
   @Mock
@@ -53,7 +55,7 @@ class MatchResultServiceTest {
   private NotificationService notificationService;
   @Mock
   private NotificationRepository notificationRepository;
-  @Mock  // Garder les 2 mocks meme inutilisé poir que l'inject mock de matchResultService fonctionne
+  @Mock
   private MemberRepository memberRepository;
 
   @InjectMocks
@@ -105,14 +107,17 @@ class MatchResultServiceTest {
     match.setResultStatus(ResultStatus.NOT_ENTERED);
   }
 
+  // -----------------------------------------------------------------------
   // encodingResult
+  // -----------------------------------------------------------------------
+
   @Test
   void encodingResultShouldSetWinnerTeamAsWhenScoreAsHigher() {
     ResultRequest dto = new ResultRequest(5, 3);
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
     when(matchRepository.save(any(Match.class))).thenReturn(match);
 
-    Match result = matchResultService.encodingResult(1L, dto,admin);
+    Match result = matchResultService.encodingResult(1L, dto, admin);
 
     assertEquals(MatchState.PLAYED, result.getState());
     assertEquals(ResultStatus.PENDING, result.getResultStatus());
@@ -130,7 +135,7 @@ class MatchResultServiceTest {
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
     when(matchRepository.save(any(Match.class))).thenReturn(match);
 
-    Match result = matchResultService.encodingResult(1L, dto,admin);
+    Match result = matchResultService.encodingResult(1L, dto, admin);
 
     assertEquals(teamB, result.getWinner());
     assertEquals(MatchState.PLAYED, result.getState());
@@ -147,7 +152,7 @@ class MatchResultServiceTest {
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
     when(matchRepository.save(any(Match.class))).thenReturn(match);
 
-    matchResultService.encodingResult(1L, dto,admin);
+    matchResultService.encodingResult(1L, dto, admin);
 
     verify(notificationService, times(4)).send(anyLong(), any(Notification.class));
   }
@@ -159,7 +164,7 @@ class MatchResultServiceTest {
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
     when(matchRepository.save(any(Match.class))).thenReturn(match);
 
-    matchResultService.encodingResult(1L, dto,admin);
+    matchResultService.encodingResult(1L, dto, admin);
 
     verify(notificationService, times(3)).send(anyLong(), any(Notification.class));
   }
@@ -169,7 +174,7 @@ class MatchResultServiceTest {
     when(matchRepository.findById(99L)).thenReturn(Optional.empty());
 
     assertThrows(NoSuchElementException.class,
-        () -> matchResultService.encodingResult(99L, new ResultRequest(3, 1),admin));
+        () -> matchResultService.encodingResult(99L, new ResultRequest(3, 1), admin));
 
     verify(matchRepository, never()).save(any());
     verify(notificationService, never()).send(anyLong(), any());
@@ -181,7 +186,7 @@ class MatchResultServiceTest {
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
 
     assertThrows(IllegalStateException.class,
-        () -> matchResultService.encodingResult(1L, new ResultRequest(3, 1),admin));
+        () -> matchResultService.encodingResult(1L, new ResultRequest(3, 1), admin));
 
     verify(matchRepository, never()).save(any());
   }
@@ -192,7 +197,7 @@ class MatchResultServiceTest {
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
 
     assertThrows(IllegalStateException.class,
-        () -> matchResultService.encodingResult(1L, new ResultRequest(3, 1),admin));
+        () -> matchResultService.encodingResult(1L, new ResultRequest(3, 1), admin));
 
     verify(matchRepository, never()).save(any());
   }
@@ -203,7 +208,7 @@ class MatchResultServiceTest {
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
 
     assertThrows(IllegalStateException.class,
-        () -> matchResultService.encodingResult(1L, new ResultRequest(3, 1),admin));
+        () -> matchResultService.encodingResult(1L, new ResultRequest(3, 1), admin));
 
     verify(matchRepository, never()).save(any());
   }
@@ -213,7 +218,7 @@ class MatchResultServiceTest {
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
 
     assertThrows(IllegalArgumentException.class,
-        () -> matchResultService.encodingResult(1L, new ResultRequest(-1, 3),admin));
+        () -> matchResultService.encodingResult(1L, new ResultRequest(-1, 3), admin));
 
     verify(matchRepository, never()).save(any());
   }
@@ -223,26 +228,51 @@ class MatchResultServiceTest {
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
 
     assertThrows(IllegalStateException.class,
-        () -> matchResultService.encodingResult(1L, new ResultRequest(3, 3),admin));
+        () -> matchResultService.encodingResult(1L, new ResultRequest(3, 3), admin));
 
     verify(matchRepository, never()).save(any());
   }
 
+  // -----------------------------------------------------------------------
   // validateResult
+  // -----------------------------------------------------------------------
+
   @Test
   void validateResultShouldFinalizeMatchWhenBothTeamsValidate() {
+    // --- ARRANGE ---
     match.setResultStatus(ResultStatus.PENDING);
     match.setWinner(teamA);
+
+    Match nextMatch = new Match();
+    nextMatch.setId(2L);
+    match.setNextMatch(nextMatch);
+
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
     when(validationResultRepository.existsByMatchAndTeam(match, teamA)).thenReturn(false);
     when(validationResultRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
     when(validationResultRepository.countByMatchAndValidated(match, true)).thenReturn(2L);
-    when(matchRepository.save(any())).thenReturn(match);
+    when(matchRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
+    // FIX : sendValidationNotifications itère sur memberRepository.findAll()
+    Member member1 = new Member(); member1.setId(10L);
+    Member member2 = new Member(); member2.setId(20L);
+    when(memberRepository.findAll()).thenReturn(List.of(member1, member2));
+
+    // --- ACT ---
     matchResultService.validateResult(1L, teamA);
 
-    verify(matchRepository, times(1)).save(any());
-    assertThat(match.getResultStatus()).isEqualTo(ResultStatus.VALIDATED);
+    // --- ASSERT ---
+    // 1. Statut du match actuel
+    assertEquals(ResultStatus.VALIDATED, match.getResultStatus());
+
+    // 2. Vainqueur poussé dans le match suivant
+    assertEquals(teamA, nextMatch.getTeamA());
+
+    // 3. Deux sauvegardes : nextMatch (advanceWinner) + match actuel (finalizeMatch)
+    verify(matchRepository, times(2)).save(any(Match.class));
+
+    // 4. Deux notifications envoyées (un par membre retourné par findAll)
+    verify(notificationService, times(2)).send(anyLong(), any(Notification.class));
   }
 
   @Test
@@ -262,9 +292,12 @@ class MatchResultServiceTest {
     when(validationResultRepository.countByMatchAndValidated(match, true)).thenReturn(2L);
     when(matchRepository.save(any())).thenReturn(match);
 
+    Member member1 = new Member(); member1.setId(10L);
+    Member member2 = new Member(); member2.setId(20L);
+    when(memberRepository.findAll()).thenReturn(List.of(member1, member2));
+
     matchResultService.validateResult(1L, teamA);
 
-    // 1 save match valide + 1 save nextMatch
     verify(matchRepository, times(2)).save(any());
     assertEquals(teamA, nextMatch.getTeamA());
   }
@@ -273,7 +306,7 @@ class MatchResultServiceTest {
   void validateResultShouldNotSaveNextMatchWhenTeamBsSlotAvailable() {
     Match nextMatch = new Match();
     nextMatch.setId(2L);
-    nextMatch.setTeamA(teamB); // teamA déjà remplie, le gagnant ira en teamB
+    nextMatch.setTeamA(teamB); // slot A déjà occupé → gagnant ira en B
     nextMatch.setTeamB(null);
 
     match.setResultStatus(ResultStatus.PENDING);
@@ -285,6 +318,10 @@ class MatchResultServiceTest {
     when(validationResultRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
     when(validationResultRepository.countByMatchAndValidated(match, true)).thenReturn(2L);
     when(matchRepository.save(any())).thenReturn(match);
+
+    Member member1 = new Member(); member1.setId(10L);
+    Member member2 = new Member(); member2.setId(20L);
+    when(memberRepository.findAll()).thenReturn(List.of(member1, member2));
 
     matchResultService.validateResult(1L, teamA);
 
@@ -323,12 +360,14 @@ class MatchResultServiceTest {
 
     matchResultService.validateResult(1L, teamA);
 
-    // Pas encore finalisé : pas de save sur le match
     verify(matchRepository, never()).save(any());
     assertThat(match.getResultStatus()).isEqualTo(ResultStatus.PENDING);
   }
 
+  // -----------------------------------------------------------------------
   // contestResult
+  // -----------------------------------------------------------------------
+
   @Test
   void contestResultShouldSetRefusedWhenValid() {
     match.setResultStatus(ResultStatus.PENDING);
@@ -378,13 +417,27 @@ class MatchResultServiceTest {
     verify(validationResultRepository, never()).save(any());
   }
 
+  // -----------------------------------------------------------------------
   // correctResult
+  // -----------------------------------------------------------------------
+
   @Test
   void correctResultShouldUpdateScoreAndWinnerWhenValid() {
     match.setState(MatchState.PLAYED);
     match.setResultStatus(ResultStatus.REFUSED);
+    match.setWinner(teamA);
+
+    Match nextMatch = new Match();
+    nextMatch.setId(2L);
+    match.setNextMatch(nextMatch);
+
     when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
     when(matchRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+    // FIX : sendValidationNotifications itère sur memberRepository.findAll()
+    Member member1 = new Member(); member1.setId(10L);
+    Member member2 = new Member(); member2.setId(20L);
+    when(memberRepository.findAll()).thenReturn(List.of(member1, member2));
 
     Match result = matchResultService.correctResult(1L, new ResultRequest(4, 2));
 
