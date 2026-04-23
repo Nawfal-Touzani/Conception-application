@@ -75,9 +75,16 @@ export const nominateSecondaryManager = async (
   token: string,
   teamId: number,
   memberId: number,
-): Promise<Response> => {
-  return fetch(`/api/teams/${teamId}/secondary-manager/${memberId}`, {
-    method: 'PUT',
-    headers: { Authorization: `Bearer ${token}` },
-  });
+): Promise<void> => {
+  const response = await fetch(
+    `/api/teams/${teamId}/secondary-manager/${memberId}`,
+    {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({ message: null }));
+    throw new Error(body.message ?? 'Impossible de nommer ce membre.');
+  }
 };
