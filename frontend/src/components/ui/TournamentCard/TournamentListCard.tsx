@@ -120,7 +120,7 @@ export default function TournamentListCard({ tournament, onSelect }: Props) {
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
-              wordBreak: 'break-all',
+              wordBreak: 'normal',
             }}
           >
             {tournament.description}
