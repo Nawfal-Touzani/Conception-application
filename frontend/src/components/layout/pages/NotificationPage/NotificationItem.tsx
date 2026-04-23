@@ -162,30 +162,32 @@ const NotificationItem = ({
           </>
         )}
 
-        {notification.type === 'RESULT_REFUSED' && notification.matchId && !notification.read && (
-          <>
-            {!correctDone && (
-              <Button
-                variant="contained"
-                color="warning"
-                size="small"
-                onClick={() => setCorrectOpen(true)}
-              >
-                Corriger
-              </Button>
-            )}
-            {correctDone && (
-              <Chip
-                label="Corrigé ✓"
-                sx={{
-                  backgroundColor: '#fff3e0',
-                  color: '#e65100',
-                  fontWeight: 600,
-                }}
-              />
-            )}
-          </>
-        )}
+        {notification.type === 'RESULT_REFUSED' &&
+          notification.matchId &&
+          !notification.read && (
+            <>
+              {!correctDone && (
+                <Button
+                  variant="contained"
+                  color="warning"
+                  size="small"
+                  onClick={() => setCorrectOpen(true)}
+                >
+                  Corriger
+                </Button>
+              )}
+              {correctDone && (
+                <Chip
+                  label="Corrigé ✓"
+                  sx={{
+                    backgroundColor: '#fff3e0',
+                    color: '#e65100',
+                    fontWeight: 600,
+                  }}
+                />
+              )}
+            </>
+          )}
 
         {/* ── Result confirmation ── */}
 
