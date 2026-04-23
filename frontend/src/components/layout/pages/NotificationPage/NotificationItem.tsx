@@ -69,6 +69,7 @@ const NotificationItem = ({
     const b = parseInt(scoreB);
     if (isNaN(a) || isNaN(b) || a < 0 || b < 0 || a === b) return;
     onCorrectResult?.(notification.matchId!, a, b);
+    onMarkAsRead(notification.id);
     setCorrectDone(true);
     setCorrectOpen(false);
   };
@@ -161,7 +162,7 @@ const NotificationItem = ({
           </>
         )}
 
-        {notification.type === 'RESULT_REFUSED' && notification.matchId && (
+        {notification.type === 'RESULT_REFUSED' && notification.matchId && !notification.read && (
           <>
             {!correctDone && (
               <Button
