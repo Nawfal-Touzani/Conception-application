@@ -1,8 +1,9 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import AdminPage from './AdminPage';
 import { AuthContext } from '../../../../contexts/AuthContext';
+import * as adminHook from '../../../../hooks/useAdmin/useAdmin';
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
@@ -16,19 +17,6 @@ const mockAdmin = {
   tag: 'AdminTag',
   role: 'ADMIN',
   token: 'fake-token',
-};
-
-const adminMember = {
-  id: 1,
-  email: 'admin@vinci.be',
-  tag: 'AdminTag',
-  speciality: 'Architecte',
-  teamName: null,
-  profileImage: '/images/avatar1.png',
-  isAvailable: true,
-  isAdmin: true,
-  admin: true,
-  isBan: false,
 };
 
 const regularMember = {
@@ -65,6 +53,27 @@ const mockContextValue = {
   bannedError: null,
 };
 
+const buildHookMock = (overrides = {}) => ({
+  user: mockAdmin,
+  admins: [],
+  allMembers: [],
+  page: 0,
+  setPage: vi.fn(),
+  error: null,
+  setError: vi.fn(),
+  success: null,
+  setSuccess: vi.fn(),
+  promoteOpen: false,
+  setPromoteOpen: vi.fn(),
+  demoteTarget: null,
+  setDemoteTarget: vi.fn(),
+  totalPages: 1,
+  paginated: [],
+  handlePromote: vi.fn(),
+  handleDemote: vi.fn(),
+  ...overrides,
+});
+
 const renderAdminPage = () =>
   render(
     <MemoryRouter>
@@ -73,12 +82,6 @@ const renderAdminPage = () =>
       </AuthContext.Provider>
     </MemoryRouter>,
   );
-
-// Helpers pour les boutons par icône
-const getDeleteButtonFor = (tag: string) => {
-  const row = screen.getByText(tag).closest('.MuiBox-root');
-  return row?.querySelector('[data-testid="DeleteIcon"]')?.closest('button');
-};
 
 const getAddButtonInDialog = () => {
   const dialog = screen.getByRole('dialog');
@@ -92,200 +95,120 @@ beforeEach(() => {
 
 describe('AdminPage', () => {
   test('affiche le titre de la page', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => [adminMember] })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => [adminMember, regularMember],
-      });
-
+    vi.spyOn(adminHook, 'useAdmin').mockReturnValue(buildHookMock());
     renderAdminPage();
     expect(await screen.findByText('Gestion des administrateurs')).toBeTruthy();
   });
 
   test('affiche la liste des admins', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => [adminMember, otherAdmin],
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => [adminMember, otherAdmin, regularMember],
-      });
-
+    vi.spyOn(adminHook, 'useAdmin').mockReturnValue(
+      buildHookMock({ paginated: [otherAdmin] }),
+    );
     renderAdminPage();
     expect(await screen.findByText('OtherAdmin')).toBeTruthy();
   });
 
   test('ouvre le dialog ajouter admin en cliquant sur +', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => [adminMember] })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => [adminMember, regularMember],
-      });
-
+    const setPromoteOpen = vi.fn();
+    vi.spyOn(adminHook, 'useAdmin').mockReturnValue(
+      buildHookMock({ promoteOpen: false, setPromoteOpen }),
+    );
     renderAdminPage();
-    await screen.findByText('Gestion des administrateurs');
     fireEvent.click(screen.getByText('+'));
+    expect(setPromoteOpen).toHaveBeenCalledWith(true);
+  });
 
+  test('affiche les membres dans le dialog quand promoteOpen est true', async () => {
+    vi.spyOn(adminHook, 'useAdmin').mockReturnValue(
+      buildHookMock({ promoteOpen: true, allMembers: [regularMember] }),
+    );
+    renderAdminPage();
     expect(await screen.findByText('Ajouter un administrateur')).toBeTruthy();
     expect(await screen.findByText('MemberTag')).toBeTruthy();
   });
 
   test('promeut un membre en admin avec succès', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => [] })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => [adminMember, regularMember],
-      })
-      .mockResolvedValueOnce({ ok: true })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => [regularMember],
-      })
-      .mockResolvedValueOnce({ ok: true, json: async () => [] });
-
+    const handlePromote = vi.fn();
+    vi.spyOn(adminHook, 'useAdmin').mockReturnValue(
+      buildHookMock({
+        promoteOpen: true,
+        allMembers: [regularMember],
+        handlePromote,
+      }),
+    );
     renderAdminPage();
-    fireEvent.click(await screen.findByText('+'));
     await screen.findByText('MemberTag');
-
     const addButton = getAddButtonInDialog();
     if (addButton) fireEvent.click(addButton);
+    expect(handlePromote).toHaveBeenCalledWith(regularMember);
+  });
 
+  test('affiche message de succès', async () => {
+    vi.spyOn(adminHook, 'useAdmin').mockReturnValue(
+      buildHookMock({ success: 'MemberTag est maintenant administrateur.' }),
+    );
+    renderAdminPage();
     expect(
       await screen.findByText('MemberTag est maintenant administrateur.'),
     ).toBeTruthy();
   });
 
-  test('affiche une erreur si la promotion échoue', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => [] })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => [adminMember, regularMember],
-      })
-      .mockResolvedValueOnce({ ok: false });
-
+  test('affiche message erreur', async () => {
+    vi.spyOn(adminHook, 'useAdmin').mockReturnValue(
+      buildHookMock({ error: 'Impossible de nommer cet administrateur.' }),
+    );
     renderAdminPage();
-    fireEvent.click(await screen.findByText('+'));
-
-    const addButton = getAddButtonInDialog();
-    if (addButton) fireEvent.click(addButton);
-
     expect(
       await screen.findByText('Impossible de nommer cet administrateur.'),
     ).toBeTruthy();
   });
 
   test('ouvre le dialog de confirmation de révocation', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => [adminMember, otherAdmin],
-      })
-      .mockResolvedValueOnce({ ok: true, json: async () => [regularMember] });
-
+    vi.spyOn(adminHook, 'useAdmin').mockReturnValue(
+      buildHookMock({ demoteTarget: otherAdmin, paginated: [otherAdmin] }),
+    );
     renderAdminPage();
-    await screen.findByText('OtherAdmin');
-
-    const deleteBtn = getDeleteButtonFor('OtherAdmin');
-    if (deleteBtn) fireEvent.click(deleteBtn);
-
     expect(await screen.findByText('Révoquer un administrateur')).toBeTruthy();
   });
 
   test('révoque un admin avec succès', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => [adminMember, otherAdmin],
-      })
-      .mockResolvedValueOnce({ ok: true, json: async () => [regularMember] })
-      .mockResolvedValueOnce({ ok: true })
-      .mockResolvedValueOnce({ ok: true, json: async () => [] })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => [regularMember, otherAdmin],
-      });
-
+    const handleDemote = vi.fn();
+    vi.spyOn(adminHook, 'useAdmin').mockReturnValue(
+      buildHookMock({ demoteTarget: otherAdmin, handleDemote }),
+    );
     renderAdminPage();
-    await screen.findByText('OtherAdmin');
-
-    const deleteBtn = getDeleteButtonFor('OtherAdmin');
-    if (deleteBtn) fireEvent.click(deleteBtn);
-
     await screen.findByText('Révoquer un administrateur');
     fireEvent.click(screen.getByText('Confirmer'));
-
-    expect(
-      await screen.findByText("OtherAdmin n'est plus administrateur."),
-    ).toBeTruthy();
-  });
-
-  test('affiche erreur si la révocation échoue', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => [adminMember, otherAdmin],
-      })
-      .mockResolvedValueOnce({ ok: true, json: async () => [regularMember] })
-      .mockResolvedValueOnce({ ok: false });
-
-    renderAdminPage();
-    await screen.findByText('OtherAdmin');
-
-    const deleteBtn = getDeleteButtonFor('OtherAdmin');
-    if (deleteBtn) fireEvent.click(deleteBtn);
-
-    await screen.findByText('Révoquer un administrateur');
-    fireEvent.click(screen.getByText('Confirmer'));
-
-    expect(
-      await screen.findByText('Impossible de révoquer cet administrateur.'),
-    ).toBeTruthy();
+    expect(handleDemote).toHaveBeenCalled();
   });
 
   test('annule la révocation', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => [adminMember, otherAdmin],
-      })
-      .mockResolvedValueOnce({ ok: true, json: async () => [regularMember] });
-
+    const setDemoteTarget = vi.fn();
+    vi.spyOn(adminHook, 'useAdmin').mockReturnValue(
+      buildHookMock({ demoteTarget: otherAdmin, setDemoteTarget }),
+    );
     renderAdminPage();
-    await screen.findByText('OtherAdmin');
-
-    const deleteBtn = getDeleteButtonFor('OtherAdmin');
-    if (deleteBtn) fireEvent.click(deleteBtn);
-
     await screen.findByText('Révoquer un administrateur');
     fireEvent.click(screen.getByText('Annuler'));
-
-    await waitFor(() => {
-      expect(screen.queryByText('Révoquer un administrateur')).toBeFalsy();
-    });
+    expect(setDemoteTarget).toHaveBeenCalledWith(null);
   });
 
   test('affiche la pagination correctement', async () => {
-    const manyAdmins = Array.from({ length: 6 }, (_, i) => ({
-      ...adminMember,
-      id: i + 1,
-      email: `admin${i}@vinci.be`,
-      tag: `Admin${i}`,
-    }));
-
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => manyAdmins })
-      .mockResolvedValueOnce({ ok: true, json: async () => [] });
-
+    vi.spyOn(adminHook, 'useAdmin').mockReturnValue(
+      buildHookMock({ page: 0, totalPages: 2 }),
+    );
     renderAdminPage();
-
     expect(await screen.findByText('Page 1 sur 2')).toBeTruthy();
+  });
+
+  test('navigue à la page suivante', async () => {
+    const setPage = vi.fn();
+    vi.spyOn(adminHook, 'useAdmin').mockReturnValue(
+      buildHookMock({ page: 0, totalPages: 2, setPage }),
+    );
+    renderAdminPage();
+    await screen.findByText('Page 1 sur 2');
     fireEvent.click(screen.getByText('Suivant'));
-    expect(screen.getByText('Page 2 sur 2')).toBeTruthy();
+    expect(setPage).toHaveBeenCalled();
   });
 });

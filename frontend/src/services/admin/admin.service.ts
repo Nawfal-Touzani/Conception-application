@@ -1,4 +1,4 @@
-import { MemberDto } from '../types/admin.types';
+import { MemberDto } from '../../types/admin.types';
 
 export const getAdmins = async (token: string): Promise<MemberDto[]> => {
   const response = await fetch('/api/members/admins', {
