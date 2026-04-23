@@ -12,6 +12,7 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import { MemberDto } from '../../../../types/admin.types';
 import { adminSx } from '../../../../styles/admin.styles';
+import { Link } from 'react-router-dom';
 
 type Props = {
   open: boolean;
@@ -37,7 +38,7 @@ const PromoteAdminDialog = ({
       Ajouter un administrateur
     </DialogTitle>
     <DialogContent>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
         {allMembers.length === 0 && (
           <Typography
             sx={{ color: 'rgba(255,255,255,0.6)', textAlign: 'center', mt: 2 }}
@@ -54,20 +55,42 @@ const PromoteAdminDialog = ({
                   : undefined
               }
               alt={member.tag}
-              sx={{ width: 36, height: 36 }}
+              sx={{ width: 40, height: 40 }}
             />
-            <Typography sx={{ fontWeight: 700, color: '#fff', flex: 1 }}>
-              {member.tag}
-            </Typography>
+
             <Typography
+              component={Link}
+              to={`/members/${member.id}`}
               sx={{
-                color: 'rgba(255,255,255,0.6)',
-                fontSize: '0.85rem',
-                mr: 1,
+                color: 'white',
+                minWidth: 120,
+                fontSize: '1.2rem',
+                textDecoration: 'none',
+                cursor: 'pointer',
+                '&:hover': {
+                  textDecoration: 'underline',
+                },
               }}
             >
-              {member.speciality}
+              {member.tag}
             </Typography>
+
+            <Typography sx={{ color: '#a1a0a0', fontSize: '1rem', flex: 4 }}>
+              {member.speciality.charAt(0).toUpperCase() +
+                member.speciality.slice(1)}
+            </Typography>
+
+            <Typography
+              sx={{
+                fontSize: '1rem',
+                color: member.isAvailable ? '#4caf50' : '#f44336',
+                fontWeight: member.isAvailable ? 'normal' : 'bold',
+                minWidth: 120,
+              }}
+            >
+              {member.isAvailable ? 'Disponible' : 'Indisponible'}
+            </Typography>
+
             <IconButton
               onClick={() => onPromote(member)}
               sx={adminSx.promoteIconButton}
@@ -78,10 +101,28 @@ const PromoteAdminDialog = ({
         ))}
       </Box>
     </DialogContent>
-    <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
+    <DialogActions
+      sx={{
+        justifyContent: 'flex-end',
+        px: 3,
+        pb: 3,
+      }}
+    >
       <Button
         onClick={onClose}
-        sx={{ color: '#fff', textTransform: 'none', fontWeight: 600 }}
+        variant="contained"
+        sx={{
+          bgcolor: '#68789a',
+          color: '#fff',
+          fontWeight: 700,
+          px: 3,
+          py: 0.8,
+          mr: 1.5,
+          borderRadius: '8px',
+          '&:hover': {
+            bgcolor: '#314161',
+          },
+        }}
       >
         Fermer
       </Button>
