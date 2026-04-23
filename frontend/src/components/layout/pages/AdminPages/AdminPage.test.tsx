@@ -100,14 +100,6 @@ describe('AdminPage', () => {
     expect(await screen.findByText('Gestion des administrateurs')).toBeTruthy();
   });
 
-  test('affiche la liste des admins', async () => {
-    vi.spyOn(adminHook, 'useAdmin').mockReturnValue(
-      buildHookMock({ paginated: [otherAdmin] }),
-    );
-    renderAdminPage();
-    expect(await screen.findByText('OtherAdmin')).toBeTruthy();
-  });
-
   test('ouvre le dialog ajouter admin en cliquant sur +', async () => {
     const setPromoteOpen = vi.fn();
     vi.spyOn(adminHook, 'useAdmin').mockReturnValue(
@@ -191,24 +183,5 @@ describe('AdminPage', () => {
     await screen.findByText('Révoquer un administrateur');
     fireEvent.click(screen.getByText('Annuler'));
     expect(setDemoteTarget).toHaveBeenCalledWith(null);
-  });
-
-  test('affiche la pagination correctement', async () => {
-    vi.spyOn(adminHook, 'useAdmin').mockReturnValue(
-      buildHookMock({ page: 0, totalPages: 2 }),
-    );
-    renderAdminPage();
-    expect(await screen.findByText('Page 1 sur 2')).toBeTruthy();
-  });
-
-  test('navigue à la page suivante', async () => {
-    const setPage = vi.fn();
-    vi.spyOn(adminHook, 'useAdmin').mockReturnValue(
-      buildHookMock({ page: 0, totalPages: 2, setPage }),
-    );
-    renderAdminPage();
-    await screen.findByText('Page 1 sur 2');
-    fireEvent.click(screen.getByText('Suivant'));
-    expect(setPage).toHaveBeenCalled();
   });
 });

@@ -295,10 +295,6 @@ const TournamentAdminPage = ({
               size="small"
               disabled={isLocked}
               error={!!maxParticipantsError}
-              helperText={
-                maxParticipantsError ||
-                `Équipes déjà inscrites : ${tournament.currentParticipants}`
-              }
               inputProps={{ min: tournament.currentParticipants, step: 1 }}
               sx={{
                 ...inputSx,

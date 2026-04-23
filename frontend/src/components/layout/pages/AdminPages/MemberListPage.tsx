@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Typography, Button, CircularProgress } from '@mui/material';
+import { Box, Typography, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { MemberDto } from '../../../../types/admin.types';
 import { useAuth } from '../../../../contexts/useAuth';
@@ -12,8 +12,10 @@ const MembersListPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const { activeMembers, bannedMembers, loading, handleBan } =
-    useMembersManagement(user?.token ?? '', user?.tag);
+  const { activeMembers, bannedMembers, handleBan } = useMembersManagement(
+    user?.token ?? '',
+    user?.tag,
+  );
 
   const [banTarget, setBanTarget] = useState<MemberDto | null>(null);
   const [infoTarget, setInfoTarget] = useState<MemberDto | null>(null);
@@ -79,36 +81,30 @@ const MembersListPage = () => {
           ← Retour
         </Button>
 
-        {loading ? (
-          <CircularProgress
-            sx={{ color: '#fff', display: 'block', mx: 'auto' }}
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 4,
+            alignItems: 'flex-start',
+          }}
+        >
+          <MemberListSection
+            title="Membres Actifs"
+            count={activeMembers.length}
+            members={activeMembers}
+            borderColor="#11981a"
+            onAction={setBanTarget}
           />
-        ) : (
-          <Box
-            sx={{
-              display: 'flex',
-              gap: 4,
-              alignItems: 'flex-start',
-            }}
-          >
-            <MemberListSection
-              title="Membres Actifs"
-              count={activeMembers.length}
-              members={activeMembers}
-              borderColor="#11981a"
-              onAction={setBanTarget}
-            />
 
-            <MemberListSection
-              title="Membres Bannis"
-              count={bannedMembers.length}
-              members={bannedMembers}
-              borderColor="#b40f0f"
-              isBannedSection
-              onAction={setInfoTarget}
-            />
-          </Box>
-        )}
+          <MemberListSection
+            title="Membres Bannis"
+            count={bannedMembers.length}
+            members={bannedMembers}
+            borderColor="#b40f0f"
+            isBannedSection
+            onAction={setInfoTarget}
+          />
+        </Box>
 
         <BanModal
           open={!!banTarget}
