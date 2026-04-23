@@ -69,6 +69,7 @@ const NotificationItem = ({
     const b = parseInt(scoreB);
     if (isNaN(a) || isNaN(b) || a < 0 || b < 0 || a === b) return;
     onCorrectResult?.(notification.matchId!, a, b);
+    onMarkAsRead(notification.id);
     setCorrectDone(true);
     setCorrectOpen(false);
   };
@@ -161,30 +162,32 @@ const NotificationItem = ({
           </>
         )}
 
-        {notification.type === 'RESULT_REFUSED' && notification.matchId && (
-          <>
-            {!correctDone && (
-              <Button
-                variant="contained"
-                color="warning"
-                size="small"
-                onClick={() => setCorrectOpen(true)}
-              >
-                Corriger
-              </Button>
-            )}
-            {correctDone && (
-              <Chip
-                label="Corrigé ✓"
-                sx={{
-                  backgroundColor: '#fff3e0',
-                  color: '#e65100',
-                  fontWeight: 600,
-                }}
-              />
-            )}
-          </>
-        )}
+        {notification.type === 'RESULT_REFUSED' &&
+          notification.matchId &&
+          !notification.read && (
+            <>
+              {!correctDone && (
+                <Button
+                  variant="contained"
+                  color="warning"
+                  size="small"
+                  onClick={() => setCorrectOpen(true)}
+                >
+                  Corriger
+                </Button>
+              )}
+              {correctDone && (
+                <Chip
+                  label="Corrigé ✓"
+                  sx={{
+                    backgroundColor: '#fff3e0',
+                    color: '#e65100',
+                    fontWeight: 600,
+                  }}
+                />
+              )}
+            </>
+          )}
 
         {/* ── Result confirmation ── */}
 
