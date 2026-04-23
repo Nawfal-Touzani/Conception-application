@@ -115,6 +115,7 @@ export const TeamMemberColumn = ({
                 isResponsible &&
                 !isCurrentUser && (
                   <Button
+                    aria-label="Nommer"
                     size="small"
                     variant="outlined"
                     onClick={(e) => {
