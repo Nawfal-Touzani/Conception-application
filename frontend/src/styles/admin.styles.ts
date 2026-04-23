@@ -39,19 +39,6 @@ export const adminSx = {
     '&:hover': { backgroundColor: '#219150' },
   },
 
-  paginationButton: {
-    backgroundColor: '#fff',
-    color: '#1a2744',
-    fontWeight: 700,
-    textTransform: 'none',
-    borderRadius: '8px',
-    '&:hover': { backgroundColor: '#eee' },
-    '&.Mui-disabled': {
-      backgroundColor: 'rgba(255,255,255,0.3)',
-      color: '#aaa',
-    },
-  },
-
   allMembersButton: {
     borderColor: '#d8a46b',
     color: '#d8a46b',
@@ -63,14 +50,15 @@ export const adminSx = {
 
   promoteDialogPaper: {
     backgroundColor: '#1a2744',
-    borderRadius: '16px',
-    border: '2px solid #fff',
+    borderRadius: '8px',
+    maxHeight: '60%',
   },
 
   promoteDialogTitle: {
     color: '#fff',
     fontWeight: 800,
     textAlign: 'center',
+    textDecoration: 'underline',
   },
 
   promoteMemberRow: {

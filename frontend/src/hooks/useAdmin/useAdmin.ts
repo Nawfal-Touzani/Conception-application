@@ -4,8 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import * as adminService from '../../services/admin/admin.service';
 import { MemberDto } from '../../types/admin.types';
 
-const PAGE_SIZE = 4;
-
 export function useAdmin() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -13,7 +11,6 @@ export function useAdmin() {
 
   const [admins, setAdmins] = useState<MemberDto[]>([]);
   const [allMembers, setAllMembers] = useState<MemberDto[]>([]);
-  const [page, setPage] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [promoteOpen, setPromoteOpen] = useState(false);
@@ -89,15 +86,10 @@ export function useAdmin() {
     loadAllMembers();
   };
 
-  const totalPages = Math.ceil(admins.length / PAGE_SIZE);
-  const paginated = admins.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-
   return {
     user,
     admins,
     allMembers,
-    page,
-    setPage,
     error,
     setError,
     success,
@@ -106,8 +98,6 @@ export function useAdmin() {
     setPromoteOpen,
     demoteTarget,
     setDemoteTarget,
-    totalPages,
-    paginated,
     handlePromote,
     handleDemote,
   };

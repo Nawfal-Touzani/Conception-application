@@ -7,16 +7,10 @@ export const useMembersManagement = (
   currentUserTag?: string,
 ) => {
   const [members, setMembers] = useState<MemberDto[]>([]);
-  const [loading, setLoading] = useState(true);
 
   const fetchMembers = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await adminService.getAllMembers(token);
-      setMembers(data);
-    } finally {
-      setLoading(false);
-    }
+    const data = await adminService.getAllMembers(token);
+    setMembers(data);
   }, [token]);
 
   useEffect(() => {
@@ -36,5 +30,5 @@ export const useMembersManagement = (
     (m) => m.isBan && m.tag !== currentUserTag,
   );
 
-  return { activeMembers, bannedMembers, loading, handleBan };
+  return { activeMembers, bannedMembers, handleBan };
 };

@@ -42,7 +42,6 @@ describe('MembersListPage Logic', () => {
     (membersHook.useMembersManagement as Mock).mockReturnValue({
       activeMembers: mockActiveMembers,
       bannedMembers: mockBannedMembers,
-      loading: false,
       handleBan: mockHandleBan,
     });
   });
@@ -55,22 +54,6 @@ describe('MembersListPage Logic', () => {
     );
     fireEvent.click(screen.getByText(/Retour/i));
     expect(mockNavigate).toHaveBeenCalledWith('/admin');
-  });
-
-  it('should show loader when data is fetching', () => {
-    (membersHook.useMembersManagement as Mock).mockReturnValue({
-      activeMembers: [],
-      bannedMembers: [],
-      loading: true,
-      handleBan: mockHandleBan,
-    });
-
-    render(
-      <MemoryRouter>
-        <MembersListPage />
-      </MemoryRouter>,
-    );
-    expect(screen.getByRole('progressbar')).toBeTruthy();
   });
 
   it('should open BanModal when action is triggered on active member', async () => {
