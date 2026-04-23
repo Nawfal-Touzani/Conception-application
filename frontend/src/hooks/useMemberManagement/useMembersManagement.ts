@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import * as adminService from '../../services/admin.service';
+import * as adminService from '../../services/admin/admin.service';
 import { MemberDto } from '../../types/admin.types';
 
 export const useMembersManagement = (
