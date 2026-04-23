@@ -108,9 +108,9 @@ public class BcryptConfiguration {
   /**
    * Adds a member to a team if not already in a team.
    *
-   * @param member                     the member
-   * @param team                       the team
-   * @param teamCompositionRepository  the repository
+   * @param member                    the member
+   * @param team                      the team
+   * @param teamCompositionRepository the repository
    */
   private void addToTeam(Member member, Team team,
                          TeamCompositionRepository teamCompositionRepository) {
@@ -120,44 +120,64 @@ public class BcryptConfiguration {
   }
 
   /**
+   * Saves a new member if the email does not already exist.
+   *
+   * @param email            the email
+   * @param password         the password
+   * @param tag              the tag
+   * @param speciality       the speciality
+   * @param image            the image
+   * @param creationDate     the creation date
+   * @param memberRepository the repository
+   * @param passwordEncoder  the encoder
+   */
+  private void saveIfAbsent(String email, String password, String tag,
+                            Speciality speciality, Image image, LocalDate creationDate,
+                            MemberRepository memberRepository,
+                            BCryptPasswordEncoder passwordEncoder) {
+    if (!memberRepository.existsByEmail(email)) {
+      memberRepository.save(
+          buildMember(email, password, tag, false, image, speciality, creationDate,
+              passwordEncoder));
+    }
+  }
+
+  /**
    * Gets or creates a member by email.
    *
-   * @param email           the email
-   * @param password        the password
-   * @param tag             the tag
-   * @param speciality      the speciality
-   * @param image           the image
-   * @param creationDate    the creation date
+   * @param email            the email
+   * @param password         the password
+   * @param tag              the tag
+   * @param speciality       the speciality
+   * @param image            the image
+   * @param creationDate     the creation date
    * @param memberRepository the repository
-   * @param passwordEncoder the encoder
+   * @param passwordEncoder  the encoder
    * @return the member
    */
   private Member getOrCreateMember(String email, String password, String tag,
                                    Speciality speciality, Image image, LocalDate creationDate,
                                    MemberRepository memberRepository,
                                    BCryptPasswordEncoder passwordEncoder) {
-    if (!memberRepository.existsByEmail(email)) {
-      memberRepository.save(
-          buildMember(email, password, tag, false, image, speciality, creationDate,
-              passwordEncoder));
-    }
+    saveIfAbsent(email, password, tag, speciality, image, creationDate,
+        memberRepository, passwordEncoder);
     return memberRepository.findByEmail(email).orElseThrow();
   }
 
   /**
    * Creates a member and their team if they do not already exist.
    *
-   * @param email                      the email
-   * @param password                   the password
-   * @param tag                        the tag
-   * @param speciality                 the speciality
-   * @param image                      the image
-   * @param creationDate               the creation date
-   * @param teamName                   the team name
-   * @param memberRepository           the member repository
-   * @param teamRepository             the team repository
-   * @param teamCompositionRepository  the composition repository
-   * @param passwordEncoder            the encoder
+   * @param email                     the email
+   * @param password                  the password
+   * @param tag                       the tag
+   * @param speciality                the speciality
+   * @param image                     the image
+   * @param creationDate              the creation date
+   * @param teamName                  the team name
+   * @param memberRepository          the member repository
+   * @param teamRepository            the team repository
+   * @param teamCompositionRepository the composition repository
+   * @param passwordEncoder           the encoder
    */
   private void createMemberAndTeam(String email, String password, String tag,
                                    Speciality speciality, Image image, LocalDate creationDate,
@@ -165,11 +185,8 @@ public class BcryptConfiguration {
                                    MemberRepository memberRepository, TeamRepository teamRepository,
                                    TeamCompositionRepository teamCompositionRepository,
                                    BCryptPasswordEncoder passwordEncoder) {
-    if (!memberRepository.existsByEmail(email)) {
-      memberRepository.save(
-          buildMember(email, password, tag, false, image, speciality, creationDate,
-              passwordEncoder));
-    }
+    saveIfAbsent(email, password, tag, speciality, image, creationDate,
+        memberRepository, passwordEncoder);
     if (!teamRepository.existsByName(teamName)) {
       final Member responsible = memberRepository.findByEmail(email).orElseThrow();
       teamRepository.save(new Team(teamName, true, LocalDateTime.now(), responsible, null));
@@ -359,11 +376,11 @@ public class BcryptConfiguration {
       final Speciality gardien      = specialityRepository.findByName("gardien").orElseThrow();
       final Speciality architecte   = specialityRepository.findByName("architecte").orElseThrow();
       final Speciality catalyseur   = specialityRepository.findByName("catalyseur").orElseThrow();
-      final Speciality perturbateur = specialityRepository.findByName("perturbateur").orElseThrow();
+      final Speciality perturbateur =
+          specialityRepository.findByName("perturbateur").orElseThrow();
       final Speciality defaultSpec  = specialityRepository.findAll().getFirst();
-
-      final List<Image> imgs = imageRepository.findAll();
-      final Image defaultImage = imgs.get(11);
+      final List<Image> imgs        = imageRepository.findAll();
+      final Image defaultImage      = imgs.get(11);
 
       // ── Core members ──
       if (!memberRepository.existsByEmail("lea@mail.com")) {
@@ -512,7 +529,6 @@ public class BcryptConfiguration {
       addToTeam(seb, teamDelta, teamCompositionRepository);
       addToTeam(ali, teamDelta, teamCompositionRepository);
       addToTeam(zed, teamDelta, teamCompositionRepository);
-
       final Member oli = memberRepository.findByEmail("oli@mail.com").orElseThrow();
       final Member fin = memberRepository.findByEmail("fin@mail.com").orElseThrow();
       addToTeam(oli, teamDelta, teamCompositionRepository);
@@ -525,12 +541,12 @@ public class BcryptConfiguration {
           imgs.get(1), LocalDate.of(2025, 9, 5), "TEAM_NOVA",
           memberRepository, teamRepository, teamCompositionRepository, passwordEncoder);
       final Team teamNova = teamRepository.findByName("TEAM_NOVA").orElseThrow();
-      final Member nova1 = memberRepository.findByEmail("zara@mail.com").orElseThrow();
-      final Member nova2 = getOrCreateMember("nova2@mail.com", "nova2", "Nova2",
+      final Member nova1  = memberRepository.findByEmail("zara@mail.com").orElseThrow();
+      final Member nova2  = getOrCreateMember("nova2@mail.com", "nova2", "Nova2",
           catalyseur, imgs.get(2), LocalDate.of(2025, 9, 6), memberRepository, passwordEncoder);
-      final Member nova3 = getOrCreateMember("nova3@mail.com", "nova3", "Nova3",
+      final Member nova3  = getOrCreateMember("nova3@mail.com", "nova3", "Nova3",
           gardien, imgs.get(3), LocalDate.of(2025, 9, 7), memberRepository, passwordEncoder);
-      final Member nova4 = getOrCreateMember("nova4@mail.com", "nova4", "Nova4",
+      final Member nova4  = getOrCreateMember("nova4@mail.com", "nova4", "Nova4",
           executeur, imgs.get(4), LocalDate.of(2025, 9, 8), memberRepository, passwordEncoder);
       addToTeam(nova2, teamNova, teamCompositionRepository);
       addToTeam(nova3, teamNova, teamCompositionRepository);
@@ -541,12 +557,12 @@ public class BcryptConfiguration {
           imgs.get(2), LocalDate.of(2025, 8, 14), "TEAM_VOID",
           memberRepository, teamRepository, teamCompositionRepository, passwordEncoder);
       final Team teamVoid = teamRepository.findByName("TEAM_VOID").orElseThrow();
-      final Member void1 = memberRepository.findByEmail("kael@mail.com").orElseThrow();
-      final Member void2 = getOrCreateMember("void2@mail.com", "void2", "Void2",
+      final Member void1  = memberRepository.findByEmail("kael@mail.com").orElseThrow();
+      final Member void2  = getOrCreateMember("void2@mail.com", "void2", "Void2",
           tacticien, imgs.get(5), LocalDate.of(2025, 8, 15), memberRepository, passwordEncoder);
-      final Member void3 = getOrCreateMember("void3@mail.com", "void3", "Void3",
+      final Member void3  = getOrCreateMember("void3@mail.com", "void3", "Void3",
           perturbateur, imgs.get(6), LocalDate.of(2025, 8, 16), memberRepository, passwordEncoder);
-      final Member void4 = getOrCreateMember("void4@mail.com", "void4", "Void4",
+      final Member void4  = getOrCreateMember("void4@mail.com", "void4", "Void4",
           guerisseur, imgs.get(7), LocalDate.of(2025, 8, 17), memberRepository, passwordEncoder);
       addToTeam(void2, teamVoid, teamCompositionRepository);
       addToTeam(void3, teamVoid, teamCompositionRepository);
@@ -557,12 +573,12 @@ public class BcryptConfiguration {
           imgs.get(4), LocalDate.of(2025, 7, 22), "TEAM_STORM",
           memberRepository, teamRepository, teamCompositionRepository, passwordEncoder);
       final Team teamStorm = teamRepository.findByName("TEAM_STORM").orElseThrow();
-      final Member storm1 = memberRepository.findByEmail("sora@mail.com").orElseThrow();
-      final Member storm2 = getOrCreateMember("storm2@mail.com", "storm2", "Storm2",
+      final Member storm1  = memberRepository.findByEmail("sora@mail.com").orElseThrow();
+      final Member storm2  = getOrCreateMember("storm2@mail.com", "storm2", "Storm2",
           architecte, imgs.get(8), LocalDate.of(2025, 7, 23), memberRepository, passwordEncoder);
-      final Member storm3 = getOrCreateMember("storm3@mail.com", "storm3", "Storm3",
+      final Member storm3  = getOrCreateMember("storm3@mail.com", "storm3", "Storm3",
           executeur, imgs.get(9), LocalDate.of(2025, 7, 24), memberRepository, passwordEncoder);
-      final Member storm4 = getOrCreateMember("storm4@mail.com", "storm4", "Storm4",
+      final Member storm4  = getOrCreateMember("storm4@mail.com", "storm4", "Storm4",
           gardien, imgs.get(10), LocalDate.of(2025, 7, 25), memberRepository, passwordEncoder);
       addToTeam(storm2, teamStorm, teamCompositionRepository);
       addToTeam(storm3, teamStorm, teamCompositionRepository);
@@ -573,12 +589,12 @@ public class BcryptConfiguration {
           imgs.get(5), LocalDate.of(2025, 6, 30), "TEAM_BLAZE",
           memberRepository, teamRepository, teamCompositionRepository, passwordEncoder);
       final Team teamBlaze = teamRepository.findByName("TEAM_BLAZE").orElseThrow();
-      final Member blaze1 = memberRepository.findByEmail("rex@mail.com").orElseThrow();
-      final Member blaze2 = getOrCreateMember("blaze2@mail.com", "blaze2", "Blaze2",
+      final Member blaze1  = memberRepository.findByEmail("rex@mail.com").orElseThrow();
+      final Member blaze2  = getOrCreateMember("blaze2@mail.com", "blaze2", "Blaze2",
           catalyseur, imgs.get(11), LocalDate.of(2025, 7, 1), memberRepository, passwordEncoder);
-      final Member blaze3 = getOrCreateMember("blaze3@mail.com", "blaze3", "Blaze3",
+      final Member blaze3  = getOrCreateMember("blaze3@mail.com", "blaze3", "Blaze3",
           tacticien, imgs.get(12), LocalDate.of(2025, 7, 2), memberRepository, passwordEncoder);
-      final Member blaze4 = getOrCreateMember("blaze4@mail.com", "blaze4", "Blaze4",
+      final Member blaze4  = getOrCreateMember("blaze4@mail.com", "blaze4", "Blaze4",
           perturbateur, imgs.get(13), LocalDate.of(2025, 7, 3), memberRepository, passwordEncoder);
       addToTeam(blaze2, teamBlaze, teamCompositionRepository);
       addToTeam(blaze3, teamBlaze, teamCompositionRepository);
@@ -589,12 +605,12 @@ public class BcryptConfiguration {
           imgs.get(6), LocalDate.of(2025, 5, 18), "TEAM_FROST",
           memberRepository, teamRepository, teamCompositionRepository, passwordEncoder);
       final Team teamFrost = teamRepository.findByName("TEAM_FROST").orElseThrow();
-      final Member frost1 = memberRepository.findByEmail("nyx@mail.com").orElseThrow();
-      final Member frost2 = getOrCreateMember("frost2@mail.com", "frost2", "Frost2",
+      final Member frost1  = memberRepository.findByEmail("nyx@mail.com").orElseThrow();
+      final Member frost2  = getOrCreateMember("frost2@mail.com", "frost2", "Frost2",
           guerisseur, imgs.get(14), LocalDate.of(2025, 5, 19), memberRepository, passwordEncoder);
-      final Member frost3 = getOrCreateMember("frost3@mail.com", "frost3", "Frost3",
+      final Member frost3  = getOrCreateMember("frost3@mail.com", "frost3", "Frost3",
           architecte, imgs.get(15), LocalDate.of(2025, 5, 20), memberRepository, passwordEncoder);
-      final Member frost4 = getOrCreateMember("frost4@mail.com", "frost4", "Frost4",
+      final Member frost4  = getOrCreateMember("frost4@mail.com", "frost4", "Frost4",
           gardien, imgs.get(16), LocalDate.of(2025, 5, 21), memberRepository, passwordEncoder);
       addToTeam(frost2, teamFrost, teamCompositionRepository);
       addToTeam(frost3, teamFrost, teamCompositionRepository);
@@ -605,12 +621,12 @@ public class BcryptConfiguration {
           imgs.get(7), LocalDate.of(2025, 4, 10), "TEAM_EMBER",
           memberRepository, teamRepository, teamCompositionRepository, passwordEncoder);
       final Team teamEmber = teamRepository.findByName("TEAM_EMBER").orElseThrow();
-      final Member ember1 = memberRepository.findByEmail("drak@mail.com").orElseThrow();
-      final Member ember2 = getOrCreateMember("ember2@mail.com", "ember2", "Ember2",
+      final Member ember1  = memberRepository.findByEmail("drak@mail.com").orElseThrow();
+      final Member ember2  = getOrCreateMember("ember2@mail.com", "ember2", "Ember2",
           executeur, imgs.get(17), LocalDate.of(2025, 4, 11), memberRepository, passwordEncoder);
-      final Member ember3 = getOrCreateMember("ember3@mail.com", "ember3", "Ember3",
+      final Member ember3  = getOrCreateMember("ember3@mail.com", "ember3", "Ember3",
           catalyseur, imgs.get(18), LocalDate.of(2025, 4, 12), memberRepository, passwordEncoder);
-      final Member ember4 = getOrCreateMember("ember4@mail.com", "ember4", "Ember4",
+      final Member ember4  = getOrCreateMember("ember4@mail.com", "ember4", "Ember4",
           perturbateur, imgs.get(19), LocalDate.of(2025, 4, 13), memberRepository, passwordEncoder);
       addToTeam(ember2, teamEmber, teamCompositionRepository);
       addToTeam(ember3, teamEmber, teamCompositionRepository);
@@ -621,12 +637,12 @@ public class BcryptConfiguration {
           imgs.get(8), LocalDate.of(2025, 3, 25), "TEAM_SURGE",
           memberRepository, teamRepository, teamCompositionRepository, passwordEncoder);
       final Team teamSurge = teamRepository.findByName("TEAM_SURGE").orElseThrow();
-      final Member surge1 = memberRepository.findByEmail("lumi@mail.com").orElseThrow();
-      final Member surge2 = getOrCreateMember("surge2@mail.com", "surge2", "Surge2",
+      final Member surge1  = memberRepository.findByEmail("lumi@mail.com").orElseThrow();
+      final Member surge2  = getOrCreateMember("surge2@mail.com", "surge2", "Surge2",
           tacticien, imgs.get(0), LocalDate.of(2025, 3, 26), memberRepository, passwordEncoder);
-      final Member surge3 = getOrCreateMember("surge3@mail.com", "surge3", "Surge3",
+      final Member surge3  = getOrCreateMember("surge3@mail.com", "surge3", "Surge3",
           gardien, imgs.get(1), LocalDate.of(2025, 3, 27), memberRepository, passwordEncoder);
-      final Member surge4 = getOrCreateMember("surge4@mail.com", "surge4", "Surge4",
+      final Member surge4  = getOrCreateMember("surge4@mail.com", "surge4", "Surge4",
           guerisseur, imgs.get(2), LocalDate.of(2025, 3, 28), memberRepository, passwordEncoder);
       addToTeam(surge2, teamSurge, teamCompositionRepository);
       addToTeam(surge3, teamSurge, teamCompositionRepository);
@@ -637,12 +653,12 @@ public class BcryptConfiguration {
           imgs.get(9), LocalDate.of(2025, 2, 14), "TEAM_CRYPT",
           memberRepository, teamRepository, teamCompositionRepository, passwordEncoder);
       final Team teamCrypt = teamRepository.findByName("TEAM_CRYPT").orElseThrow();
-      final Member crypt1 = memberRepository.findByEmail("fenn@mail.com").orElseThrow();
-      final Member crypt2 = getOrCreateMember("crypt2@mail.com", "crypt2", "Crypt2",
+      final Member crypt1  = memberRepository.findByEmail("fenn@mail.com").orElseThrow();
+      final Member crypt2  = getOrCreateMember("crypt2@mail.com", "crypt2", "Crypt2",
           catalyseur, imgs.get(3), LocalDate.of(2025, 2, 15), memberRepository, passwordEncoder);
-      final Member crypt3 = getOrCreateMember("crypt3@mail.com", "crypt3", "Crypt3",
+      final Member crypt3  = getOrCreateMember("crypt3@mail.com", "crypt3", "Crypt3",
           perturbateur, imgs.get(4), LocalDate.of(2025, 2, 16), memberRepository, passwordEncoder);
-      final Member crypt4 = getOrCreateMember("crypt4@mail.com", "crypt4", "Crypt4",
+      final Member crypt4  = getOrCreateMember("crypt4@mail.com", "crypt4", "Crypt4",
           executeur, imgs.get(5), LocalDate.of(2025, 2, 17), memberRepository, passwordEncoder);
       addToTeam(crypt2, teamCrypt, teamCompositionRepository);
       addToTeam(crypt3, teamCrypt, teamCompositionRepository);
@@ -719,10 +735,6 @@ public class BcryptConfiguration {
               teamStorm, teamBlaze, teamFrost, teamEmber),
           tournamentRepository, registrationRepository);
 
-      // ════════════════════════════════════════════════════════
-      // BRACKETS TOURNOIS TERMINÉS
-      // ════════════════════════════════════════════════════════
-
       // ── Spring Arena Cup 2025 ──
       final Optional<Tournament> springArenaOpt =
           tournamentRepository.findByName("Spring Arena Cup 2025");
@@ -763,13 +775,15 @@ public class BcryptConfiguration {
               LocalDateTime.of(2025, 4, 17, 10, 0), 2, 0, teamOmega, admin, sacDemi1,
               matchRepository);
           addSelections4(sacR1m1, teamOmega, tibo, neo, kai, mia, playersSelectionRepository);
-          addSelections4(sacR1m1, teamNova, nova1, nova2, nova3, nova4, playersSelectionRepository);
+          addSelections4(sacR1m1, teamNova, nova1, nova2, nova3, nova4,
+              playersSelectionRepository);
 
           final Match sacR1m2 = buildPlayedMatch(sac, teamIota, teamVoid, 1,
               LocalDateTime.of(2025, 4, 17, 12, 0), 2, 1, teamIota, admin, sacDemi1,
               matchRepository);
           addSelections4(sacR1m2, teamIota, lisa, noa, tim, zoe, playersSelectionRepository);
-          addSelections4(sacR1m2, teamVoid, void1, void2, void3, void4, playersSelectionRepository);
+          addSelections4(sacR1m2, teamVoid, void1, void2, void3, void4,
+              playersSelectionRepository);
 
           final Match sacR1m3 = buildPlayedMatch(sac, teamAlpha, teamStorm, 1,
               LocalDateTime.of(2025, 4, 17, 14, 0), 2, 0, teamAlpha, admin, sacDemi2,
@@ -823,8 +837,7 @@ public class BcryptConfiguration {
               playersSelectionRepository);
 
           final Match ec25R1m2 = buildPlayedMatch(ec25, teamNova, teamVoid, 1,
-              LocalDateTime.of(2025, 5, 22, 16, 0), 2, 1,
-              teamNova, admin, ec25Demi2,
+              LocalDateTime.of(2025, 5, 22, 16, 0), 2, 1, teamNova, admin, ec25Demi2,
               matchRepository);
           addSelections4(ec25R1m2, teamNova, nova1, nova2, nova3, nova4,
               playersSelectionRepository);
@@ -896,8 +909,10 @@ public class BcryptConfiguration {
 
           final Match splR1m1 = buildPlayedMatch(spl, teamNova, teamVoid, 1,
               LocalDateTime.of(2025, 7, 3, 10, 0), 2, 0, teamNova, admin, splQ1, matchRepository);
-          addSelections4(splR1m1, teamNova, nova1, nova2, nova3, nova4, playersSelectionRepository);
-          addSelections4(splR1m1, teamVoid, void1, void2, void3, void4, playersSelectionRepository);
+          addSelections4(splR1m1, teamNova, nova1, nova2, nova3, nova4,
+              playersSelectionRepository);
+          addSelections4(splR1m1, teamVoid, void1, void2, void3, void4,
+              playersSelectionRepository);
 
           final Match splR1m2 = buildPlayedMatch(spl, teamCrypt, teamFrost, 1,
               LocalDateTime.of(2025, 7, 3, 12, 0), 2, 1, teamCrypt, admin, splQ2, matchRepository);
@@ -1043,7 +1058,8 @@ public class BcryptConfiguration {
               LocalDateTime.of(2026, 4, 21, 16, 0), 2, 1, teamOmega, admin, ecFinale,
               matchRepository);
           addSelections4(ecDemi2, teamOmega, tibo, neo, kai, mia, playersSelectionRepository);
-          addSelections4(ecDemi2, teamNova, nova1, nova2, nova3, nova4, playersSelectionRepository);
+          addSelections4(ecDemi2, teamNova, nova1, nova2, nova3, nova4,
+              playersSelectionRepository);
 
           final Match ecR1m1 = buildPlayedMatch(ec, teamIota, teamVoid, 1,
               LocalDateTime.of(2026, 4, 17, 10, 0), 2, 0, teamIota, admin, ecDemi1,
@@ -1061,13 +1077,14 @@ public class BcryptConfiguration {
           final Match ecR1m3 = buildPlayedMatch(ec, teamNova, teamStorm, 1,
               LocalDateTime.of(2026, 4, 17, 14, 0), 2, 1, teamNova, admin, ecDemi2,
               matchRepository);
-          addSelections4(ecR1m3, teamNova, nova1, nova2, nova3, nova4, playersSelectionRepository);
+          addSelections4(ecR1m3, teamNova, nova1, nova2, nova3, nova4,
+              playersSelectionRepository);
           addSelections4(ecR1m3, teamStorm, storm1, storm2, storm3, storm4,
               playersSelectionRepository);
         }
       }
 
-      // ── Spring Battle Series 2026 — matchs de démo ──
+      // ── Spring Battle Series 2026 ──
       final Optional<Tournament> sbsOpt =
           tournamentRepository.findByName("Spring Battle Series 2026");
       if (sbsOpt.isPresent()) {
