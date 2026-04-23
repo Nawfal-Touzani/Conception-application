@@ -8,10 +8,13 @@ import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Notification;
 import be.vinci.ipl.cae.api.models.entities.Notification.Type;
 import be.vinci.ipl.cae.api.models.entities.Team;
+import be.vinci.ipl.cae.api.models.entities.Tournament;
+import be.vinci.ipl.cae.api.models.entities.Tournament.Status;
 import be.vinci.ipl.cae.api.models.entities.ValidationResult;
 import be.vinci.ipl.cae.api.repositories.MatchRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.NotificationRepository;
+import be.vinci.ipl.cae.api.repositories.TournamentRepository;
 import be.vinci.ipl.cae.api.repositories.ValidationResultRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -31,6 +34,7 @@ public class MatchResultService {
   private final NotificationService notificationService;
   private final MemberRepository memberRepository;
   private final NotificationRepository notificationRepository;
+  private final TournamentRepository tournamentRepository;
 
   /**
    * Creates a new MatchResultService.
@@ -38,12 +42,13 @@ public class MatchResultService {
   public MatchResultService(MatchRepository matchRepository,
       ValidationResultRepository validationResultRepository,
       NotificationService notificationService, MemberRepository memberRepository,
-      NotificationRepository notificationRepository) {
+      NotificationRepository notificationRepository, TournamentRepository tournamentRepository) {
     this.matchRepository = matchRepository;
     this.validationResultRepository = validationResultRepository;
     this.notificationService = notificationService;
     this.memberRepository = memberRepository;
     this.notificationRepository = notificationRepository;
+    this.tournamentRepository = tournamentRepository;
   }
 
   /**
@@ -239,10 +244,23 @@ public class MatchResultService {
    */
   public void advanceWinner(Match match) {
 
+    if (match.getWinner() == null) {
+      throw new IllegalStateException("Cannot advance match without winner");
+    }
+
     Match nextMatch = match.getNextMatch();
 
     if (nextMatch == null) {
+
+      Tournament tournament = match.getTournament();
+
+      tournament.setWinnerTeam(match.getWinner());
+
+      tournament.setStatus(Status.FINISHED);
+
+      tournamentRepository.save(tournament);
       return;
+
     }
 
     if (nextMatch.getTeamA() == null) {
@@ -265,9 +283,10 @@ public class MatchResultService {
    */
   public void finalizeMatch(Match match) {
     match.setResultStatus(ResultStatus.VALIDATED);
+    advanceWinner(match);
     matchRepository.save(match);
     sendValidationNotifications(match);
-    advanceWinner(match);
+
   }
 
   private void sendPendingNotifications(Match match) {
