@@ -12,6 +12,7 @@ import {
 import {
   validateResult,
   contestResult,
+  correctResult,
 } from '../../../../services/match/encode-result';
 import { Notification } from '../../../../types/notifications.types';
 
@@ -67,6 +68,17 @@ const NotificationPage = () => {
   const handleContestResult = async (matchId: number) => {
     if (!user) return;
     await contestResult(matchId, user.token);
+    const data = await getNotifications(user.id, user.token, filter);
+    setNotifications(data);
+  };
+
+  const handleCorrectResult = async (
+    matchId: number,
+    scoreA: number,
+    scoreB: number,
+  ) => {
+    if (!user) return;
+    await correctResult(matchId, { scoreA, scoreB }, user.token);
     const data = await getNotifications(user.id, user.token, filter);
     setNotifications(data);
   };
@@ -185,6 +197,7 @@ const NotificationPage = () => {
               onRefuse={handleRefuse}
               onValidateResult={handleValidateResult}
               onContestResult={handleContestResult}
+              onCorrectResult={handleCorrectResult}
             />
           )}
         </Box>

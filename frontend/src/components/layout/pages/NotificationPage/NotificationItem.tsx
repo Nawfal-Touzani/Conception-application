@@ -24,6 +24,7 @@ interface NotificationItemProps {
   onRefuse?: (membershipRequestId: number, reason: string) => void;
   onValidateResult?: (matchId: number) => void;
   onContestResult?: (matchId: number) => void;
+  onCorrectResult?: (matchId: number, scoreA: number, scoreB: number) => void;
 }
 
 const NotificationItem = ({
