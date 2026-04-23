@@ -66,37 +66,14 @@ public class MatchSelectionService {
           "Une sélection existe déjà pour cette équipe. Utilisez PUT pour la modifier.");
     }
 
-    if (memberIds.size() != 4) {
-      throw new IllegalArgumentException("Exactly 4 players must be selected");
-    }
-
-    List<Member> selectedMembers = new ArrayList<>();
-    for (Long memberId : memberIds) {
-      Member member = memberRepository.findById(memberId)
-          .orElseThrow(() -> new NoSuchElementException("Member not found with id " + memberId));
-
-      if (!teamCompositionRepository.existsByMemberAndTeamId(member, team.getId())) {
-        throw new IllegalStateException(
-            "Member " + memberId + " does not belong to the submitting team");
-      }
-
-      LocalDate matchDate = match.getDateTime().toLocalDate();
-      if (unavailabilityRepository.existsByMemberAndStartDateBeforeAndEndDateAfter(member,
-          matchDate.plusDays(1), matchDate.minusDays(1))) {
-        throw new IllegalStateException("Member " + memberId + " is unavailable on match date");
-      }
-
-      selectedMembers.add(member);
-    }
+    List<Member> selectedMembers = validateAndResolveMembers(memberIds, team, match);
 
     List<PlayersSelection> selections = new ArrayList<>();
     for (Member member : selectedMembers) {
-      PlayersSelection ps = new PlayersSelection(member, match, team);
-      selections.add(playersSelectionRepository.save(ps));
+      selections.add(playersSelectionRepository.save(new PlayersSelection(member, match, team)));
     }
 
     sendSelectionNotifications(match, selectedMembers);
-
     return selections;
   }
 
@@ -114,12 +91,30 @@ public class MatchSelectionService {
     Match match = matchService.getScheduledMatchForTeam(idMatch, team);
 
     if (playersSelectionRepository.countByMatchAndTeam(match, team) == 0) {
-      throw new IllegalStateException("No existing selection found for this team in this match");
+      throw new IllegalStateException(
+          "No existing selection found for this team in this match");
     }
+
+    List<Long> previousIds = playersSelectionRepository.findByMatchAndTeam(match, team)
+        .stream()
+        .map(ps -> ps.getMember().getId())
+        .toList();
 
     playersSelectionRepository.deleteByMatchAndTeam(match, team);
 
-    return submitSelection(idMatch, team, memberIds);
+    List<Member> selectedMembers = validateAndResolveMembers(memberIds, team, match);
+
+    List<PlayersSelection> selections = new ArrayList<>();
+    for (Member member : selectedMembers) {
+      selections.add(playersSelectionRepository.save(new PlayersSelection(member, match, team)));
+    }
+
+    List<Member> newMembers = selectedMembers.stream()
+        .filter(m -> !previousIds.contains(m.getId()))
+        .toList();
+    sendSelectionNotifications(match, newMembers);
+
+    return selections;
   }
 
   /**
@@ -191,5 +186,33 @@ public class MatchSelectionService {
       notif.setMatch(match);
       notificationService.send(member.getId(), notif);
     }
+  }
+
+  private List<Member> validateAndResolveMembers(List<Long> memberIds, Team team, Match match) {
+    if (memberIds.size() != 4) {
+      throw new IllegalArgumentException("Exactly 4 players must be selected");
+    }
+
+    LocalDate matchDate = match.getDateTime().toLocalDate();
+    List<Member> resolved = new ArrayList<>();
+
+    for (Long memberId : memberIds) {
+      Member member = memberRepository.findById(memberId)
+          .orElseThrow(() -> new NoSuchElementException("Member not found with id " + memberId));
+
+      if (!teamCompositionRepository.existsByMemberAndTeamId(member, team.getId())) {
+        throw new IllegalStateException(
+            "Member " + memberId + " does not belong to the submitting team");
+      }
+
+      if (unavailabilityRepository.existsByMemberAndStartDateBeforeAndEndDateAfter(member,
+          matchDate.plusDays(1), matchDate.minusDays(1))) {
+        throw new IllegalStateException("Member " + memberId + " is unavailable on match date");
+      }
+
+      resolved.add(member);
+    }
+
+    return resolved;
   }
 }
