@@ -10,8 +10,6 @@ const AdminPage = () => {
   const navigate = useNavigate();
   const {
     allMembers,
-    page,
-    setPage,
     error,
     setError,
     success,
@@ -20,10 +18,9 @@ const AdminPage = () => {
     setPromoteOpen,
     demoteTarget,
     setDemoteTarget,
-    totalPages,
-    paginated,
     handlePromote,
     handleDemote,
+    admins,
   } = useAdmin();
 
   return (
@@ -57,7 +54,7 @@ const AdminPage = () => {
         )}
 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          {paginated.map((member) => (
+          {admins.map((member) => (
             <MemberRow
               key={member.email}
               member={member}
@@ -69,36 +66,12 @@ const AdminPage = () => {
         <Box
           sx={{
             display: 'flex',
-            justifyContent: 'center',
+            justifyContent: 'right',
             alignItems: 'center',
-            mt: 3,
-            gap: 2,
+            mt: 4,
             flexWrap: 'wrap',
-            ml: 12,
           }}
         >
-          <Button
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-            disabled={page === 0}
-            variant="contained"
-            sx={adminSx.paginationButton}
-          >
-            Précédent
-          </Button>
-
-          <Typography sx={{ color: '#fff', fontWeight: 600 }}>
-            Page {page + 1} sur {totalPages || 1}
-          </Typography>
-
-          <Button
-            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-            disabled={page >= totalPages - 1}
-            variant="contained"
-            sx={adminSx.paginationButton}
-          >
-            Suivant
-          </Button>
-
           <Button
             onClick={() => navigate('/admin/members')}
             variant="outlined"
