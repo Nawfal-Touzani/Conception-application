@@ -4,6 +4,20 @@ import * as teamService from '../../services/team/team.service';
 import { TournamentDetails } from '../../types/tournament.types';
 import { TeamDto } from '../../types/team.types';
 
+const ERROR_MAP: Record<string, string> = {
+  '4 member required': 'Votre équipe doit avoir au moins 4 membres.',
+  'deadline passed': "La date limite d'inscription est dépassée.",
+  'tournament is full': 'Le tournoi est complet.',
+  'not public yet': "Le tournoi n'est pas encore ouvert aux inscriptions.",
+  'not in preparation': "Le tournoi n'est plus en phase d'inscription.",
+  'not responsible':
+    'Seul le responsable ou second responsable peut inscrire la team.',
+};
+
+function mapErrorMessage(msg: string): string {
+  return ERROR_MAP[msg] ?? msg;
+}
+
 export function useTournamentDetail(
   tournament: TournamentDetails,
   onRegister: () => Promise<void>,
@@ -44,34 +58,22 @@ export function useTournamentDetail(
         { method: 'POST', headers: { Authorization: `Bearer ${token}` } },
       );
       if (!response.ok) {
-        const text = await response.text();
-        try {
-          const json = JSON.parse(text);
-          const msg = json.message || '';
-          if (msg.includes('already')) {
-            await onRegister();
-          } else if (msg.includes('4 member')) {
-            setRegisterError('Votre équipe doit avoir au moins 4 membres.');
-          } else if (msg.includes('deadline') || msg.includes('past')) {
-            setRegisterError("La date limite d'inscription est dépassée.");
-          } else if (msg.includes('full') || msg.includes('maximum')) {
-            setRegisterError('Le tournoi est complet.');
-          } else if (msg.includes('public')) {
-            setRegisterError(
-              "Le tournoi n'est pas encore ouvert aux inscriptions.",
-            );
-          } else if (msg.includes('preparation')) {
-            setRegisterError("Le tournoi n'est plus en phase d'inscription.");
-          } else if (msg.includes('responsible')) {
-            setRegisterError(
-              'Seul le responsable ou second responsable peut inscrire la team.',
-            );
-          } else {
-            setRegisterError(msg || "Erreur lors de l'inscription.");
-          }
-        } catch {
-          setRegisterError(text || "Erreur lors de l'inscription.");
+        const body = await response.json().catch(() => ({ message: null }));
+        const msg: string = body.message ?? '';
+
+        if (msg.toLowerCase().includes('already')) {
+          await onRegister();
+          return;
         }
+        if (response.status === 403) {
+          setRegisterError(
+            'Seul le responsable ou second responsable peut inscrire la team.',
+          );
+          return;
+        }
+        setRegisterError(
+          mapErrorMessage(msg) || "Erreur lors de l'inscription.",
+        );
       } else {
         setRegisterSuccess(true);
         await onRegister();

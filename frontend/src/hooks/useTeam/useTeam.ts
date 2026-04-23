@@ -23,9 +23,10 @@ export function useTeam() {
   const isSolo = members.length === 1;
 
   const isResponsible =
-    team?.responsibleTag != null &&
-    members.find((m) => m.gameTag === team.responsibleTag) != null &&
-    user?.tag === team.responsibleTag;
+    !!team &&
+    !!user &&
+    (team.responsibleTag === user.tag ||
+      team.secondResponsibleTag === user.tag);
 
   const tournamentsInProgress = tournaments.filter(
     (t) => t.status === 'IN_PROGRESS',
@@ -59,24 +60,14 @@ export function useTeam() {
   const handleLeave = async () => {
     setLeaveLoading(true);
     try {
-      const res = await teamService.leaveTeam(token);
-      if (res.status === 409) {
-        const text = await res.text();
-        setLeaveError(
-          text || 'Désignez un second responsable avant de quitter.',
-        );
-        setConfirmOpen(false);
-        return;
-      }
-      if (!res.ok) {
-        setLeaveError('Une erreur est survenue.');
-        setConfirmOpen(false);
-        return;
-      }
+      await teamService.leaveTeam(token);
       setConfirmOpen(false);
       loadTeamData();
-    } catch {
-      setLeaveError('Erreur réseau.');
+    } catch (err) {
+      setLeaveError(
+        err instanceof Error ? err.message : 'Une erreur est survenue.',
+      );
+      setConfirmOpen(false);
     } finally {
       setLeaveLoading(false);
     }
@@ -87,19 +78,11 @@ export function useTeam() {
     setNominateError(null);
     setNominateSuccess(null);
     try {
-      const res = await teamService.nominateSecondaryManager(
-        token,
-        team.id,
-        memberId,
-      );
-      if (!res.ok) {
-        setNominateError('Impossible de nommer ce membre.');
-        return;
-      }
+      await teamService.nominateSecondaryManager(token, team.id, memberId);
       setNominateSuccess('Second responsable nommé avec succès.');
       loadTeamData();
-    } catch {
-      setNominateError('Erreur réseau.');
+    } catch (err) {
+      setNominateError(err instanceof Error ? err.message : 'Erreur réseau.');
     }
   };
 

@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 /**
@@ -31,6 +32,7 @@ public class TeamService {
   private final MemberRepository memberRepository;
   private final MembershipRequestRepository membershipRequestRepository;
   private final NotificationService notificationService;
+  private final MatchSelectionService matchSelectionService;
 
   /**
    * Instantiates a new Team service.
@@ -40,17 +42,18 @@ public class TeamService {
    * @param memberRepository            the member repository
    * @param membershipRequestRepository the membership request repository
    * @param notificationService         the notification service
+   * @param matchSelectionService       the match members selection service
    */
   public TeamService(TeamRepository teamRepository,
-      TeamCompositionRepository teamCompositionRepository,
-      MemberRepository memberRepository,
+      TeamCompositionRepository teamCompositionRepository, MemberRepository memberRepository,
       MembershipRequestRepository membershipRequestRepository,
-      NotificationService notificationService) {
+      NotificationService notificationService, MatchSelectionService matchSelectionService) {
     this.teamRepository = teamRepository;
     this.teamCompositionRepository = teamCompositionRepository;
     this.memberRepository = memberRepository;
     this.membershipRequestRepository = membershipRequestRepository;
     this.notificationService = notificationService;
+    this.matchSelectionService = matchSelectionService;
   }
 
   /**
@@ -72,8 +75,8 @@ public class TeamService {
       throw new IllegalStateException("Team name already exists");
     }
 
-    Member member = memberRepository.findById(memberId).orElseThrow(
-        () -> new IllegalArgumentException("Member not found"));
+    Member member = memberRepository.findById(memberId)
+        .orElseThrow(() -> new IllegalArgumentException("Member not found"));
 
     Team team = new Team();
     team.setName(request.getName());
@@ -107,16 +110,22 @@ public class TeamService {
     request.setTeam(team);
     MembershipRequest saved = membershipRequestRepository.save(request);
 
-    Notification notif = new Notification(
-        Notification.Type.MEMBERSHIP_REQUEST,
-        "Nouvelle demande d'adhésion de "
-            + member.getTag()
-            + " pour rejoindre "
-            + team.getName(),
-        LocalDateTime.now()
-    );
+    Notification notif = new Notification(Notification.Type.MEMBERSHIP_REQUEST,
+        "Nouvelle demande d'adhésion de " + member.getTag() + " pour rejoindre " + team.getName(),
+        LocalDateTime.now());
     notif.setMembershipRequest(saved);
+
     notificationService.send(team.getResponsible().getId(), notif);
+    if (team.getSecondResponsible() != null) {
+      Notification notif2 = new Notification(
+          Notification.Type.MEMBERSHIP_REQUEST,
+          "Nouvelle demande d'adhésion de " + member.getTag()
+              + " pour rejoindre " + team.getName(),
+          LocalDateTime.now()
+      );
+      notif2.setMembershipRequest(saved);
+      notificationService.send(team.getSecondResponsible().getId(), notif2);
+    }
 
     return saved;
   }
@@ -136,20 +145,12 @@ public class TeamService {
     List<TeamComposition> compositions = teamCompositionRepository.findAllByTeamId(teamId);
     LocalDate today = LocalDate.now();
 
-    return compositions.stream()
-        .map(tc -> {
-          Member m = tc.getMember();
-          boolean isAvailable = m.getUnavailabilities().stream()
-              .noneMatch(
-                  u -> !today.isBefore(u.getStartDate()) && !today.isAfter(u.getEndDate()));
-          return new TeamMemberDto(
-              m.getId(),
-              m.getTag(),
-              m.getImage().getUrl(),
-              isAvailable
-          );
-        })
-        .toList();
+    return compositions.stream().map(tc -> {
+      Member m = tc.getMember();
+      boolean isAvailable = m.getUnavailabilities().stream()
+          .noneMatch(u -> !today.isBefore(u.getStartDate()) && !today.isAfter(u.getEndDate()));
+      return new TeamMemberDto(m.getId(), m.getTag(), m.getImage().getUrl(), isAvailable);
+    }).toList();
   }
 
   /**
@@ -168,9 +169,7 @@ public class TeamService {
    */
   @Transactional
   public Iterable<TeamResponseDto> getAllTeamDtos() {
-    return teamRepository.findByActiveTrue().stream()
-        .map(this::toDto)
-        .toList();
+    return teamRepository.findByActiveTrue().stream().map(this::toDto).toList();
   }
 
   /**
@@ -188,12 +187,15 @@ public class TeamService {
 
     Team team = tc.getTeam();
 
-    boolean isResponsible = team.getResponsible() != null
-        && team.getResponsible().getId().equals(member.getId());
-    boolean isSecondResponsible = team.getSecondResponsible() != null
-        && team.getSecondResponsible().getId().equals(member.getId());
+    boolean isResponsible =
+        team.getResponsible() != null && team.getResponsible().getId().equals(member.getId());
+    boolean isSecondResponsible =
+        team.getSecondResponsible() != null && team.getSecondResponsible().getId()
+            .equals(member.getId());
 
     int teamSize = teamCompositionRepository.findAllByTeamId(team.getId()).size();
+
+    matchSelectionService.invalidateSelectionsOnLeave(member);
 
     if (teamSize == 1) {
       team.setActive(false);
@@ -237,13 +239,10 @@ public class TeamService {
    * @return the team response dto
    */
   public TeamResponseDto toDto(Team team) {
-    return new TeamResponseDto(
-        team.getId(),
-        team.getName(),
+    return new TeamResponseDto(team.getId(), team.getName(),
         team.getResponsible() != null ? team.getResponsible().getTag() : null,
         team.getSecondResponsible() != null ? team.getSecondResponsible().getTag() : null,
-        team.getCreationDate()
-    );
+        team.getCreationDate());
   }
 
   /**
@@ -254,8 +253,14 @@ public class TeamService {
    * @throws NoSuchElementException if no team found for this responsible
    */
   public Team getTeamByResponsible(Member responsible) {
-    return teamRepository.findByResponsible(responsible)
-        .orElseThrow(() -> new NoSuchElementException(
+    Optional<Team> team = teamRepository.findByResponsible(responsible);
+
+    if (team.isPresent()) {
+      return team.get();
+    }
+
+    return teamRepository.findBySecondResponsible(responsible).orElseThrow(
+        () -> new NoSuchElementException(
             "No team found for responsible with id " + responsible.getId()));
   }
 }

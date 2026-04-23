@@ -339,113 +339,136 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
             </Paper>
           )}
 
-          <Paper
-            elevation={0}
-            sx={{ borderRadius: '12px', p: 3, backgroundColor: '#fff' }}
-          >
-            <Typography
-              sx={{
-                fontWeight: 700,
-                color: '#1a2744',
-                fontSize: '1.1rem',
-                mb: 0.5,
-              }}
+          {(tournament.status === 'PREPARATION' ||
+            tournament.status === 'UPCOMING') && (
+            <Paper
+              elevation={0}
+              sx={{ borderRadius: '12px', p: 3, backgroundColor: '#fff' }}
             >
-              Inscriptions
-            </Typography>
-
-            {tournament.status === 'PREPARATION' && (
-              <Typography sx={{ color: '#555', fontSize: '0.95rem', mb: 1.5 }}>
-                Date limite le {formatDate(tournament.registrationDeadline)}
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  color: '#1a2744',
+                  fontSize: '1.1rem',
+                  mb: 0.5,
+                }}
+              >
+                Inscriptions
               </Typography>
-            )}
 
-            {tournament.status === 'UPCOMING' && (
-              <Typography sx={{ color: '#555', fontSize: '0.95rem', mb: 1.5 }}>
-                Tournoi complet — inscriptions fermées
-              </Typography>
-            )}
-
-            <Divider sx={{ mb: 1.5 }} />
-            <Typography
-              sx={{
-                fontWeight: 800,
-                color: '#1a2744',
-                fontSize: '1.6rem',
-                mb:
-                  registrationOpen && isResponsible && !isAlreadyRegistered
-                    ? 2
-                    : 0,
-              }}
-            >
-              {registrationOpen ? 'Ouvert' : formatStatus(tournament)}
-            </Typography>
-
-            {registrationOpen &&
-              isResponsible &&
-              !isAlreadyRegistered &&
-              !registerSuccess &&
-              tournament.currentParticipants < tournament.maxParticipants && (
-                <Button
-                  variant="contained"
-                  onClick={handleRegister}
-                  fullWidth
-                  sx={{
-                    backgroundColor: '#1a2744',
-                    color: '#fff',
-                    textTransform: 'none',
-                    fontWeight: 700,
-                    fontSize: '1rem',
-                    borderRadius: '8px',
-                    '&:hover': { backgroundColor: '#243560' },
-                  }}
-                >
-                  S'inscrire
-                </Button>
-              )}
-
-            {registrationOpen &&
-              !isAlreadyRegistered &&
-              tournament.currentParticipants >= tournament.maxParticipants && (
+              {tournament.status === 'PREPARATION' && (
                 <Typography
-                  sx={{ color: '#e74c3c', fontSize: '0.9rem', mt: 1 }}
+                  sx={{ color: '#555', fontSize: '0.95rem', mb: 1.5 }}
                 >
-                  Le tournoi est complet.
+                  Date limite le {formatDate(tournament.registrationDeadline)}
                 </Typography>
               )}
 
-            {registerSuccess && (
-              <Typography
-                sx={{
-                  color: 'green',
-                  fontSize: '0.95rem',
-                  mt: 1,
-                  fontWeight: 600,
-                }}
-              >
-                Vous vous êtes inscrits avec succès !
-              </Typography>
-            )}
+              {tournament.status === 'UPCOMING' && (
+                <Typography
+                  sx={{ color: '#555', fontSize: '0.95rem', mb: 1.5 }}
+                >
+                  Date limite atteinte ou tournoi complet
+                </Typography>
+              )}
 
-            {registrationOpen && isAlreadyRegistered && !registerSuccess && (
+              <Divider sx={{ mb: 1.5 }} />
+
               <Typography
                 sx={{
+                  fontWeight: 800,
                   color: '#1a2744',
-                  fontSize: '0.95rem',
-                  mt: 1,
-                  fontWeight: 600,
+                  fontSize: '1.6rem',
+                  mb:
+                    tournament.status === 'PREPARATION' &&
+                    registrationOpen &&
+                    isResponsible &&
+                    !isAlreadyRegistered
+                      ? 2
+                      : 0,
                 }}
               >
-                Vous êtes déjà inscrits à ce tournoi.
+                {tournament.status === 'PREPARATION'
+                  ? registrationOpen
+                    ? 'Ouvert'
+                    : formatStatus(tournament)
+                  : 'Fermé'}
               </Typography>
-            )}
 
-            {registerError && (
-              <Typography sx={{ color: '#e74c3c', fontSize: '0.9rem', mt: 1 }}>
-                {registerError}
-              </Typography>
-            )}
-          </Paper>
+              {tournament.status === 'PREPARATION' &&
+                registrationOpen &&
+                isResponsible &&
+                !isAlreadyRegistered &&
+                !registerSuccess &&
+                tournament.currentParticipants < tournament.maxParticipants && (
+                  <Button
+                    variant="contained"
+                    onClick={handleRegister}
+                    fullWidth
+                    sx={{
+                      backgroundColor: '#1a2744',
+                      color: '#fff',
+                      textTransform: 'none',
+                      fontWeight: 700,
+                      fontSize: '1rem',
+                      borderRadius: '8px',
+                      '&:hover': { backgroundColor: '#243560' },
+                    }}
+                  >
+                    S'inscrire
+                  </Button>
+                )}
+
+              {tournament.status === 'PREPARATION' &&
+                registrationOpen &&
+                !isAlreadyRegistered &&
+                tournament.currentParticipants >=
+                  tournament.maxParticipants && (
+                  <Typography
+                    sx={{ color: '#e74c3c', fontSize: '0.9rem', mt: 1 }}
+                  >
+                    Le tournoi est complet.
+                  </Typography>
+                )}
+
+              {tournament.status === 'PREPARATION' && registerSuccess && (
+                <Typography
+                  sx={{
+                    color: 'green',
+                    fontSize: '0.95rem',
+                    mt: 1,
+                    fontWeight: 600,
+                  }}
+                >
+                  Vous vous êtes inscrits avec succès !
+                </Typography>
+              )}
+
+              {tournament.status === 'PREPARATION' &&
+                registrationOpen &&
+                isAlreadyRegistered &&
+                !registerSuccess && (
+                  <Typography
+                    sx={{
+                      color: '#1a2744',
+                      fontSize: '0.95rem',
+                      mt: 1,
+                      fontWeight: 600,
+                    }}
+                  >
+                    Vous êtes déjà inscrits à ce tournoi.
+                  </Typography>
+                )}
+
+              {tournament.status === 'PREPARATION' && registerError && (
+                <Typography
+                  sx={{ color: '#e74c3c', fontSize: '0.9rem', mt: 1 }}
+                >
+                  {registerError}
+                </Typography>
+              )}
+            </Paper>
+          )}
         </Box>
       </Box>
     </Box>

@@ -42,8 +42,13 @@ public class TeamManagerService {
     Team team = teamRepository.findById(teamId)
         .orElseThrow(() -> new IllegalArgumentException("Team not found"));
 
-    if (!team.getResponsible().getId().equals(responsibleId)) {
-      throw new SecurityException("Only the team responsible can assign a secondary manager");
+    boolean isPrimary = team.getResponsible() != null
+        && team.getResponsible().getId().equals(responsibleId);
+    boolean isSecondary = team.getSecondResponsible() != null
+        && team.getSecondResponsible().getId().equals(responsibleId);
+
+    if (!isPrimary && !isSecondary) {
+      throw new SecurityException("Only a team responsible can assign a secondary manager");
     }
 
     Member member = memberRepository.findById(memberId)

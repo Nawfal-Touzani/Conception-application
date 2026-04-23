@@ -20,15 +20,16 @@ export const createTournament = async (
     },
     body: JSON.stringify(tournament),
   });
+
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(errorText || 'Erreur lors de la creation du tournoi');
+    throw new Error(errorText || 'Erreur lors de la création du tournoi.');
   }
+
   return response.json();
 };
 
 // GET /api/tournaments — récupère tous les tournois
-// token optionnel — un visiteur non connecté peut voir les tournois publics
 export const getTournaments = async (
   token: string,
   teamName?: string,
@@ -47,7 +48,12 @@ export const getTournaments = async (
   }
 
   const response = await fetch(url, { headers });
-  if (!response.ok) throw new Error('Erreur lors du chargement des tournois.');
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || 'Erreur lors du chargement des tournois.');
+  }
+
   return response.json();
 };
 
@@ -56,23 +62,34 @@ export const getTournamentById = async (
   token: string,
   id: number,
 ): Promise<TournamentDetails> => {
-  const response = await fetch(`api/tournaments/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!response.ok) throw new Error('Tournoi introuvable.');
+  const headers: Record<string, string> = {};
+  if (token && token.length > 0) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_URL}/${id}`, { headers });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || 'Tournoi introuvable.');
+  }
+
   return response.json();
 };
 
 // GET /api/tournaments/homepage
 export const getHomepageTournaments =
   async (): Promise<HomepageTournaments> => {
-    // no token needed, public endpoint
     const response = await fetch(`${API_URL}/homepage`);
+
     if (!response.ok) {
+      const errorText = await response.text();
       throw new Error(
-        "Erreur lors du chargement des tournois de la page d'accueil.",
+        errorText ||
+          "Erreur lors du chargement des tournois de la page d'accueil.",
       );
     }
+
     return response.json();
   };
 
@@ -90,10 +107,12 @@ export const updateTournament = async (
     },
     body: JSON.stringify(tournament),
   });
+
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(errorText || 'Erreur lors de la modification du tournoi');
+    throw new Error(errorText || 'Erreur lors de la modification du tournoi.');
   }
+
   return response.json();
 };
 
@@ -108,9 +127,11 @@ export const publishTournament = async (
       Authorization: `Bearer ${token}`,
     },
   });
+
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(errorText || 'Erreur lors de la publication du tournoi');
+    throw new Error(errorText || 'Erreur lors de la publication du tournoi.');
   }
+
   return response.json();
 };

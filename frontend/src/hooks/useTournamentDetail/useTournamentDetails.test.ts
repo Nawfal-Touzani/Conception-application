@@ -48,13 +48,17 @@ const mockOnRegister = vi.fn().mockResolvedValue(undefined);
 
 beforeEach(() => {
   vi.clearAllMocks();
+
   (teamService.getMyTeam as ReturnType<typeof vi.fn>).mockResolvedValue(
     mockTeam,
   );
+
   (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
     ok: true,
-    text: async () => '',
+    json: async () => ({}),
   });
+
+  mockOnRegister.mockClear();
 });
 
 describe('useTournamentDetail - états dérivés', () => {
@@ -167,7 +171,7 @@ describe('useTournamentDetail - handleRegister erreurs', () => {
     test(`affiche le bon message pour "${msg}"`, async () => {
       (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
         ok: false,
-        text: async () => JSON.stringify({ message: msg }),
+        json: async () => ({ message: msg }), // ← json, pas text
       });
 
       const { result } = renderHook(() =>
@@ -186,7 +190,7 @@ describe('useTournamentDetail - handleRegister erreurs', () => {
   test('appelle onRegister si message contient "already"', async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
       ok: false,
-      text: async () => JSON.stringify({ message: 'already registered' }),
+      json: async () => ({ message: 'already registered' }), // ← json, pas text
     });
 
     const { result } = renderHook(() =>
@@ -202,6 +206,7 @@ describe('useTournamentDetail - handleRegister erreurs', () => {
     expect(result.current.registerError).toBeNull();
   });
 
+  // Les deux tests suivants ne changent pas
   test('affiche erreur générique si fetch throw', async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockRejectedValue(
       new Error('Network error'),

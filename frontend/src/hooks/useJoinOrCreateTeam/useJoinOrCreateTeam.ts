@@ -28,63 +28,74 @@ export function useJoinOrCreateTeam(onTeamCreated: () => void) {
 
   useEffect(() => {
     if (!token) return;
-    teamService
-      .getTeams(token)
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setTeams(data);
-          setFilteredTeams(data);
-        }
-      })
-      .catch(() => {});
+
+    const loadTeams = async () => {
+      try {
+        const data = await teamService.getTeams(token);
+        setTeams(data);
+        setFilteredTeams(data);
+      } catch {
+        setSnack({
+          open: true,
+          msg: 'Erreur lors du chargement des équipes.',
+          severity: 'error',
+          section: 'join',
+        });
+      }
+    };
+
+    loadTeams();
   }, [token]);
 
   useEffect(() => {
-    if (!search.trim()) {
+    const trimmedSearch = search.trim().toLowerCase();
+
+    if (!trimmedSearch) {
       setFilteredTeams(teams);
-    } else {
-      setFilteredTeams(
-        teams.filter((t) =>
-          t.name.toLowerCase().includes(search.toLowerCase()),
-        ),
-      );
+      return;
     }
+
+    setFilteredTeams(
+      teams.filter((team) => team.name.toLowerCase().includes(trimmedSearch)),
+    );
   }, [search, teams]);
 
-  const closeSnack = () => setSnack((s) => ({ ...s, open: false }));
+  const closeSnack = () => {
+    setSnack((prev) => ({ ...prev, open: false }));
+  };
 
   const createTeam = async () => {
-    if (!teamName.trim()) return;
-    try {
-      const res = await teamService.createTeam(token, teamName);
-      if (res.status === 201) {
-        onTeamCreated();
-      } else if (res.status === 409) {
-        setSnack({
-          open: true,
-          msg: "Ce nom d'équipe existe déjà.",
-          severity: 'error',
-          section: 'create',
-        });
-      } else if (res.status === 400) {
-        setSnack({
-          open: true,
-          msg: "Nom d'équipe invalide.",
-          severity: 'error',
-          section: 'create',
-        });
-      } else {
-        setSnack({
-          open: true,
-          msg: 'Erreur lors de la création.',
-          severity: 'error',
-          section: 'create',
-        });
-      }
-    } catch {
+    const trimmedName = teamName.trim();
+
+    if (!trimmedName) {
       setSnack({
         open: true,
-        msg: 'Impossible de joindre le serveur.',
+        msg: "Veuillez entrer un nom d'équipe.",
+        severity: 'error',
+        section: 'create',
+      });
+      return;
+    }
+
+    try {
+      await teamService.createTeam(token, trimmedName);
+
+      setSnack({
+        open: true,
+        msg: 'Équipe créée avec succès !',
+        severity: 'success',
+        section: 'create',
+      });
+
+      setTeamName('');
+      onTeamCreated();
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message : 'Erreur lors de la création.';
+
+      setSnack({
+        open: true,
+        msg,
         severity: 'error',
         section: 'create',
       });
@@ -92,29 +103,34 @@ export function useJoinOrCreateTeam(onTeamCreated: () => void) {
   };
 
   const joinTeam = async () => {
-    if (selectedTeamId === '') return;
-    try {
-      const res = await teamService.sendJoinRequest(token, selectedTeamId);
-      if (res.ok || res.status === 201) {
-        setSnack({
-          open: true,
-          msg: 'Demande envoyée avec succès !',
-          severity: 'success',
-          section: 'join',
-        });
-        setSelectedTeamId('');
-      } else {
-        setSnack({
-          open: true,
-          msg: "Erreur lors de l'envoi.",
-          severity: 'error',
-          section: 'join',
-        });
-      }
-    } catch {
+    if (selectedTeamId === '') {
       setSnack({
         open: true,
-        msg: 'Impossible de joindre le serveur.',
+        msg: 'Veuillez sélectionner une équipe.',
+        severity: 'error',
+        section: 'join',
+      });
+      return;
+    }
+
+    try {
+      await teamService.sendJoinRequest(token, selectedTeamId);
+
+      setSnack({
+        open: true,
+        msg: 'Demande envoyée avec succès !',
+        severity: 'success',
+        section: 'join',
+      });
+
+      setSelectedTeamId('');
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message : 'Erreur lors de la demande.';
+
+      setSnack({
+        open: true,
+        msg,
         severity: 'error',
         section: 'join',
       });
