@@ -12,6 +12,8 @@ import { TournamentDetails } from '../../../../types/tournament.types';
 import { useAuth } from '../../../../contexts/useAuth';
 import * as tournamentService from '../../../../services/tournament/tournament.service';
 import { useNavigate } from 'react-router-dom';
+import { MatchSelectionStatus } from '../../../../types/match.types';
+import { getMatchSelectionStatuses } from '../../../../services/match/match.service';
 
 type Props = {
   tournament: TournamentDetails;
@@ -24,6 +26,7 @@ function statusLabel(tournament: TournamentDetails): string {
   if (tournament.status === 'PREPARATION') {
     return tournament.isPublic ? 'Inscriptions ouvertes' : 'En préparation';
   }
+  if (tournament.status === 'UPCOMING') return 'Complet';
   if (tournament.status === 'IN_PROGRESS') return 'En cours';
   if (tournament.status === 'FINISHED') return 'Terminé';
   return 'Annulé';
@@ -104,6 +107,7 @@ const TournamentAdminPage = ({
     tournament.status === 'PREPARATION' && !tournament.isPublic;
 
   const [planningPublished, setPlanningPublished] = useState(false);
+  const [allSelectionsReady, setAllSelectionsReady] = useState(false);
 
   useEffect(() => {
     fetch(`http://localhost:3000/tournaments/${tournament.id}/matches`, {
@@ -114,7 +118,20 @@ const TournamentAdminPage = ({
         setPlanningPublished(matches.length > 0);
       })
       .catch(() => setPlanningPublished(false));
-  }, [tournament.id, token]);
+
+    if (tournament.status === 'IN_PROGRESS') {
+      getMatchSelectionStatuses(tournament.id, token)
+        .then((statuses: MatchSelectionStatus[]) => {
+          const firstRound = statuses.filter((s) => s.roundNumber === 1);
+          const ready =
+            firstRound.length > 0 &&
+            firstRound.every((s) => s.teamAReady && s.teamBReady);
+          setAllSelectionsReady(ready);
+        })
+        .catch(() => setAllSelectionsReady(false));
+    }
+  }, [tournament.id, tournament.status, token]);
+
   return (
     <Box
       sx={{
@@ -327,29 +344,49 @@ const TournamentAdminPage = ({
                 }}
               />
             )}
-            {tournament.isPublic && (
-              <Button
-                variant="contained"
-                onClick={() =>
-                  navigate(`/encode/result/${tournament.id}`, {
-                    state: { tournamentName: tournament.name },
-                  })
-                }
-                fullWidth
-                sx={{
-                  backgroundColor: '#2ecc71',
-                  color: '#fff',
-                  textTransform: 'none',
-                  fontWeight: 700,
-                  fontSize: '0.95rem',
-                  borderRadius: '8px',
-                  '&:hover': { backgroundColor: '#27ae60' },
-                }}
-              >
-                Encoder les résultats
-              </Button>
+
+            {tournament.status === 'IN_PROGRESS' && (
+              <>
+                <Button
+                  variant="contained"
+                  disabled={!allSelectionsReady}
+                  onClick={() =>
+                    navigate(`/encode/result/${tournament.id}`, {
+                      state: { tournamentName: tournament.name },
+                    })
+                  }
+                  fullWidth
+                  sx={{
+                    backgroundColor: '#2ecc71',
+                    color: '#fff',
+                    textTransform: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.95rem',
+                    borderRadius: '8px',
+                    '&:hover': { backgroundColor: '#27ae60' },
+                    '&.Mui-disabled': {
+                      backgroundColor: 'rgba(46,204,113,0.3)',
+                      color: 'rgba(255,255,255,0.4)',
+                    },
+                  }}
+                >
+                  Encoder les résultats
+                </Button>
+                {!allSelectionsReady && (
+                  <Typography
+                    sx={{
+                      color: 'rgba(255,255,255,0.5)',
+                      fontSize: '0.8rem',
+                      textAlign: 'center',
+                    }}
+                  >
+                    En attente des compositions des deux équipes.
+                  </Typography>
+                )}
+              </>
             )}
-            {tournament.isPublic && !planningPublished && (
+
+            {tournament.status === 'UPCOMING' && !planningPublished && (
               <Button
                 variant="contained"
                 onClick={() => onNavigateToPlanning(tournament.id)}
