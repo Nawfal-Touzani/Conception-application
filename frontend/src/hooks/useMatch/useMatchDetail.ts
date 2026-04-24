@@ -25,33 +25,51 @@ export const useMatchDetail = (
   initialMatch: MatchDetail,
   token: string,
 ): UseMatchDetailResult => {
+  // garde en memoire le match actuellement affiche
   const [match, setMatch] = useState<MatchDetail>(initialMatch);
+
+  // suit les appels api en cours pour bloquer certains boutons
   const [loading, setLoading] = useState(false);
+
+  // contient le message d'erreur visible dans l'ui
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // contient le message de succes visible dans l'ui
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  // ouvre ou ferme la confirmation de forfait
   const [showForfeitConfirm, setShowForfeitConfirm] = useState(false);
+
+  // ouvre ou ferme la confirmation de contestation
   const [showContestConfirm, setShowContestConfirm] = useState(false);
 
-  // Helper interne qui factorise le loading/error/success autour d'une action
+  // centralise le comportement commun de toutes les actions async
   const runAction = async (
     action: () => Promise<MatchDetail>,
     onSuccess?: (updated: MatchDetail) => void,
   ) => {
+    // remet les messages a zero avant une nouvelle action
     setLoading(true);
     setErrorMsg(null);
     setSuccessMsg(null);
 
     try {
       const updated = await action();
+
+      // met a jour le match local avec la reponse du back
       setMatch(updated);
+
+      // laisse chaque action ajouter son comportement specifique
       onSuccess?.(updated);
     } catch (err) {
+      // transforme l'erreur en message simple pour l'utilisateur
       if (err instanceof Error) {
         setErrorMsg(err.message);
       } else {
         setErrorMsg('Une erreur est survenue.');
       }
     } finally {
+      // termine toujours le loading meme si l'appel echoue
       setLoading(false);
     }
   };
@@ -60,7 +78,8 @@ export const useMatchDetail = (
     await runAction(
       () => declareForfeit(match.id, token),
       () => {
-        setSuccessMsg('Forfait déclaré. Score attribué 0–5.');
+        // ferme la modale puis confirme l'action a l'utilisateur
+        setSuccessMsg('Forfait declare. Score attribue 0 - 5.');
         setShowForfeitConfirm(false);
       },
     );
@@ -69,7 +88,10 @@ export const useMatchDetail = (
   const handleValidate = async () => {
     await runAction(
       () => validateResult(match.id, token),
-      () => setSuccessMsg('Résultat validé.'),
+      () => {
+        // informe que le resultat a ete valide
+        setSuccessMsg('Resultat valide.');
+      },
     );
   };
 
@@ -77,7 +99,8 @@ export const useMatchDetail = (
     await runAction(
       () => contestResult(match.id, token),
       () => {
-        setSuccessMsg('Résultat contesté. Un administrateur va vérifier.');
+        // ferme la modale puis informe qu'un controle suivra
+        setSuccessMsg('Resultat conteste. Un administrateur va verifier.');
         setShowContestConfirm(false);
       },
     );
