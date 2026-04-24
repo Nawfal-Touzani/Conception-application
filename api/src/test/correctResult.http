@@ -1,0 +1,51 @@
+@baseUrl = http://localhost:3000
+@tokenAdmin = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsInVzZXJuYW1lIjoibWFuYWdlciIsImlhdCI6MTc3Mjk4NDI4MiwiZXhwIjoxNzczMDcwNjgyfQ.CaWuGQLW9547D2q65CVYE_74SuX8g3wlX0eETMt8uHE
+
+### Correct result - success (should return 200)
+PUT {{baseUrl}}/matches/1/result
+Authorization: Bearer {{tokenAdmin}}
+Content-Type: application/json
+
+{
+  "scoreA": 2,
+  "scoreB": 3
+}
+
+### Correct result - result not refused (should return 400)
+PUT {{baseUrl}}/matches/2/result
+Authorization: Bearer {{tokenAdmin}}
+Content-Type: application/json
+
+{
+  "scoreA": 2,
+  "scoreB": 3
+}
+
+### Correct result - draw (should return 400)
+PUT {{baseUrl}}/matches/1/result
+Authorization: Bearer {{tokenAdmin}}
+Content-Type: application/json
+
+{
+  "scoreA": 2,
+  "scoreB": 2
+}
+
+### Correct result - match not found (should return 404)
+PUT {{baseUrl}}/matches/999/result
+Authorization: Bearer {{tokenAdmin}}
+Content-Type: application/json
+
+{
+  "scoreA": 2,
+  "scoreB": 3
+}
+
+### Correct result - unauthorized (should return 403)
+PUT {{baseUrl}}/matches/1/result
+Content-Type: application/json
+
+{
+  "scoreA": 2,
+  "scoreB": 3
+}

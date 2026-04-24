@@ -9,6 +9,7 @@ import be.vinci.ipl.cae.api.models.entities.Speciality;
 import be.vinci.ipl.cae.api.repositories.ImageRepository;
 import be.vinci.ipl.cae.api.repositories.MemberRepository;
 import be.vinci.ipl.cae.api.repositories.SpecialityRepository;
+import be.vinci.ipl.cae.api.repositories.TeamRepository;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import java.time.LocalDate;
@@ -31,6 +32,9 @@ public class AuthService {
   private final MemberRepository memberRepository;
   private final ImageRepository imageRepository;
   private final SpecialityRepository specialityRepository;
+  private final TeamRepository teamRepository;
+
+
   // Secret injection by .env
   @Value("${JWT_SECRET}")
   private String jwtSecret;
@@ -42,13 +46,16 @@ public class AuthService {
    * @param memberRepository     repository for member persistence and lookup
    * @param imageRepository      repository used to validate the profile image on registration
    * @param specialityRepository repository used to validate the speciality on registration
+   * @param teamRepository       repository used to determine whether a member is team responsible
    */
   public AuthService(BCryptPasswordEncoder passwordEncoder, MemberRepository memberRepository,
-      ImageRepository imageRepository, SpecialityRepository specialityRepository) {
+      ImageRepository imageRepository, SpecialityRepository specialityRepository,
+      TeamRepository teamRepository) {
     this.passwordEncoder = passwordEncoder;
     this.memberRepository = memberRepository;
     this.imageRepository = imageRepository;
     this.specialityRepository = specialityRepository;
+    this.teamRepository = teamRepository;
   }
 
   /**
@@ -97,7 +104,7 @@ public class AuthService {
 
     // If banned, can't login
     if (member.isBan()) {
-      throw new IllegalStateException("Votre compte a été banni.");
+      throw new SecurityException("Votre compte a été banni.");
     }
 
     return createJwtToken(member);
@@ -150,5 +157,17 @@ public class AuthService {
    */
   public Member readOneFromEmail(String email) {
     return memberRepository.findByEmail(email).orElse(null);
+  }
+
+  /**
+   * Checks whether a member is responsible of at least one team, either as main responsible
+   * or as second responsible.
+   *
+   * @param member the member to check
+   * @return true if the member is responsible of at least one team
+   */
+  public boolean isResponsible(Member member) {
+    return teamRepository.existsByResponsible(member)
+        || teamRepository.existsBySecondResponsible(member);
   }
 }

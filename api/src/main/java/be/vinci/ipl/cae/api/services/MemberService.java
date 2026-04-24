@@ -28,10 +28,10 @@ public class MemberService {
   private final MemberRepository memberRepository;
   private final SpecialityRepository specialityRepository;
   private final ImageRepository imageRepository;
-  private BCryptPasswordEncoder passwordEncoder;
   private final TeamCompositionRepository teamCompositionRepository;
   private final UnavailabilityRepository unavailabilityRepository;
   private final BanishmentRepository banishmentRepository;
+  private final BCryptPasswordEncoder passwordEncoder;
 
   /**
    * Constructor for MemberService.
@@ -116,17 +116,18 @@ public class MemberService {
   }
 
   /**
-   * Promote a member to administrator.
+   * Promotes a member to administrator.
    *
    * @param memberId the ID of the member to promote
-   * @throws RuntimeException if the member does not exist or is already admin
+   * @throws NoSuchElementException if no member exists with the given ID
+   * @throws IllegalStateException  if the member is already an administrator
    */
   public void promoteToAdmin(Long memberId) {
     Member member = memberRepository.findById(memberId)
-        .orElseThrow(() -> new RuntimeException("Member not found"));
+        .orElseThrow(() -> new NoSuchElementException("Member not found"));
 
     if (member.getIsAdmin()) {
-      throw new RuntimeException("Member is already an administrator");
+      throw new IllegalStateException("Member is already an administrator");
     }
 
     member.setIsAdmin(true);
@@ -134,22 +135,24 @@ public class MemberService {
   }
 
   /**
-   * Demote an administrator to regular member.
+   * Demotes an administrator to a regular member.
    *
    * @param memberId the ID of the member to demote
-   * @throws RuntimeException if the member does not exist, is not admin, or is the last admin
+   * @throws NoSuchElementException if no member exists with the given ID
+   * @throws IllegalStateException  if the member is not an administrator
+   * @throws IllegalStateException  if the member is the last remaining administrator
    */
   public void demoteFromAdmin(Long memberId) {
     Member member = memberRepository.findById(memberId)
-        .orElseThrow(() -> new RuntimeException("Member not found"));
+        .orElseThrow(() -> new NoSuchElementException("Member not found"));
 
     if (!member.getIsAdmin()) {
-      throw new RuntimeException("Member is not an administrator");
+      throw new IllegalStateException("Member is not an administrator");
     }
 
     long adminCount = memberRepository.countByIsAdminTrue();
     if (adminCount <= 1) {
-      throw new RuntimeException("Cannot remove the last administrator");
+      throw new IllegalStateException("Cannot remove the last administrator");
     }
 
     member.setIsAdmin(false);
@@ -173,9 +176,25 @@ public class MemberService {
    */
   @Transactional
   public List<MemberProfileResponseDto> getAllMembers() {
-    return memberRepository.findAll().stream()
-        .map(m -> getProfile(m.getEmail()))
-        .toList();
+    return memberRepository.findAll().stream().map(m -> getProfile(m.getEmail())).toList();
+  }
+
+  /**
+   * Gets all member profiles in a single query (admin only).
+   *
+   * @return list of all member profiles
+   */
+  public List<MemberProfileResponseDto> getAllMemberProfiles() {
+    return memberRepository.findAll().stream().map(this::mapToProfileDto).toList();
+  }
+
+  /**
+   * Gets all admin profiles in a single query (admin only).
+   *
+   * @return list of admin profiles
+   */
+  public List<MemberProfileResponseDto> getAllAdminProfiles() {
+    return memberRepository.findByIsAdminTrue().stream().map(this::mapToProfileDto).toList();
   }
 
   /**
@@ -195,54 +214,38 @@ public class MemberService {
   private MemberProfileResponseDto mapToProfileDto(Member member) {
     Banishment ban = banishmentRepository.findByBannedMemberId(member.getId()).orElse(null);
 
-    return new MemberProfileResponseDto(
-        member.getId(),
-        member.getEmail(),
-        member.getTag(),
-        member.getSpeciality().getName(),
-        getMemberTeamName(member.getId()),
-        member.getImage().getUrl(),
-        member.getProfileCreationDate(),
-        member.getIsAdmin(),
-        isMemberAvailable(member),
-        member.isBan(),
-        ban != null ? ban.getReason() : null,
-        ban != null ? ban.getBanishmentDate() : null
-    );
+    return new MemberProfileResponseDto(member.getId(), member.getEmail(), member.getTag(),
+        member.getSpeciality().getName(), getMemberTeamName(member.getId()),
+        member.getImage().getUrl(), member.getProfileCreationDate(), member.getIsAdmin(),
+        isMemberAvailable(member), member.isBan(), ban != null ? ban.getReason() : null,
+        ban != null ? ban.getBanishmentDate() : null);
   }
 
   private String getMemberTeamName(Long memberId) {
     return teamCompositionRepository.findByMemberId(memberId)
-        .map(compo -> compo.getTeam().getName())
-        .orElse(null);
+        .map(compo -> compo.getTeam().getName()).orElse(null);
   }
 
   private boolean isMemberAvailable(Member member) {
     LocalDate today = LocalDate.now();
     boolean isUnavailable = unavailabilityRepository
         .existsByMemberAndStartDateBeforeAndEndDateAfter(
-            member,
-            today.plusDays(1),
-            today.minusDays(1)
-        );
+            member, today.plusDays(1), today.minusDays(1));
     return !isUnavailable;
   }
 
   private void performProfileUpdates(Member member, UpdateMemberProfileDto payload) {
     if (payload.speciality() != null) {
-      specialityRepository.findByName(payload.speciality())
-          .ifPresent(member::setSpeciality);
+      specialityRepository.findByName(payload.speciality()).ifPresent(member::setSpeciality);
     }
 
     if (payload.profileImage() != null) {
-      imageRepository.findByUrl(payload.profileImage())
-          .ifPresent(member::setImage);
+      imageRepository.findByUrl(payload.profileImage()).ifPresent(member::setImage);
     }
   }
 
   private boolean isInvalidPasswordRequest(ChangePasswordDto dto) {
-    return dto == null || dto.newPassword() == null
-        || dto.newPassword().equals(dto.oldPassword())
+    return dto == null || dto.newPassword() == null || dto.newPassword().equals(dto.oldPassword())
         || !dto.newPassword().equals(dto.confirmPassword());
   }
 
@@ -251,14 +254,19 @@ public class MemberService {
     String speciality = member.getSpeciality().getName();
     String teamName = getMemberTeamName(member.getId());
 
-    return new PublicMemberDto(
-        member.getId(),
-        member.getTag(),
-        image,
-        speciality,
-        teamName,
-        member.getProfileCreationDate()
-    );
+    return new PublicMemberDto(member.getId(), member.getTag(), image, speciality, teamName,
+        member.getProfileCreationDate());
   }
 
+  /**
+   * Retrieves a member by their email address.
+   *
+   * @param email the member's email
+   * @return the member
+   * @throws NoSuchElementException if not found
+   */
+  public Member getByEmail(String email) {
+    return memberRepository.findByEmail(email)
+        .orElseThrow(() -> new NoSuchElementException("Member not found with email " + email));
+  }
 }

@@ -29,7 +29,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "matchs")
+@Table(name = "matches")
 public class Match {
 
   /**
@@ -87,21 +87,22 @@ public class Match {
   private Tournament tournament;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "id_team_A")
+  @JoinColumn(name = "id_team_a")
   private Team teamA;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "id_team_B")
+  @JoinColumn(name = "id_team_b")
   private Team teamB;
 
   @Column(name = "round_number", nullable = false)
   private Integer roundNumber;
 
-  @Column(name = "date_time", nullable = false)
+  @Column(name = "date_time")
   private LocalDateTime dateTime;
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private MatchState state;
+  private MatchState state = MatchState.SCHEDULED;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "id_responsible_admin")
@@ -113,20 +114,52 @@ public class Match {
   @Column(name = "score_B")
   private Integer scoreB;
 
+  @Column(name = "result_encoded_date")
+  private LocalDateTime resultEncodedDate;
+
   @Enumerated(EnumType.STRING)
-  @Column(name = "result_statut")
-  private ResultStatus resultStatus;
+  @Column(name = "result_status", nullable = false)
+  private ResultStatus resultStatus = ResultStatus.NOT_ENTERED;
+
+  @Column(name = "team_a_has_already_contested", nullable = false)
+  private boolean contestedByTeamA = false;
+
+  @Column(name = "team_b_has_already_contested", nullable = false)
+  private boolean contestedByTeamB = false;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "winner")
+  @JoinColumn(name = "id_winner")
   private Team winner;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "next_game")
+  @JoinColumn(name = "id_next_match")
   private Match nextMatch;
 
   @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonManagedReference("match-notifications")
   private List<Notification> notifications = new ArrayList<>();
 
+  @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonManagedReference("match-selections")
+  private List<PlayersSelection> playersSelections = new ArrayList<>();
+
+  @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonManagedReference("match-validations")
+  private List<ValidationResult> validationResults = new ArrayList<>();
+
+  /**
+   * Constructs a Match with the minimum required fields at creation time.
+   *
+   * @param tournament       the tournament this match belongs to
+   * @param roundNumber      the round number in the bracket
+   * @param dateTime         the scheduled date and time
+   * @param responsibleAdmin the admin responsible for this match
+   */
+  public Match(Tournament tournament, Integer roundNumber,
+      LocalDateTime dateTime, Member responsibleAdmin) {
+    this.tournament = tournament;
+    this.roundNumber = roundNumber;
+    this.dateTime = dateTime;
+    this.responsibleAdmin = responsibleAdmin;
+  }
 }

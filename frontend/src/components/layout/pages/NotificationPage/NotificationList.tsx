@@ -8,23 +8,34 @@ interface NotificationListProps {
   onMarkAsRead: (notificationId: number) => void;
   onApprove?: (membershipRequestId: number) => void;
   onRefuse?: (membershipRequestId: number, reason: string) => void;
+  onValidateResult?: (matchId: number) => void;
+  onContestResult?: (matchId: number) => void;
+  onCorrectResult?: (matchId: number, scoreA: number, scoreB: number) => void;
 }
 
+// Liste de toutes les notifications
 const NotificationList = ({
   notifications,
   onMarkAsRead,
   onApprove,
   onRefuse,
+  onValidateResult,
+  onContestResult,
+  onCorrectResult,
 }: NotificationListProps) => {
   return (
     <List>
       {notifications.map((notif) => (
+        // on affiche chaque notification
         <NotificationItem
           key={notif.id}
           notification={notif}
           onMarkAsRead={onMarkAsRead}
           onApprove={onApprove}
           onRefuse={onRefuse}
+          onValidateResult={onValidateResult}
+          onContestResult={onContestResult}
+          onCorrectResult={onCorrectResult}
         />
       ))}
     </List>

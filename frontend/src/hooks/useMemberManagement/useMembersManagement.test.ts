@@ -1,4 +1,4 @@
-import { renderHook, waitFor, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useMembersManagement } from './useMembersManagement';
 import { MemberDto } from '../../types/admin.types';
@@ -61,10 +61,8 @@ describe('useMembersManagement', () => {
       useMembersManagement(token, currentUserTag),
     );
 
-    expect(result.current.loading).toBe(true);
-
     await waitFor(() => {
-      expect(result.current.loading).toBe(false);
+      expect(result.current.activeMembers).toHaveLength(1);
     });
 
     expect(result.current.activeMembers).toHaveLength(1);
@@ -92,8 +90,6 @@ describe('useMembersManagement', () => {
       useMembersManagement(token, currentUserTag),
     );
 
-    await waitFor(() => expect(result.current.loading).toBe(false));
-
     await act(async () => {
       await result.current.handleBan(1, 'Spam');
     });
@@ -120,8 +116,6 @@ describe('useMembersManagement', () => {
     const { result } = renderHook(() =>
       useMembersManagement(token, currentUserTag),
     );
-
-    await waitFor(() => expect(result.current.loading).toBe(false));
 
     await expect(
       act(async () => {

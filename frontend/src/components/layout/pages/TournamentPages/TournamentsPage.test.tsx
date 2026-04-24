@@ -3,12 +3,26 @@ import { MemoryRouter } from 'react-router-dom';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import TournamentsPage from './TournamentPage';
 import { AuthContext } from '../../../../contexts/AuthContext';
+import * as matchService from '../../../../services/match/match.service';
 
 vi.mock('../../../../services/tournament/tournament.service', () => ({
   getTournaments: vi.fn(),
 }));
 
+vi.mock('../../../../services/tournament/tournament.service', () => ({
+  updateTournament: vi.fn(),
+  publishTournament: vi.fn(),
+  getTournaments: vi.fn(),
+}));
+
+vi.mock('../../../../services/match/match.service', () => ({
+  getBracketByTournament: vi.fn(),
+  getMatchById: vi.fn(),
+}));
+
 import * as tournamentService from '../../../../services/tournament/tournament.service';
+
+// ─── Fixtures ─────────────────────────────────────────────────────────────────
 
 const mockAdmin = {
   id: 1,
@@ -48,7 +62,7 @@ const tournamentOpen = {
   description: 'Tournoi de Pâques',
   startDate: '2026-04-15',
   endDate: '2026-04-25',
-  registrationDeadline: '2026-04-08',
+  registrationDeadline: '2099-12-31',
   maxParticipants: 8,
   currentParticipants: 3,
   status: 'PREPARATION' as const,
@@ -119,6 +133,8 @@ const renderAsUser = () =>
 beforeEach(() => {
   vi.clearAllMocks();
 });
+
+// ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('TournamentsPage', () => {
   test('affiche le titre de la page', async () => {
@@ -225,14 +241,14 @@ describe('TournamentsPage', () => {
     });
   });
 
-  test('filtre par statut "En Cours"', async () => {
+  test('filtre par statut "En cours"', async () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
     ).mockResolvedValue([tournamentOpen, tournamentInProgress]);
     renderAsUser();
     await screen.findByText('Spring Battle Series 2026');
 
-    fireEvent.click(screen.getByLabelText('En Cours'));
+    fireEvent.click(screen.getByLabelText('En cours'));
 
     await waitFor(() => {
       expect(screen.queryByText('Spring Battle Series 2026')).toBeTruthy();
@@ -314,6 +330,23 @@ describe('TournamentsPage', () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>
     ).mockResolvedValue([tournamentOpen]);
+
+    (
+      matchService.getBracketByTournament as ReturnType<typeof vi.fn>
+    ).mockResolvedValue([
+      {
+        id: 10,
+        roundNumber: 1,
+        roundLabel: 'Quarts',
+        teamA: { id: 1, name: 'Team A' },
+        teamB: { id: 2, name: 'Team B' },
+        scoreA: null,
+        scoreB: null,
+        winnerId: null,
+        state: 'SCHEDULED',
+      },
+    ]);
+
     renderAsUser();
     await screen.findByText('Vinci Easter Cup 2026');
 
@@ -324,6 +357,7 @@ describe('TournamentsPage', () => {
 
     expect(await screen.findByText('Quarts')).toBeTruthy();
   });
+
   test('clique sur Administrer navigue vers TournamentAdminPage', async () => {
     (
       tournamentService.getTournaments as ReturnType<typeof vi.fn>

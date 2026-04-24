@@ -21,6 +21,7 @@ interface BanModalProps {
   onConfirm: (reason: string) => Promise<void>;
 }
 
+// Pop-up de confirmation du ban (ou on ajoute la raison du ban)
 export const BanModal = ({
   open,
   onClose,
@@ -31,12 +32,14 @@ export const BanModal = ({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // reset du pop-up quand le pop-up est fermé
   const resetState = () => {
     setReason('');
     setError(null);
     setLoading(false);
   };
 
+  // logique de validation et envoi
   const handleConfirm = async () => {
     if (!reason.trim()) {
       setError('Veuillez indiquer une raison pour le bannissement.');
@@ -59,6 +62,7 @@ export const BanModal = ({
     <Dialog
       open={open}
       onClose={onClose}
+      // Réinitialise l'état quand le pop-up est closed
       TransitionProps={{ onExited: resetState }}
       PaperProps={{
         sx: {

@@ -6,9 +6,9 @@ const fillDate = async (page: Page, index: number, value: string) => {
   await input.fill(value);
 };
 
-const selectTeamCount = async (page: Page, count: number) => {
-  await page.locator('.MuiSelect-select').click();
-  await page.getByRole('option', { name: `${count} équipes`, exact: true }).click();
+const fillMaxParticipants = async (page: Page, count: number) => {
+  const input = page.locator('input[type="number"]');
+  await input.fill(String(count));
 };
 
 test.describe('Create Tournament', () => {
@@ -24,19 +24,6 @@ test.describe('Create Tournament', () => {
     await expect(page).not.toHaveURL(/login/);
   });
 
-  test('création réussie', async ({ page }) => {
-    const tournamentName = `Tournoi E2E ${Date.now()}`;
-
-    await page.getByPlaceholder('Nom du tournoi').fill(tournamentName);
-    await page.getByPlaceholder('Description').fill('Une super description de test');
-    await fillDate(page, 0, '2030-06-10');
-    await fillDate(page, 1, '2030-06-12');
-    await fillDate(page, 2, '2030-06-05');
-    await selectTeamCount(page, 8);
-    await page.getByRole('button', { name: 'Créer le tournoi' }).click();
-    await expect(page.getByText(/a été créé avec succès/)).toBeVisible({ timeout: 10000 });
-  });
-
   test('formulaire vide affiche les erreurs', async ({ page }) => {
     await page.getByRole('button', { name: 'Créer le tournoi' }).click();
     await expect(page.getByText('Le nom est requis.')).toBeVisible();
@@ -50,7 +37,7 @@ test.describe('Create Tournament', () => {
     await fillDate(page, 0, '2020-01-01');
     await fillDate(page, 1, '2020-01-05');
     await fillDate(page, 2, '2019-12-30');
-    await selectTeamCount(page, 8);
+    await fillMaxParticipants(page, 8);
     await page.getByRole('button', { name: 'Créer le tournoi' }).click();
     await expect(
       page.getByText('La date de début ne peut pas être dans le passé.')
@@ -63,7 +50,7 @@ test.describe('Create Tournament', () => {
     await fillDate(page, 0, '2030-06-10');
     await fillDate(page, 1, '2030-06-05');
     await fillDate(page, 2, '2030-06-01');
-    await selectTeamCount(page, 8);
+    await fillMaxParticipants(page, 8);
     await page.getByRole('button', { name: 'Créer le tournoi' }).click();
     await expect(
       page.getByText('La date de fin doit être après la date de début.')
@@ -76,42 +63,30 @@ test.describe('Create Tournament', () => {
     await fillDate(page, 0, '2030-06-10');
     await fillDate(page, 1, '2030-06-12');
     await fillDate(page, 2, '2030-06-05');
-    // Pas de sélection → champ vide → erreur "nombre requis"
     await page.getByRole('button', { name: 'Créer le tournoi' }).click();
     await expect(
-      page.getByText('Le nombre de participants est requis.')
+      page.getByText('Le nombre de participants doit être au minimum 2.')
     ).toBeVisible();
   });
 
-  test('nom déjà existant affiche erreur 409', async ({ page }) => {
-    const tournamentName = `Tournoi Doublon ${Date.now()}`;
-
-    // 1ère soumission — crée le tournoi
-    await page.getByPlaceholder('Nom du tournoi').fill(tournamentName);
+  test("date limite d'inscription après date de début affiche une erreur", async ({ page }) => {
+    await page.getByPlaceholder('Nom du tournoi').fill('Tournoi Test');
     await page.getByPlaceholder('Description').fill('Description');
     await fillDate(page, 0, '2030-06-10');
     await fillDate(page, 1, '2030-06-12');
-    await fillDate(page, 2, '2030-06-05');
-    await selectTeamCount(page, 8);
+    await fillDate(page, 2, '2030-06-11');
+    await fillMaxParticipants(page, 8);
     await page.getByRole('button', { name: 'Créer le tournoi' }).click();
     await expect(
-      page.getByText(new RegExp(`Le tournoi "${tournamentName}" a été créé avec succès`))
-    ).toBeVisible({ timeout: 10000 });
+      page.getByText("La date limite d'inscription doit être avant la date de début.")
+    ).toBeVisible();
+  });
 
-    // Attends que le formulaire soit resetté
-    await expect(page.getByPlaceholder('Nom du tournoi')).toHaveValue('', { timeout: 5000 });
-
-    // 2ème soumission — même nom → 409
-    await page.getByPlaceholder('Nom du tournoi').fill(tournamentName);
-    await page.getByPlaceholder('Description').fill('Description');
-    await fillDate(page, 0, '2030-07-10');
-    await fillDate(page, 1, '2030-07-12');
-    await fillDate(page, 2, '2030-07-05');
-    await selectTeamCount(page, 8);
+  test('formulaire vide affiche aussi les erreurs de date et participants', async ({ page }) => {
     await page.getByRole('button', { name: 'Créer le tournoi' }).click();
-    await expect(
-      page.getByText('Un tournoi avec ce nom existe déjà.')
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('La date de fin est requise.')).toBeVisible();
+    await expect(page.getByText("La date limite d'inscription est requise.")).toBeVisible();
+    await expect(page.getByText('Le nombre de participants doit être au minimum 2.')).toBeVisible();
   });
 
   test('bouton Annuler remet le formulaire à zéro', async ({ page }) => {

@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import TournamentAdminPage from './TournamentAdminPage';
 import { AuthContext } from '../../../../contexts/AuthContext';
+import { MemoryRouter } from 'react-router-dom';
 
 vi.mock('../../../../services/tournament/tournament.service', () => ({
   updateTournament: vi.fn(),
@@ -9,6 +10,8 @@ vi.mock('../../../../services/tournament/tournament.service', () => ({
 }));
 
 import * as tournamentService from '../../../../services/tournament/tournament.service';
+
+// ─── Fixtures ─────────────────────────────────────────────────────────────────
 
 const mockAdmin = {
   id: 1,
@@ -42,21 +45,28 @@ const baseTournament = {
 
 const onBack = vi.fn();
 const onUpdated = vi.fn();
+const onNavigateToPlanning = vi.fn();
 
 const renderComponent = (tournament = baseTournament) =>
   render(
-    <AuthContext.Provider value={mockContext}>
-      <TournamentAdminPage
-        tournament={tournament}
-        onBack={onBack}
-        onUpdated={onUpdated}
-      />
-    </AuthContext.Provider>,
+    <MemoryRouter>
+      <AuthContext.Provider value={mockContext}>
+        <TournamentAdminPage
+          tournament={tournament}
+          onBack={onBack}
+          onUpdated={onUpdated}
+          onNavigateToPlanning={onNavigateToPlanning}
+          onNavigateToEncodeResult={vi.fn()}
+        />
+      </AuthContext.Provider>
+    </MemoryRouter>,
   );
 
 beforeEach(() => {
   vi.clearAllMocks();
 });
+
+// ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('TournamentAdminPage', () => {
   // ── Affichage ──

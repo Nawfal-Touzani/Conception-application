@@ -1,0 +1,17 @@
+@baseUrl = http://localhost:3000
+@tokenResponsible = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsInVzZXJuYW1lIjoibWFuYWdlciIsImlhdCI6MTc3Mjk4NDI4MiwiZXhwIjoxNzczMDcwNjgyfQ.CaWuGQLW9547D2q65CVYE_74SuX8g3wlX0eETMt8uHE
+
+### Declare forfeit - success (should return 200)
+POST {{baseUrl}}/matches/1/forfeit
+Authorization: Bearer {{tokenResponsible}}
+
+### Declare forfeit - match not scheduled (should return 400)
+POST {{baseUrl}}/matches/2/forfeit
+Authorization: Bearer {{tokenResponsible}}
+
+### Declare forfeit - match not found (should return 404)
+POST {{baseUrl}}/matches/999/forfeit
+Authorization: Bearer {{tokenResponsible}}
+
+### Declare forfeit - unauthorized (should return 403)
+POST {{baseUrl}}/matches/1/forfeit

@@ -5,18 +5,22 @@ import {
   Button,
   Alert,
   Paper,
-  Select,
-  MenuItem,
 } from '@mui/material';
 import { useAuth } from '../../../../contexts/useAuth';
 import * as tournamentService from '../../../../services/tournament/tournament.service';
 import { useTournamentForm } from '../../../../hooks/useTournamentForm/useTournamentForm';
-
-const NUMBER_OF_TEAM = [2, 4, 8, 16, 32, 64, 128];
+import { useNavigate } from 'react-router-dom';
 
 const CreateTournamentPage = () => {
+  // récup l'utilisateur connecté
   const { user } = useAuth();
+
+  // token pour les appels API
   const token = user?.token ?? '';
+
+  const navigate = useNavigate();
+
+  // hook custom pour gérer le formulaire
   const {
     name,
     setName,
@@ -38,14 +42,18 @@ const CreateTournamentPage = () => {
     validate,
   } = useTournamentForm();
 
+  // quand on clique sur "Créer"
   const handleSubmit = async () => {
+    // reset des messages
     setErrors([]);
     setSuccess(null);
 
+    // vérifie les champs
     if (!validate()) return;
 
     try {
-      await tournamentService.createTournament(
+      // appel API pour créer le tournoi
+      const result = await tournamentService.createTournament(
         user!.id,
         {
           name,
@@ -57,8 +65,16 @@ const CreateTournamentPage = () => {
         },
         token,
       );
+      // message de succès
       setSuccess(`Le tournoi "${name}" a été créé avec succès !`);
 
+      // redirection après 1.5s
+      setTimeout(
+        () => navigate('/tournaments', { state: { selectedId: result.id } }),
+        1500,
+      );
+
+      // reset du formulaire
       setName('');
       setDescription('');
       setStartDate('');
@@ -66,6 +82,7 @@ const CreateTournamentPage = () => {
       setRegistrationDeadline('');
       setMaxParticipants('');
     } catch (err) {
+      // gestion des erreurs
       if (err instanceof Error && err.message.includes('409')) {
         setErrors(['Un tournoi avec ce nom existe déjà.']);
       } else {
@@ -74,12 +91,15 @@ const CreateTournamentPage = () => {
     }
   };
 
+  // style commun pour les inputs
   const inputSx = {
     '& .MuiOutlinedInput-root': {
       backgroundColor: '#fff',
       borderRadius: '6px',
     },
   };
+
+  // petit composant pour les labels
   const Label = ({ text }: { text: string }) => (
     <Typography
       sx={{ color: '#c8d8e8', fontSize: '0.85rem', fontWeight: 600, mb: 0.5 }}
@@ -94,12 +114,36 @@ const CreateTournamentPage = () => {
         minHeight: '100vh',
         backgroundColor: '#1a2744',
         display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'flex-start',
+        flexDirection: 'column',
+        alignItems: 'center',
         pt: 6,
         px: 2,
       }}
     >
+      <Box sx={{ mb: 4, textAlign: 'center', width: '100%', maxWidth: 720 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            color: 'white',
+            fontWeight: 900,
+            textTransform: 'uppercase',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 2,
+            '&::before, &::after': {
+              content: '""',
+              height: '3px',
+              flex: 1,
+              maxWidth: '50px',
+              backgroundColor: 'white',
+            },
+          }}
+        >
+          Créer un tournoi
+        </Typography>
+      </Box>
+
       <Paper
         sx={{
           width: '100%',
@@ -107,15 +151,9 @@ const CreateTournamentPage = () => {
           backgroundColor: '#1e2f50',
           borderRadius: '12px',
           p: 4,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
         }}
       >
-        <Typography
-          variant="h5"
-          sx={{ color: '#fff', fontWeight: 700, textAlign: 'center', mb: 4 }}
-        >
-          Créer un tournoi
-        </Typography>
-
         {errors.length > 0 && (
           <Alert
             onClose={() => setErrors([])}
@@ -204,37 +242,18 @@ const CreateTournamentPage = () => {
 
             <Box>
               <Label text="Nombre maximum d'équipes :" />
-              <Select
+              <TextField
+                placeholder="Ex: 8"
+                type="number"
                 value={maxParticipants}
                 onChange={(e) =>
                   setMaxParticipants(
                     e.target.value === '' ? '' : Number(e.target.value),
                   )
                 }
-                displayEmpty
                 fullWidth
-                renderValue={(selected) => {
-                  if (!selected) {
-                    return (
-                      <span style={{ color: '#999' }}>
-                        Choisir le nombre d'équipes
-                      </span>
-                    );
-                  }
-                  return selected;
-                }}
-                sx={{
-                  backgroundColor: '#fff',
-                  borderRadius: '6px',
-                  '& .MuiSelect-select': { py: '16.5px' },
-                }}
-              >
-                {NUMBER_OF_TEAM.map((val) => (
-                  <MenuItem key={val} value={val}>
-                    {val} équipes
-                  </MenuItem>
-                ))}
-              </Select>
+                sx={inputSx}
+              />
             </Box>
           </Box>
         </Box>

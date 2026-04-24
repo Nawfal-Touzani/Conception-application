@@ -71,7 +71,7 @@ describe('NavBarContainer', () => {
     vi.mocked(notifService.getNotifications).mockResolvedValue([
       { id: 1, type: '', message: 'Notification 1', read: false, sendDate: '' },
       { id: 2, type: '', message: 'Notification 2', read: false, sendDate: '' },
-    ] as Notification[]);
+    ] as unknown as Notification[]);
 
     render(
       <MemoryRouter initialEntries={['/']}>

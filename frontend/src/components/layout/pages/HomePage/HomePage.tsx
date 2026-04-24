@@ -80,9 +80,29 @@ const HomePage: React.FC = () => {
 
       {/* Tournaments section */}
       <Box display="flex" flexDirection="column" alignItems="center" gap={3}>
-        <Typography variant="h3" color="white" fontWeight="bold">
-          Tournois
-        </Typography>
+        <Box sx={{ mb: 3, textAlign: 'center' }}>
+          <Typography
+            variant="h4"
+            sx={{
+              color: 'white',
+              fontWeight: 900,
+              textAlign: 'center',
+              textTransform: 'uppercase',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 2,
+              '&::before, &::after': {
+                content: '""',
+                height: '3px',
+                width: '50px',
+                backgroundColor: 'white',
+              },
+            }}
+          >
+            Tournois
+          </Typography>
+        </Box>
 
         <Box display="flex" gap={2} flexWrap="wrap" justifyContent="center">
           {error && <Typography color="#e74c3c">{error}</Typography>}

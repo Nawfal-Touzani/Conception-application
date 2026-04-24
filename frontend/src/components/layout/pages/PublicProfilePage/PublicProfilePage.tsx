@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, Avatar, Button } from '@mui/material';
 import { usePublicMember } from '../../../../hooks/usePublicMember/usePublicMember';
 
+// page de profil public
 const PublicProfilePage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -46,15 +47,14 @@ const PublicProfilePage = () => {
           borderColor: '#d8a46b',
           color: '#d8a46b',
           fontWeight: 700,
-          textTransform: 'none',
-          borderRadius: '8px',
           ml: 7,
+          mt: 2,
           '&:hover': {
             backgroundColor: 'rgba(216,164,107,0.1)',
           },
         }}
       >
-        ←
+        ← Retour
       </Button>
 
       <Box
@@ -84,7 +84,7 @@ const PublicProfilePage = () => {
         />
 
         <Typography variant="h2" sx={{ mb: 1 }}>
-          {member.tag}
+          {member.tag}#{String(member.id).padStart(3, '0')}
         </Typography>
 
         <Box

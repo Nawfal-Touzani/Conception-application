@@ -22,7 +22,8 @@ public record TournamentResponseDto(
     String organizerTag,
     @JsonProperty("isPublic") boolean isPublic,
     String winnerTeamName,
-    List<String> registeredTeamNames
+    List<String> registeredTeamNames,
+    String currentRoundLabel
 ) {
 
 }

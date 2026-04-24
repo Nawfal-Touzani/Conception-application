@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -11,23 +11,34 @@ import {
 import { TournamentDetails } from '../../../../types/tournament.types';
 import { useAuth } from '../../../../contexts/useAuth';
 import * as tournamentService from '../../../../services/tournament/tournament.service';
+import { MatchSelectionStatus } from '../../../../types/match.types';
+import { getMatchSelectionStatuses } from '../../../../services/match/match.service';
 
 type Props = {
   tournament: TournamentDetails;
   onBack: () => void;
   onUpdated: (updated: TournamentDetails) => void;
+  onNavigateToPlanning: (id: number) => void;
+  onNavigateToEncodeResult: (id: number, name: string) => void;
 };
 
 function statusLabel(tournament: TournamentDetails): string {
   if (tournament.status === 'PREPARATION') {
     return tournament.isPublic ? 'Inscriptions ouvertes' : 'En préparation';
   }
+  if (tournament.status === 'UPCOMING') return 'Complet';
   if (tournament.status === 'IN_PROGRESS') return 'En cours';
   if (tournament.status === 'FINISHED') return 'Terminé';
   return 'Annulé';
 }
 
-const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
+const TournamentAdminPage = ({
+  tournament,
+  onUpdated,
+  onBack,
+  onNavigateToPlanning,
+  onNavigateToEncodeResult,
+}: Props) => {
   const { user } = useAuth();
   const token = user?.token ?? '';
 
@@ -41,18 +52,15 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
   const [maxParticipants, setMaxParticipants] = useState(
     tournament.maxParticipants,
   );
-
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const isPowerOfTwo = (n: number) => n > 0 && (n & (n - 1)) === 0;
+  const isLocked = tournament.isPublic;
 
   const maxParticipantsError =
     maxParticipants < tournament.currentParticipants
       ? 'Impossible de mettre moins que les équipes déjà inscrites.'
-      : !isPowerOfTwo(maxParticipants)
-        ? 'Le nombre de teams doit être une puissance de 2.'
-        : '';
+      : '';
 
   const handleUpdate = async () => {
     setErrorMsg(null);
@@ -98,6 +106,33 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
   const canPublish =
     tournament.status === 'PREPARATION' && !tournament.isPublic;
 
+  const [planningPublished, setPlanningPublished] = useState(false);
+  const [allSelectionsReady, setAllSelectionsReady] = useState(false);
+
+  useEffect(() => {
+    fetch(`http://localhost:3000/tournaments/${tournament.id}/matches`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => (res.ok ? res.json() : []))
+      .then((matches) => {
+        setPlanningPublished(matches.length > 0);
+      })
+      .catch(() => setPlanningPublished(false));
+
+    if (tournament.status === 'IN_PROGRESS') {
+      getMatchSelectionStatuses(tournament.id, token)
+        .then((statuses: MatchSelectionStatus[]) => {
+          const ready = statuses.some((s) => s.teamAisReady && s.teamBisReady);
+
+          setAllSelectionsReady(ready);
+        })
+        .catch((error) => {
+          console.error('Erreur getMatchSelectionStatuses', error);
+          setAllSelectionsReady(false);
+        });
+    }
+  }, [tournament.id, tournament.status, token]);
+
   return (
     <Box
       sx={{
@@ -119,7 +154,7 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          mb: 4,
+          mb: 2,
         }}
       >
         <Typography
@@ -140,16 +175,24 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
         />
       </Box>
 
+      {isLocked && (
+        <Alert severity="info" sx={{ mb: 3, maxWidth: 800, width: '100%' }}>
+          Le tournoi est public, les informations ne peuvent plus être
+          modifiées.
+        </Alert>
+      )}
+
       <Box
         sx={{
           width: '100%',
           maxWidth: 800,
-          backgroundColor: '#243060',
+          backgroundColor: '#1e2f50',
           borderRadius: '16px',
           p: 4,
           display: 'flex',
           flexDirection: 'column',
           gap: 3,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
         }}
       >
         <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
@@ -173,6 +216,7 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               size="small"
+              disabled={isLocked}
               sx={inputSx}
             />
             <TextField
@@ -183,6 +227,7 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
               size="small"
               multiline
               rows={2}
+              disabled={isLocked}
               sx={inputSx}
             />
             <Typography
@@ -196,6 +241,7 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
               size="small"
+              disabled={isLocked}
               sx={inputSx}
             />
             <Typography
@@ -209,6 +255,7 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               size="small"
+              disabled={isLocked}
               sx={inputSx}
             />
           </Box>
@@ -233,9 +280,9 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
               value={registrationDeadline}
               onChange={(e) => setRegistrationDeadline(e.target.value)}
               size="small"
+              disabled={isLocked}
               sx={inputSx}
             />
-
             <Typography
               sx={{ color: '#fff', fontWeight: 600, fontSize: '0.9rem' }}
             >
@@ -247,11 +294,8 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
               value={maxParticipants}
               onChange={(e) => setMaxParticipants(Number(e.target.value))}
               size="small"
+              disabled={isLocked}
               error={!!maxParticipantsError}
-              helperText={
-                maxParticipantsError ||
-                `Équipes déjà inscrites : ${tournament.currentParticipants}`
-              }
               inputProps={{ min: tournament.currentParticipants, step: 1 }}
               sx={{
                 ...inputSx,
@@ -263,13 +307,11 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
                 },
               }}
             />
-
             <Typography
               sx={{ color: '#fff', fontWeight: 600, fontSize: '0.9rem', mt: 2 }}
             >
               Actions
             </Typography>
-
             {canPublish && (
               <Button
                 variant="contained"
@@ -288,7 +330,6 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
                 Rendre public
               </Button>
             )}
-
             {!canPublish && tournament.status === 'PREPARATION' && (
               <Chip
                 label="Déjà public"
@@ -300,6 +341,64 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
                 }}
               />
             )}
+
+            {tournament.status === 'IN_PROGRESS' && (
+              <>
+                <Button
+                  variant="contained"
+                  disabled={!allSelectionsReady}
+                  onClick={() =>
+                    onNavigateToEncodeResult(tournament.id, tournament.name)
+                  }
+                  fullWidth
+                  sx={{
+                    backgroundColor: '#2ecc71',
+                    color: '#fff',
+                    textTransform: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.95rem',
+                    borderRadius: '8px',
+                    '&:hover': { backgroundColor: '#27ae60' },
+                    '&.Mui-disabled': {
+                      backgroundColor: 'rgba(46,204,113,0.3)',
+                      color: 'rgba(255,255,255,0.4)',
+                    },
+                  }}
+                >
+                  Encoder les résultats
+                </Button>
+                {!allSelectionsReady && (
+                  <Typography
+                    sx={{
+                      color: 'rgba(255,255,255,0.5)',
+                      fontSize: '0.8rem',
+                      textAlign: 'center',
+                    }}
+                  >
+                    En attente des compositions des deux équipes.
+                  </Typography>
+                )}
+              </>
+            )}
+
+            {tournament.status === 'UPCOMING' && !planningPublished && (
+              <Button
+                variant="contained"
+                onClick={() => onNavigateToPlanning(tournament.id)}
+                fullWidth
+                sx={{
+                  backgroundColor: '#3a7bd5',
+                  color: '#fff',
+                  textTransform: 'none',
+                  fontWeight: 700,
+                  fontSize: '0.95rem',
+                  borderRadius: '8px',
+                  '&:hover': { backgroundColor: '#2f65b8' },
+                }}
+              >
+                Planifier les matchs
+              </Button>
+            )}
           </Box>
         </Box>
 
@@ -307,7 +406,7 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
           <Button
             variant="contained"
             onClick={handleUpdate}
-            disabled={!!maxParticipantsError}
+            disabled={!!maxParticipantsError || isLocked}
             sx={{
               backgroundColor: '#fff',
               color: '#1a2744',
@@ -338,7 +437,6 @@ const TournamentAdminPage = ({ tournament, onUpdated, onBack }: Props) => {
           {successMsg}
         </Alert>
       </Snackbar>
-
       <Snackbar
         open={!!errorMsg}
         autoHideDuration={4000}

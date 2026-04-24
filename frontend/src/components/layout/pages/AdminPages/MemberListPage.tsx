@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Typography, Button, CircularProgress } from '@mui/material';
+import { Box, Typography, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { MemberDto } from '../../../../types/admin.types';
 import { useAuth } from '../../../../contexts/useAuth';
@@ -8,16 +8,20 @@ import { BanInfoModal } from './Ban/BanInfoModal';
 import { useMembersManagement } from '../../../../hooks/useMemberManagement/useMembersManagement';
 import { MemberListSection } from './MemberListSection';
 
+// Page de gestion des membres en 2 colonnes : bannies et actifs
 const MembersListPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const { activeMembers, bannedMembers, loading, handleBan } =
-    useMembersManagement(user?.token ?? '', user?.tag);
+  const { activeMembers, bannedMembers, handleBan } = useMembersManagement(
+    user?.token ?? '',
+    user?.tag,
+  );
 
   const [banTarget, setBanTarget] = useState<MemberDto | null>(null);
   const [infoTarget, setInfoTarget] = useState<MemberDto | null>(null);
 
+  // Déclenche le ban via le hook
   const onConfirmBan = async (reason: string) => {
     if (banTarget) {
       try {
@@ -41,12 +45,29 @@ const MembersListPage = () => {
       }}
     >
       <Box sx={{ width: '100%', maxWidth: 1200 }}>
-        <Typography
-          variant="h4"
-          sx={{ color: '#fff', fontWeight: 800, mb: 4, textAlign: 'center' }}
-        >
-          Gestion des membres
-        </Typography>
+        <Box sx={{ mb: 2, textAlign: 'center' }}>
+          <Typography
+            variant="h4"
+            sx={{
+              color: 'white',
+              fontWeight: 900,
+              textAlign: 'center',
+              textTransform: 'uppercase',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 2,
+              '&::before, &::after': {
+                content: '""',
+                height: '3px',
+                width: '50px',
+                backgroundColor: 'white',
+              },
+            }}
+          >
+            Membres
+          </Typography>
+        </Box>
 
         <Button
           onClick={() => navigate('/admin')}
@@ -62,36 +83,30 @@ const MembersListPage = () => {
           ← Retour
         </Button>
 
-        {loading ? (
-          <CircularProgress
-            sx={{ color: '#fff', display: 'block', mx: 'auto' }}
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 4,
+            alignItems: 'flex-start',
+          }}
+        >
+          <MemberListSection
+            title="Membres Actifs"
+            count={activeMembers.length}
+            members={activeMembers}
+            borderColor="#11981a"
+            onAction={setBanTarget}
           />
-        ) : (
-          <Box
-            sx={{
-              display: 'flex',
-              gap: 4,
-              alignItems: 'flex-start',
-            }}
-          >
-            <MemberListSection
-              title="Membres Actifs"
-              count={activeMembers.length}
-              members={activeMembers}
-              borderColor="#11981a"
-              onAction={setBanTarget}
-            />
 
-            <MemberListSection
-              title="Membres Bannis"
-              count={bannedMembers.length}
-              members={bannedMembers}
-              borderColor="#b40f0f"
-              isBannedSection
-              onAction={setInfoTarget}
-            />
-          </Box>
-        )}
+          <MemberListSection
+            title="Membres Bannis"
+            count={bannedMembers.length}
+            members={bannedMembers}
+            borderColor="#b40f0f"
+            isBannedSection
+            onAction={setInfoTarget}
+          />
+        </Box>
 
         <BanModal
           open={!!banTarget}

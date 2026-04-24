@@ -6,12 +6,14 @@ import { AvatarItem } from './AvatarItem';
 import { AvatarModalProps } from '../../../types/avatar.types';
 import { formatAvatarUrl } from '../../../utils/Avatar/avatar.utils';
 
+// Composant pour la séléction d'avatar dans un pop-up
 export const AvatarModal = ({
   open,
   onClose,
   onConfirm,
   currentImage,
 }: AvatarModalProps) => {
+  // récupère la logique via le hook
   const { images, selectedImage, setSelectedImage, BASE_URL } = useAvatar(
     open,
     currentImage,
@@ -54,6 +56,7 @@ export const AvatarModal = ({
           }}
         >
           {images.map((img) => {
+            // reconstruit l'url à chaque image
             const fullUrl = formatAvatarUrl(BASE_URL, img.url);
             return (
               <AvatarItem

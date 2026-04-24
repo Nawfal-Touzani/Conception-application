@@ -4,8 +4,6 @@ import be.vinci.ipl.cae.api.models.dtos.BanishMemberDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.services.BanishmentService;
 import jakarta.validation.Valid;
-import java.util.NoSuchElementException;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,18 +48,7 @@ public class BanishmentController {
       @PathVariable Long memberId,
       @RequestBody @Valid BanishMemberDto req,
       Authentication authentication) {
-
     Member admin = (Member) authentication.getPrincipal();
-
-    try {
-      banishmentService.banMember(memberId, admin.getId(), req.reason());
-    } catch (NoSuchElementException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-    } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
-    } catch (Exception e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error",
-          e);
-    }
+    banishmentService.banMember(memberId, admin.getId(), req.reason());
   }
 }

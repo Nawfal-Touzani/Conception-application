@@ -1,6 +1,7 @@
 import { Box } from '@mui/material';
 import { AvatarItemProps } from '../../../types/avatar.types';
 
+// Gère le visuel individuel des avatars
 export const AvatarItem = ({
   url,
   isSelected,

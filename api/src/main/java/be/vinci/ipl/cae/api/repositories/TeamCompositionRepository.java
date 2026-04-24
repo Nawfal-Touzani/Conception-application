@@ -1,5 +1,6 @@
 package be.vinci.ipl.cae.api.repositories;
 
+import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.TeamComposition;
 import be.vinci.ipl.cae.api.models.entities.TeamCompositionId;
 import java.util.List;
@@ -53,4 +54,14 @@ public interface TeamCompositionRepository extends
    * @return the count of member.
    */
   int countByTeamId(Long idTeam);
+
+  /**
+   * Checks whether a member belongs to a specific team.
+   * Used in submitSelection to verify each selected player is part of the submitting team.
+   *
+   * @param member the member
+   * @param teamId the team id
+   * @return true if the member belongs to the team
+   */
+  boolean existsByMemberAndTeamId(Member member, Long teamId);
 }
