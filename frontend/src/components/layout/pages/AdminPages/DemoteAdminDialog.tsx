@@ -14,6 +14,7 @@ type Props = {
   onConfirm: () => void;
 };
 
+// Modale de confirmation pour révoquer un admin
 const DemoteAdminDialog = ({ demoteTarget, onClose, onConfirm }: Props) => (
   <Dialog
     open={!!demoteTarget}
