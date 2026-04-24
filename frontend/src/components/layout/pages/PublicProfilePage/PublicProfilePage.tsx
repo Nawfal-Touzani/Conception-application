@@ -2,6 +2,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, Avatar, Button } from '@mui/material';
 import { usePublicMember } from '../../../../hooks/usePublicMember/usePublicMember';
 
+
+// page de profil public
 const PublicProfilePage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
