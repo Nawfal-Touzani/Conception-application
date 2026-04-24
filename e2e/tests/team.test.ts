@@ -29,7 +29,7 @@ test.describe('Team Page', () => {
   test("affiche les membres de l'équipe", async ({ page }) => {
     await expect(page.getByText("Membres de l'équipe")).toBeVisible({ timeout: 10000 });
     await expect(page.getByText('Rogue')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText('Pulse')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('Pulse', { exact: true }).first()).toBeVisible({ timeout: 10000 });
   });
 
   test('affiche les onglets Tournois', async ({ page }) => {
