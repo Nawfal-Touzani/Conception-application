@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import React from 'react';
 import {
   Box,
@@ -35,6 +36,7 @@ type Props = {
 
 const MatchDetailPage: React.FC<Props> = ({
   match: initialMatch,
+  onBack,
   isResponsible = false,
   userTeamId = null,
   onNavigateToSelection,
@@ -52,7 +54,6 @@ const MatchDetailPage: React.FC<Props> = ({
     setShowForfeitConfirm,
     setShowContestConfirm,
     handleForfeit,
-    handleValidate,
     handleContest,
   } = useMatchDetail(initialMatch, token);
 
@@ -83,6 +84,38 @@ const MatchDetailPage: React.FC<Props> = ({
         gap: 3,
       }}
     >
+      <Box
+        sx={{
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'flex-start',
+          px: { xs: 1, sm: 2 },
+        }}
+      >
+        <Button
+          onClick={onBack}
+          startIcon={<ArrowBackIcon />}
+          sx={{
+            alignSelf: 'flex-start',
+            color: 'rgba(255,255,255,0.75)',
+            textTransform: 'none',
+            fontWeight: 'bold',
+            fontSize: '0.95rem',
+            minWidth: 0,
+            px: 1,
+            py: 0.5,
+            borderRadius: '8px',
+            justifyContent: 'flex-start',
+            '&:hover': {
+              color: '#fff',
+              backgroundColor: 'rgba(255,255,255,0.08)',
+            },
+          }}
+        >
+          Retour
+        </Button>
+      </Box>
+
       <Typography
         sx={{
           color: '#fff',
@@ -332,7 +365,7 @@ const MatchDetailPage: React.FC<Props> = ({
         </Alert>
       )}
 
-      {isResponsible && (
+      {isResponsible && myTeam && (
         <Box
           sx={{
             display: 'flex',
@@ -382,53 +415,6 @@ const MatchDetailPage: React.FC<Props> = ({
             >
               Déclarer forfait
             </Button>
-          )}
-
-          {isPending && (
-            <>
-              <Button
-                variant="contained"
-                onClick={handleValidate}
-                disabled={loading}
-                sx={{
-                  backgroundColor: '#2ecc71',
-                  color: 'white',
-                  borderRadius: '10px',
-                  textTransform: 'none',
-                  fontWeight: 'bold',
-                  fontSize: '1rem',
-                  '&:hover': { backgroundColor: '#27ae60' },
-                  '&.Mui-disabled': { opacity: 0.4 },
-                }}
-              >
-                {loading ? (
-                  <CircularProgress size={16} color="inherit" />
-                ) : (
-                  'Valider le résultat'
-                )}
-              </Button>
-
-              <Button
-                variant="outlined"
-                onClick={() => setShowContestConfirm(true)}
-                disabled={loading}
-                sx={{
-                  borderColor: '#e74c3c',
-                  color: '#e74c3c',
-                  borderRadius: '10px',
-                  textTransform: 'none',
-                  fontWeight: 'bold',
-                  fontSize: '1rem',
-                  '&:hover': {
-                    backgroundColor: 'rgba(231,76,60,0.08)',
-                    borderColor: '#e74c3c',
-                  },
-                  '&.Mui-disabled': { opacity: 0.4 },
-                }}
-              >
-                Contester
-              </Button>
-            </>
           )}
         </Box>
       )}

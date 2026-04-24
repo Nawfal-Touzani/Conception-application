@@ -101,7 +101,7 @@ const TournamentBracket: React.FC<Props> = ({
             sx={{
               display: 'flex',
               flexDirection: 'column',
-              gap: `${Math.pow(2, rIdx) * 12}px`,
+              gap: `${Math.pow(2, rIdx) * 48}px`,
               justifyContent: 'center',
               flex: 1,
             }}
@@ -128,12 +128,10 @@ const BracketMatchCard: React.FC<{
   match: MatchBracket;
   onClick?: () => void;
   isResponsible?: boolean;
-}> = ({ match, onClick, isResponsible = false }) => {
+}> = ({ match, onClick }) => {
   const scorePublic = match.scoreA !== null && match.scoreB !== null;
-  const isDone = match.state === 'PLAYED' || match.state === 'FORFEIT';
-  const isScheduled = match.state === 'SCHEDULED';
 
-  const isClickable = (isDone || (isScheduled && isResponsible)) && !!onClick;
+  const isClickable = !!onClick;
 
   return (
     <Paper
