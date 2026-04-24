@@ -21,15 +21,15 @@ export const register = async (
   });
 
   if (!response.ok) {
-    // 400 Bad Request (@Valid) email format
+    const errorText = await response.text();
+
+    if (response.status === 409 || errorText.includes('déjà utilisé')) {
+      throw new Error('Cet email est déjà utilisé par un autre joueur.');
+    }
     if (response.status === 400) {
       throw new Error(
         "Format des données invalide (Vérifiez que l'email est correct).",
       );
-    }
-    // 409 Conflict (email already in use)
-    if (response.status === 409) {
-      throw new Error('Cet email est déjà utilisé par un autre joueur.');
     }
     // Base error message for other cases
     throw new Error("Une erreur est survenue lors de l'inscription.");
