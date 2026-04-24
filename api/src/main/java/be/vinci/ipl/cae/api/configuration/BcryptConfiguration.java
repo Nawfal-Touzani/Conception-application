@@ -1090,14 +1090,35 @@ public class BcryptConfiguration {
       if (sbsOpt.isPresent()) {
         final Tournament sbs = sbsOpt.get();
         if (matchRepository.findByTournamentOrderByRoundNumberAsc(sbs).isEmpty()) {
+
           Match sbsFinale = new Match();
           sbsFinale.setTournament(sbs);
-          sbsFinale.setRoundNumber(2);
+          sbsFinale.setRoundNumber(3);
           sbsFinale.setDateTime(LocalDateTime.of(2026, 5, 10, 15, 0));
           sbsFinale.setState(MatchState.SCHEDULED);
           sbsFinale.setResultStatus(ResultStatus.NOT_ENTERED);
           sbsFinale.setResponsibleAdmin(admin);
           sbsFinale = matchRepository.save(sbsFinale);
+
+          Match sbsDemi1 = new Match();
+          sbsDemi1.setTournament(sbs);
+          sbsDemi1.setRoundNumber(2);
+          sbsDemi1.setDateTime(LocalDateTime.of(2026, 5, 8, 15, 0));
+          sbsDemi1.setState(MatchState.SCHEDULED);
+          sbsDemi1.setResultStatus(ResultStatus.NOT_ENTERED);
+          sbsDemi1.setResponsibleAdmin(admin);
+          sbsDemi1.setNextMatch(sbsFinale);
+          sbsDemi1 = matchRepository.save(sbsDemi1);
+
+          Match sbsDemi2 = new Match();
+          sbsDemi2.setTournament(sbs);
+          sbsDemi2.setRoundNumber(2);
+          sbsDemi2.setDateTime(LocalDateTime.of(2026, 5, 8, 17, 0));
+          sbsDemi2.setState(MatchState.SCHEDULED);
+          sbsDemi2.setResultStatus(ResultStatus.NOT_ENTERED);
+          sbsDemi2.setResponsibleAdmin(admin);
+          sbsDemi2.setNextMatch(sbsFinale);
+          sbsDemi2 = matchRepository.save(sbsDemi2);
 
           Match deltaVsIota = new Match();
           deltaVsIota.setTournament(sbs);
@@ -1108,7 +1129,7 @@ public class BcryptConfiguration {
           deltaVsIota.setState(MatchState.SCHEDULED);
           deltaVsIota.setResultStatus(ResultStatus.NOT_ENTERED);
           deltaVsIota.setResponsibleAdmin(admin);
-          deltaVsIota.setNextMatch(sbsFinale);
+          deltaVsIota.setNextMatch(sbsDemi1);
           deltaVsIota = matchRepository.save(deltaVsIota);
           addSelections4(deltaVsIota, teamDelta, max, ali, zed, seb, playersSelectionRepository);
           addSelections4(deltaVsIota, teamIota, lisa, noa, tim, zoe, playersSelectionRepository);
@@ -1122,7 +1143,7 @@ public class BcryptConfiguration {
           omegaVsAlpha.setState(MatchState.SCHEDULED);
           omegaVsAlpha.setResultStatus(ResultStatus.NOT_ENTERED);
           omegaVsAlpha.setResponsibleAdmin(admin);
-          omegaVsAlpha.setNextMatch(sbsFinale);
+          omegaVsAlpha.setNextMatch(sbsDemi1);
           omegaVsAlpha = matchRepository.save(omegaVsAlpha);
           addSelections4(omegaVsAlpha, teamOmega, tibo, neo, kai, mia, playersSelectionRepository);
           addSelections4(omegaVsAlpha, teamAlpha, lea, tom, ines, pol, playersSelectionRepository);
@@ -1136,8 +1157,8 @@ public class BcryptConfiguration {
           novaVsVoid.setState(MatchState.SCHEDULED);
           novaVsVoid.setResultStatus(ResultStatus.NOT_ENTERED);
           novaVsVoid.setResponsibleAdmin(admin);
-          novaVsVoid.setNextMatch(sbsFinale);
-          matchRepository.save(novaVsVoid);
+          novaVsVoid.setNextMatch(sbsDemi2);
+          novaVsVoid = matchRepository.save(novaVsVoid);
 
           Match stormVsBlaze = new Match();
           stormVsBlaze.setTournament(sbs);
@@ -1148,8 +1169,8 @@ public class BcryptConfiguration {
           stormVsBlaze.setState(MatchState.SCHEDULED);
           stormVsBlaze.setResultStatus(ResultStatus.NOT_ENTERED);
           stormVsBlaze.setResponsibleAdmin(admin);
-          stormVsBlaze.setNextMatch(sbsFinale);
-          matchRepository.save(stormVsBlaze);
+          stormVsBlaze.setNextMatch(sbsDemi2);
+          stormVsBlaze = matchRepository.save(stormVsBlaze);
         }
       }
     };
