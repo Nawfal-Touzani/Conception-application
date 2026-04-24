@@ -13,6 +13,7 @@ interface MemberRowProps {
   onShowBanInfo?: (member: MemberDto) => void;
 }
 
+// Composant qui représente la ligne de chaque membre (profil, spécialité et actions)
 export const MemberRow = ({
   member,
   onDelete,

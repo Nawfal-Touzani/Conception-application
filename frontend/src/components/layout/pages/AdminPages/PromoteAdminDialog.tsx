@@ -21,6 +21,7 @@ type Props = {
   onPromote: (member: MemberDto) => void;
 };
 
+// Fenetre avec la liste des membres et le + pour ajouter un admin
 const PromoteAdminDialog = ({
   open,
   allMembers,

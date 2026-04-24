@@ -8,6 +8,7 @@ import { BanInfoModal } from './Ban/BanInfoModal';
 import { useMembersManagement } from '../../../../hooks/useMemberManagement/useMembersManagement';
 import { MemberListSection } from './MemberListSection';
 
+// Page de gestion des membres en 2 colonnes : bannies et actifs
 const MembersListPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -20,6 +21,7 @@ const MembersListPage = () => {
   const [banTarget, setBanTarget] = useState<MemberDto | null>(null);
   const [infoTarget, setInfoTarget] = useState<MemberDto | null>(null);
 
+  // Déclenche le ban via le hook
   const onConfirmBan = async (reason: string) => {
     if (banTarget) {
       try {

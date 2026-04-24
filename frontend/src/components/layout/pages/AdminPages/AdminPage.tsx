@@ -6,8 +6,11 @@ import { adminSx } from '../../../../styles/admin.styles';
 import PromoteAdminDialog from './PromoteAdminDialog';
 import DemoteAdminDialog from './DemoteAdminDialog';
 
+// Page de gestion des admins : liste les admins actuels et permet d'add des nouveaux ou retirer
 const AdminPage = () => {
   const navigate = useNavigate();
+
+  // Centralisation de la logique dans le hook
   const {
     allMembers,
     error,
