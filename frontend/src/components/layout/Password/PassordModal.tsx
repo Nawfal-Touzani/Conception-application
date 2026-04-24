@@ -13,6 +13,7 @@ import { PasswordModalProps } from '../../../types/password.type';
 import { usePasswordForm } from '../../../hooks/usePassword/usePasswordForm';
 import { pswdFieldStyle } from '../../../styles/passwordModal.styles';
 
+// Modale pour le changement de mot de passe 
 export const PasswordModal = ({ open, onClose, token }: PasswordModalProps) => {
   const {
     passwordData,
@@ -54,6 +55,7 @@ export const PasswordModal = ({ open, onClose, token }: PasswordModalProps) => {
             mt: 1,
           }}
         >
+          {/* Messages de retour pour user (fail ou success) */}
           <Collapse in={!!error}>
             <Alert severity="error" sx={{ mb: 1, borderRadius: 2 }}>
               {error}
