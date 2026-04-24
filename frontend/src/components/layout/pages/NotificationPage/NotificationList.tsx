@@ -13,6 +13,7 @@ interface NotificationListProps {
   onCorrectResult?: (matchId: number, scoreA: number, scoreB: number) => void;
 }
 
+// Liste de toutes les notifications
 const NotificationList = ({
   notifications,
   onMarkAsRead,
@@ -25,6 +26,7 @@ const NotificationList = ({
   return (
     <List>
       {notifications.map((notif) => (
+        // on affiche chaque notification
         <NotificationItem
           key={notif.id}
           notification={notif}

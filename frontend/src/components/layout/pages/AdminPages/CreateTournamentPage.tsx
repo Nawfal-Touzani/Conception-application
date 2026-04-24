@@ -12,10 +12,15 @@ import { useTournamentForm } from '../../../../hooks/useTournamentForm/useTourna
 import { useNavigate } from 'react-router-dom';
 
 const CreateTournamentPage = () => {
+  // récup l'utilisateur connecté
   const { user } = useAuth();
+
+  // token pour les appels API
   const token = user?.token ?? '';
+
   const navigate = useNavigate();
 
+  // hook custom pour gérer le formulaire
   const {
     name,
     setName,
@@ -37,13 +42,17 @@ const CreateTournamentPage = () => {
     validate,
   } = useTournamentForm();
 
+  // quand on clique sur "Créer"
   const handleSubmit = async () => {
+    // reset des messages
     setErrors([]);
     setSuccess(null);
 
+    // vérifie les champs
     if (!validate()) return;
 
     try {
+      // appel API pour créer le tournoi
       const result = await tournamentService.createTournament(
         user!.id,
         {
@@ -56,12 +65,16 @@ const CreateTournamentPage = () => {
         },
         token,
       );
+      // message de succès
       setSuccess(`Le tournoi "${name}" a été créé avec succès !`);
+
+      // redirection après 1.5s
       setTimeout(
         () => navigate('/tournaments', { state: { selectedId: result.id } }),
         1500,
       );
 
+      // reset du formulaire
       setName('');
       setDescription('');
       setStartDate('');
@@ -69,6 +82,7 @@ const CreateTournamentPage = () => {
       setRegistrationDeadline('');
       setMaxParticipants('');
     } catch (err) {
+      // gestion des erreurs
       if (err instanceof Error && err.message.includes('409')) {
         setErrors(['Un tournoi avec ce nom existe déjà.']);
       } else {
@@ -77,12 +91,15 @@ const CreateTournamentPage = () => {
     }
   };
 
+  // style commun pour les inputs
   const inputSx = {
     '& .MuiOutlinedInput-root': {
       backgroundColor: '#fff',
       borderRadius: '6px',
     },
   };
+
+  // petit composant pour les labels
   const Label = ({ text }: { text: string }) => (
     <Typography
       sx={{ color: '#c8d8e8', fontSize: '0.85rem', fontWeight: 600, mb: 0.5 }}
