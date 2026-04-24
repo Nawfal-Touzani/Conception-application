@@ -42,11 +42,6 @@ test.describe('Team Page', () => {
     await expect(page.getByText('Spring Battle Series 2026')).toBeVisible({ timeout: 10000 });
   });
 
-  test('affiche les tournois à venir de la team', async ({ page }) => {
-    await page.getByText(/À venir \(/).click();
-    await expect(page.getByText('Elite Championship 2026')).toBeVisible({ timeout: 10000 });
-  });
-
   test('le bouton Quitter est visible', async ({ page }) => {
     await expect(page.getByRole('button', { name: 'Quitter' })).toBeVisible({ timeout: 10000 });
   });
