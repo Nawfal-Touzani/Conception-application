@@ -1,6 +1,7 @@
 import { Box, FormControl, MenuItem, Select, Typography } from '@mui/material';
 import { SpecialityMenuProps } from '../../../types/speciality.types';
 
+// Composant du menu pour la séléction de la spécialité (visuel)
 export const SpecialityMenuUI = ({
   specialities,
   selectedId,
