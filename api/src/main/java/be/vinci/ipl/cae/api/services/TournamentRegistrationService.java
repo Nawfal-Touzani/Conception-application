@@ -57,8 +57,8 @@ public class TournamentRegistrationService {
         .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
 
     // Retrieve the team or throw if not found
-    final Team team = teamRepository.findById(idTeam).orElseThrow(
-        () -> new NoSuchElementException("Team not found"));
+    final Team team = teamRepository.findById(idTeam)
+        .orElseThrow(() -> new NoSuchElementException("Team not found"));
 
     // Check tournament status (must be in preparation phase)
     if (tournament.getStatus() != Status.PREPARATION) {
@@ -93,15 +93,22 @@ public class TournamentRegistrationService {
     }
 
     // Check if the member is the responsible or second responsible in the team
-    if (!team.getResponsible().getId().equals(idResponsable)
-        && (team.getSecondResponsible() == null
+    if (!team.getResponsible().getId().equals(idResponsable) && (team.getSecondResponsible() == null
         || !team.getSecondResponsible().getId().equals(idResponsable))) {
       throw new IllegalArgumentException(
           "Only the responsible or second responsible can register the team");
     }
     TournamentRegistration tournamentRegistration = new TournamentRegistration(LocalDate.now(),
         team, tournament);
-    return tournamentRegistrationRepository.save(tournamentRegistration);
+    TournamentRegistration saved = tournamentRegistrationRepository.save(tournamentRegistration);
+
+    int updatedCount = tournamentRegistrationRepository.countByTournamentId(idTournament);
+    if (updatedCount >= tournament.getMaxParticipants()) {
+      tournament.setStatus(Status.UPCOMING);
+      tournamentRepository.save(tournament);
+    }
+
+    return saved;
   }
 
 }

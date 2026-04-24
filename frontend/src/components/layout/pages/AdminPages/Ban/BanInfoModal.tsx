@@ -17,6 +17,7 @@ interface BanInfoModalProps {
   member: MemberDto | null;
 }
 
+// Sous composant pour l'affichage d'une ligne d'info
 const BanDetailItem = ({
   label,
   value,
@@ -36,6 +37,7 @@ const BanDetailItem = ({
   </Box>
 );
 
+// Fenêtre qui affiche les détails du membre ban
 export const BanInfoModal = ({ open, onClose, member }: BanInfoModalProps) => {
   const formattedDate = member?.banDate
     ? new Date(member.banDate).toLocaleDateString('fr-FR', {

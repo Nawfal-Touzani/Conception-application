@@ -1,5 +1,6 @@
 export type TournamentStatus =
   | 'PREPARATION'
+  | 'UPCOMING'
   | 'IN_PROGRESS'
   | 'FINISHED'
   | 'CANCELLED';
@@ -29,6 +30,8 @@ export interface TournamentDetails {
   isPublic: boolean;
   winnerTeamName?: string | null;
   registeredTeamNames?: string[];
+  teams?: string[];
+  currentRoundLabel?: string | null;
 }
 
 export interface HomepageTournaments {

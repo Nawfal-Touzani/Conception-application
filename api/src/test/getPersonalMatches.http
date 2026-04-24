@@ -1,0 +1,16 @@
+@baseUrl = http://localhost:3000
+@tokenPlayer = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoMCIsInVzZXJuYW1lIjoibWFuYWdlciIsImlhdCI6MTc3Mjk4NDI4MiwiZXhwIjoxNzczMDcwNjgyfQ.CaWuGQLW9547D2q65CVYE_74SuX8g3wlX0eETMt8uHE
+
+### Get upcoming matches - success (should return 200)
+GET {{baseUrl}}/matches/upcoming
+Authorization: Bearer {{tokenPlayer}}
+
+### Get upcoming matches - unauthorized (should return 403)
+GET {{baseUrl}}/matches/upcoming
+
+### Get past matches - success (should return 200)
+GET {{baseUrl}}/matches/past
+Authorization: Bearer {{tokenPlayer}}
+
+### Get past matches - unauthorized (should return 403)
+GET {{baseUrl}}/matches/past

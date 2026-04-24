@@ -1,6 +1,5 @@
 package be.vinci.ipl.cae.api.models.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -39,13 +38,13 @@ public class Team {
   private String name;
 
   @Column(nullable = false)
-  private Boolean isActive = true;
+  private boolean active = true;
 
   @Column(nullable = false)
   private LocalDateTime creationDate;
 
-  @OneToOne(fetch = FetchType.LAZY, optional = true)
-  @JoinColumn(name = "responsible_id", nullable = true, unique = false)
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "responsible_id")
   @JsonIgnore
   private Member responsible;
 
@@ -67,22 +66,26 @@ public class Team {
   private List<TournamentRegistration> tournamentRegistrations = new ArrayList<>();
 
   @OneToMany(mappedBy = "winnerTeam")
-  @JsonBackReference("team-winner")
+  @JsonIgnore
   private List<Tournament> tournamentsWon = new ArrayList<>();
+
+  @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonIgnore
+  private List<ValidationResult> validationResults = new ArrayList<>();
 
   /**
    * Full constructor to create a team with all essential attributes.
    *
    * @param name              the unique team name (max 100 characters)
-   * @param isActive          indicates if the team is active (true/false)
+   * @param active            indicates if the team is active (true/false)
    * @param creationDate      the team creation date
    * @param responsible       the primary responsible member (mandatory)
    * @param secondResponsible the secondary responsible member (optional, can be null)
    */
-  public Team(String name, Boolean isActive, LocalDateTime creationDate, Member responsible,
+  public Team(String name, boolean active, LocalDateTime creationDate, Member responsible,
       Member secondResponsible) {
     this.name = name;
-    this.isActive = isActive;
+    this.active = active;
     this.creationDate = creationDate;
     this.responsible = responsible;
     this.secondResponsible = secondResponsible;

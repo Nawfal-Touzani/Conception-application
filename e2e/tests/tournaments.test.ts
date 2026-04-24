@@ -26,7 +26,7 @@ test.describe('Tournaments Page', () => {
     await expect(page.getByText('Nom', { exact: true })).toBeVisible();
     await expect(page.getByText('Team', { exact: true })).toBeVisible();
     await expect(page.getByText('Tag', { exact: true })).toBeVisible();
-    await expect(page.getByText('Statut', { exact: true })).toBeVisible();
+    await expect(page.getByText('État', { exact: true })).toBeVisible();
   });
 
   test('filtre par nom fonctionne', async ({ page }) => {
@@ -36,7 +36,7 @@ test.describe('Tournaments Page', () => {
   });
 
   test('filtre par statut En Cours fonctionne', async ({ page }) => {
-    await page.getByLabel('En Cours').click();
+    await page.getByLabel('En cours').click();
     await expect(page.getByText('Spring Battle Series 2026')).toBeVisible({ timeout: 5000 });
     await expect(page.getByText('Vinci Easter Cup 2026')).not.toBeVisible();
   });
@@ -59,14 +59,14 @@ test.describe('Tournaments Page', () => {
 
   test('clic sur info ouvre le détail du tournoi', async ({ page }) => {
     await page.locator('[data-testid="InfoOutlinedIcon"]').first().click();
-    await expect(page.getByText('Quarts')).toBeVisible({ timeout: 5000 });
-    await expect(page.getByText('Demi')).toBeVisible();
-    await expect(page.getByText('Finale')).toBeVisible();
+    await expect(page.getByText('Teams participantes')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText('Début', { exact: true })).toBeVisible();
+    await expect(page.getByText('Fin', { exact: true })).toBeVisible();
   });
 
   test('bouton retour depuis le détail revient à la liste', async ({ page }) => {
     await page.locator('[data-testid="InfoOutlinedIcon"]').first().click();
-    await expect(page.getByText('Quarts')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText('Teams participantes')).toBeVisible({ timeout: 5000 });
     await page.locator('[data-testid="ArrowBackIcon"]').click();
     await expect(page.getByRole('heading', { name: 'Tournois' })).toBeVisible({ timeout: 5000 });
   });

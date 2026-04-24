@@ -53,7 +53,12 @@ public class Notification {
     /**
      * Result confirmation type.
      */
-    RESULT_CONFIRMATION
+    RESULT_CONFIRMATION,
+
+    /**
+     * Result contested type.
+     */
+    RESULT_REFUSED
   }
 
   @Id

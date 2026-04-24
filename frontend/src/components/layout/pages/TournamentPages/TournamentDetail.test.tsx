@@ -1,13 +1,30 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import TournamentDetail from './TournamentDetailPage';
 import { AuthContext } from '../../../../contexts/AuthContext';
 
-vi.mock('../../../../services/team.service', () => ({
-  getMyTeam: vi.fn(),
+vi.mock('../../../../hooks/useTournamentDetail/useTournamentDetail', () => ({
+  useTournamentDetail: vi.fn(),
 }));
 
-import * as teamService from '../../../../services/team.service';
+vi.mock('./TournamentBracket', () => ({
+  default: () => <div>Bracket</div>,
+}));
+
+vi.mock('../MatchPage/MatchDetailPage', () => ({
+  default: () => <div>Match detail page</div>,
+}));
+
+vi.mock('../MatchPage/MatchSelectionPage', () => ({
+  default: () => <div>Match selection page</div>,
+}));
+
+vi.mock('../../../../services/match/match.service', () => ({
+  getMatchById: vi.fn(),
+}));
+
+import * as useTournamentDetailModule from '../../../../hooks/useTournamentDetail/useTournamentDetail';
 
 const mockUser = {
   id: 1,
@@ -25,23 +42,8 @@ const mockContextUser = {
   bannedError: null,
 };
 
-const myTeamResponsible = {
-  id: 1,
-  name: 'TEAM_ALPHA',
-  responsibleTag: 'Lynx',
-  secondResponsibleTag: null,
-  creationDate: null,
-};
-
-const myTeamNotResponsible = {
-  id: 1,
-  name: 'TEAM_ALPHA',
-  responsibleTag: 'Rogue',
-  secondResponsibleTag: null,
-  creationDate: null,
-};
-
-const onRegister = async () => {};
+const onRegister = vi.fn(async () => {});
+const onBack = vi.fn();
 
 const baseTournament = {
   id: 1,
@@ -56,6 +58,16 @@ const baseTournament = {
   registeredTeamNames: ['TEAM_OMEGA', 'TEAM_VOID', 'TEAM_STORM'],
 };
 
+const defaultHookReturn = {
+  myTeam: null,
+  isResponsible: false,
+  isAlreadyRegistered: false,
+  registrationOpen: true,
+  registerSuccess: false,
+  registerError: null,
+  handleRegister: vi.fn(),
+};
+
 const renderWithContext = (component: React.ReactElement) =>
   render(
     <AuthContext.Provider value={mockContextUser}>
@@ -63,374 +75,212 @@ const renderWithContext = (component: React.ReactElement) =>
     </AuthContext.Provider>,
   );
 
+const renderTournamentDetail = (
+  tournamentOverrides = {},
+  hookOverrides = {},
+) => {
+  (
+    useTournamentDetailModule.useTournamentDetail as ReturnType<typeof vi.fn>
+  ).mockReturnValue({
+    ...defaultHookReturn,
+    ...hookOverrides,
+  });
+
+  return renderWithContext(
+    <TournamentDetail
+      tournament={{
+        ...baseTournament,
+        status: 'PREPARATION',
+        isPublic: true,
+        ...tournamentOverrides,
+      }}
+      onRegister={onRegister}
+      onBack={onBack}
+    />,
+  );
+};
+
 beforeEach(() => {
   vi.clearAllMocks();
-  (teamService.getMyTeam as ReturnType<typeof vi.fn>).mockRejectedValue(
-    new Error('no team'),
-  );
+  (
+    useTournamentDetailModule.useTournamentDetail as ReturnType<typeof vi.fn>
+  ).mockReturnValue(defaultHookReturn);
 });
 
 describe('TournamentDetail', () => {
   test('affiche le nom du tournoi', () => {
-    renderWithContext(
-      <TournamentDetail
-        tournament={{
-          ...baseTournament,
-          status: 'PREPARATION',
-          isPublic: true,
-        }}
-        onRegister={onRegister}
-      />,
-    );
+    renderTournamentDetail();
     expect(screen.getByText('Vinci Easter Cup 2026')).toBeTruthy();
   });
 
-  test('affiche "Ouvert" pour PREPARATION + isPublic true', () => {
-    renderWithContext(
-      <TournamentDetail
-        tournament={{
-          ...baseTournament,
-          status: 'PREPARATION',
-          isPublic: true,
-        }}
-        onRegister={onRegister}
-      />,
-    );
+  test('affiche le bouton retour et appelle onBack au clic', () => {
+    renderTournamentDetail();
+    fireEvent.click(screen.getByRole('button', { name: /tous les tournois/i }));
+    expect(onBack).toHaveBeenCalled();
+  });
+
+  test('affiche "Ouvert" pour PREPARATION + registrationOpen true', () => {
+    renderTournamentDetail({}, { registrationOpen: true });
     expect(screen.getByText('Ouvert')).toBeTruthy();
   });
 
   test('affiche "En préparation" pour PREPARATION + isPublic false', () => {
-    renderWithContext(
-      <TournamentDetail
-        tournament={{
-          ...baseTournament,
-          status: 'PREPARATION',
-          isPublic: false,
-        }}
-        onRegister={onRegister}
-      />,
-    );
+    renderTournamentDetail({ isPublic: false }, { registrationOpen: false });
     expect(screen.getAllByText('En préparation').length).toBeGreaterThan(0);
   });
 
   test('affiche "En cours" pour IN_PROGRESS', () => {
-    renderWithContext(
-      <TournamentDetail
-        tournament={{
-          ...baseTournament,
-          status: 'IN_PROGRESS',
-          isPublic: true,
-        }}
-        onRegister={onRegister}
-      />,
-    );
+    renderTournamentDetail({ status: 'IN_PROGRESS' });
     expect(screen.getAllByText('En cours').length).toBeGreaterThan(0);
   });
 
   test('affiche "Terminé" pour FINISHED', () => {
-    renderWithContext(
-      <TournamentDetail
-        tournament={{ ...baseTournament, status: 'FINISHED', isPublic: true }}
-        onRegister={onRegister}
-      />,
-    );
+    renderTournamentDetail({ status: 'FINISHED' });
     expect(screen.getAllByText('Terminé').length).toBeGreaterThan(0);
   });
 
   test('affiche "Annulé" pour CANCELLED', () => {
-    renderWithContext(
-      <TournamentDetail
-        tournament={{ ...baseTournament, status: 'CANCELLED', isPublic: false }}
-        onRegister={onRegister}
-      />,
-    );
+    renderTournamentDetail({ status: 'CANCELLED', isPublic: false });
     expect(screen.getAllByText('Annulé').length).toBeGreaterThan(0);
   });
 
   test('affiche la date de début', () => {
-    renderWithContext(
-      <TournamentDetail
-        tournament={{
-          ...baseTournament,
-          status: 'PREPARATION',
-          isPublic: true,
-        }}
-        onRegister={onRegister}
-      />,
-    );
+    renderTournamentDetail();
     expect(screen.getByText('15/04/2026')).toBeTruthy();
   });
 
   test('affiche la date limite des inscriptions', () => {
-    renderWithContext(
-      <TournamentDetail
-        tournament={{
-          ...baseTournament,
-          status: 'PREPARATION',
-          isPublic: true,
-        }}
-        onRegister={onRegister}
-      />,
-    );
+    renderTournamentDetail();
     expect(screen.getByText(/08\/04\/2026/)).toBeTruthy();
   });
 
   test('affiche le nombre de teams max', () => {
-    renderWithContext(
-      <TournamentDetail
-        tournament={{
-          ...baseTournament,
-          status: 'PREPARATION',
-          isPublic: true,
-        }}
-        onRegister={onRegister}
-      />,
-    );
+    renderTournamentDetail();
     expect(screen.getByText('8')).toBeTruthy();
   });
 
   test('affiche "Aucune équipe inscrite" si currentParticipants = 0', () => {
-    renderWithContext(
-      <TournamentDetail
-        tournament={{
-          ...baseTournament,
-          status: 'PREPARATION',
-          isPublic: true,
-          currentParticipants: 0,
-          registeredTeamNames: [],
-        }}
-        onRegister={onRegister}
-      />,
-    );
+    renderTournamentDetail({
+      currentParticipants: 0,
+      registeredTeamNames: [],
+    });
     expect(
       screen.getByText('Aucune équipe inscrite pour le moment.'),
     ).toBeTruthy();
   });
 
   test('affiche la liste des équipes inscrites', () => {
-    renderWithContext(
-      <TournamentDetail
-        tournament={{
-          ...baseTournament,
-          status: 'PREPARATION',
-          isPublic: true,
-        }}
-        onRegister={onRegister}
-      />,
-    );
+    renderTournamentDetail();
     expect(screen.getByText('TEAM_OMEGA')).toBeTruthy();
     expect(screen.getByText('TEAM_VOID')).toBeTruthy();
     expect(screen.getByText('TEAM_STORM')).toBeTruthy();
   });
 
-  test('affiche les sections du bracket', () => {
-    renderWithContext(
-      <TournamentDetail
-        tournament={{
-          ...baseTournament,
-          status: 'IN_PROGRESS',
-          isPublic: true,
-        }}
-        onRegister={onRegister}
-      />,
-    );
-    expect(screen.getByText('Quarts')).toBeTruthy();
-    expect(screen.getByText('Demi')).toBeTruthy();
-    expect(screen.getByText('Finale')).toBeTruthy();
-  });
-
   test('affiche le panneau "Teams participantes"', () => {
-    renderWithContext(
-      <TournamentDetail
-        tournament={{
-          ...baseTournament,
-          status: 'PREPARATION',
-          isPublic: true,
-        }}
-        onRegister={onRegister}
-      />,
-    );
+    renderTournamentDetail();
     expect(screen.getByText('Teams participantes')).toBeTruthy();
-    expect(screen.getByText('3 sur 8')).toBeTruthy();
+    expect(screen.getByText('3')).toBeTruthy();
   });
 
   test('affiche le gagnant si FINISHED et winnerTeamName présent', () => {
-    renderWithContext(
-      <TournamentDetail
-        tournament={{
-          ...baseTournament,
-          status: 'FINISHED',
-          isPublic: true,
-          winnerTeamName: 'TEAM_WINNER',
-          registeredTeamNames: [],
-        }}
-        onRegister={onRegister}
-      />,
-    );
+    renderTournamentDetail({
+      status: 'FINISHED',
+      winnerTeamName: 'TEAM_WINNER',
+    });
     expect(screen.getByText('🏆 Gagnant')).toBeTruthy();
     expect(screen.getByText('TEAM_WINNER')).toBeTruthy();
   });
 
   test("n'affiche pas le gagnant si FINISHED mais winnerTeamName absent", () => {
-    renderWithContext(
-      <TournamentDetail
-        tournament={{ ...baseTournament, status: 'FINISHED', isPublic: true }}
-        onRegister={onRegister}
-      />,
-    );
+    renderTournamentDetail({ status: 'FINISHED' });
     expect(screen.queryByText('🏆 Gagnant')).toBeFalsy();
   });
 
-  test("n'affiche pas le bouton S'inscrire si l'utilisateur n'est pas responsable", async () => {
-    (teamService.getMyTeam as ReturnType<typeof vi.fn>).mockResolvedValue(
-      myTeamNotResponsible,
+  test("n'affiche pas le bouton S'inscrire si l'utilisateur n'est pas responsable", () => {
+    renderTournamentDetail(
+      {},
+      { registrationOpen: true, isResponsible: false },
     );
-    renderWithContext(
-      <TournamentDetail
-        tournament={{
-          ...baseTournament,
-          status: 'PREPARATION',
-          isPublic: true,
-        }}
-        onRegister={onRegister}
-      />,
-    );
-    await waitFor(() => {
-      expect(screen.queryByText("S'inscrire")).toBeFalsy();
-    });
+    expect(screen.queryByText("S'inscrire")).toBeFalsy();
   });
 
-  test("affiche le bouton S'inscrire si responsable, inscriptions ouvertes, pas encore inscrit et tournoi non complet", async () => {
-    (teamService.getMyTeam as ReturnType<typeof vi.fn>).mockResolvedValue(
-      myTeamResponsible,
+  test("affiche le bouton S'inscrire si responsable, inscriptions ouvertes, pas encore inscrit et tournoi non complet", () => {
+    renderTournamentDetail(
+      { registeredTeamNames: [] },
+      {
+        registrationOpen: true,
+        isResponsible: true,
+        isAlreadyRegistered: false,
+      },
     );
-    renderWithContext(
-      <TournamentDetail
-        tournament={{
-          ...baseTournament,
-          status: 'PREPARATION',
-          isPublic: true,
-          registeredTeamNames: [],
-        }}
-        onRegister={onRegister}
-      />,
-    );
-    await waitFor(() => {
-      expect(screen.queryByText("S'inscrire")).toBeTruthy();
-    });
+    expect(screen.queryByText("S'inscrire")).toBeTruthy();
   });
 
-  // ── Fix 1 : déjà inscrits uniquement si inscriptions ouvertes ──
-  test("affiche 'déjà inscrits' si registrationOpen et team déjà inscrite", async () => {
-    (teamService.getMyTeam as ReturnType<typeof vi.fn>).mockResolvedValue(
-      myTeamResponsible,
+  test("affiche 'déjà inscrits' si registrationOpen et team déjà inscrite", () => {
+    renderTournamentDetail(
+      { registeredTeamNames: ['TEAM_ALPHA'] },
+      {
+        registrationOpen: true,
+        isResponsible: true,
+        isAlreadyRegistered: true,
+      },
     );
-    renderWithContext(
-      <TournamentDetail
-        tournament={{
-          ...baseTournament,
-          status: 'PREPARATION',
-          isPublic: true,
-          registeredTeamNames: ['TEAM_ALPHA'],
-        }}
-        onRegister={onRegister}
-      />,
-    );
-    await waitFor(() => {
-      expect(screen.queryByText("S'inscrire")).toBeFalsy();
-      expect(
-        screen.queryByText('Vous êtes déjà inscrits à ce tournoi.'),
-      ).toBeTruthy();
-    });
+    expect(screen.queryByText("S'inscrire")).toBeFalsy();
+    expect(
+      screen.queryByText('Vous êtes déjà inscrits à ce tournoi.'),
+    ).toBeTruthy();
   });
 
-  test("n'affiche pas 'déjà inscrits' si registrationOpen est false (tournoi IN_PROGRESS)", async () => {
-    (teamService.getMyTeam as ReturnType<typeof vi.fn>).mockResolvedValue(
-      myTeamResponsible,
+  test("n'affiche pas 'déjà inscrits' si registrationOpen est false", () => {
+    renderTournamentDetail(
+      { status: 'IN_PROGRESS', registeredTeamNames: ['TEAM_ALPHA'] },
+      { registrationOpen: false, isAlreadyRegistered: true },
     );
-    renderWithContext(
-      <TournamentDetail
-        tournament={{
-          ...baseTournament,
-          status: 'IN_PROGRESS',
-          isPublic: true,
-          registeredTeamNames: ['TEAM_ALPHA'],
-        }}
-        onRegister={onRegister}
-      />,
-    );
-    await waitFor(() => {
-      expect(
-        screen.queryByText('Vous êtes déjà inscrits à ce tournoi.'),
-      ).toBeFalsy();
-    });
+    expect(
+      screen.queryByText('Vous êtes déjà inscrits à ce tournoi.'),
+    ).toBeFalsy();
   });
 
-  // ── Fix 2 : tournoi complet ──
-  test("n'affiche pas le bouton S'inscrire si le tournoi est complet", async () => {
-    (teamService.getMyTeam as ReturnType<typeof vi.fn>).mockResolvedValue(
-      myTeamResponsible,
+  test("n'affiche pas le bouton S'inscrire si le tournoi est complet", () => {
+    renderTournamentDetail(
+      {
+        currentParticipants: 8,
+        maxParticipants: 8,
+        registeredTeamNames: [],
+      },
+      {
+        registrationOpen: true,
+        isResponsible: true,
+        isAlreadyRegistered: false,
+      },
     );
-    renderWithContext(
-      <TournamentDetail
-        tournament={{
-          ...baseTournament,
-          status: 'PREPARATION',
-          isPublic: true,
-          currentParticipants: 8,
-          maxParticipants: 8,
-          registeredTeamNames: [],
-        }}
-        onRegister={onRegister}
-      />,
-    );
-    await waitFor(() => {
-      expect(screen.queryByText("S'inscrire")).toBeFalsy();
-      expect(screen.queryByText('Le tournoi est complet.')).toBeTruthy();
-    });
+    expect(screen.queryByText("S'inscrire")).toBeFalsy();
+    expect(screen.queryByText('Le tournoi est complet.')).toBeTruthy();
   });
 
-  test("n'affiche pas le message complet si la team est déjà inscrite (même si tournoi complet)", async () => {
-    (teamService.getMyTeam as ReturnType<typeof vi.fn>).mockResolvedValue(
-      myTeamResponsible,
+  test("n'affiche pas le message complet si la team est déjà inscrite", () => {
+    renderTournamentDetail(
+      {
+        currentParticipants: 8,
+        maxParticipants: 8,
+        registeredTeamNames: ['TEAM_ALPHA'],
+      },
+      {
+        registrationOpen: true,
+        isAlreadyRegistered: true,
+      },
     );
-    renderWithContext(
-      <TournamentDetail
-        tournament={{
-          ...baseTournament,
-          status: 'PREPARATION',
-          isPublic: true,
-          currentParticipants: 8,
-          maxParticipants: 8,
-          registeredTeamNames: ['TEAM_ALPHA'],
-        }}
-        onRegister={onRegister}
-      />,
-    );
-    await waitFor(() => {
-      expect(screen.queryByText('Le tournoi est complet.')).toBeFalsy();
-      expect(
-        screen.queryByText('Vous êtes déjà inscrits à ce tournoi.'),
-      ).toBeTruthy();
-    });
+    expect(screen.queryByText('Le tournoi est complet.')).toBeFalsy();
+    expect(
+      screen.queryByText('Vous êtes déjà inscrits à ce tournoi.'),
+    ).toBeTruthy();
   });
 
-  test("n'affiche pas le bouton S'inscrire si le tournoi n'est pas en inscriptions ouvertes", async () => {
-    (teamService.getMyTeam as ReturnType<typeof vi.fn>).mockResolvedValue(
-      myTeamResponsible,
+  test("n'affiche pas le bouton S'inscrire si le tournoi n'est pas en inscriptions ouvertes", () => {
+    renderTournamentDetail(
+      { status: 'IN_PROGRESS' },
+      { registrationOpen: false, isResponsible: true },
     );
-    renderWithContext(
-      <TournamentDetail
-        tournament={{
-          ...baseTournament,
-          status: 'IN_PROGRESS',
-          isPublic: true,
-        }}
-        onRegister={onRegister}
-      />,
-    );
-    await waitFor(() => {
-      expect(screen.queryByText("S'inscrire")).toBeFalsy();
-    });
+    expect(screen.queryByText("S'inscrire")).toBeFalsy();
   });
 });

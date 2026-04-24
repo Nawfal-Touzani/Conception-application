@@ -1,22 +1,15 @@
-import { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
   Paper,
   Button,
   TextField,
-  InputAdornment,
-  Snackbar,
   Alert,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  ListSubheader,
+  Autocomplete,
+  Divider,
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import { useAuth } from '../../../../contexts/useAuth';
-import * as teamService from '../../../../services/team.service';
+import { useJoinOrCreateTeam } from '../../../../hooks/useJoinOrCreateTeam/useJoinOrCreateTeam';
+import { joinOrCreateTeamSx } from '../../../../styles/joinOrCreateTeam.styles';
 import { TeamDto } from '../../../../types/team.types';
 
 type Props = {
@@ -24,346 +17,219 @@ type Props = {
 };
 
 const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
-  const { user } = useAuth();
-
-  //  Fix: extraire le token en variable primitive stable
-  // Un objet authHeaders recréé à chaque render causerait une boucle infinie
-  // si mis en dépendance de useEffect. On utilise le token (string) à la place.
-  const token = user?.token ?? '';
-
-  const [teams, setTeams] = useState<TeamDto[]>([]);
-  const [filteredTeams, setFilteredTeams] = useState<TeamDto[]>([]);
-  const [search, setSearch] = useState('');
-  const [selectedTeamId, setSelectedTeamId] = useState<number | ''>('');
-  const [teamName, setTeamName] = useState('');
-  const [snack, setSnack] = useState<{
-    open: boolean;
-    msg: string;
-    severity: 'success' | 'error';
-  }>({ open: false, msg: '', severity: 'success' });
-
-  //  Fix: dépendance sur `token` (string) et non sur `authHeaders` (objet recréé à chaque render)
-  useEffect(() => {
-    if (!token) return;
-    teamService
-      .getTeams(token)
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setTeams(data);
-          setFilteredTeams(data);
-        }
-      })
-      .catch(() => {});
-  }, [token]);
-
-  // Filtre la liste affichée a chaque fois que la recherche change
-  useEffect(() => {
-    if (!search.trim()) {
-      setFilteredTeams(teams);
-    } else {
-      setFilteredTeams(
-        teams.filter((t) =>
-          t.name.toLowerCase().includes(search.toLowerCase()),
-        ),
-      );
-    }
-    setSelectedTeamId('');
-  }, [search, teams]);
-
-  // Creer une equipe
-  const createTeam = async () => {
-    if (!teamName.trim()) return;
-    try {
-      const res = await teamService.createTeam(token, teamName);
-
-      if (res.status === 201) {
-        onTeamCreated();
-      } else if (res.status === 409) {
-        setSnack({
-          open: true,
-          msg: "Ce nom d'équipe existe déjà.",
-          severity: 'error',
-        });
-      } else if (res.status === 400) {
-        setSnack({
-          open: true,
-          msg: "Nom d'équipe invalide.",
-          severity: 'error',
-        });
-      } else {
-        setSnack({
-          open: true,
-          msg: 'Erreur lors de la création.',
-          severity: 'error',
-        });
-      }
-    } catch {
-      setSnack({
-        open: true,
-        msg: 'Impossible de joindre le serveur.',
-        severity: 'error',
-      });
-    }
-  };
-
-  // Rejoindre une equipe
-  const joinTeam = async () => {
-    if (selectedTeamId === '') return;
-    try {
-      const res = await teamService.sendJoinRequest(token, selectedTeamId);
-
-      if (res.ok || res.status === 201) {
-        setSnack({
-          open: true,
-          msg: 'Demande envoyée avec succès !',
-          severity: 'success',
-        });
-        setSelectedTeamId('');
-      } else {
-        setSnack({
-          open: true,
-          msg: "Erreur lors de l'envoi.",
-          severity: 'error',
-        });
-      }
-    } catch {
-      setSnack({
-        open: true,
-        msg: 'Impossible de joindre le serveur.',
-        severity: 'error',
-      });
-    }
-  };
+  // Hook personnalisé qui centralise la logique des deux formulaires
+  const {
+    teams,
+    selectedTeamId,
+    setSelectedTeamId,
+    teamName,
+    setTeamName,
+    snack,
+    closeSnack,
+    createTeam,
+    joinTeam,
+  } = useJoinOrCreateTeam(onTeamCreated);
 
   return (
     <Box
       sx={{
-        flexGrow: 1,
-        backgroundColor: '#1a2744',
-        display: 'flex',
+        // Spread operator pour fusionner les styles de base
+        ...joinOrCreateTeamSx.root,
         flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        px: 2,
+        gap: 2,
       }}
     >
+      <Box sx={{ textAlign: 'center', width: '100%', mt: -9 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            color: 'white',
+            fontWeight: 900,
+            textAlign: 'center',
+            textTransform: 'uppercase',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 2,
+            mb: 4,
+            '&::before, &::after': {
+              content: '""',
+              height: '3px',
+              width: '50px',
+              backgroundColor: 'white',
+            },
+          }}
+        >
+          Mon équipe
+        </Typography>
+      </Box>
+
       <Box
         sx={{
+          ...joinOrCreateTeamSx.layout,
+          maxWidth: 1000,
           display: 'flex',
-          gap: 4,
-          width: '100%',
-          maxWidth: 860,
-          alignItems: 'flex-start',
+          alignItems: 'stretch',
+          position: 'relative',
         }}
       >
         {/* ── Left: Rejoindre ── */}
-        <Paper
-          elevation={0}
+        <Box
           sx={{
             flex: 1,
-            borderRadius: '12px',
-            p: 3.5,
-            backgroundColor: '#fff',
             display: 'flex',
             flexDirection: 'column',
-            gap: 2,
+            alignItems: 'center',
           }}
         >
           <Typography
-            variant="h5"
-            sx={{
-              fontWeight: 800,
-              color: '#1a2744',
-              mb: 0.5,
-              textAlign: 'center',
-            }}
+            variant="h4"
+            sx={{ fontWeight: 800, color: '#fff', mb: 3, textAlign: 'center' }}
           >
             Rejoindre une team
           </Typography>
-          <Box
+
+          <Paper
+            elevation={0}
             sx={{
-              width: 40,
-              height: 3,
-              backgroundColor: '#1a2744',
-              borderRadius: 2,
-              mx: 'auto',
-              mt: -1,
+              ...joinOrCreateTeamSx.card,
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
             }}
-          />
+          >
+            <Box sx={joinOrCreateTeamSx.divider} />
 
-          {/* Liste déroulante avec recherche intégrée */}
-          <FormControl fullWidth size="small">
-            <InputLabel id="team-select-label">
-              Sélectionner une équipe
-            </InputLabel>
-            <Select
-              labelId="team-select-label"
-              value={selectedTeamId}
-              label="Sélectionner une équipe"
-              onChange={(e) => setSelectedTeamId(e.target.value as number)}
-              sx={{ borderRadius: '6px', fontSize: '0.9rem' }}
-              MenuProps={{
-                autoFocus: false,
-                PaperProps: {
-                  sx: { maxHeight: 320 },
-                },
+            {/* Affichage de l'alerte si elle concerne la la section join */}
+            {snack.open && snack.section === 'join' && (
+              <Alert severity={snack.severity} onClose={closeSnack}>
+                {snack.msg}
+              </Alert>
+            )}
+
+            {/* Liste déroulante qui permet aussi la recherche de team */}
+            <Autocomplete
+              fullWidth
+              size="small"
+              options={teams}
+              // Détermine le texte affiché dans le champ pour chaque option
+              getOptionLabel={(option: TeamDto) => option.name}
+              // Retrouve l'objet TeamDto complet à partir de l'id stocké dans le state
+              value={teams.find((t) => t.id === selectedTeamId) || null}
+              onChange={(_event, newValue) => {
+                closeSnack();
+                // Si une équipe est sélectionnée on stocke son id, sinon on remet à vide
+                setSelectedTeamId(newValue ? newValue.id : '');
               }}
-            >
-              <ListSubheader sx={{ p: 1, lineHeight: 'normal' }}>
+              // `renderInput` est obligatoire sur Autocomplete : définit le champ
+              // de saisie sous-jacent et lui passe les props internes via `params`
+              renderInput={(params) => (
                 <TextField
-                  fullWidth
-                  size="small"
-                  placeholder="Rechercher..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  onKeyDown={(e) => e.stopPropagation()}
-                  autoFocus
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <SearchIcon
-                          sx={{ fontSize: '1rem', color: '#1a2744' }}
-                        />
-                      </InputAdornment>
-                    ),
-                    sx: { fontSize: '0.85rem', borderRadius: '6px' },
-                  }}
+                  {...params}
+                  label="Rechercher ou sélectionner une équipe"
+                  sx={joinOrCreateTeamSx.select}
                 />
-              </ListSubheader>
-              {filteredTeams.length === 0 ? (
-                <MenuItem disabled value="">
-                  <Typography
-                    sx={{ color: 'rgba(0,0,0,0.4)', fontSize: '0.85rem' }}
-                  >
-                    Aucune équipe trouvée
-                  </Typography>
-                </MenuItem>
-              ) : (
-                filteredTeams.map((team) => (
-                  <MenuItem key={team.id} value={team.id}>
-                    {team.name}
-                  </MenuItem>
-                ))
               )}
-            </Select>
-          </FormControl>
+              sx={{ mt: 2 }}
+              noOptionsText="Aucune équipe trouvée"
+            />
 
-          <Box sx={{ textAlign: 'center' }}>
-            <Button
-              variant="contained"
-              disabled={selectedTeamId === ''}
-              onClick={joinTeam}
-              sx={{
-                backgroundColor: '#1a2744',
-                borderRadius: '6px',
-                px: 3,
-                py: 1,
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                textTransform: 'none',
-                boxShadow: 'none',
-                '&:hover': { backgroundColor: '#243358' },
-                '&:disabled': { backgroundColor: '#ccc', color: '#888' },
-              }}
-            >
-              Envoyer demande
-            </Button>
-          </Box>
-        </Paper>
+            <Box sx={{ textAlign: 'center', mt: 'auto', pt: 4 }}>
+              <Button
+                variant="contained"
+                disabled={selectedTeamId === ''}
+                onClick={joinTeam}
+                sx={joinOrCreateTeamSx.button}
+              >
+                Envoyer demande
+              </Button>
+            </Box>
+          </Paper>
+        </Box>
 
-        {/* ── Right: Créer ── */}
-        <Paper
-          elevation={0}
+        <Divider
+          orientation="vertical"
+          flexItem
+          sx={{
+            mx: 6,
+            borderColor: 'rgba(255,255,255,0.2)',
+            borderWidth: '1.5px',
+          }}
+        />
+
+        {/* ── Right: Créer team ── */}
+        <Box
           sx={{
             flex: 1,
-            borderRadius: '12px',
-            p: 3.5,
-            backgroundColor: '#fff',
             display: 'flex',
             flexDirection: 'column',
-            gap: 2,
+            alignItems: 'center',
           }}
         >
           <Typography
-            variant="h5"
-            sx={{
-              fontWeight: 800,
-              color: '#1a2744',
-              mb: 0.5,
-              textAlign: 'center',
-            }}
+            variant="h4"
+            sx={{ fontWeight: 800, color: '#fff', mb: 3, textAlign: 'center' }}
           >
             Créer une team
           </Typography>
-          <Box
-            sx={{
-              width: 40,
-              height: 3,
-              backgroundColor: '#1a2744',
-              borderRadius: 2,
-              mx: 'auto',
-              mt: -1,
-            }}
-          />
 
-          <Typography
-            sx={{ color: '#1a2744', fontWeight: 600, fontSize: '0.95rem' }}
+          <Paper
+            elevation={0}
+            sx={{
+              ...joinOrCreateTeamSx.card,
+              width: '100%',
+              minHeight: 320,
+              display: 'flex',
+              flexDirection: 'column',
+            }}
           >
-            Entrez le nom de votre futur équipe :
-          </Typography>
+            <Box sx={joinOrCreateTeamSx.divider} />
 
-          <TextField
-            fullWidth
-            value={teamName}
-            onChange={(e) => setTeamName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && createTeam()}
-            size="small"
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                backgroundColor: '#e8eaf0',
-                borderRadius: '6px',
-                '& fieldset': { border: 'none' },
-              },
-            }}
-          />
+            {/* Même logique que pour "join" :alerte isolée */}
+            {snack.open && snack.section === 'create' && (
+              <Alert severity={snack.severity} onClose={closeSnack}>
+                {snack.msg}
+              </Alert>
+            )}
 
-          <Box sx={{ textAlign: 'center', mt: 'auto' }}>
-            <Button
-              variant="contained"
-              disabled={!teamName.trim()}
-              onClick={createTeam}
+            <Typography
               sx={{
-                backgroundColor: '#1a2744',
-                borderRadius: '6px',
-                px: 4,
-                py: 1,
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                textTransform: 'none',
-                boxShadow: 'none',
-                '&:hover': { backgroundColor: '#243358' },
-                '&:disabled': { backgroundColor: '#ccc', color: '#888' },
+                color: '#1a2744',
+                fontWeight: 600,
+                fontSize: '0.95rem',
+                mt: 2,
               }}
             >
-              Créer
-            </Button>
-          </Box>
-        </Paper>
-      </Box>
+              Entrez le nom de votre future équipe :
+            </Typography>
 
-      <Snackbar
-        open={snack.open}
-        autoHideDuration={4000}
-        onClose={() => setSnack((s) => ({ ...s, open: false }))}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          severity={snack.severity}
-          onClose={() => setSnack((s) => ({ ...s, open: false }))}
-        >
-          {snack.msg}
-        </Alert>
-      </Snackbar>
+            <TextField
+              fullWidth
+              value={teamName}
+              placeholder="Ex: TEAM_BETA"
+              onChange={(e) => {
+                closeSnack();
+                setTeamName(e.target.value);
+              }}
+              // Raccourci clavier pour soumettre le formulaire sans cliquer sur le bouton
+              onKeyDown={(e) => e.key === 'Enter' && createTeam()}
+              size="small"
+              sx={{ ...joinOrCreateTeamSx.teamNameInput, mt: 1 }}
+            />
+
+            <Box sx={{ textAlign: 'center', mt: 'auto', pt: 4 }}>
+              <Button
+                variant="contained"
+                disabled={!teamName.trim()}
+                onClick={createTeam}
+                sx={{ ...joinOrCreateTeamSx.button, px: 4 }}
+              >
+                Créer
+              </Button>
+            </Box>
+          </Paper>
+        </Box>
+      </Box>
     </Box>
   );
 };

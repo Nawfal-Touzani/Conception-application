@@ -1,8 +1,24 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
-import JoinOrCreateTeam from './JoinOrCreateTeam';
-import { AuthContext } from '../../../../contexts/AuthContext';
+import { useJoinOrCreateTeam } from '../../../../hooks/useJoinOrCreateTeam/useJoinOrCreateTeam';
+import * as teamService from '../../../../services/team/team.service';
+import { useAuth } from '../../../../contexts/useAuth';
+import { TeamDto } from '../../../../types/team.types';
+
+vi.mock('../../../../contexts/useAuth', () => ({
+  useAuth: vi.fn(),
+}));
+
+vi.mock('../../../../services/team/team.service', () => {
+  const mockGetTeams = vi.fn();
+  const mockCreateTeam = vi.fn();
+  const mockSendJoinRequest = vi.fn();
+  return {
+    getTeams: mockGetTeams,
+    createTeam: mockCreateTeam,
+    sendJoinRequest: mockSendJoinRequest,
+  };
+});
 
 const mockUser = {
   id: 1,
@@ -12,7 +28,7 @@ const mockUser = {
   token: 'fake-token',
 };
 
-const mockTeams = [
+const mockTeams: TeamDto[] = [
   {
     id: 1,
     name: 'Team Alpha',
@@ -29,261 +45,315 @@ const mockTeams = [
   },
 ];
 
-const mockContextValue = {
-  user: mockUser,
-  login: vi.fn(),
-  register: vi.fn(),
-  logout: vi.fn(),
-  bannedError: null,
-};
-
 const onTeamCreated = vi.fn();
-
-const renderPage = () =>
-  render(
-    <MemoryRouter>
-      <AuthContext.Provider value={mockContextValue}>
-        <JoinOrCreateTeam onTeamCreated={onTeamCreated} />
-      </AuthContext.Provider>
-    </MemoryRouter>,
-  );
-
-const getCreateInput = () => {
-  const inputs = screen.getAllByRole('textbox');
-  return inputs[inputs.length - 1];
-};
 
 beforeEach(() => {
   vi.clearAllMocks();
-  global.fetch = vi.fn();
+
+  vi.mocked(useAuth).mockReturnValue({
+    user: mockUser,
+    login: vi.fn(),
+    register: vi.fn(),
+    logout: vi.fn(),
+    bannedError: null,
+  });
+
+  vi.mocked(teamService.getTeams).mockResolvedValue(mockTeams);
+  vi.mocked(teamService.createTeam).mockResolvedValue();
+  vi.mocked(teamService.sendJoinRequest).mockResolvedValue();
 });
 
-describe('JoinOrCreateTeam', () => {
-  test('affiche les deux sections', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockTeams,
+describe('useJoinOrCreateTeam - chargement et filtre des équipes', () => {
+  test('charge les équipes au montage', async () => {
+    const { result } = renderHook(() => useJoinOrCreateTeam(onTeamCreated));
+
+    await waitFor(() => {
+      expect(
+        vi.mocked(teamService.getTeams).mock.results[0]?.value,
+      ).resolves.toBe(mockTeams);
     });
 
-    renderPage();
-    expect(await screen.findByText('Rejoindre une team')).toBeTruthy();
-    expect(screen.getByText('Créer une team')).toBeTruthy();
+    expect(result.current.teams).toEqual(mockTeams);
+    expect(result.current.filteredTeams).toEqual(mockTeams);
   });
 
-  test('affiche la liste des équipes', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockTeams,
+  test('filtre les équipes par search', async () => {
+    const { result } = renderHook(() => useJoinOrCreateTeam(onTeamCreated));
+
+    await act(async () => {
+      result.current.setSearch('beta');
     });
-
-    renderPage();
-    await waitFor(() => {});
-    fireEvent.mouseDown(screen.getByRole('combobox'));
-    expect(await screen.findByText('Team Alpha')).toBeTruthy();
-    expect(screen.getByText('Team Beta')).toBeTruthy();
-  });
-
-  test('filtre les équipes par recherche', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockTeams,
-    });
-
-    renderPage();
-    await waitFor(() => {});
-    fireEvent.mouseDown(screen.getByRole('combobox'));
-    await screen.findByText('Team Alpha');
-
-    fireEvent.change(screen.getByPlaceholderText('Rechercher...'), {
-      target: { value: 'Alpha' },
-    });
-
-    expect(screen.getByText('Team Alpha')).toBeTruthy();
-    expect(screen.queryByText('Team Beta')).toBeFalsy();
-  });
-
-  test('affiche message si aucune équipe trouvée', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockTeams,
-    });
-
-    renderPage();
-    await waitFor(() => {});
-    fireEvent.mouseDown(screen.getByRole('combobox'));
-    await screen.findByText('Team Alpha');
-
-    fireEvent.change(screen.getByPlaceholderText('Rechercher...'), {
-      target: { value: 'zzz' },
-    });
-
-    expect(screen.getByText('Aucune équipe trouvée')).toBeTruthy();
-  });
-
-  test('le bouton Envoyer demande est désactivé si aucune équipe sélectionnée', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockTeams,
-    });
-
-    renderPage();
-    await waitFor(() => {});
 
     expect(
-      (screen.getByText('Envoyer demande') as HTMLButtonElement).disabled,
+      result.current.filteredTeams.every((t) =>
+        t.name.toLowerCase().includes('beta'),
+      ),
     ).toBe(true);
-  });
-
-  test('sélectionne une équipe et envoie une demande avec succès', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => mockTeams })
-      .mockResolvedValueOnce({ ok: true, status: 201 });
-
-    renderPage();
-    await waitFor(() => {});
-    fireEvent.mouseDown(screen.getByRole('combobox'));
-    fireEvent.click(await screen.findByText('Team Alpha'));
 
     expect(
-      (screen.getByText('Envoyer demande') as HTMLButtonElement).disabled,
+      result.current.filteredTeams.some((t) => t.name === 'Team Beta'),
+    ).toBe(true);
+
+    expect(
+      result.current.filteredTeams.some((t) => t.name === 'Team Alpha'),
     ).toBe(false);
-    fireEvent.click(screen.getByText('Envoyer demande'));
-
-    expect(
-      await screen.findByText('Demande envoyée avec succès !'),
-    ).toBeTruthy();
   });
 
-  test("affiche erreur si l'envoi de demande échoue", async () => {
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => mockTeams })
-      .mockResolvedValueOnce({ ok: false, status: 500 });
+  test('filtre se réinitialise si search est vide', async () => {
+    const { result } = renderHook(() => useJoinOrCreateTeam(onTeamCreated));
 
-    renderPage();
-    await waitFor(() => {});
-    fireEvent.mouseDown(screen.getByRole('combobox'));
-    fireEvent.click(await screen.findByText('Team Alpha'));
-    fireEvent.click(screen.getByText('Envoyer demande'));
-
-    expect(await screen.findByText("Erreur lors de l'envoi.")).toBeTruthy();
-  });
-
-  test("affiche erreur réseau lors de l'envoi de demande", async () => {
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => mockTeams })
-      .mockRejectedValueOnce(new Error('network'));
-
-    renderPage();
-    await waitFor(() => {});
-    fireEvent.mouseDown(screen.getByRole('combobox'));
-    fireEvent.click(await screen.findByText('Team Alpha'));
-    fireEvent.click(screen.getByText('Envoyer demande'));
-
-    expect(
-      await screen.findByText('Impossible de joindre le serveur.'),
-    ).toBeTruthy();
-  });
-
-  test('le bouton Créer est désactivé si le nom est vide', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-      ok: true,
-      json: async () => [],
+    await act(async () => {
+      result.current.setSearch('beta');
     });
 
-    renderPage();
-    await screen.findByText('Créer une team');
+    expect(
+      result.current.filteredTeams.every((t) =>
+        t.name.toLowerCase().includes('beta'),
+      ),
+    ).toBe(true);
 
-    expect((screen.getByText('Créer') as HTMLButtonElement).disabled).toBe(
-      true,
+    await act(async () => {
+      result.current.setSearch('');
+    });
+
+    await waitFor(() => {
+      expect(result.current.filteredTeams).toEqual(mockTeams);
+    });
+  });
+
+  test('charge un tableau vide si getTeams échoue', async () => {
+    vi.mocked(teamService.getTeams).mockRejectedValue(
+      new Error('Erreur serveur'),
     );
+
+    const { result } = renderHook(() => useJoinOrCreateTeam(onTeamCreated));
+
+    await waitFor(() => {
+      expect(result.current.teams).toEqual([]);
+      expect(result.current.filteredTeams).toEqual([]);
+    });
+  });
+});
+
+describe('useJoinOrCreateTeam - createTeam', () => {
+  test('ne crée pas si teamName est vide', async () => {
+    const { result } = renderHook(() => useJoinOrCreateTeam(onTeamCreated));
+
+    expect(result.current.teamName).toBe('');
+
+    await act(async () => {
+      await result.current.createTeam();
+    });
+
+    expect(teamService.createTeam).not.toHaveBeenCalled();
+    expect(result.current.snack.open).toBe(true);
+    expect(result.current.snack.severity).toBe('error');
+    expect(result.current.snack.section).toBe('create');
+    expect(result.current.snack.msg).toBe("Veuillez entrer un nom d'équipe.");
   });
 
   test('crée une équipe avec succès', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => [] })
-      .mockResolvedValueOnce({ ok: true, status: 201 });
+    const { result } = renderHook(() => useJoinOrCreateTeam(onTeamCreated));
 
-    renderPage();
-    await screen.findByText('Créer une team');
-
-    fireEvent.change(getCreateInput(), { target: { value: 'NewTeam' } });
-    fireEvent.click(screen.getByText('Créer'));
-
-    await waitFor(() => {
-      expect(onTeamCreated).toHaveBeenCalled();
+    act(() => {
+      result.current.setTeamName('NewTeam');
     });
-  });
 
-  test("affiche erreur si le nom d'équipe existe déjà (409)", async () => {
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => [] })
-      .mockResolvedValueOnce({ ok: false, status: 409 });
+    expect(result.current.teamName).toBe('NewTeam');
 
-    renderPage();
-    await screen.findByText('Créer une team');
-    fireEvent.change(getCreateInput(), { target: { value: 'ExistingTeam' } });
-    fireEvent.click(screen.getByText('Créer'));
-
-    expect(
-      await screen.findByText("Ce nom d'équipe existe déjà."),
-    ).toBeTruthy();
-  });
-
-  test('affiche erreur si nom invalide (400)', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => [] })
-      .mockResolvedValueOnce({ ok: false, status: 400 });
-
-    renderPage();
-    await screen.findByText('Créer une team');
-    fireEvent.change(getCreateInput(), { target: { value: '!' } });
-    fireEvent.click(screen.getByText('Créer'));
-
-    expect(await screen.findByText("Nom d'équipe invalide.")).toBeTruthy();
-  });
-
-  test('affiche erreur générique si création échoue (autre status)', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => [] })
-      .mockResolvedValueOnce({ ok: false, status: 500 });
-
-    renderPage();
-    await screen.findByText('Créer une team');
-    fireEvent.change(getCreateInput(), { target: { value: 'SomeTeam' } });
-    fireEvent.click(screen.getByText('Créer'));
-
-    expect(await screen.findByText('Erreur lors de la création.')).toBeTruthy();
-  });
-
-  test('affiche erreur réseau lors de la création', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => [] })
-      .mockRejectedValueOnce(new Error('network'));
-
-    renderPage();
-    await screen.findByText('Créer une team');
-    fireEvent.change(getCreateInput(), { target: { value: 'SomeTeam' } });
-    fireEvent.click(screen.getByText('Créer'));
-
-    expect(
-      await screen.findByText('Impossible de joindre le serveur.'),
-    ).toBeTruthy();
-  });
-
-  test('crée une équipe en appuyant sur Enter', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => [] })
-      .mockResolvedValueOnce({ ok: true, status: 201 });
-
-    renderPage();
-    await screen.findByText('Créer une team');
-
-    const input = getCreateInput();
-    fireEvent.change(input, { target: { value: 'NewTeam' } });
-    fireEvent.keyDown(input, { key: 'Enter' });
-
-    await waitFor(() => {
-      expect(onTeamCreated).toHaveBeenCalled();
+    await act(async () => {
+      await result.current.createTeam();
     });
+
+    expect(teamService.createTeam).toHaveBeenCalledWith(
+      'fake-token',
+      'NewTeam',
+    );
+    expect(onTeamCreated).toHaveBeenCalledTimes(1);
+    expect(result.current.snack.open).toBe(true);
+    expect(result.current.snack.severity).toBe('success');
+    expect(result.current.snack.section).toBe('create');
+    expect(result.current.snack.msg).toBe('Équipe créée avec succès !');
+    expect(result.current.teamName).toBe('');
+  });
+
+  test('crée une équipe avec succès après modification du nom', async () => {
+    const { result } = renderHook(() => useJoinOrCreateTeam(onTeamCreated));
+
+    act(() => {
+      result.current.setTeamName('Old');
+    });
+
+    expect(result.current.teamName).toBe('Old');
+
+    await act(async () => {
+      result.current.setTeamName('New');
+    });
+
+    expect(result.current.teamName).toBe('New');
+
+    await act(async () => {
+      await result.current.createTeam();
+    });
+
+    expect(teamService.createTeam).toHaveBeenCalledWith('fake-token', 'New');
+    expect(onTeamCreated).toHaveBeenCalledTimes(1);
+  });
+
+  test('traite une erreur 409 (nom existe déjà)', async () => {
+    const errorMessage = "Ce nom d'équipe existe déjà.";
+    vi.mocked(teamService.createTeam).mockRejectedValueOnce(
+      new Error(errorMessage),
+    );
+
+    const { result } = renderHook(() => useJoinOrCreateTeam(onTeamCreated));
+
+    act(() => {
+      result.current.setTeamName('ExistingTeam');
+    });
+
+    await act(async () => {
+      await result.current.createTeam();
+    });
+
+    expect(result.current.snack.open).toBe(true);
+    expect(result.current.snack.severity).toBe('error');
+    expect(result.current.snack.section).toBe('create');
+    expect(result.current.snack.msg).toBe(errorMessage);
+  });
+
+  test('traite une erreur 400 (nom invalide)', async () => {
+    const errorMessage = "Nom d'équipe invalide.";
+    vi.mocked(teamService.createTeam).mockRejectedValueOnce(
+      new Error(errorMessage),
+    );
+
+    const { result } = renderHook(() => useJoinOrCreateTeam(onTeamCreated));
+
+    act(() => {
+      result.current.setTeamName('!');
+    });
+
+    await act(async () => {
+      await result.current.createTeam();
+    });
+
+    expect(result.current.snack.open).toBe(true);
+    expect(result.current.snack.severity).toBe('error');
+    expect(result.current.snack.section).toBe('create');
+    expect(result.current.snack.msg).toBe(errorMessage);
+  });
+
+  test('traite une autre erreur de création (500, etc.)', async () => {
+    const backendError = 'Erreur serveur';
+    vi.mocked(teamService.createTeam).mockRejectedValueOnce(
+      new Error(backendError),
+    );
+
+    const { result } = renderHook(() => useJoinOrCreateTeam(onTeamCreated));
+
+    act(() => {
+      result.current.setTeamName('SomeTeam');
+    });
+
+    await act(async () => {
+      await result.current.createTeam();
+    });
+
+    expect(result.current.snack.open).toBe(true);
+    expect(result.current.snack.severity).toBe('error');
+    expect(result.current.snack.section).toBe('create');
+    expect(result.current.snack.msg).toBe(backendError);
+  });
+
+  test('ferme le snack sur closeSnack', () => {
+    const { result } = renderHook(() => useJoinOrCreateTeam(onTeamCreated));
+
+    act(() => {
+      result.current.setTeamName('NewTeam');
+    });
+
+    act(() => {
+      result.current.closeSnack();
+    });
+
+    expect(result.current.snack.open).toBe(false);
+  });
+});
+
+describe('useJoinOrCreateTeam - joinTeam', () => {
+  test('ne peut pas rejoindre si aucune équipe sélectionnée', async () => {
+    const { result } = renderHook(() => useJoinOrCreateTeam(onTeamCreated));
+
+    expect(result.current.selectedTeamId).toBe('');
+
+    await act(async () => {
+      await result.current.joinTeam();
+    });
+
+    expect(teamService.sendJoinRequest).not.toHaveBeenCalled();
+    expect(result.current.snack.open).toBe(true);
+    expect(result.current.snack.severity).toBe('error');
+    expect(result.current.snack.section).toBe('join');
+    expect(result.current.snack.msg).toBe('Veuillez sélectionner une équipe.');
+  });
+
+  test('envoie une demande de rejoindre une équipe avec succès', async () => {
+    const { result } = renderHook(() => useJoinOrCreateTeam(onTeamCreated));
+
+    act(() => {
+      result.current.setSelectedTeamId(1);
+    });
+
+    expect(result.current.selectedTeamId).toBe(1);
+
+    await act(async () => {
+      await result.current.joinTeam();
+    });
+
+    expect(teamService.sendJoinRequest).toHaveBeenCalledWith('fake-token', 1);
+    expect(result.current.snack.open).toBe(true);
+    expect(result.current.snack.severity).toBe('success');
+    expect(result.current.snack.section).toBe('join');
+    expect(result.current.snack.msg).toBe('Demande envoyée avec succès !');
+    expect(result.current.selectedTeamId).toBe('');
+  });
+
+  test('traite une erreur lors de l’envoi de la demande', async () => {
+    const errorMessage = 'Erreur lors de la demande.';
+    vi.mocked(teamService.sendJoinRequest).mockRejectedValueOnce(
+      new Error(errorMessage),
+    );
+
+    const { result } = renderHook(() => useJoinOrCreateTeam(onTeamCreated));
+
+    act(() => {
+      result.current.setSelectedTeamId(1);
+    });
+
+    await act(async () => {
+      await result.current.joinTeam();
+    });
+
+    expect(result.current.snack.open).toBe(true);
+    expect(result.current.snack.severity).toBe('error');
+    expect(result.current.snack.section).toBe('join');
+    expect(result.current.snack.msg).toBe(errorMessage);
+  });
+
+  test('ferme le snack pour la section "join"', () => {
+    const { result } = renderHook(() => useJoinOrCreateTeam(onTeamCreated));
+
+    act(() => {
+      result.current.joinTeam();
+    });
+
+    expect(result.current.snack.open).toBe(true);
+
+    act(() => {
+      result.current.closeSnack();
+    });
+
+    expect(result.current.snack.open).toBe(false);
   });
 });

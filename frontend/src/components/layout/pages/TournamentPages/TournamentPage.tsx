@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Box, Button, IconButton, Typography } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useAuth } from '../../../../contexts/useAuth';
@@ -6,7 +7,10 @@ import TournamentListCard from '../../../ui/TournamentCard/TournamentListCard';
 import TournamentFilters from '../../../ui/TournamentFilters/TournamentFilters';
 import TournamentDetail from './TournamentDetailPage';
 import TournamentAdminPage from './TournamentAdminPage';
+import EncodeResultPage from '../AdminPages/EncodeResultPage';
+import TournamentPlanningPage from './../TournamentPages/TournamentPlanningPage';
 import { colors } from '../../../../styles/tournament.styles';
+import { useLocation } from 'react-router-dom';
 
 const CARD_WIDTH = 320;
 const GAP = 24;
@@ -14,6 +18,16 @@ const GAP = 24;
 const TournamentsPage = () => {
   const { user } = useAuth();
   const token = user?.token ?? '';
+  const location = useLocation();
+
+  const [planningTournamentId, setPlanningTournamentId] = useState<
+    number | null
+  >(null);
+
+  const [encodeTournament, setEncodeTournament] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
 
   const {
     isAdmin,
@@ -28,6 +42,56 @@ const TournamentsPage = () => {
     reset,
     filters,
   } = useTournaments(token);
+
+  useEffect(() => {
+    const selectedId = location.state?.selectedId;
+    if (!selectedId) return;
+    const allTournaments = rows.flat();
+    if (allTournaments.length === 0) return;
+    const found = allTournaments.find((t) => t.id === selectedId);
+    if (found) setSelectedTournament(found);
+  }, [rows, location.state, setSelectedTournament]);
+
+  if (planningTournamentId !== null) {
+    return (
+      <Box
+        sx={{
+          flexGrow: 1,
+          backgroundColor: colors.primary,
+          minHeight: '100vh',
+        }}
+      >
+        <Box sx={{ pt: 1, pl: 1 }}>
+          <IconButton
+            onClick={() => setPlanningTournamentId(null)}
+            sx={{ color: colors.white }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+        </Box>
+        <TournamentPlanningPage tournamentId={planningTournamentId} />
+      </Box>
+    );
+  }
+
+  if (encodeTournament !== null) {
+    return (
+      <Box
+        sx={{
+          flexGrow: 1,
+          backgroundColor: colors.primary,
+          minHeight: '100vh',
+        }}
+      >
+        {/* On n'affiche plus la flèche ici */}
+        <EncodeResultPage
+          tournamentId={encodeTournament.id}
+          tournamentName={encodeTournament.name}
+          onBack={() => setEncodeTournament(null)}
+        />
+      </Box>
+    );
+  }
 
   if (adminTournament) {
     return (
@@ -55,6 +119,10 @@ const TournamentsPage = () => {
               prev.map((t) => (t.id === updated.id ? updated : t)),
             );
           }}
+          onNavigateToPlanning={(id) => setPlanningTournamentId(id)}
+          onNavigateToEncodeResult={(id, name) => {
+            setEncodeTournament({ id, name });
+          }}
         />
       </Box>
     );
@@ -69,17 +137,10 @@ const TournamentsPage = () => {
           minHeight: '100vh',
         }}
       >
-        <Box sx={{ pt: 1, pl: 1 }}>
-          <IconButton
-            onClick={() => setSelectedTournament(null)}
-            sx={{ color: colors.white }}
-          >
-            <ArrowBackIcon />
-          </IconButton>
-        </Box>
         <TournamentDetail
           tournament={selectedTournament}
           onRegister={() => handleRegister(selectedTournament.id)}
+          onBack={() => setSelectedTournament(null)}
         />
       </Box>
     );
@@ -99,20 +160,30 @@ const TournamentsPage = () => {
       }}
     >
       <TournamentFilters isAdmin={isAdmin} {...filters} onReset={reset} />
-
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <Typography
-          variant="h4"
-          sx={{
-            color: colors.white,
-            fontWeight: 800,
-            mb: 4,
-            textAlign: 'center',
-          }}
-        >
-          Tournois
-        </Typography>
-
+        <Box sx={{ mb: 5, textAlign: 'center' }}>
+          <Typography
+            variant="h4"
+            sx={{
+              color: colors.white,
+              fontWeight: 900,
+              textAlign: 'center',
+              textTransform: 'uppercase',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 2,
+              '&::before, &::after': {
+                content: '""',
+                height: '3px',
+                width: '50px',
+                backgroundColor: 'white',
+              },
+            }}
+          >
+            Tournois
+          </Typography>
+        </Box>
         {error && (
           <Typography sx={{ color: '#e74c3c', mb: 2, textAlign: 'center' }}>
             {error}
@@ -125,7 +196,6 @@ const TournamentsPage = () => {
             Aucun tournoi trouvé.
           </Typography>
         )}
-
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           {rows.map((row, rowIndex) => (
             <Box key={rowIndex}>

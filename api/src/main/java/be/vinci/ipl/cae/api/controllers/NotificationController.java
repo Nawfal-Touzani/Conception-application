@@ -4,9 +4,9 @@ import be.vinci.ipl.cae.api.models.dtos.NotificationDto;
 import be.vinci.ipl.cae.api.models.dtos.NotificationResponseDto;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.Notification;
+import be.vinci.ipl.cae.api.models.mappers.NotificationMapper;
 import be.vinci.ipl.cae.api.services.NotificationService;
 import jakarta.validation.Valid;
-import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,14 +30,18 @@ import org.springframework.web.server.ResponseStatusException;
 public class NotificationController {
 
   private final NotificationService notificationService;
+  private final NotificationMapper notificationMapper;
 
   /**
    * Creates a new NotificationController.
    *
    * @param notificationService the notification service
+   * @param notificationMapper  the dto mapper
    */
-  public NotificationController(NotificationService notificationService) {
+  public NotificationController(NotificationService notificationService,
+      NotificationMapper notificationMapper) {
     this.notificationService = notificationService;
+    this.notificationMapper = notificationMapper;
   }
 
   /**
@@ -54,7 +58,7 @@ public class NotificationController {
       @RequestParam(required = false) Boolean read,
       @AuthenticationPrincipal Member currentMember) {
 
-    if (currentMember.getId() != id) {
+    if (!currentMember.getId().equals(id)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN);
     }
 
@@ -63,13 +67,10 @@ public class NotificationController {
           ? notificationService.getAllNotificationByMember(id)
           : notificationService.getNotificationsByReadStatus(id, read);
 
-      return ((List<Notification>) notifications).stream()
-          .map(this::toDto)
-          .toList();
+      return notificationMapper.toDtoList(notifications);
     } catch (NoSuchElementException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
-
   }
 
   /**
@@ -88,7 +89,7 @@ public class NotificationController {
     Notification notification = new Notification(dto.type(), dto.message(), dto.sendDate());
 
     try {
-      return toDto(notificationService.send(id, notification));
+      return notificationMapper.toDto(notificationService.send(id, notification));
     } catch (NoSuchElementException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
@@ -108,29 +109,14 @@ public class NotificationController {
   public NotificationResponseDto markNotificationAsRead(@PathVariable long idMember,
       @PathVariable long idNotification, @AuthenticationPrincipal Member currentMember) {
 
-    if (currentMember.getId() != idMember) {
+    if (!currentMember.getId().equals(idMember)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN);
     }
 
     try {
-      return toDto(notificationService.markNotificationRead(idNotification));
+      return notificationMapper.toDto(notificationService.markNotificationRead(idNotification));
     } catch (NoSuchElementException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
-
-  // conversion of nototification into NotificationResponseDto
-  private NotificationResponseDto toDto(Notification notif) {
-    return new NotificationResponseDto(
-        notif.getId(),
-        notif.getType(),
-        notif.getMessage(),
-        notif.getSendDate(),
-        notif.isRead(),
-        notif.getMembershipRequest() != null ? notif.getMembershipRequest().getId() : null,
-        notif.getMembershipRequest() != null ? notif.getMembershipRequest()
-            .getState().name() : null
-    );
-  }
-
 }
