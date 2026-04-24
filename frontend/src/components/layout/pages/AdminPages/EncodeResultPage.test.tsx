@@ -18,12 +18,28 @@ vi.mock('../../../../services/match/encode-result', () => ({
 
 vi.mock('../../../../services/match/match.service', () => ({
   getMatchesByTournament: vi.fn(),
+  getMatchSelectionStatuses: vi.fn(),
 }));
 
 vi.mock('react-router-dom', () => ({
   useParams: () => ({ tournamentId: '1' }),
   useLocation: () => ({ state: { tournamentName: 'Tournoi Test' } }),
 }));
+
+const mockStatuses = [
+  {
+    id: 1,
+    roundNumber: 1,
+    teamAReady: true,
+    teamBReady: true,
+  },
+  {
+    id: 2,
+    roundNumber: 1,
+    teamAReady: true,
+    teamBReady: true,
+  },
+];
 
 type AuthContextType = ReturnType<typeof useAuth>;
 
@@ -80,26 +96,39 @@ const mockMatches: MatchResponseDto[] = [
   },
 ];
 
+const renderPage = () =>
+  render(
+    <ResultEncodingPage
+      tournamentId={1}
+      tournamentName="Tournoi Test"
+      onBack={vi.fn()}
+    />,
+  );
+
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('ResultEncodingPage', () => {
   beforeEach(() => {
+    vi.clearAllMocks();
+
     vi.mocked(useAuth).mockReturnValue(mockAuth);
     vi.mocked(matchService.getMatchesByTournament).mockResolvedValue(
       mockMatches,
     );
-    vi.clearAllMocks();
+    vi.mocked(matchService.getMatchSelectionStatuses).mockResolvedValue(
+      mockStatuses as never,
+    );
   });
 
   // — Affichage initial ——————————————————————————————————————————————————————
 
   test('affiche le titre de la page', async () => {
-    render(<ResultEncodingPage />);
+    renderPage();
     expect(screen.getByText('Encodage des résultats')).toBeTruthy();
   });
 
   test('affiche le nom du tournoi', async () => {
-    render(<ResultEncodingPage />);
+    renderPage();
     expect(screen.getByDisplayValue('Tournoi Test')).toBeTruthy();
   });
 
@@ -107,7 +136,7 @@ describe('ResultEncodingPage', () => {
     vi.mocked(matchService.getMatchesByTournament).mockResolvedValue(
       mockMatches,
     );
-    render(<ResultEncodingPage />);
+    renderPage();
     await waitFor(() => {
       expect(screen.getByText(/Nom équipe 1/)).toBeTruthy();
       expect(screen.getByText(/Eagles/)).toBeTruthy();
@@ -120,7 +149,7 @@ describe('ResultEncodingPage', () => {
     vi.mocked(matchService.getMatchesByTournament).mockResolvedValue(
       mockMatches,
     );
-    render(<ResultEncodingPage />);
+    renderPage();
     await waitFor(() => screen.getAllByText('Encoder résultat'));
 
     fireEvent.click(screen.getAllByText('Encoder résultat')[0]);
@@ -132,7 +161,7 @@ describe('ResultEncodingPage', () => {
     vi.mocked(matchService.getMatchesByTournament).mockResolvedValue(
       mockMatches,
     );
-    render(<ResultEncodingPage />);
+    renderPage();
     await waitFor(() => screen.getAllByText('Encoder résultat'));
 
     fireEvent.click(screen.getAllByText('Encoder résultat')[0]);
@@ -147,7 +176,7 @@ describe('ResultEncodingPage', () => {
     vi.mocked(matchService.getMatchesByTournament).mockResolvedValue(
       mockMatches,
     );
-    render(<ResultEncodingPage />);
+    renderPage();
     await waitFor(() => screen.getAllByText('Encoder résultat'));
 
     fireEvent.click(screen.getAllByText('Encoder résultat')[0]);
@@ -164,7 +193,7 @@ describe('ResultEncodingPage', () => {
       mockMatchResponseDto,
     );
 
-    render(<ResultEncodingPage />);
+    renderPage();
     await waitFor(() => screen.getAllByText('Encoder résultat'));
 
     fireEvent.click(screen.getAllByText('Encoder résultat')[0]);
@@ -192,7 +221,7 @@ describe('ResultEncodingPage', () => {
       mockMatchResponseDto,
     );
 
-    render(<ResultEncodingPage />);
+    renderPage();
     await waitFor(() => screen.getAllByText('Encoder résultat'));
 
     fireEvent.click(screen.getAllByText('Encoder résultat')[0]);
@@ -221,7 +250,7 @@ describe('ResultEncodingPage', () => {
       new Error('Erreur serveur'),
     );
 
-    render(<ResultEncodingPage />);
+    renderPage();
     await waitFor(() => screen.getAllByText('Encoder résultat'));
 
     fireEvent.click(screen.getAllByText('Encoder résultat')[0]);

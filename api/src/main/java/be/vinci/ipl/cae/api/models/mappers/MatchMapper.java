@@ -11,6 +11,7 @@ import be.vinci.ipl.cae.api.models.entities.Match.ResultStatus;
 import be.vinci.ipl.cae.api.models.entities.Member;
 import be.vinci.ipl.cae.api.models.entities.PlayersSelection;
 import be.vinci.ipl.cae.api.models.entities.Team;
+import be.vinci.ipl.cae.api.models.entities.Tournament;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
@@ -30,11 +31,12 @@ public class MatchMapper {
     PublicScoreInfo scores = getPublicScoreInfo(match);
 
     return new MatchBracketDto(match.getId(), match.getRoundNumber(),
-        buildRoundLabel(match.getRoundNumber(), match.getTournament().getMaxParticipants()),
+        buildRoundLabel(match.getRoundNumber(), match.getTournament()),
         match.getTeamA() != null ? new TeamBracketDto(match.getTeamA().getId(),
             match.getTeamA().getName()) : null,
         match.getTeamB() != null ? new TeamBracketDto(match.getTeamB().getId(),
             match.getTeamB().getName()) : null, scores.scoreA(), scores.scoreB(), scores.winnerId(),
+        match.getNextMatch() != null ? match.getNextMatch().getId() : null,
         match.getState().name());
   }
 
@@ -50,7 +52,7 @@ public class MatchMapper {
 
     return new MatchDetailDto(match.getId(), match.getTournament().getId(),
         match.getTournament().getName(),
-        buildRoundLabel(match.getRoundNumber(), match.getTournament().getMaxParticipants()),
+        buildRoundLabel(match.getRoundNumber(), match.getTournament()),
         match.getDateTime(), match.getState().name(), match.getResultStatus().name(),
         match.getTeamA() != null ? toTeamMatchDto(match, match.getTeamA(), currentUser) : null,
         match.getTeamB() != null ? toTeamMatchDto(match, match.getTeamB(), currentUser) : null,
@@ -99,16 +101,18 @@ public class MatchMapper {
     return new TeamMatchDto(team.getId(), team.getName(), status, lineup);
   }
 
-  private String buildRoundLabel(int roundNumber, int maxParticipants) {
-    int totalRounds = (int) (Math.log(maxParticipants) / Math.log(2));
-    int roundFromFinal = totalRounds - roundNumber + 1;
+  private String buildRoundLabel(int roundNumber, Tournament tournament) {
+    int maxRound = tournament.getMatches().stream()
+        .mapToInt(Match::getRoundNumber).max().orElse(1);
 
-    return switch (roundFromFinal) {
-      case 1 -> "Finale";
-      case 2 -> "Demi-finale";
-      case 3 -> "Quarts de finale";
-      case 4 -> "Huitièmes de finale";
-      default -> "Tour " + roundFromFinal;
+    int distanceFromEnd = maxRound - roundNumber;
+
+    return switch (distanceFromEnd) {
+      case 0 -> "Finale";
+      case 1 -> "Demi-finale";
+      case 2 -> "Quarts de finale";
+      case 3 -> "Huitièmes de finale";
+      default -> "Tour " + roundNumber;
     };
   }
 
@@ -125,20 +129,16 @@ public class MatchMapper {
         isPublic && match.getWinner() != null ? match.getWinner().getId() : null);
   }
 
+  private List<PlayerSelectionDto> toPlayerSelectionDtos(List<PlayersSelection> teamSelections) {
+    return teamSelections.stream().map(
+        ps -> new PlayerSelectionDto(ps.getMember().getId(), ps.getMember().getTag(),
+            ps.getMember().getImage().getUrl())).toList();
+  }
+
   /**
    * Helper record to hold masked public scores.
    */
   private record PublicScoreInfo(Integer scoreA, Integer scoreB, Long winnerId) {
 
-  }
-
-  private List<PlayerSelectionDto> toPlayerSelectionDtos(List<PlayersSelection> teamSelections) {
-    return teamSelections.stream()
-        .map(ps -> new PlayerSelectionDto(
-            ps.getMember().getId(),
-            ps.getMember().getTag(),
-            ps.getMember().getImage().getUrl()
-        ))
-        .toList();
   }
 }

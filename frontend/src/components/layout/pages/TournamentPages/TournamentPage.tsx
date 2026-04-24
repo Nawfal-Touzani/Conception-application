@@ -7,6 +7,7 @@ import TournamentListCard from '../../../ui/TournamentCard/TournamentListCard';
 import TournamentFilters from '../../../ui/TournamentFilters/TournamentFilters';
 import TournamentDetail from './TournamentDetailPage';
 import TournamentAdminPage from './TournamentAdminPage';
+import EncodeResultPage from '../AdminPages/EncodeResultPage';
 import TournamentPlanningPage from './../TournamentPages/TournamentPlanningPage';
 import { colors } from '../../../../styles/tournament.styles';
 import { useLocation } from 'react-router-dom';
@@ -22,6 +23,11 @@ const TournamentsPage = () => {
   const [planningTournamentId, setPlanningTournamentId] = useState<
     number | null
   >(null);
+
+  const [encodeTournament, setEncodeTournament] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
 
   const {
     isAdmin,
@@ -68,6 +74,25 @@ const TournamentsPage = () => {
     );
   }
 
+  if (encodeTournament !== null) {
+    return (
+      <Box
+        sx={{
+          flexGrow: 1,
+          backgroundColor: colors.primary,
+          minHeight: '100vh',
+        }}
+      >
+        {/* On n'affiche plus la flèche ici */}
+        <EncodeResultPage
+          tournamentId={encodeTournament.id}
+          tournamentName={encodeTournament.name}
+          onBack={() => setEncodeTournament(null)}
+        />
+      </Box>
+    );
+  }
+
   if (adminTournament) {
     return (
       <Box
@@ -95,6 +120,9 @@ const TournamentsPage = () => {
             );
           }}
           onNavigateToPlanning={(id) => setPlanningTournamentId(id)}
+          onNavigateToEncodeResult={(id, name) => {
+            setEncodeTournament({ id, name });
+          }}
         />
       </Box>
     );

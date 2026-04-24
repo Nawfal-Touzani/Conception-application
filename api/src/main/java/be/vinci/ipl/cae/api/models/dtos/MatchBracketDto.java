@@ -16,5 +16,6 @@ public record MatchBracketDto(
     Integer scoreA,
     Integer scoreB,
     Long winnerId,
+    Long nextMatchId,
     @NotNull String state
 ) {}

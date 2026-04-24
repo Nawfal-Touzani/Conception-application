@@ -12,18 +12,26 @@ import {
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useAuth } from '../../../../contexts/useAuth';
-import { useParams, useLocation } from 'react-router-dom';
 import { encodeResult } from '../../../../services/match/encode-result';
 import { MatchResponseDto } from '../../../../types/match.types';
 import { validateEncoding } from '../../../../utils/EncodeValidation/EncodeValidation';
 import { getMatchesByTournament } from '../../../../services/match/match.service';
-const ResultEncodingPage = () => {
+import { getMatchSelectionStatuses } from '../../../../services/match/match.service';
+import { MatchSelectionStatus } from '../../../../types/match.types';
+
+type Props = {
+  tournamentId: number;
+  tournamentName: string;
+  onBack: () => void;
+};
+
+const ResultEncodingPage = ({
+  tournamentId,
+  tournamentName,
+  onBack,
+}: Props) => {
   const { user } = useAuth();
   const token = user?.token ?? '';
-
-  const { tournamentId } = useParams<{ tournamentId: string }>();
-  const { state } = useLocation();
-  const tournamentName = state?.tournamentName ?? '';
 
   const [matches, setMatches] = useState<MatchResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,14 +47,36 @@ const ResultEncodingPage = () => {
     const fetchMatches = async () => {
       try {
         setLoading(true);
-        const data = await getMatchesByTournament(Number(tournamentId), token);
-        setMatches(data);
+        setError(null);
+
+        const [matchesData, statuses] = await Promise.all([
+          getMatchesByTournament(tournamentId, token),
+          getMatchSelectionStatuses(tournamentId, token),
+        ]);
+
+        const encodableMatchIds = new Set(
+          statuses
+            .filter((s: MatchSelectionStatus) => s.teamAReady && s.teamBReady)
+            .map((s) => s.id),
+        );
+
+        const filteredMatches = matchesData.filter(
+          (m) =>
+            m.state === 'SCHEDULED' &&
+            m.resultStatus === 'NOT_ENTERED' &&
+            encodableMatchIds.has(m.id) &&
+            m.teamA &&
+            m.teamB,
+        );
+
+        setMatches(filteredMatches);
       } catch (err) {
         setError('Erreur lors de la récupération des matchs.');
       } finally {
         setLoading(false);
       }
     };
+
     fetchMatches();
   }, [tournamentId, token]);
 
@@ -112,8 +142,17 @@ const ResultEncodingPage = () => {
     >
       <Box sx={{ width: '100%', maxWidth: 900, mb: 1 }}>
         <IconButton
-          sx={{ color: 'white' }}
-          onClick={() => window.history.back()}
+          onClick={onBack}
+          sx={{
+            position: 'fixed',
+            left: 16,
+            color: 'white',
+            backgroundColor: 'rgba(255,255,255,0.08)',
+            zIndex: 100,
+            '&:hover': {
+              backgroundColor: 'rgba(255,255,255,0.16)',
+            },
+          }}
         >
           <ArrowBackIcon fontSize="large" />
         </IconButton>
@@ -165,46 +204,52 @@ const ResultEncodingPage = () => {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             {loading ? (
               <CircularProgress sx={{ alignSelf: 'center', my: 2 }} />
+            ) : matches.length === 0 ? (
+              <Typography
+                sx={{
+                  color: 'rgba(255,255,255,0.55)',
+                  textAlign: 'center',
+                  fontStyle: 'italic',
+                  py: 2,
+                }}
+              >
+                Aucun match prêt à être encodé.
+              </Typography>
             ) : (
-              matches
-                .filter(
-                  (m) =>
-                    m.state === 'SCHEDULED' && m.resultStatus === 'NOT_ENTERED',
-                )
-                .map((match) => (
-                  <Box
-                    key={match.id}
+              matches.map((match) => (
+                <Box
+                  key={match.id}
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    p: 2,
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '6px',
+                    transition: '0.3s',
+                    '&:hover': { backgroundColor: 'rgba(255,255,255,0.05)' },
+                  }}
+                >
+                  <Typography sx={{ color: 'white', flex: 2 }}>
+                    {match.teamA} <span style={{ color: '#7f8c8d' }}>vs</span>{' '}
+                    {match.teamB}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    onClick={() => handleSelectMatch(match)}
                     sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      p: 2,
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      borderRadius: '6px',
-                      transition: '0.3s',
-                      '&:hover': { backgroundColor: 'rgba(255,255,255,0.05)' },
+                      backgroundColor: '#fff',
+                      color: '#1a2744',
+                      fontWeight: 700,
+                      textTransform: 'none',
+                      px: 3,
+                      '&:hover': { backgroundColor: '#ecf0f1' },
                     }}
                   >
-                    <Typography sx={{ color: 'white', flex: 2 }}>
-                      {match.teamA} <span style={{ color: '#7f8c8d' }}>vs</span>{' '}
-                      {match.teamB}
-                    </Typography>
-                    <Button
-                      variant="contained"
-                      onClick={() => handleSelectMatch(match)}
-                      sx={{
-                        backgroundColor: '#fff',
-                        color: '#1a2744',
-                        fontWeight: 700,
-                        textTransform: 'none',
-                        px: 3,
-                        '&:hover': { backgroundColor: '#ecf0f1' },
-                      }}
-                    >
-                      Encoder résultat
-                    </Button>
-                  </Box>
-                ))
+                    Encoder résultat
+                  </Button>
+                </Box>
+              ))
             )}
           </Box>
         </Box>
