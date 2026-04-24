@@ -7,6 +7,6 @@ package be.vinci.ipl.cae.api.models.dtos;
 public record MatchSelectionStatusDto(
     Long id,
     Integer roundNumber,
-    boolean teamAReady,
-    boolean teamBReady
+    boolean teamAisReady,
+    boolean teamBisReady
 ) {}
