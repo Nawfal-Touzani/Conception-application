@@ -45,6 +45,7 @@ const baseTournament = {
 
 const onBack = vi.fn();
 const onUpdated = vi.fn();
+const onNavigateToPlanning = vi.fn();
 
 const renderComponent = (tournament = baseTournament) =>
   render(
@@ -54,7 +55,8 @@ const renderComponent = (tournament = baseTournament) =>
           tournament={tournament}
           onBack={onBack}
           onUpdated={onUpdated}
-          onNavigateToPlanning={vi.fn()}
+          onNavigateToPlanning={onNavigateToPlanning}
+          onNavigateToEncodeResult={vi.fn()}
         />
       </AuthContext.Provider>
     </MemoryRouter>,
