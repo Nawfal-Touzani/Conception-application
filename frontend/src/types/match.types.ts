@@ -88,6 +88,6 @@ export interface MatchBracket {
 export interface MatchSelectionStatus {
   id: number;
   roundNumber: number;
-  teamAReady: boolean;
-  teamBReady: boolean;
+  teamAisReady: boolean;
+  teamBisReady: boolean;
 }
