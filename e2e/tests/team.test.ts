@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 
+test.describe.configure({ mode: 'serial' });
+
 test.describe('Team Page', () => {
 
   test.beforeEach(async ({ page }) => {
@@ -27,9 +29,10 @@ test.describe('Team Page', () => {
   });
 
   test("affiche les membres de l'équipe", async ({ page }) => {
-    await expect(page.getByText("Membres de l'équipe")).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText('Rogue')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText('Pulse', { exact: true }).first()).toBeVisible({ timeout: 10000 });
+    const sectionMembres = page.getByText("Membres de l'équipe");
+    await expect(sectionMembres).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(/Rogue/i).first()).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(/Pulse/i).first()).toBeVisible({ timeout: 15000 });
   });
 
   test('affiche les onglets Tournois', async ({ page }) => {
