@@ -1,275 +1,34 @@
-import { useEffect, useState } from 'react';
 import { Box, Button, Typography } from '@mui/material';
-import { useAuth } from '../../../../contexts/useAuth';
-import * as tournamentService from '../../../../services/tournament/tournament.service';
-import { TournamentDetails } from '../../../../types/tournament.types';
+import { useTournamentPlanning } from '../../../../hooks/useTournamentPlanning/useTournamentPlanning';
+import {
+  roundLabels,
+  posEqual,
+} from '../../../../utils/TournamentPlanning/tournament.planning.utils';
+import { TeamPos } from '../../../../types/tournament.planning.types';
 
 type Props = { tournamentId: number };
-type Match = { team1: string; team2: string };
-type Round = Match[];
-type Phase = 'draft' | 'confirmed' | 'published';
-type TeamPos = { roundIdx: number; matchIdx: number; slot: 0 | 1 };
 
-function shuffleArray(array: string[]): string[] {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-}
-
-function buildBracket(teams: string[]): Round[] {
-  const rounds: Round[] = [];
-  let current = shuffleArray(teams);
-
-  const round1: Match[] = [];
-  const nextSlots: string[] = [];
-
-  for (let i = 0; i < current.length; i += 2) {
-    if (current[i + 1] === undefined) {
-      nextSlots.push(current[i]);
-    } else {
-      round1.push({ team1: current[i], team2: current[i + 1] });
-      nextSlots.push('?');
-    }
-  }
-  rounds.push(round1);
-  current = nextSlots;
-
-  while (current.length > 1) {
-    const round: Match[] = [];
-    const next: string[] = [];
-
-    for (let i = 0; i < current.length; i += 2) {
-      if (current[i + 1] === undefined) {
-        next.push(current[i]);
-      } else {
-        round.push({ team1: current[i], team2: current[i + 1] });
-        next.push('?');
-      }
-    }
-
-    if (round.length > 0) rounds.push(round);
-    current = next;
-  }
-
-  return rounds;
-}
-
-function buildFullBracketFromBackend(
-  backendMatches: {
-    roundNumber: number;
-    teamA: string | null;
-    teamB: string | null;
-  }[],
-): Round[] {
-  const maxRound = Math.max(...backendMatches.map((m) => m.roundNumber));
-  const rounds: Round[] = [];
-
-  for (let r = 1; r <= maxRound; r++) {
-    const roundMatches = backendMatches
-      .filter((m) => m.roundNumber === r)
-      .map((m) => ({ team1: m.teamA ?? '?', team2: m.teamB ?? '?' }));
-    rounds.push(roundMatches);
-  }
-
-  return rounds;
-}
-
-const roundLabels = (total: number, idx: number): string => {
-  const remaining = total - idx;
-  if (remaining === 1) return 'Finale';
-  if (remaining === 2) return 'Demi-finales';
-  if (remaining === 3) return 'Quarts de finale';
-  return `Tour ${idx + 1}`;
-};
-
-function getTeamAt(rounds: Round[], pos: TeamPos): string {
-  return pos.slot === 0
-    ? rounds[pos.roundIdx][pos.matchIdx].team1
-    : rounds[pos.roundIdx][pos.matchIdx].team2;
-}
-
-function swapTeams(rounds: Round[], a: TeamPos, b: TeamPos): Round[] {
-  const next = rounds.map((r) => r.map((m) => ({ ...m })));
-  const tA = getTeamAt(next, a);
-  const tB = getTeamAt(next, b);
-  if (a.slot === 0) next[a.roundIdx][a.matchIdx].team1 = tB;
-  else next[a.roundIdx][a.matchIdx].team2 = tB;
-  if (b.slot === 0) next[b.roundIdx][b.matchIdx].team1 = tA;
-  else next[b.roundIdx][b.matchIdx].team2 = tA;
-  return next;
-}
-
-function posEqual(a: TeamPos, b: TeamPos): boolean {
-  return (
-    a.roundIdx === b.roundIdx && a.matchIdx === b.matchIdx && a.slot === b.slot
-  );
-}
-
+// Page d'affichage du planning d'un tournoi
+// Toute la logique est dans le hook useTournamentPlanning, ici c'est que du JSX
 const TournamentPlanningPage = ({ tournamentId }: Props) => {
-  const { user } = useAuth();
-  const token = user?.token ?? '';
+  const {
+    tournament,
+    rounds,
+    phase,
+    selected,
+    message,
+    showConfirmModal,
+    showPubOverlay,
+    setShowConfirmModal,
+    setShowPubOverlay,
+    handleTeamClick,
+    doConfirm,
+    doReset,
+    doDraft,
+    confirmPublish,
+  } = useTournamentPlanning(tournamentId);
 
-  const [tournament, setTournament] = useState<TournamentDetails | null>(null);
-  const [rounds, setRounds] = useState<Round[]>([]);
-  const [teams, setTeams] = useState<string[]>([]);
-  const [phase, setPhase] = useState<Phase>('draft');
-  const [confirmedRounds, setConfirmedRounds] = useState<Round[]>([]);
-  const [selected, setSelected] = useState<TeamPos | null>(null);
-  const [message, setMessage] = useState<{
-    text: string;
-    type: 'success' | 'warn' | '';
-  }>({ text: '', type: '' });
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [showPubOverlay, setShowPubOverlay] = useState(false);
-
-  useEffect(() => {
-    tournamentService.getTournamentById(token, tournamentId).then((t) => {
-      setTournament(t);
-      const teamNames = t.registeredTeamNames ?? [];
-      setTeams(teamNames);
-
-      const savedBracket = sessionStorage.getItem(`bracket_${tournamentId}`);
-      const savedPhase = sessionStorage.getItem(`phase_${tournamentId}`);
-
-      fetch(`http://localhost:3000/tournaments/${tournamentId}/matches`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => (res.ok ? res.json() : []))
-        .then(
-          (
-            matches: {
-              roundNumber: number;
-              teamA: string | null;
-              teamB: string | null;
-            }[],
-          ) => {
-            if (matches.length > 0) {
-              // Published → données viennent du backend
-              const full = buildFullBracketFromBackend(matches);
-              setRounds(full);
-              setConfirmedRounds(full);
-              setPhase('published');
-              sessionStorage.removeItem(`bracket_${tournamentId}`);
-              sessionStorage.removeItem(`phase_${tournamentId}`);
-            } else if (savedBracket && savedPhase === 'confirmed') {
-              // Confirmed → données viennent du sessionStorage
-              const parsed = JSON.parse(savedBracket);
-              setRounds(parsed);
-              setConfirmedRounds(parsed);
-              setPhase('confirmed');
-            } else {
-              // Draft → génère un nouveau bracket
-              setRounds(buildBracket(teamNames));
-              setPhase('draft');
-            }
-          },
-        )
-        .catch(() => {
-          if (savedBracket && savedPhase === 'confirmed') {
-            const parsed = JSON.parse(savedBracket);
-            setRounds(parsed);
-            setConfirmedRounds(parsed);
-            setPhase('confirmed');
-          } else {
-            setRounds(buildBracket(teamNames));
-            setPhase('draft');
-          }
-        });
-    });
-  }, [tournamentId, token]);
-
-  const callPlanningApi = async (p: Phase) => {
-    const res = await fetch(
-      `http://localhost:3000/tournaments/${tournamentId}/planning`,
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          phase: p,
-          rounds: rounds.map((round) => ({
-            matches: round.map((m) => ({
-              team1: m.team1,
-              team2: m.team2,
-            })),
-          })),
-        }),
-      },
-    );
-    if (!res.ok) throw new Error('API error');
-  };
-
-  const handleTeamClick = (pos: TeamPos) => {
-    if (phase !== 'draft') return;
-    const teamName = getTeamAt(rounds, pos);
-    if (teamName === '?') return;
-
-    if (!selected) {
-      setSelected(pos);
-    } else if (posEqual(selected, pos)) {
-      setSelected(null);
-    } else {
-      const bothRound0 = selected.roundIdx === 0 && pos.roundIdx === 0;
-      const byeSwap =
-        (selected.roundIdx === 1 && pos.roundIdx === 0) ||
-        (selected.roundIdx === 0 && pos.roundIdx === 1);
-      if (bothRound0 || byeSwap) {
-        setRounds(swapTeams(rounds, selected, pos));
-      }
-      setSelected(null);
-    }
-  };
-
-  const doConfirm = async () => {
-    try {
-      await callPlanningApi('confirmed');
-      setConfirmedRounds(rounds);
-      setSelected(null);
-      setPhase('confirmed');
-      // Mémorise le bracket confirmé dans le sessionStorage
-      sessionStorage.setItem(`bracket_${tournamentId}`, JSON.stringify(rounds));
-      sessionStorage.setItem(`phase_${tournamentId}`, 'confirmed');
-      setMessage({ text: 'Planning confirmé !', type: 'success' });
-    } catch {
-      setMessage({ text: 'Erreur lors de la confirmation.', type: 'warn' });
-    }
-  };
-
-  const doReset = () => {
-    setRounds(buildBracket(teams));
-    setConfirmedRounds([]);
-    setSelected(null);
-    setPhase('draft');
-    sessionStorage.removeItem(`bracket_${tournamentId}`);
-    sessionStorage.removeItem(`phase_${tournamentId}`);
-  };
-
-  const doDraft = () => {
-    setRounds(confirmedRounds);
-    setPhase('draft');
-    setSelected(null);
-  };
-
-  const confirmPublish = async () => {
-    try {
-      await callPlanningApi('published');
-      // Nettoie le sessionStorage à la publication
-      sessionStorage.removeItem(`bracket_${tournamentId}`);
-      sessionStorage.removeItem(`phase_${tournamentId}`);
-      setShowConfirmModal(false);
-      setPhase('published');
-      setMessage({ text: '', type: '' });
-      setTimeout(() => setShowPubOverlay(true), 300);
-    } catch {
-      setMessage({ text: 'Erreur lors de la publication.', type: 'warn' });
-    }
-  };
-
+  // Tant que le tournoi est pas chargé
   if (!tournament) {
     return (
       <Box sx={{ color: '#fff', textAlign: 'center', pt: 8 }}>
@@ -278,6 +37,7 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
     );
   }
 
+  // Badge qui change selon la phase (draft / confirmé / publié)
   const badge =
     phase === 'published'
       ? {
@@ -319,6 +79,7 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
         Gestion du planning — {tournament.name}
       </Typography>
 
+      {/* Badge de statut du planning */}
       <Box
         sx={{
           fontSize: '0.78rem',
@@ -337,11 +98,13 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
         {badge.label}
       </Box>
 
+      {/* Si pas d'équipes inscrites, on affiche un message */}
       {rounds.length === 0 ? (
         <Typography sx={{ color: 'rgba(255,255,255,0.6)' }}>
           Aucune équipe inscrite pour générer le bracket.
         </Typography>
       ) : (
+        // Bracket : chaque colonne = un round
         <Box
           sx={{
             display: 'flex',
@@ -363,6 +126,7 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
                 minWidth: 170,
               }}
             >
+              {/* Titre du round (Finale, Demi-finales, etc.) */}
               <Typography
                 sx={{
                   color: '#e8b84b',
@@ -375,6 +139,8 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
               >
                 {roundLabels(rounds.length, rIdx)}
               </Typography>
+
+              {/* Les matchs du round, espacés selon la profondeur dans le bracket */}
               <Box
                 sx={{
                   display: 'flex',
@@ -401,27 +167,21 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
                       };
                       const isSelected =
                         selected !== null && posEqual(selected, pos);
-                      const isTBD = team === '?';
-                      const isByeTeam = rIdx === 1 && !isTBD;
+                      const isTBD = team === '?'; // Gagnant pas encore connu
+                      const isByeTeam = rIdx === 1 && !isTBD; // Équipe qui a eu un bye au round 1
                       const isSwappable =
                         phase === 'draft' &&
                         (rIdx === 0 || isByeTeam) &&
                         !isTBD;
+
                       return (
                         <Box key={tIdx}>
+                          {/* Slot d'une équipe, cliquable seulement en mode draft */}
                           <Box
                             onClick={() => handleTeamClick(pos)}
                             sx={{
                               px: 1.5,
                               py: 0.9,
-                              color: isTBD
-                                ? 'rgba(255,255,255,0.25)'
-                                : isSelected
-                                  ? '#e8b84b'
-                                  : isByeTeam
-                                    ? '#e8b84b'
-                                    : '#fff',
-                              fontWeight: isSelected || isByeTeam ? 700 : 500,
                               cursor: isSwappable ? 'pointer' : 'default',
                               transition: 'all 0.15s',
                               '&:hover': isSwappable
@@ -442,6 +202,8 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
                               {isTBD ? 'TBD' : team}
                             </Typography>
                           </Box>
+
+                          {/* Séparateur entre les deux équipes du match */}
                           {tIdx === 0 && (
                             <Box
                               sx={{
@@ -461,6 +223,7 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
         </Box>
       )}
 
+      {/* Boutons d'action selon la phase actuelle */}
       <Box
         sx={{
           display: 'flex',
@@ -480,6 +243,7 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
             >
               Confirmer le planning
             </Button>
+            {/* Relance un bracket aléatoire depuis zéro */}
             <Button
               variant="contained"
               onClick={doReset}
@@ -498,6 +262,7 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
             >
               Publier le planning
             </Button>
+            {/* Revient en draft avec le bracket confirmé, pas un nouveau aléatoire */}
             <Button
               variant="contained"
               onClick={doDraft}
@@ -508,6 +273,7 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
           </>
         )}
         {phase === 'published' && (
+          // Plus rien à faire, le planning est verrouillé
           <Button
             variant="contained"
             disabled
@@ -518,6 +284,7 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
         )}
       </Box>
 
+      {/* Message de succès ou d'erreur après une action */}
       {message.text && (
         <Typography
           sx={{
@@ -532,6 +299,7 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
         </Typography>
       )}
 
+      {/* Modal de confirmation avant publication */}
       {showConfirmModal && (
         <Box
           onClick={() => setShowConfirmModal(false)}
@@ -545,6 +313,7 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
             zIndex: 100,
           }}
         >
+          {/* stopPropagation pour pas fermer en cliquant dans la modale */}
           <Box
             onClick={(e) => e.stopPropagation()}
             sx={{
@@ -604,6 +373,7 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
         </Box>
       )}
 
+      {/* Overlay affiché après publication réussie */}
       {showPubOverlay && (
         <Box
           sx={{
@@ -661,6 +431,7 @@ const TournamentPlanningPage = ({ tournamentId }: Props) => {
   );
 };
 
+// Styles communs pour les boutons, réutilisé partout dans la page
 const btnStyle = (bg: string, hoverBg: string) => ({
   backgroundColor: bg,
   color: '#fff',

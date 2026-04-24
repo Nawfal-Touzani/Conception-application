@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Box, Button, Divider, Paper, Typography } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { TournamentDetails } from '../../../../types/tournament.types';
 import { useTournamentDetail } from '../../../../hooks/useTournamentDetail/useTournamentDetail';
 import {
@@ -16,9 +17,10 @@ import { useAuth } from '../../../../contexts/useAuth';
 type Props = {
   tournament: TournamentDetails;
   onRegister: () => Promise<void>;
+  onBack: () => void;
 };
 
-const TournamentDetail = ({ tournament, onRegister }: Props) => {
+const TournamentDetail = ({ tournament, onRegister, onBack }: Props) => {
   const { user } = useAuth();
   const token = user?.token ?? '';
 
@@ -91,11 +93,38 @@ const TournamentDetail = ({ tournament, onRegister }: Props) => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        pt: 0,
+        pt: 8,
         px: 4,
         pb: 5,
       }}
     >
+      {/* ← Flèche de retour en haut de la page détail */}
+      <Box
+        sx={{
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'flex-start',
+          mb: 2,
+        }}
+      >
+        <Button
+          variant="text"
+          startIcon={<ArrowBackIcon />}
+          onClick={onBack}
+          sx={{
+            color: '#fff',
+            textTransform: 'none',
+            fontWeight: 'bold',
+            fontSize: '0.95rem',
+            '&:hover': {
+              backgroundColor: 'rgba(255,255,255,0.1)',
+            },
+          }}
+        >
+          Tous les tournois
+        </Button>
+      </Box>
+
       <Typography
         variant="h4"
         sx={{ color: '#fff', fontWeight: 800, mb: 1, textAlign: 'center' }}
