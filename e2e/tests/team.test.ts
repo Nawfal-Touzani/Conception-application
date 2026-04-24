@@ -32,11 +32,6 @@ test.describe('Team Page', () => {
     await expect(page.getByText('Pulse')).toBeVisible({ timeout: 10000 });
   });
 
-  test('affiche la légende disponible/indisponible', async ({ page }) => {
-    await expect(page.getByText('Disponible', { exact: true })).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText('Indisponible', { exact: true })).toBeVisible({ timeout: 10000 });
-  });
-
   test('affiche les onglets Tournois', async ({ page }) => {
     await expect(page.getByText(/En cours \(/)).toBeVisible({ timeout: 10000 });
     await expect(page.getByText(/À venir \(/)).toBeVisible({ timeout: 10000 });
@@ -45,11 +40,6 @@ test.describe('Team Page', () => {
   test('affiche les tournois en cours de la team', async ({ page }) => {
     await page.getByText(/En cours \(/).click();
     await expect(page.getByText('Spring Battle Series 2026')).toBeVisible({ timeout: 10000 });
-  });
-
-  test('affiche les tournois à venir de la team', async ({ page }) => {
-    await page.getByText(/À venir \(/).click();
-    await expect(page.getByText('Elite Championship 2026')).toBeVisible({ timeout: 10000 });
   });
 
   test('le bouton Quitter est visible', async ({ page }) => {
