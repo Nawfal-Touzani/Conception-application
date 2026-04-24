@@ -1,20 +1,22 @@
 import { TeamDto, TeamMember } from '../../types/team.types';
 
-// fonction asynchrone qui retourne une promise avec un tab de Team
 export const getTeams = async (token: string): Promise<TeamDto[]> => {
+  // `Authorization: Bearer` : schéma d'authentification standard pour les JWT
   const response = await fetch('/api/teams', {
     headers: { Authorization: `Bearer ${token}` },
   });
 
   if (!response.ok) {
+    // `response.text()` lit le corps de la réponse d'erreur renvoyé par le serveur
+    // Le `||` fournit un message de fallback si le corps est vide
     const errorText = await response.text();
     throw new Error(errorText || 'Erreur lors du chargement des équipes.');
   }
 
+  // `response.json()` désérialise le corps JSON et retourne une Promise<TeamDto[]>
   return response.json();
 };
 
-// retourne les membres de l'équipe du joueur avec ce token
 export const getMyTeamMembers = async (
   token: string,
 ): Promise<TeamMember[]> => {
@@ -51,8 +53,11 @@ export const createTeam = async (
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
+      // `Content-Type: application/json` indique au serveur le format du body
+      // obligatoire pour que le backend parse correctement `JSON.stringify({ name })`
       'Content-Type': 'application/json',
     },
+    // `JSON.stringify` sérialise l'objet JS en chaîne JSON pour l'envoi
     body: JSON.stringify({ name }),
   });
 
@@ -66,6 +71,7 @@ export const sendJoinRequest = async (
   token: string,
   teamId: number,
 ): Promise<void> => {
+  // `teamId` injecté dans l'URL via template literal pour cibler l'équipe concernée
   const response = await fetch(`/api/teams/${teamId}/membership-requests`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
@@ -78,6 +84,7 @@ export const sendJoinRequest = async (
 };
 
 export const leaveTeam = async (token: string): Promise<void> => {
+  // `DELETE` : méthode HTTP sémantique pour une action de suppression/départ
   const response = await fetch('/api/teams/leave', {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` },
@@ -94,6 +101,8 @@ export const nominateSecondaryManager = async (
   teamId: number,
   memberId: number,
 ): Promise<void> => {
+  // `PUT` : méthode HTTP sémantique pour une mise à jour de ressource existante
+  // Les deux ids sont passés en paramètres d'URL pour cibler précisément le membre
   const response = await fetch(
     `/api/teams/${teamId}/secondary-manager/${memberId}`,
     {

@@ -4,7 +4,7 @@ import NavBar from '../../../hooks/useNavBar/useNavBar';
 
 const App = () => {
   return (
-    // Main Box taking the full height of the screen
+    // Box principale qui occupe toute la hauteur de l'écran
     <Box
       sx={{
         display: 'flex',
@@ -13,11 +13,12 @@ const App = () => {
         backgroundColor: '#1e2a44',
       }}
     >
-      {/* Our navigation bar will always be visible at the top */}
+      {/* La barre de navigation toujours visible en haut de page */}
       <NavBar />
 
-      {/* This is where the React Router magic happens! */}
-      {/* Outlet will be replaced by LoginPage, RegisterPage, or HomePage depending on the URL */}
+      {/* `Outlet` est un composant React Router qui agit comme un emplacement dynamique :
+          il est remplacé par le composant de la route active (LoginPage, RegisterPage, HomePage…)
+          selon l'URL courante */}
       <Box
         component="main"
         sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}
