@@ -18,7 +18,6 @@ type Props = {
 
 const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
   // Hook personnalisé qui centralise la logique des deux formulaires
-  // (rejoindre et créer une équipe) et remonte `onTeamCreated` après succès
   const {
     teams,
     selectedTeamId,
@@ -34,8 +33,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
   return (
     <Box
       sx={{
-        // Spread operator : on fusionne les styles de base du fichier de styles
-        // avec les overrides définis inline
+        // Spread operator pour fusionner les styles de base
         ...joinOrCreateTeamSx.root,
         flexDirection: 'column',
         gap: 2,
@@ -54,8 +52,6 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
             justifyContent: 'center',
             gap: 2,
             mb: 4,
-            // Pseudo-éléments CSS via MUI sx : génère les deux lignes décoratives
-            // de part et d'autre du titre sans élément HTML supplémentaire
             '&::before, &::after': {
               content: '""',
               height: '3px',
@@ -104,16 +100,14 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
           >
             <Box sx={joinOrCreateTeamSx.divider} />
 
-            {/* Affiche l'alerte uniquement si elle concerne la section "join"
-                — permet d'avoir un snack distinct par section avec le même state */}
+            {/* Affichage de l'alerte si elle concerne la la section join */}
             {snack.open && snack.section === 'join' && (
               <Alert severity={snack.severity} onClose={closeSnack}>
                 {snack.msg}
               </Alert>
             )}
 
-            {/* Autocomplete MUI : champ de recherche avec suggestions issues de `teams`
-                Composant contrôlé : `value` est synchronisé avec `selectedTeamId` */}
+            {/* Liste déroulante qui permet aussi la recherche de team */}
             <Autocomplete
               fullWidth
               size="small"
@@ -141,7 +135,6 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
             />
 
             <Box sx={{ textAlign: 'center', mt: 'auto', pt: 4 }}>
-              {/* `mt: 'auto'` pousse le bouton en bas du Paper grâce au flexDirection column */}
               <Button
                 variant="contained"
                 disabled={selectedTeamId === ''}
@@ -154,7 +147,6 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
           </Paper>
         </Box>
 
-        {/* Divider vertical — `flexItem` requis pour s'étirer dans un conteneur flex */}
         <Divider
           orientation="vertical"
           flexItem
@@ -193,7 +185,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
           >
             <Box sx={joinOrCreateTeamSx.divider} />
 
-            {/* Même logique que pour "join" : alerte isolée à la section "create" */}
+            {/* Même logique que pour "join" :alerte isolée */}
             {snack.open && snack.section === 'create' && (
               <Alert severity={snack.severity} onClose={closeSnack}>
                 {snack.msg}
@@ -219,14 +211,13 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
                 closeSnack();
                 setTeamName(e.target.value);
               }}
-              // Raccourci clavier : soumet le formulaire sans cliquer sur le bouton
+              // Raccourci clavier pour soumettre le formulaire sans cliquer sur le bouton
               onKeyDown={(e) => e.key === 'Enter' && createTeam()}
               size="small"
               sx={{ ...joinOrCreateTeamSx.teamNameInput, mt: 1 }}
             />
 
             <Box sx={{ textAlign: 'center', mt: 'auto', pt: 4 }}>
-              {/* `teamName.trim()` évite de valider un nom composé uniquement d'espaces */}
               <Button
                 variant="contained"
                 disabled={!teamName.trim()}
