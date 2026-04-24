@@ -69,7 +69,7 @@ describe('useJoinOrCreateTeam - chargement et filtre des équipes', () => {
 
     await waitFor(() => {
       expect(
-        vi.mocked(teamService.getTeams).mock.results.at(0)?.value,
+        vi.mocked(teamService.getTeams).mock.results[0]?.value,
       ).resolves.toBe(mockTeams);
     });
 
