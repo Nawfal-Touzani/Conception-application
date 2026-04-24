@@ -103,7 +103,7 @@ describe('Bouton Nommer', () => {
 describe('Navigation', () => {
   it('navigue vers le profil au clic sur le gameTag', () => {
     renderComponent([makeMember({ memberId: 7, gameTag: 'clicker' })]);
-    fireEvent.click(screen.getByText('clicker'));
+    fireEvent.click(screen.getByText('clicker#007'));
     expect(mockNavigate).toHaveBeenCalledWith('/members/7');
   });
 });
