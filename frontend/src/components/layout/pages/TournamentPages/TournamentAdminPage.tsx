@@ -125,7 +125,7 @@ const TournamentAdminPage = ({
           const firstRound = statuses.filter((s) => s.roundNumber === 1);
           const ready =
             firstRound.length > 0 &&
-            firstRound.every((s) => s.teamAReady && s.teamBReady);
+            firstRound.some((s) => s.teamAReady && s.teamBReady);
           setAllSelectionsReady(ready);
         })
         .catch(() => setAllSelectionsReady(false));
