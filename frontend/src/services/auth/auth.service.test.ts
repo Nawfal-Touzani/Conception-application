@@ -1,12 +1,12 @@
 import { describe, test, expect, vi, afterEach } from 'vitest';
 import { register, login, getMe } from './auth.service';
 
-// Mocking the fetch with a given HTTP status and optional response body.
-// This avoids repeating the same boilerplate in every test case.
 const mockFetch = (status: number, body?: object) => {
+  const responseBody = JSON.stringify(body ?? {});
   global.fetch = vi.fn().mockResolvedValue({
     ok: status >= 200 && status < 300,
     status,
+    text: vi.fn().mockResolvedValue(responseBody),
     json: vi.fn().mockResolvedValue(body ?? {}),
   });
 };
