@@ -72,7 +72,7 @@ const PromoteAdminDialog = ({
                 },
               }}
             >
-              {member.tag}
+              {member.tag}#{String(member.id).padStart(3, '0')}
             </Typography>
 
             <Typography sx={{ color: '#a1a0a0', fontSize: '1rem', flex: 4 }}>

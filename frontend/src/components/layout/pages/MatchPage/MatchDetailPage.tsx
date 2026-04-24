@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import React from 'react';
 import {
   Box,
@@ -586,28 +587,50 @@ const LineupColumn: React.FC<LineupColumnProps> = ({
 const PlayerRow: React.FC<{ player: PlayerSelectionDto; reverse: boolean }> = ({
   player,
   reverse,
-}) => (
-  <Box
-    sx={{
-      display: 'flex',
-      flexDirection: reverse ? 'row-reverse' : 'row',
-      alignItems: 'center',
-      gap: 1,
-    }}
-  >
-    <Avatar
-      src={
-        player.imageUrl?.startsWith('/')
-          ? `${BASE_URL}${player.imageUrl}`
-          : player.imageUrl
-      }
-      sx={{ width: 32, height: 32 }}
-    />
-    <Typography sx={{ fontSize: '0.9rem', fontWeight: 500, color: '#1a2540' }}>
-      {player.tag}
-    </Typography>
-  </Box>
-);
+}) => {
+  const navigate = useNavigate();
+
+  const handleNavigate = () => {
+    navigate(`/members/${player.id}`);
+  };
+
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: reverse ? 'row-reverse' : 'row',
+        alignItems: 'center',
+        gap: 1,
+      }}
+    >
+      <Avatar
+        src={
+          player.imageUrl?.startsWith('/')
+            ? `${BASE_URL}${player.imageUrl}`
+            : player.imageUrl
+        }
+        onClick={handleNavigate}
+        sx={{
+          width: 32,
+          height: 32,
+          cursor: 'pointer',
+          '&:hover': { opacity: 0.8, transition: 'opacity 0.2s' },
+        }}
+      />
+      <Typography
+        onClick={handleNavigate}
+        sx={{
+          fontSize: '0.9rem',
+          fontWeight: 500,
+          color: '#1a2540',
+          cursor: 'pointer',
+        }}
+      >
+        {player.tag}#{String(player.id).padStart(3, '0')}
+      </Typography>
+    </Box>
+  );
+};
 
 type ConfirmModalProps = {
   title: string;

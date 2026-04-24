@@ -117,7 +117,7 @@ describe('MembersListPage Logic', () => {
     const dialog = await screen.findByRole('dialog');
     expect(dialog).toBeTruthy();
 
-    const lynxElements = screen.getAllByText('Lynx');
+    const lynxElements = screen.getAllByText(/Lynx/);
     expect(lynxElements.length).toBeGreaterThan(1);
 
     expect(dialog.textContent).toContain('Lynx');

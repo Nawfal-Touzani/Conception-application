@@ -82,12 +82,13 @@ export const TeamMemberColumn = ({
                 <Avatar
                   src={`http://localhost:3000${member.avatarUrl}`}
                   alt={member.gameTag}
-                  sx={{ width: 50, height: 50 }}
+                  onClick={() => navigate(`/members/${member.memberId}`)}
+                  sx={{ width: 50, height: 50, cursor: 'pointer' }}
                 />
               </ListItemAvatar>
 
               <ListItemText
-                primary={member.gameTag}
+                primary={`${member.gameTag}#${String(member.memberId).padStart(3, '0')}`}
                 onClick={() => navigate(`/members/${member.memberId}`)}
                 sx={teamPageSx.gameTag}
                 primaryTypographyProps={{

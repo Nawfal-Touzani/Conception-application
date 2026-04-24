@@ -48,7 +48,7 @@ describe('PublicProfilePage', () => {
 
     renderComponent();
 
-    expect(await screen.findByText('Lynx')).toBeTruthy();
+    expect(await screen.findByText('Lynx#001')).toBeTruthy();
     expect(screen.getByText('Tacticien')).toBeTruthy();
     expect(screen.getByText('TEAM_ALPHA')).toBeTruthy();
     expect(screen.getByText(/12 novembre 2025/i)).toBeTruthy();
