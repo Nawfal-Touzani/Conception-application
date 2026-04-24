@@ -24,7 +24,10 @@ const DemoteAdminDialog = ({ demoteTarget, onClose, onConfirm }: Props) => (
     <DialogContent>
       <Typography>
         Es-tu sûr de vouloir révoquer les droits administrateur de{' '}
-        <strong>{demoteTarget?.tag}</strong> ?
+        <strong>
+          {demoteTarget?.tag}#{String(demoteTarget?.id).padStart(3, '0')}
+        </strong>{' '}
+        ?
       </Typography>
     </DialogContent>
     <DialogActions>

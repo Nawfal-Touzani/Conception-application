@@ -170,7 +170,7 @@ const NavBar = ({
                     variant="body2"
                     sx={{ fontWeight: 'bold', color: 'inherit' }}
                   >
-                    {user.tag}
+                    {user.tag}#{String(user.id).padStart(3, '0')}
                   </Typography>
 
                   <AccountCircle sx={{ fontSize: 32 }} />

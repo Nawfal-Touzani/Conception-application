@@ -116,7 +116,11 @@ describe('AdminPage', () => {
     );
     renderAdminPage();
     expect(await screen.findByText('Ajouter un administrateur')).toBeTruthy();
-    expect(await screen.findByText('MemberTag')).toBeTruthy();
+    expect(
+      await screen.findByText(
+        `MemberTag#${String(regularMember.id).padStart(3, '0')}`,
+      ),
+    ).toBeTruthy();
   });
 
   test('promeut un membre en admin avec succès', async () => {
@@ -129,7 +133,9 @@ describe('AdminPage', () => {
       }),
     );
     renderAdminPage();
-    await screen.findByText('MemberTag');
+    await screen.findByText(
+      `MemberTag#${String(regularMember.id).padStart(3, '0')}`,
+    );
     const addButton = getAddButtonInDialog();
     if (addButton) fireEvent.click(addButton);
     expect(handlePromote).toHaveBeenCalledWith(regularMember);
