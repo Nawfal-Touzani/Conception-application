@@ -12,33 +12,39 @@ export const getMatchesByTournament = async (
   tournamentId: number,
   token: string,
 ): Promise<MatchResponseDto[]> => {
+  // recupere la liste simple des matchs d'un tournoi
   const response = await fetch(`/api/tournaments/${tournamentId}/matches`, {
     headers: { Authorization: `Bearer ${token}` },
   });
+
   if (!response.ok) throw new Error(`Error ${response.status}`);
+
   return response.json();
 };
 
-// GET /matches/:id, accessible publiquement, token optionnel
-// Si le résultat est VALIDATED, les compositions sont visibles
+// recupere le detail complet d'un match
+// le token reste optionnel car la page peut etre publique
 export const getMatchById = async (
   id: number,
   token?: string,
 ): Promise<MatchDetail> => {
+  // ajoute le bearer seulement si l'utilisateur est connecte
   const headers: Record<string, string> = {};
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const response = await fetch(`${API_URL}/matches/${id}`, { headers });
 
   if (!response.ok) {
+    // donne un message metier plus clair si le match n'existe pas
     if (response.status === 404) throw new Error('Match introuvable.');
+
     throw new Error('Erreur lors du chargement du match.');
   }
 
   return response.json();
 };
 
-// GET /matches/upcoming, matchs à venir du membre connecté
+// recupere les prochains matchs du membre connecte
 export const getUpcomingMatches = async (
   token: string,
 ): Promise<MatchDetail[]> => {
@@ -47,30 +53,32 @@ export const getUpcomingMatches = async (
   });
 
   if (!response.ok) {
-    throw new Error('Erreur lors du chargement des matchs à venir.');
+    throw new Error('Erreur lors du chargement des matchs a venir.');
   }
 
   return response.json();
 };
 
-// GET /matches/past, matchs passés du membre connecté
+// recupere les anciens matchs du membre connecte
 export const getPastMatches = async (token: string): Promise<MatchDetail[]> => {
   const response = await fetch(`${API_URL}/matches/past`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
   if (!response.ok) {
-    throw new Error('Erreur lors du chargement des matchs passés.');
+    throw new Error('Erreur lors du chargement des matchs passes.');
   }
 
   return response.json();
 };
 
-// GET /tournaments/:id/bracket, accessible publiquement, token optionnel
+// recupere le bracket d'un tournoi
+// le token reste optionnel car cette vue peut etre publique
 export const getBracketByTournament = async (
   tournamentId: number,
   token?: string,
 ): Promise<MatchBracket[]> => {
+  // ajoute le bearer seulement si on en a un
   const headers: Record<string, string> = {};
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
@@ -80,14 +88,16 @@ export const getBracketByTournament = async (
   );
 
   if (!response.ok) {
+    // remonte un message metier plus lisible que le simple code http
     if (response.status === 404) throw new Error('Tournoi introuvable.');
+
     throw new Error('Erreur lors du chargement du bracket.');
   }
 
   return response.json();
 };
 
-// GET /matches/:id/selection/eligible, membres éligibles pour la compo (responsable)
+// recupere les membres qu'on peut selectionner pour la composition
 export const getEligibleMembers = async (
   matchId: number,
   token: string,
@@ -100,17 +110,19 @@ export const getEligibleMembers = async (
   );
 
   if (!response.ok) {
+    // ce cas arrive si l'utilisateur n'a pas les droits de responsable
     if (response.status === 403)
       throw new Error(
-        "Accès refusé. Vous n'êtes pas responsable de cette équipe.",
+        "Acces refuse. Vous n'etes pas responsable de cette equipe.",
       );
-    throw new Error('Erreur lors du chargement des membres éligibles.');
+
+    throw new Error('Erreur lors du chargement des membres eligibles.');
   }
 
   return response.json();
 };
 
-// POST /matches/:id/selection, première soumission de la composition (4 joueurs)
+// envoie une premiere composition pour le match
 export const submitSelection = async (
   matchId: number,
   memberIds: number[],
@@ -122,10 +134,12 @@ export const submitSelection = async (
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
+    // envoie juste la liste des ids au back
     body: JSON.stringify({ memberIds }),
   });
 
   if (!response.ok) {
+    // essaie de recuperer le message exact du back si disponible
     const message = await response.text();
     throw new Error(
       message || 'Erreur lors de la soumission de la composition.',
@@ -135,7 +149,7 @@ export const submitSelection = async (
   return response.json();
 };
 
-// PUT /matches/:id/selection, modification de la composition existante
+// remplace une composition deja existante
 export const modifySelection = async (
   matchId: number,
   memberIds: number[],
@@ -147,10 +161,12 @@ export const modifySelection = async (
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
+    // envoie la nouvelle liste complete au back
     body: JSON.stringify({ memberIds }),
   });
 
   if (!response.ok) {
+    // garde en priorite le message du serveur si il existe
     const message = await response.text();
     throw new Error(
       message || 'Erreur lors de la soumission de la composition.',
@@ -160,7 +176,7 @@ export const modifySelection = async (
   return response.json();
 };
 
-// POST /matches/:id/validate, le responsable valide le résultat encodé par l'admin
+// valide le resultat d'un match deja encode
 export const validateResult = async (
   matchId: number,
   token: string,
@@ -171,17 +187,19 @@ export const validateResult = async (
   });
 
   if (!response.ok) {
+    // ce cas indique que l'action n'est pas autorisee dans l'etat actuel
     if (response.status === 409)
       throw new Error(
-        "Ce résultat ne peut pas être validé dans l'état actuel.",
+        "Ce resultat ne peut pas etre valide dans l'etat actuel.",
       );
-    throw new Error('Erreur lors de la validation du résultat.');
+
+    throw new Error('Erreur lors de la validation du resultat.');
   }
 
   return response.json();
 };
 
-// POST /matches/:id/contest, le responsable conteste le résultat (une seule fois possible)
+// conteste le resultat d'un match
 export const contestResult = async (
   matchId: number,
   token: string,
@@ -192,15 +210,17 @@ export const contestResult = async (
   });
 
   if (!response.ok) {
+    // le back bloque si une contestation a deja ete faite
     if (response.status === 409)
-      throw new Error('Vous avez déjà contesté ce résultat.');
-    throw new Error('Erreur lors de la contestation du résultat.');
+      throw new Error('Vous avez deja conteste ce resultat.');
+
+    throw new Error('Erreur lors de la contestation du resultat.');
   }
 
   return response.json();
 };
 
-// POST /matches/:id/forfeit, le responsable déclare forfait (0-5, irréversible)
+// declare le forfait de l'equipe pour ce match
 export const declareForfeit = async (
   matchId: number,
   token: string,
@@ -211,14 +231,17 @@ export const declareForfeit = async (
   });
 
   if (!response.ok) {
+    // le back refuse si le match n'est pas dans un etat compatible
     if (response.status === 409)
-      throw new Error('Le forfait ne peut pas être déclaré pour ce match.');
-    throw new Error('Erreur lors de la déclaration de forfait.');
+      throw new Error('Le forfait ne peut pas etre declare pour ce match.');
+
+    throw new Error('Erreur lors de la declaration de forfait.');
   }
 
   return response.json();
 };
 
+// recupere les statuts de selection des matchs d'un tournoi
 export const getMatchSelectionStatuses = async (
   tournamentId: number,
   token: string,
@@ -227,6 +250,10 @@ export const getMatchSelectionStatuses = async (
     `${API_URL}/tournaments/${tournamentId}/selections/status`,
     { headers: { Authorization: `Bearer ${token}` } },
   );
-  if (!response.ok) throw new Error('Erreur lors du chargement des statuts.');
+
+  if (!response.ok) {
+    throw new Error('Erreur lors du chargement des statuts.');
+  }
+
   return response.json();
 };

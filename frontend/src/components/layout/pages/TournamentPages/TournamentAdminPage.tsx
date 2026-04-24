@@ -122,13 +122,14 @@ const TournamentAdminPage = ({
     if (tournament.status === 'IN_PROGRESS') {
       getMatchSelectionStatuses(tournament.id, token)
         .then((statuses: MatchSelectionStatus[]) => {
-          const firstRound = statuses.filter((s) => s.roundNumber === 1);
-          const ready =
-            firstRound.length > 0 &&
-            firstRound.some((s) => s.teamAReady && s.teamBReady);
+          const ready = statuses.some((s) => s.teamAisReady && s.teamBisReady);
+
           setAllSelectionsReady(ready);
         })
-        .catch(() => setAllSelectionsReady(false));
+        .catch((error) => {
+          console.error('Erreur getMatchSelectionStatuses', error);
+          setAllSelectionsReady(false);
+        });
     }
   }, [tournament.id, tournament.status, token]);
 

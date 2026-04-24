@@ -56,7 +56,9 @@ const ResultEncodingPage = ({
 
         const encodableMatchIds = new Set(
           statuses
-            .filter((s: MatchSelectionStatus) => s.teamAReady && s.teamBReady)
+            .filter(
+              (s: MatchSelectionStatus) => s.teamAisReady && s.teamBisReady,
+            )
             .map((s) => s.id),
         );
 
