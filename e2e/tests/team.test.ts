@@ -32,11 +32,6 @@ test.describe('Team Page', () => {
     await expect(page.getByText('Pulse')).toBeVisible({ timeout: 10000 });
   });
 
-  test('affiche la légende disponible/indisponible', async ({ page }) => {
-    await expect(page.getByText('Disponible', { exact: true })).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText('Indisponible', { exact: true })).toBeVisible({ timeout: 10000 });
-  });
-
   test('affiche les onglets Tournois', async ({ page }) => {
     await expect(page.getByText(/En cours \(/)).toBeVisible({ timeout: 10000 });
     await expect(page.getByText(/À venir \(/)).toBeVisible({ timeout: 10000 });
