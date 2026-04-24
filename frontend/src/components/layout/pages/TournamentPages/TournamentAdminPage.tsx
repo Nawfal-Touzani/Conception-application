@@ -11,7 +11,6 @@ import {
 import { TournamentDetails } from '../../../../types/tournament.types';
 import { useAuth } from '../../../../contexts/useAuth';
 import * as tournamentService from '../../../../services/tournament/tournament.service';
-import { useNavigate } from 'react-router-dom';
 import { MatchSelectionStatus } from '../../../../types/match.types';
 import { getMatchSelectionStatuses } from '../../../../services/match/match.service';
 
@@ -20,6 +19,7 @@ type Props = {
   onBack: () => void;
   onUpdated: (updated: TournamentDetails) => void;
   onNavigateToPlanning: (id: number) => void;
+  onNavigateToEncodeResult: (id: number, name: string) => void;
 };
 
 function statusLabel(tournament: TournamentDetails): string {
@@ -37,10 +37,10 @@ const TournamentAdminPage = ({
   onUpdated,
   onBack,
   onNavigateToPlanning,
+  onNavigateToEncodeResult,
 }: Props) => {
   const { user } = useAuth();
   const token = user?.token ?? '';
-  const navigate = useNavigate();
 
   const [name, setName] = useState(tournament.name);
   const [description, setDescription] = useState(tournament.description ?? '');
@@ -125,7 +125,7 @@ const TournamentAdminPage = ({
           const firstRound = statuses.filter((s) => s.roundNumber === 1);
           const ready =
             firstRound.length > 0 &&
-            firstRound.every((s) => s.teamAReady && s.teamBReady);
+            firstRound.some((s) => s.teamAReady && s.teamBReady);
           setAllSelectionsReady(ready);
         })
         .catch(() => setAllSelectionsReady(false));
@@ -347,9 +347,7 @@ const TournamentAdminPage = ({
                   variant="contained"
                   disabled={!allSelectionsReady}
                   onClick={() =>
-                    navigate(`/encode/result/${tournament.id}`, {
-                      state: { tournamentName: tournament.name },
-                    })
+                    onNavigateToEncodeResult(tournament.id, tournament.name)
                   }
                   fullWidth
                   sx={{

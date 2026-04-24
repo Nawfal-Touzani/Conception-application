@@ -203,7 +203,8 @@ public class TournamentService {
     TournamentResponseDto inProgress = tournamentRepository.findFirstByStatus(Status.IN_PROGRESS)
         .map(this::toResponseDto).orElse(null);
 
-    TournamentResponseDto nextUpcoming = tournamentRepository.findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(
+    TournamentResponseDto nextUpcoming = tournamentRepository
+        .findFirstByStatusAndIsPublicTrueOrderByStartDateAsc(
         Status.PREPARATION).map(this::toResponseDto).orElse(null);
 
     return new HomepageTournamentsDto(lastFinished, inProgress, nextUpcoming);

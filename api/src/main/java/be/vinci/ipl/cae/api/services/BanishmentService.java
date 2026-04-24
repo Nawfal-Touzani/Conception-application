@@ -50,6 +50,7 @@ public class BanishmentService {
    * @param adminId  the id of the admin who perform the ban
    * @param reason   reason for the banishment
    */
+  @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
   @Transactional
   public void banMember(Long memberId, Long adminId, String reason) {
     Member memberToBan = findMember(memberId);

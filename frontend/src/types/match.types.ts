@@ -81,6 +81,7 @@ export interface MatchBracket {
   scoreA: number | null;
   scoreB: number | null;
   winnerId: number | null;
+  nextMatchId: number | null;
   state: MatchState;
 }
 
