@@ -30,14 +30,14 @@ const mockStatuses = [
   {
     id: 1,
     roundNumber: 1,
-    teamAReady: true,
-    teamBReady: true,
+    teamAisReady: true,
+    teamBisReady: true,
   },
   {
     id: 2,
     roundNumber: 1,
-    teamAReady: true,
-    teamBReady: true,
+    teamAisReady: true,
+    teamBisReady: true,
   },
 ];
 
