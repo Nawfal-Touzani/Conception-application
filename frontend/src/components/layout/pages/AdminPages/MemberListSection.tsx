@@ -11,6 +11,8 @@ interface Props {
   onAction: (member: MemberDto) => void;
 }
 
+// S'occupe des colonnes de liste de membres (actifs ou ban)
+// affiche titre, compteur,...
 export const MemberListSection = ({
   title,
   count,
