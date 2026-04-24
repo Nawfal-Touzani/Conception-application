@@ -26,7 +26,7 @@ interface NotificationItemProps {
   onContestResult?: (matchId: number) => void;
   onCorrectResult?: (matchId: number, scoreA: number, scoreB: number) => void;
 }
-
+// Composant pour afficher UNE notification
 const NotificationItem = ({
   notification,
   onMarkAsRead,
@@ -36,13 +36,24 @@ const NotificationItem = ({
   onContestResult,
   onCorrectResult,
 }: NotificationItemProps) => {
+  // état pour ouvrir la popup de refus
   const [refuseOpen, setRefuseOpen] = useState(false);
+
+  // raison du refus
   const [reason, setReason] = useState('');
+
+  // état popup correction score
+
   const [correctOpen, setCorrectOpen] = useState(false);
+
+  // permet de savoir si la correction est faite
   const [correctDone, setCorrectDone] = useState(false);
+
+  // scores saisis
   const [scoreA, setScoreA] = useState('');
   const [scoreB, setScoreB] = useState('');
 
+  // état de la demande (acceptée ou refusée)
   const [actionDone, setActionDone] = useState<'approved' | 'refused' | null>(
     notification.requestState === 'ACCEPTED'
       ? 'approved'
@@ -51,10 +62,12 @@ const NotificationItem = ({
         : null,
   );
 
+  // état pour validation ou contestation du résultat
   const [resultAction, setResultAction] = useState<
     'validated' | 'contested' | null
   >(null);
 
+  // handler  confirme un refus
   const handleRefuseConfirm = () => {
     if (notification.membershipRequestId && onRefuse) {
       onRefuse(notification.membershipRequestId, reason);
@@ -64,16 +77,22 @@ const NotificationItem = ({
     setReason('');
   };
 
+  // handler  corrige  un score
   const handleCorrectConfirm = () => {
     const a = parseInt(scoreA);
     const b = parseInt(scoreB);
+
+    // on bloque si valeurs invalides
     if (isNaN(a) || isNaN(b) || a < 0 || b < 0 || a === b) return;
+
     onCorrectResult?.(notification.matchId!, a, b);
     onMarkAsRead(notification.id);
+
     setCorrectDone(true);
     setCorrectOpen(false);
   };
 
+  // vérifie le type de notification
   const isMembershipRequest =
     notification.type === 'MEMBERSHIP_REQUEST' &&
     notification.membershipRequestId;
@@ -161,6 +180,8 @@ const NotificationItem = ({
             )}
           </>
         )}
+
+        {/* ── Correct result ── */}
 
         {notification.type === 'RESULT_REFUSED' &&
           notification.matchId &&

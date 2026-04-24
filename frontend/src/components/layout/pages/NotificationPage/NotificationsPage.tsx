@@ -21,10 +21,16 @@ import NotificationList from './NotificationList';
 import { Box, Typography, Button } from '@mui/material';
 
 const NotificationPage = () => {
+  // récup user connecté
   const { user } = useAuth();
+
+  // liste des notifications
   const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  // filtre (lu / non lu / tout)
   const [filter, setFilter] = useState<boolean | undefined>(undefined);
 
+  // récup les notifications à chaque changement
   useEffect(() => {
     if (!user) return;
     const fetchNotifications = async () => {
@@ -34,30 +40,38 @@ const NotificationPage = () => {
     fetchNotifications();
   }, [user, filter]);
 
+  // marquer comme lu
   const handleMarkAsRead = async (notificationId: number) => {
     if (!user) return;
     const updated = await markAsRead(user.id, notificationId, user.token);
+
+    // on met à jour juste la notif modifiée
     setNotifications((prev) =>
       prev.map((n) => (n.id === updated.id ? updated : n)),
     );
   };
 
+  // accepter une demande
   const handleApprove = async (membershipRequestId: number) => {
     if (!user) return;
     await approveRequest(membershipRequestId, user.token);
-    // Refresh the list after action
+
+    // refresh après action
     const data = await getNotifications(user.id, user.token, filter);
     setNotifications(data);
   };
 
+  // refuser une demande
   const handleRefuse = async (membershipRequestId: number, reason: string) => {
     if (!user) return;
     await refuseRequest(membershipRequestId, reason, user.token);
-    // Refresh the list after action
+
+    // refresh après action
     const data = await getNotifications(user.id, user.token, filter);
     setNotifications(data);
   };
 
+  // valider un résultat
   const handleValidateResult = async (matchId: number) => {
     if (!user) return;
     await validateResult(matchId, user.token);
@@ -65,6 +79,7 @@ const NotificationPage = () => {
     setNotifications(data);
   };
 
+  // contester un résultat
   const handleContestResult = async (matchId: number) => {
     if (!user) return;
     await contestResult(matchId, user.token);
@@ -72,6 +87,7 @@ const NotificationPage = () => {
     setNotifications(data);
   };
 
+  // corriger un score
   const handleCorrectResult = async (
     matchId: number,
     scoreA: number,
