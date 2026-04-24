@@ -1,23 +1,22 @@
 import React from 'react';
 import {
-  Box,
-  Typography,
-  Avatar,
-  Checkbox,
-  Button,
-  CircularProgress,
   Alert,
-  IconButton,
+  Avatar,
+  Box,
+  Button,
+  Checkbox,
   Chip,
+  CircularProgress,
+  IconButton,
   Paper,
+  Typography,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { MatchDetail } from '../../../../types/match.types';
-import { useMatchSelection } from '../../../../hooks/useMatch/useMatchSelection';
-import { useAuth } from '../../../../contexts/useAuth';
+import { useMatchSelectionPage } from '../../../../hooks/useMatch/useMatchSelectionPage';
 import { formatMatchDateTime } from '../../../../utils/match/match.utils';
-
-const BASE_URL = 'http://localhost:3000';
+import { getMemberAvatarUrl } from '../../../../utils/match/match-detail.utils';
+import { matchSelectionStyles as s } from '../../../../styles/match/matchSelection.styles';
 
 type Props = {
   match: MatchDetail;
@@ -30,9 +29,6 @@ const MatchSelectionPage: React.FC<Props> = ({
   hasExistingSelection,
   onBack,
 }) => {
-  const { user } = useAuth();
-  const token = user?.token ?? '';
-
   const {
     eligibleMembers,
     selectedIds,
@@ -42,188 +38,103 @@ const MatchSelectionPage: React.FC<Props> = ({
     successMsg,
     toggleMember,
     handleSubmit,
-  } = useMatchSelection(match, token, hasExistingSelection, onBack);
+  } = useMatchSelectionPage({ match, hasExistingSelection, onBack });
 
   return (
-    <Box
-      sx={{
-        flexGrow: 1,
-        backgroundColor: '#1e2a44',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        px: 4,
-        py: 3,
-        gap: 3,
-      }}
-    >
-      {/* Header */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'flex-start',
-          gap: 1.5,
-          width: '100%',
-          maxWidth: 600,
-        }}
-      >
-        <IconButton onClick={() => onBack()} sx={{ color: '#fff', p: 0.5 }}>
+    <Box sx={s.pageContainer}>
+      {/* entete avec le bouton retour et les infos du match */}
+      <Box sx={s.headerRow}>
+        <IconButton onClick={() => onBack()} sx={s.backButton}>
           <ArrowBackIcon />
         </IconButton>
+
         <Box>
-          <Typography color="rgba(255,255,255,0.45)" fontSize="0.8rem">
+          <Typography sx={s.headerSubtitle}>
             {match.tournamentName} · {match.roundLabel}
           </Typography>
-          <Typography color="white" fontWeight="bold" fontSize="1.15rem">
+
+          <Typography sx={s.headerTitle}>
             {hasExistingSelection
               ? 'Modifier la composition'
-              : 'Sélectionner les joueurs'}
+              : 'Selectionner les joueurs'}
           </Typography>
-          <Typography
-            color="rgba(255,255,255,0.45)"
-            fontSize="0.82rem"
-            mt={0.25}
-          >
+
+          <Typography sx={s.headerDate}>
             {formatMatchDateTime(match.dateTime)}
           </Typography>
         </Box>
       </Box>
 
-      {/* Compteur de sélection */}
-      <Paper
-        elevation={4}
-        sx={{
-          width: '100%',
-          maxWidth: 600,
-          borderRadius: '10px',
-          backgroundColor: '#243060',
-          px: 2.5,
-          py: 1.5,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <Typography color="#e8b84b" fontWeight="bold" fontSize="0.9rem">
-          {selectedIds.length} / 4 joueurs sélectionnés
+      {/* compteur des joueurs selectionnes avec leurs avatars */}
+      <Paper elevation={4} sx={s.counterCard}>
+        <Typography sx={s.counterLabel}>
+          {selectedIds.length} / 4 joueurs selectionnes
         </Typography>
-        <Box sx={{ display: 'flex', gap: 0.5 }}>
+
+        <Box sx={s.counterAvatarRow}>
           {selectedIds.map((id) => {
             const member = eligibleMembers.find((e) => e.id === id);
+
             return member ? (
               <Avatar
                 key={id}
-                src={
-                  member.imageUrl?.startsWith('/')
-                    ? `${BASE_URL}${member.imageUrl}`
-                    : member.imageUrl
-                }
-                sx={{ width: 32, height: 32, border: '2px solid #e8b84b' }}
+                src={getMemberAvatarUrl(member.imageUrl)}
+                sx={s.counterAvatar}
               />
             ) : null;
           })}
         </Box>
       </Paper>
 
-      {/* Liste des membres */}
+      {/* affiche un spinner pendant le chargement des membres */}
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
+        <Box sx={s.loadingWrapper}>
           <CircularProgress sx={{ color: '#e8b84b' }} />
         </Box>
       ) : (
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 1,
-            width: '100%',
-            maxWidth: 600,
-          }}
-        >
+        <Box sx={s.memberList}>
           {eligibleMembers.map((member) => {
             const isSelected = selectedIds.includes(member.id);
+
+            // bloque si indisponible ou si on a deja 4 joueurs choisis
             const isDisabled =
               !member.available || (!isSelected && selectedIds.length >= 4);
-            const isUnavailable = !member.available;
 
             return (
               <Paper
                 key={member.id}
                 elevation={2}
                 onClick={() => !isDisabled && toggleMember(member.id)}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  borderRadius: '10px',
-                  px: 2,
-                  py: 1,
-                  border: '1px solid',
-                  borderColor: isSelected
-                    ? '#e8b84b'
-                    : 'rgba(255,255,255,0.08)',
-                  backgroundColor: isSelected
-                    ? 'rgba(232,184,75,0.12)'
-                    : '#243060',
-                  opacity: isDisabled ? 0.45 : 1,
-                  cursor: isDisabled ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.15s',
-                }}
+                sx={s.memberCard(isSelected, isDisabled)}
               >
-                {/* BOULE VERTE/ROUGE */}
-                <Box
-                  sx={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: '50%',
-                    backgroundColor: member.available ? '#2ecc71' : '#e74c3c',
-                    boxShadow: '0 0 0 2px rgba(255,255,255,0.2)',
-                    flexShrink: 0,
-                  }}
-                />
+                {/* point vert ou rouge selon la disponibilite du joueur */}
+                <Box sx={s.availabilityDot(member.available)} />
 
                 <Avatar
-                  src={
-                    member.imageUrl?.startsWith('/')
-                      ? `${BASE_URL}${member.imageUrl}`
-                      : member.imageUrl
-                  }
-                  sx={{ width: 38, height: 38 }}
+                  src={getMemberAvatarUrl(member.imageUrl)}
+                  sx={s.memberAvatar}
                 />
 
                 <Box sx={{ flex: 1 }}>
-                  <Typography color="white" fontWeight={500} fontSize="0.95rem">
-                    {member.tag}
-                  </Typography>
-                  {/* Chip indisponible seulement si vraiment indispo */}
-                  {isUnavailable && (
+                  <Typography sx={s.memberTag}>{member.tag}</Typography>
+
+                  {/* affiche le chip uniquement si le joueur est indisponible */}
+                  {!member.available && (
                     <Chip
                       label="Indisponible"
                       size="small"
-                      sx={{
-                        backgroundColor: 'rgba(231,76,60,0.2)',
-                        color: '#e74c3c',
-                        height: 18,
-                        fontSize: '0.7rem',
-                        mt: 0.25,
-                      }}
+                      sx={s.unavailableChip}
                     />
                   )}
                 </Box>
 
-                {/* Checkbox bloqué si indispo OU limite atteinte */}
+                {/* le checkbox suit l'etat de selection et respecte la limite de 4 */}
                 <Checkbox
                   checked={isSelected}
                   disabled={isDisabled}
                   onChange={() => toggleMember(member.id)}
-                  onClick={(e) => e.stopPropagation()}
-                  sx={{
-                    color: 'rgba(255,255,255,0.3)',
-                    '&.Mui-checked': { color: '#e8b84b' },
-                    '&.Mui-disabled': {
-                      color: isUnavailable ? '#555' : 'rgba(255,255,255,0.3)',
-                    },
-                  }}
+                  onClick={(event) => event.stopPropagation()}
+                  sx={s.checkbox}
                 />
               </Paper>
             );
@@ -231,53 +142,32 @@ const MatchSelectionPage: React.FC<Props> = ({
         </Box>
       )}
 
-      {/* Feedback */}
       {errorMsg && (
-        <Alert
-          severity="error"
-          sx={{ width: '100%', maxWidth: 600, borderRadius: '10px' }}
-        >
+        <Alert severity="error" sx={s.alert}>
           {errorMsg}
         </Alert>
       )}
+
       {successMsg && (
-        <Alert
-          severity="success"
-          sx={{ width: '100%', maxWidth: 600, borderRadius: '10px' }}
-        >
+        <Alert severity="success" sx={s.alert}>
           {successMsg}
         </Alert>
       )}
 
-      {/* Bouton valider */}
+      {/* bouton desactive tant que 4 joueurs ne sont pas selectionnes */}
       <Button
         variant="contained"
         onClick={handleSubmit}
         disabled={selectedIds.length !== 4 || submitting}
         fullWidth
-        sx={{
-          maxWidth: 600,
-          backgroundColor: '#e8b84b',
-          color: '#1a2744',
-          textTransform: 'none',
-          fontWeight: 'bold',
-          fontSize: '1rem',
-          borderRadius: '10px',
-          py: 1.5,
-          mt: 'auto',
-          '&:hover': { backgroundColor: '#d4a73a' },
-          '&.Mui-disabled': {
-            backgroundColor: 'rgba(232,184,75,0.25)',
-            color: 'rgba(26,39,68,0.5)',
-          },
-        }}
+        sx={s.submitButton}
       >
         {submitting ? (
           <CircularProgress size={18} color="inherit" />
         ) : hasExistingSelection ? (
           'Modifier la composition'
         ) : (
-          'Valider la sélection'
+          'Valider la selection'
         )}
       </Button>
     </Box>

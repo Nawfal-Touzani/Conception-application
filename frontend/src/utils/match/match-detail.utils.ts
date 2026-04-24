@@ -48,3 +48,17 @@ export const getPlayerAvatarUrl = (
 
   return imageUrl;
 };
+
+// construit l'url complete de l'avatar d'un membre si l'image vient du back
+export const getMemberAvatarUrl = (
+  imageUrl?: string | null,
+  baseUrl = 'http://localhost:3000',
+): string | undefined => {
+  if (!imageUrl) return undefined;
+
+  if (imageUrl.startsWith('/')) {
+    return `${baseUrl}${imageUrl}`;
+  }
+
+  return imageUrl;
+};
