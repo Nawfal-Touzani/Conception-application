@@ -56,7 +56,7 @@ export const MemberRow = ({
         },
       }}
     >
-      {member.tag}
+      {member.tag}#{String(member.id).padStart(3, '0')}
     </Typography>
 
     <Typography sx={{ color: '#555', fontSize: '1.2rem', flex: 1 }}>

@@ -83,7 +83,7 @@ const PublicProfilePage = () => {
         />
 
         <Typography variant="h2" sx={{ mb: 1 }}>
-          {member.tag}
+          {member.tag}#{String(member.id).padStart(3, '0')}
         </Typography>
 
         <Box
