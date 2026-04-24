@@ -41,7 +41,6 @@ export const TeamTournamentColumn = ({
               Aucun tournoi en cours.
             </Typography>
           ) : (
-
             tournamentsInProgress.map((t) => (
               <Paper key={t.id} elevation={0} sx={teamPageSx.tournamentCard}>
                 <Box>

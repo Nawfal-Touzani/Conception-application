@@ -42,7 +42,6 @@ const TeamPage = () => {
     handleNominate,
   } = useTeam();
 
-  
   if (hasTeam === null) return null;
   if (!hasTeam) return <JoinOrCreateTeam onTeamCreated={loadTeamData} />;
 
@@ -88,7 +87,6 @@ const TeamPage = () => {
         />
 
         <TeamTournamentColumn
-
           tabIndex={tabIndex}
           setTabIndex={setTabIndex}
           tournamentsInProgress={tournamentsInProgress}

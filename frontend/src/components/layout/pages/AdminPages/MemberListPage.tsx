@@ -8,7 +8,7 @@ import { BanInfoModal } from './Ban/BanInfoModal';
 import { useMembersManagement } from '../../../../hooks/useMemberManagement/useMembersManagement';
 import { MemberListSection } from './MemberListSection';
 
-// Page de gestion des membres en 2 colonnes : bannies et actifs 
+// Page de gestion des membres en 2 colonnes : bannies et actifs
 const MembersListPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
