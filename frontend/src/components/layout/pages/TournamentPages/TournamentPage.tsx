@@ -109,17 +109,10 @@ const TournamentsPage = () => {
           minHeight: '100vh',
         }}
       >
-        <Box sx={{ pt: 1, pl: 1 }}>
-          <IconButton
-            onClick={() => setSelectedTournament(null)}
-            sx={{ color: colors.white }}
-          >
-            <ArrowBackIcon />
-          </IconButton>
-        </Box>
         <TournamentDetail
           tournament={selectedTournament}
           onRegister={() => handleRegister(selectedTournament.id)}
+          onBack={() => setSelectedTournament(null)}
         />
       </Box>
     );
