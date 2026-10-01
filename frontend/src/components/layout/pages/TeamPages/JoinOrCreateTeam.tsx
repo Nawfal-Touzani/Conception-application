@@ -157,7 +157,7 @@ const JoinOrCreateTeam = ({ onTeamCreated }: Props) => {
           }}
         />
 
-        {/* Créer team */}
+        {/*Créer team */}
         <Box
           sx={{
             flex: 1,
